@@ -1,0 +1,15 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Customer#10;«person»#10;Submits requests"]
+  n1["Payment Adapter#10;«component»#10;Calls payment provider"]
+  n2(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+  style n2 fill:#fff3e6,stroke:#e65100
+  subgraph n3["Request Controller"]
+    n4["RequestHandler#10;«class»#10;Illustrative implementation#10;+handle(request): Response"]
+    n5["RequestValidator#10;«class»#10;Illustrative implementation#10;+validate(request): bool"]
+  end
+  n0 -->|"Submits request #91;HTTPS#93;"| n4
+  n4 -->|"Validates input #91;method#93;"| n5
+  n4 -->|"Requests authorization #91;method#93;"| n1
+  n4 -->|"Queues accepted work #91;SQS#93;"| n2
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools==75.8.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "architecture-suite"
+version = "1.0.0"
+description = "Offline C4 architecture analysis, plan compilation, and diagram exports"
+requires-python = ">=3.11,<3.15"
+license = {text = "Apache-2.0"}
+dependencies = ["PyYAML==6.0.3", "Pillow==13.0.0", "playwright==1.51.0", "jsonschema==4.23.0", "tree-sitter-language-pack==0.10.0", "tree-sitter==0.26.0"]
+
+[project.scripts]
+architecture-suite = "architecture_suite.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "skills/architecture-suite-runtime/scripts"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["skills/architecture-suite-runtime/scripts"]
+
+[tool.setuptools.package-data]
+architecture_suite = ["assets/*", "assets/aws/*", "assets/licenses/*", "*.js"]
+
+[tool.pytest.ini_options]
+pythonpath = ["skills/architecture-suite-runtime/scripts"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["architecture_suite"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = ["examples", "skills/architecture-suite-runtime/samples"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W6"]

@@ -1,0 +1,10 @@
+{
+  "name": "architecture-suite-verification",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Setup and syntax validation only; runtime vendors ELK",
+  "devDependencies": {
+    "elkjs": "0.9.3",
+    "mermaid": "11.17.2"
+  }
+}

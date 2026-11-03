@@ -1,0 +1,28 @@
+Architecture Suite
+Copyright 2026 Tyler Simon
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It bundles the following third-party material, which is NOT covered by the
+Apache License and remains under its own terms. Sources, versions and SHA-256
+checksums are recorded in
+skills/architecture-suite-runtime/scripts/architecture_suite/assets/provenance.json
+and manifest.json.
+
+- ELK (Eclipse Layout Kernel) 0.9.3, elkjs build
+  (assets/elk.bundled.js). Eclipse Public License 2.0; see
+  assets/licenses/ELK-LICENSE.md.
+
+- Roboto Regular font, googlefonts/roboto-2 v2.138 (assets/font.ttf).
+  Apache License 2.0; see assets/licenses/FONT-LICENSE.txt.
+
+- AWS Architecture Icons, release 2026-07-31 (assets/aws/, aws-catalog.json).
+  Provided by Amazon Web Services for creating architecture diagrams; AWS and
+  the AWS service names and icons are trademarks of Amazon.com, Inc. or its
+  affiliates. See assets/licenses/AWS-USAGE.md and
+  https://aws.amazon.com/architecture/icons/.
+
+Google Cloud icons are not distributed with this product. The runtime ships
+only a catalogue of service names and the checksums of the official files;
+users install the icons from their own download (see
+assets/licenses/GCP-USAGE.md). Google Cloud is a trademark of Google LLC.

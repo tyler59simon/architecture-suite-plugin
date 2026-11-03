@@ -1,0 +1,21 @@
+%% Illustrative scenario; authored separately from schema 2.0 C4 views.
+sequenceDiagram
+  actor Rider
+  participant Gateway as Rider Gateway
+  participant Bus as Event Bus
+  participant Dispatch as Dispatch Service
+  participant Cache as Location Cache
+  participant ETA as ETA Model
+  participant Store as Trip Store
+  actor Driver
+  Rider->>Gateway: Request trip (HTTPS)
+  Gateway->>Bus: Publish trip requested
+  Bus->>Dispatch: Deliver trip event
+  Dispatch->>Cache: Find nearby drivers
+  Dispatch->>ETA: Predict arrival times
+  Dispatch->>Store: Record assignment
+  Dispatch->>Bus: Publish driver assignment
+  Bus-->>Gateway: Deliver assignment
+  Gateway-->>Driver: Offer trip (gRPC)
+  Driver-->>Gateway: Accept
+  Gateway-->>Rider: Driver on the way

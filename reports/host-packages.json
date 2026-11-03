@@ -1,0 +1,70 @@
+{
+  "codex.zip": {
+    "files": 1936,
+    "skills": [
+      "c4-aws",
+      "c4-code",
+      "c4-component",
+      "c4-container",
+      "c4-diagrams",
+      "c4-gcp",
+      "c4-overview",
+      "c4-system",
+      "reverse-engineer-c4"
+    ],
+    "plugin_manifest": null,
+    "status": "package-validated; agent behaviour not separately evaluated",
+    "sha256": "841ee07be14e3d45ef9f313f508aef176fff1333e1a89c2ecb930968851ee175"
+  },
+  "claude.zip": {
+    "files": 1939,
+    "skills": [
+      "c4-aws",
+      "c4-code",
+      "c4-component",
+      "c4-container",
+      "c4-diagrams",
+      "c4-gcp",
+      "c4-overview",
+      "c4-system",
+      "reverse-engineer-c4"
+    ],
+    "plugin_manifest": ".claude-plugin/plugin.json",
+    "status": "package-validated; agent behaviour evaluated with claude plugin eval (evals/)",
+    "sha256": "b47e3dd2d9140672c4d883e6dadd4a1694d8c62d886b469c74912da9efad5a35"
+  },
+  "copilot.zip": {
+    "files": 1936,
+    "skills": [
+      "c4-aws",
+      "c4-code",
+      "c4-component",
+      "c4-container",
+      "c4-diagrams",
+      "c4-gcp",
+      "c4-overview",
+      "c4-system",
+      "reverse-engineer-c4"
+    ],
+    "plugin_manifest": null,
+    "status": "package-validated; agent behaviour not separately evaluated",
+    "sha256": "3fd6af8e60b81d14a69d974aa25c4e3251e3e333cd2c7f47245b0558c07cd05c"
+  },
+  "factory.zip": {
+    "files": 1939,
+    "skills": [
+      "c4-aws",
+      "c4-code",
+      "c4-component",
+      "c4-container",
+      "c4-diagrams",
+      "c4-gcp",
+      "c4-overview",
+      "c4-system",
+      "reverse-engineer-c4"
+    ],
+    "plugin_manifest": ".factory-plugin/plugin.json",
+    "status": "package-validated; agent behaviour not separately evaluated",
+    "sha256": "c2d3867c9c39439bc0aee0b4e645df096afcb3123035125543ac07f3d250ca24"
+  }
+}

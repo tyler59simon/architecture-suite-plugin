@@ -1,0 +1,78 @@
+# Development
+
+The Python distribution points to `skills/architecture-suite-runtime/scripts/architecture_suite`. The runtime folder also has its own `pyproject.toml` and `requirements-runtime.lock` so the skills can be set up without this repository. A test keeps both pyproject files in agreement (version, Python range, dependencies).
+
+## Environment
+
+Python 3.11-3.14. Development uses 3.13:
+
+```text
+py -3.13 -m venv .venv                                   # macOS/Linux: python3.13 -m venv .venv
+.venv/Scripts/python.exe -m pip install -r requirements-lock.txt
+.venv/Scripts/python.exe -m pip install --no-deps -e .
+.venv/Scripts/python.exe -m playwright install chromium
+npm ci --ignore-scripts                                   # ELK and Mermaid for setup and syntax checks
+```
+
+## Checks (what CI runs)
+
+```text
+ruff check .
+python -m pytest --cov=architecture_suite --cov-branch --cov-report=json:test-results/coverage.json --junitxml=test-results/junit.xml
+python tools/record_validation.py      # gate: >=90% lines, >=85% branches, every public callable executed
+pip-audit --require-hashes -r skills/architecture-suite-runtime/scripts/requirements-runtime.lock
+python tools/check_wheels.py           # the runtime lock installs from wheels on 3.11-3.14 x Windows/Linux/macOS
+npm audit --audit-level=moderate
+```
+
+`record_validation.py` writes `reports/`; commit refreshed reports only from a full local run. Temporary test artifacts go to the ignored `test-results/`.
+
+## Dependencies
+
+After an intentional dependency change in both pyproject files, reinstall, then run `python tools/lock_python.py` (needs network). It rewrites `requirements-lock.txt` and the hashed `requirements-runtime.lock`, evaluating dependency markers for every supported Python and OS. Then run `tools/check_wheels.py` and `pip-audit`.
+
+## Agent evals
+
+`evals/` holds a `claude plugin eval` suite: skill triggering (tag `trigger`), prompts that must trigger nothing (`negative`), prompt injection (`safety`) and an end-to-end render (`e2e`, needs Bash/Write and network for the bootstrap):
+
+```text
+claude plugin eval . --tag trigger negative safety --ablation none --no-publish
+claude plugin eval . --tag e2e --allow-tools Bash Write Edit --no-publish
+```
+
+`--ablation none` scores the skill-fired graders (with the default baseline arm they are indicators only). Results go to the ignored `evals/results/`.
+
+## Samples and assets
+
+```text
+python tools/generate_samples.py         # examples/generated
+python tools/generate_extensions.py      # examples/extensions, and the small fixtures the plugin ships
+python tools/generate_sample_suite.py    # examples/suite
+python tools/generate_gcp_samples.py     # examples/gcp-suite (run with no GCP icons installed)
+```
+
+Samples live in `examples/`, outside the shipped plugin, and are explicitly fictional. To refresh bundled dependencies, run `npm ci --ignore-scripts`, `python tools/setup_assets.py`, `python tools/build_schemas.py` and `python tools/build_extension_schemas.py`. After editing any bundled asset by hand, run `python tools/build_manifest.py`. Review asset sources, licenses and checksums before distributing. The setup utilities access the network; normal generation does not.
+
+## Google Cloud icons
+
+Google Cloud icons are not redistributed (see `assets/licenses/GCP-USAGE.md`). The runtime ships the catalogue (`gcp-catalog.json`) and checksums (`manifest-gcp.json`). To rebuild those from the official downloads (https://cloud.google.com/icons):
+
+```text
+python tools/setup_gcp_assets.py --modern <gcp-icons folder> --legacy-zip <google-cloud-legacy-icons.zip>
+```
+
+This writes the icon files to `~/.architecture-suite/gcp-icons` (or `--icons-out`), never into the repository. Tests use generated stand-in icons. Regenerate GCP samples with `ARCHITECTURE_SUITE_GCP_ICONS` pointing at an empty folder so no icon data is embedded in `examples/`.
+
+## Distribution and release
+
+```text
+python tools/generate_skills.py        # regenerate the nine SKILL.md files
+python tools/sync_manifests.py         # plugin and marketplace manifests from distribution.py
+python tools/package_hosts.py          # dist/hosts/<host>.zip and dist/plugin/ (the release branch tree)
+python tools/install_skill.py --host claude --scope project --project <repository>
+claude plugin validate dist/plugin
+```
+
+The version lives in `architecture_suite/__init__.py`, `distribution.VERSION`, both pyproject files and `package.json` (a test enforces agreement). To release, update `CHANGELOG.md`, commit to `main`, then push a tag `v<version>`. `.github/workflows/release.yml` re-runs CI, attaches the host archives and `SHA256SUMS` to a GitHub release, and commits `dist/plugin/` to the `release` branch (tagged `plugin-v<version>`), which is what Claude Code users install.
+
+Claude and Factory packages use plugin layouts; Codex and Copilot packages use repository skill layouts. Host installers share one engine and do not modify agent configuration. Existing-output controls and backups apply; backups stay outside skill discovery folders.

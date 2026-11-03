@@ -1,0 +1,816 @@
+{
+  "callables": [
+    {
+      "module": "analyzer.py",
+      "function": "draft_plan",
+      "executed": true
+    },
+    {
+      "module": "analyzer.py",
+      "function": "analyze_repository",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "verify_assets",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "normalize_cloud_profile",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "normalize_gcp_icon_style",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "gcp_key",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "catalog",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "gcp_icon_root",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "gcp_manifest",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "icon_available",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "gcp_icon_status",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "gcp_icon_sources",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "install_gcp_icons",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "resolve_gcp_service",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "resolve_service",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "validate_svg",
+      "executed": true
+    },
+    {
+      "module": "aws.py",
+      "function": "icon_bytes",
+      "executed": true
+    },
+    {
+      "module": "aws_analyzer.py",
+      "function": "detect_aws",
+      "executed": true
+    },
+    {
+      "module": "c4_layout.py",
+      "function": "build_view_scene_elk",
+      "executed": true
+    },
+    {
+      "module": "c4_layout.py",
+      "function": "choose_scene",
+      "executed": true
+    },
+    {
+      "module": "changes.py",
+      "function": "diff_models",
+      "executed": true
+    },
+    {
+      "module": "changes.py",
+      "function": "check_rules",
+      "executed": true
+    },
+    {
+      "module": "changes.py",
+      "function": "markdown_report",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "parse_overview_styles",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_doctor",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_install_gcp_icons",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_plan_lint",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_plan_draft",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_verify",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_publish",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "cmd_examples",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "build_parser",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
+      "function": "main",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "skill_names",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "plugin_manifest",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "marketplace_manifest",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "legal_files",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "package_hosts",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "write_plugin_tree",
+      "executed": true
+    },
+    {
+      "module": "distribution.py",
+      "function": "install_host",
+      "executed": true
+    },
+    {
+      "module": "draft.py",
+      "function": "render_plan",
+      "executed": true
+    },
+    {
+      "module": "emit.py",
+      "function": "render_scene_svg",
+      "executed": true
+    },
+    {
+      "module": "emit.py",
+      "function": "render_scene_drawio",
+      "executed": true
+    },
+    {
+      "module": "examples.py",
+      "function": "example_plan",
+      "executed": true
+    },
+    {
+      "module": "examples.py",
+      "function": "example_model",
+      "executed": true
+    },
+    {
+      "module": "examples.py",
+      "function": "all_example_models",
+      "executed": true
+    },
+    {
+      "module": "examples_gcp.py",
+      "function": "ridepulse_plan",
+      "executed": true
+    },
+    {
+      "module": "examples_gcp.py",
+      "function": "ridepulse_model",
+      "executed": true
+    },
+    {
+      "module": "explorer.py",
+      "function": "explorer_html",
+      "executed": true
+    },
+    {
+      "module": "extensions.py",
+      "function": "cmd_extension",
+      "executed": true
+    },
+    {
+      "module": "extensions.py",
+      "function": "register_commands",
+      "executed": true
+    },
+    {
+      "module": "gcp_analyzer.py",
+      "function": "detect_gcp",
+      "executed": true
+    },
+    {
+      "module": "infrastructure.py",
+      "function": "evidence_reference",
+      "executed": true
+    },
+    {
+      "module": "infrastructure.py",
+      "function": "import_infrastructure",
+      "executed": true
+    },
+    {
+      "module": "infrastructure.py",
+      "function": "topology_plan",
+      "executed": true
+    },
+    {
+      "module": "inventory.py",
+      "function": "dependency_inventory",
+      "executed": true
+    },
+    {
+      "module": "layout_host.py",
+      "function": "layout_graph",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "slugify",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "view_id_for",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "load_model",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "model_as_json",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "error_findings",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "normalize_validation_profile",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "normalized_model",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "project_model",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "derive_views",
+      "executed": true
+    },
+    {
+      "module": "model.py",
+      "function": "validate_model",
+      "executed": true
+    },
+    {
+      "module": "overview_layout.py",
+      "function": "normalize_overview_styles",
+      "executed": true
+    },
+    {
+      "module": "overview_layout.py",
+      "function": "overview_data",
+      "executed": true
+    },
+    {
+      "module": "overview_layout.py",
+      "function": "build_overview_scene",
+      "executed": true
+    },
+    {
+      "module": "overview_layout.py",
+      "function": "build_cloud_scene",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "parse_yaml",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "parse_plan_document",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Finding.blocking",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Finding.render",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "errors",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "advisories",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "plan_provider",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "lint_plan",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Fidelity.lossless",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Fidelity.as_dict",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Fidelity.is_lossless",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Fidelity.payload",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "Fidelity.render",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "compile_plan",
+      "executed": true
+    },
+    {
+      "module": "plan.py",
+      "function": "slug",
+      "executed": true
+    },
+    {
+      "module": "readability.py",
+      "function": "readability_findings",
+      "executed": true
+    },
+    {
+      "module": "readability.py",
+      "function": "score_scene",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "normalize_artifact_level",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "diagram_specs",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "expected_artifact_paths",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_mermaid",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_svg",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_drawio",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "layout_measurements",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "layout_report",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "verify_model_layout",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "measure_model_layout",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_overview_mermaid",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_overview_drawio",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_overview_svg",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_aws_deployment_mermaid",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_aws_deployment_drawio",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_aws_deployment_svg",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_gcp_deployment_mermaid",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_gcp_deployment_drawio",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_gcp_deployment_svg",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "browser_page",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "find_browser",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "validate_png",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_svg_png",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "write_rendered_artifacts",
+      "executed": true
+    },
+    {
+      "module": "report.py",
+      "function": "render_architecture_report",
+      "executed": true
+    },
+    {
+      "module": "runtime_env.py",
+      "function": "python_supported",
+      "executed": true
+    },
+    {
+      "module": "runtime_env.py",
+      "function": "supported_range",
+      "executed": true
+    },
+    {
+      "module": "runtime_env.py",
+      "function": "lock_digest",
+      "executed": true
+    },
+    {
+      "module": "runtime_env.py",
+      "function": "write_stamp",
+      "executed": true
+    },
+    {
+      "module": "runtime_env.py",
+      "function": "check_stamp",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "redact",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "contains_likely_secret",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "detect_prompt_injection",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "safe_text",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "canonical_existing_directory",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "canonical_existing_file",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "canonical_output_directory",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "contained_path",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "require_write_authorization",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "atomic_output_directory",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "run_bounded",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "ScanResult.texts",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
+      "function": "scan_repository",
+      "executed": true
+    },
+    {
+      "module": "scenarios.py",
+      "function": "validate_scenario",
+      "executed": true
+    },
+    {
+      "module": "scenarios.py",
+      "function": "scenario_mermaid",
+      "executed": true
+    },
+    {
+      "module": "scenarios.py",
+      "function": "scenario_scene",
+      "executed": true
+    },
+    {
+      "module": "scene.py",
+      "function": "Scene.as_dict",
+      "executed": true
+    },
+    {
+      "module": "scene.py",
+      "function": "build_scene",
+      "executed": true
+    },
+    {
+      "module": "scene.py",
+      "function": "scene_collisions",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "element_visual",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "box_style",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "text_width",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "line_height",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "wrap_to_width",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "TextLine.height",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "TextLine.width",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "Label.width",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "Label.height",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "Label.plain",
+      "executed": true
+    },
+    {
+      "module": "style.py",
+      "function": "element_label",
+      "executed": true
+    }
+  ],
+  "uncovered_lines": {
+    "analyzer.py": [
+      120,
+      142
+    ],
+    "changes.py": [
+      56,
+      135
+    ],
+    "cli.py": [
+      80,
+      104,
+      108,
+      228,
+      288
+    ],
+    "infrastructure.py": [
+      26
+    ],
+    "inventory.py": [
+      154
+    ],
+    "layout_host.py": [
+      38,
+      39,
+      40,
+      41
+    ],
+    "model.py": [
+      283,
+      286,
+      295,
+      296,
+      301,
+      302,
+      335,
+      346,
+      479
+    ],
+    "plan.py": [
+      75,
+      279,
+      282,
+      351,
+      357,
+      521
+    ],
+    "renderers.py": [
+      121,
+      245,
+      253,
+      254,
+      255,
+      267,
+      268,
+      310,
+      317,
+      320,
+      324,
+      361
+    ],
+    "safety.py": [
+      213
+    ],
+    "scenarios.py": [
+      28
+    ],
+    "scene.py": [
+      116,
+      270
+    ]
+  }
+}

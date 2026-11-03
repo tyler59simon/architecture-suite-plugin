@@ -1,0 +1,60 @@
+name: Release
+# Push a tag like v1.0.0 (matching the package version) from main to publish.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  verify:
+    uses: ./.github/workflows/architecture.yml
+    permissions:
+      contents: read
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install locked tree
+        run: |
+          python -m pip install -r requirements-lock.txt
+          python -m pip install --no-deps -e .
+      - name: Tag matches the package version
+        run: |
+          version=$(python -c "import architecture_suite; print(architecture_suite.__version__)")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
+      - name: Build host archives and the release plugin tree
+        run: python tools/package_hosts.py
+      - name: Checksums
+        working-directory: dist/hosts
+        run: sha256sum *.zip > SHA256SUMS
+      - name: GitHub release with host archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
+            --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
+      - name: Publish the slim plugin to the release branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin release >/dev/null; then
+            git fetch origin release
+            git worktree add release-tree origin/release
+            git -C release-tree switch -c release
+          else
+            git worktree add --orphan -b release release-tree
+          fi
+          rsync -a --delete --exclude .git dist/plugin/ release-tree/
+          cd release-tree
+          git add -A
+          git commit -m "Architecture Suite $GITHUB_REF_NAME"
+          git tag "plugin-$GITHUB_REF_NAME"
+          git push origin release "plugin-$GITHUB_REF_NAME"

@@ -1,0 +1,93 @@
+# Agentic Living Memory
+
+Internal
+
+Single user, single computer; installed under ~/.codex/agentic-living-memory with data under the user-selected root
+
+## Evidence
+
+- evidence-1: ARCHITECTURE.md: — 
+- evidence-10: core/cli.py:21: — 
+- evidence-11: core/common.py:1: — 
+- evidence-12: core/capture.py; core/tag_taxonomy.py: — 
+- evidence-13: core/governance.py: — 
+- evidence-14: core/search.py: — 
+- evidence-15: core/search.py:1: — 
+- evidence-16: core/recursion.py; core/telemetry.py: — 
+- evidence-17: core/sync.py: — 
+- evidence-18: ARCHITECTURE.md (Markdown storage and lifecycle): — 
+- evidence-19: INSTALLATION.md: — 
+- evidence-2: ARCHITECTURE.md (Bootstrap and live hooks): — 
+- evidence-20: hooks/claude_hooks.py: — 
+- evidence-21: AGENTS.md: — 
+- evidence-22: core/cli.py:3: — 
+- evidence-23: core/cli.py: — 
+- evidence-24: core/repository.py: — 
+- evidence-25: core/recursion.py: — 
+- evidence-3: core/sync.py; OBSIDIAN.md: — 
+- evidence-4: core/pdf.py: — 
+- evidence-5: hooks/*_hooks.py; integrations/setup.py: — 
+- evidence-6: hooks/claude_hooks.py:1: — 
+- evidence-7: install.py:1; integrations/setup.py:58: — 
+- evidence-8: living_memory.py:1; core/cli.py:1: — 
+- evidence-9: core/cli.py:1: — 
+
+## Assumptions
+
+- Container grouping into Hook Adapters, Memory CLI, Note Store and Index is architectural judgment from ARCHITECTURE.md, not from manifests.
+
+## Gaps
+
+- Multi-component flows inside Memory CLI are summarized; full call graph not established.
+
+## Layout verification
+
+```json
+{
+  "ok": true,
+  "diagrams": {
+    "05-overview/overview-executive": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 16,
+      "aspect_ratio": 1.615,
+      "score": 49.61471458310507,
+      "advisories": []
+    },
+    "05-overview/overview-progressive": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 20,
+      "aspect_ratio": 3.089,
+      "score": 63.08862745098039,
+      "advisories": []
+    },
+    "05-overview/overview-hierarchy": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 4.626,
+      "score": 4.625757575757576,
+      "advisories": []
+    },
+    "05-overview/overview-small-multiples": {
+      "findings": [],
+      "crossings": 1,
+      "bends": 38,
+      "aspect_ratio": 1.141,
+      "score": 215.14069519981084,
+      "advisories": [
+        "Dense view; split by scope or use small-multiples"
+      ]
+    },
+    "05-overview/overview-complete": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 18,
+      "aspect_ratio": 3.024,
+      "score": 57.02386278896346,
+      "advisories": []
+    }
+  }
+}
+```

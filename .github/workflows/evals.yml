@@ -1,0 +1,55 @@
+name: Agent evals
+# Manual: runs real Claude sessions billed to the ANTHROPIC_API_KEY repository secret.
+# Linux provides the shell sandbox the end-to-end case needs (Windows runs refuse Bash grants).
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Eval tags to run (space separated)
+        default: trigger negative safety e2e
+      runs:
+        description: Runs per case
+        default: '3'
+      max_cost_usd:
+        description: Hard cost ceiling for the whole run
+        default: '20'
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Shell sandbox backend and Chromium system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap socat
+          npx --yes playwright@1.51.0 install-deps chromium
+      - run: npm install -g @anthropic-ai/claude-code
+      - name: Validate the plugin
+        run: claude plugin validate .
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TAGS: ${{ inputs.tags }}
+          RUNS: ${{ inputs.runs }}
+          MAX_COST: ${{ inputs.max_cost_usd }}
+        run: |
+          # TAGS is intentionally unquoted: one --tag value per word.
+          claude plugin eval . --tag $TAGS --runs "$RUNS" --allow-tools Bash Write Edit \
+            --ablation none --no-publish --trust-plugin --threshold 0.8 \
+            --max-cost-usd "$MAX_COST" --json evals-result.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-evals
+          path: |
+            evals-result.json
+            evals/results

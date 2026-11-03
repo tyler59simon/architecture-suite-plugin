@@ -1,0 +1,11 @@
+%% Illustrative scenario; authored separately from schema 2.0 C4 views.
+sequenceDiagram
+  actor Customer
+  participant API
+  participant PaymentProvider as Payment Provider
+  participant Queue as Order Queue
+  Customer->>API: Submit request (HTTPS)
+  API->>PaymentProvider: Authorize payment
+  PaymentProvider-->>API: Authorization result
+  API->>Queue: Queue accepted work
+  API-->>Customer: Return confirmation

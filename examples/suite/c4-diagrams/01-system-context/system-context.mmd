@@ -1,0 +1,12 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Agentic Living Memory#10;«software_system»#10;Local, harness-independent durable#10;memory for coding agents, stored as#10;Markdown notes with derived search#10;indexes"]
+  n1["Developer#10;«person»#10;Installs the system, approves governance#10;plans, reads notes"]
+  n2["Agent Harness#10;«software_system»#10;Codex, Claude Code, Factory or Copilot;#10;fires lifecycle hooks and runs the agent#10;that decides what to capture"]
+  n3["Obsidian#10;«software_system»#10;Optional vault receiving a staged overlay#10;of notes, canvas and dashboards"]
+  n4["Headless Browser#10;«software_system»#10;Renders approved corporate PDFs in an#10;isolated temporary profile"]
+  n1 -->|"Runs one-time setup and wizard"| n0
+  n2 -->|"Fires SessionStart, UserPromptSubmit and Stop events;#10;Agent invokes capture and governance scripts #91;Hook#10;payload JSON; CLI#93;"| n0
+  n0 -->|"Publishes staged overlay"| n3
+  n0 -->|"Renders approved PDF"| n4
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

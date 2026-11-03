@@ -1,0 +1,53 @@
+{
+  "timestamp_utc": "2026-11-03T19:53:55.388457+00:00",
+  "version": "1.0.0",
+  "method": "tools/record_packages.py: install into temporary directories; no live agent session",
+  "installs": {
+    "codex/project": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".agents/skills"
+    },
+    "codex/user": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".codex/skills"
+    },
+    "claude/project": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".claude/skills"
+    },
+    "claude/user": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".claude/skills"
+    },
+    "copilot/project": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".github/skills"
+    },
+    "copilot/user": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".copilot/skills"
+    },
+    "factory/project": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".factory/skills"
+    },
+    "factory/user": {
+      "skills": 9,
+      "runtime_matches_source": true,
+      "relative_folder": ".factory/skills"
+    }
+  },
+  "agent_behavior": {
+    "claude": "package-validated; agent behaviour evaluated with claude plugin eval (evals/)",
+    "factory": "package-validated; agent behaviour not separately evaluated",
+    "codex": "package-validated; agent behaviour not separately evaluated",
+    "copilot": "package-validated; agent behaviour not separately evaluated"
+  }
+}

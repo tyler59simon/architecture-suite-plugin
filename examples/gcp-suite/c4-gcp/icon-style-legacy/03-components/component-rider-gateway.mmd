@@ -1,0 +1,15 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n1(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n1 fill:#fff3e6,stroke:#e65100
+  n2[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n2 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n3["Rider Gateway"]
+    n4["Auth Middleware#10;«component»#10;Authenticates callers and enforces#10;quotas"]
+    n5["Trip Controller#10;«component»#10;Accepts trip requests and publishes#10;events"]
+  end
+  n4 -->|"Verifies rider accounts #91;Spanner API#93;"| n2
+  n5 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n1
+  n5 -->|"Charges completed trips #91;HTTPS#93;"| n0
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

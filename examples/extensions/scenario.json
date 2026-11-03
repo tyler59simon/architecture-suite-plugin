@@ -1,0 +1,40 @@
+{
+  "schema_version": "architecture-scenario/v1",
+  "name": "Order submission",
+  "participants": [
+    "customer",
+    "api",
+    "order-queue"
+  ],
+  "steps": [
+    {
+      "from": "customer",
+      "to": "api",
+      "description": "Submit order"
+    },
+    {
+      "type": "alt",
+      "condition": "valid order",
+      "steps": [
+        {
+          "from": "api",
+          "to": "order-queue",
+          "description": "Queue work"
+        }
+      ],
+      "branches": [
+        {
+          "condition": "invalid",
+          "steps": [
+            {
+              "type": "response",
+              "from": "api",
+              "to": "customer",
+              "description": "Validation error"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

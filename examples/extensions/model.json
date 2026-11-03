@@ -1,0 +1,654 @@
+{
+  "schema_version": "2.0",
+  "system": {
+    "name": "Order Platform",
+    "description": "API and asynchronous worker",
+    "classification": "Synthetic, non-production example",
+    "scope": "Illustrative owned applications"
+  },
+  "elements": [
+    {
+      "name": "Order Platform",
+      "description": "API and asynchronous worker",
+      "id": "order-platform",
+      "type": "software_system",
+      "evidence_ids": []
+    },
+    {
+      "name": "Customer",
+      "description": "Submits requests",
+      "id": "customer",
+      "type": "person",
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Payment Provider",
+      "description": "Authorizes payments",
+      "id": "payment-provider",
+      "type": "software_system",
+      "external": true,
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "API",
+      "description": "Accepts customer requests",
+      "technology": "Python HTTPS",
+      "id": "api",
+      "type": "container",
+      "parent_id": "order-platform",
+      "cloud": {
+        "provider": "aws",
+        "service": "Amazon-Elastic-Container-Service"
+      },
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Request Controller",
+      "description": "Validates and routes requests",
+      "id": "request-controller",
+      "type": "component",
+      "parent_id": "api",
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "RequestHandler",
+      "description": "Illustrative implementation",
+      "kind": "class",
+      "id": "requesthandler",
+      "type": "code",
+      "parent_id": "request-controller",
+      "members": [
+        "+handle(request): Response"
+      ],
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "RequestValidator",
+      "description": "Illustrative implementation",
+      "kind": "class",
+      "id": "requestvalidator",
+      "type": "code",
+      "parent_id": "request-controller",
+      "members": [
+        "+validate(request): bool"
+      ],
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Payment Adapter",
+      "description": "Calls payment provider",
+      "id": "payment-adapter",
+      "type": "component",
+      "parent_id": "api",
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "PaymentClient",
+      "description": "Illustrative implementation",
+      "kind": "class",
+      "id": "paymentclient",
+      "type": "code",
+      "parent_id": "payment-adapter",
+      "members": [
+        "+authorize(order): Result"
+      ],
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Worker",
+      "description": "Processes queued requests",
+      "technology": "Go",
+      "id": "worker",
+      "type": "container",
+      "parent_id": "order-platform",
+      "cloud": {
+        "provider": "aws",
+        "service": "AWS-Lambda"
+      },
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Fulfillment",
+      "description": "Dispatches fulfillment work",
+      "id": "fulfillment",
+      "type": "component",
+      "parent_id": "worker",
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "FulfillmentJob",
+      "description": "Illustrative implementation",
+      "kind": "class",
+      "id": "fulfillmentjob",
+      "type": "code",
+      "parent_id": "fulfillment",
+      "members": [
+        "+run(order): Result"
+      ],
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Order Queue",
+      "description": "Buffers accepted work",
+      "technology": "SQS",
+      "id": "order-queue",
+      "type": "container",
+      "parent_id": "order-platform",
+      "cloud": {
+        "provider": "aws",
+        "service": "Amazon-Simple-Queue-Service"
+      },
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    },
+    {
+      "name": "Order Store",
+      "description": "Persists request state",
+      "technology": "DynamoDB",
+      "id": "order-store",
+      "type": "container",
+      "parent_id": "order-platform",
+      "cloud": {
+        "provider": "aws",
+        "service": "Amazon-DynamoDB"
+      },
+      "evidence_ids": [
+        "evidence-1"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "system-context-r1",
+      "source_id": "customer",
+      "destination_id": "order-platform",
+      "description": "Submits request",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-1"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "system-context-r2",
+      "source_id": "order-platform",
+      "destination_id": "payment-provider",
+      "description": "Authorizes payment",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-4"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "containers-r1",
+      "source_id": "customer",
+      "destination_id": "api",
+      "description": "Submits request",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-1"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "containers-r2",
+      "source_id": "api",
+      "destination_id": "payment-provider",
+      "description": "Authorizes payment",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-4"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "containers-r3",
+      "source_id": "api",
+      "destination_id": "order-queue",
+      "description": "Queues accepted work",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-5"
+      ],
+      "technology": "SQS"
+    },
+    {
+      "id": "containers-r4",
+      "source_id": "order-queue",
+      "destination_id": "worker",
+      "description": "Delivers work",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-6"
+      ],
+      "technology": "event"
+    },
+    {
+      "id": "containers-r5",
+      "source_id": "worker",
+      "destination_id": "order-store",
+      "description": "Stores result",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-7"
+      ],
+      "technology": "DynamoDB"
+    },
+    {
+      "id": "component-api-r1",
+      "source_id": "customer",
+      "destination_id": "request-controller",
+      "description": "Submits request",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-1"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "component-api-r2",
+      "source_id": "request-controller",
+      "destination_id": "payment-adapter",
+      "description": "Requests authorization",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-3"
+      ],
+      "technology": "method"
+    },
+    {
+      "id": "component-api-r3",
+      "source_id": "payment-adapter",
+      "destination_id": "payment-provider",
+      "description": "Authorizes payment",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-4"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "component-api-r4",
+      "source_id": "request-controller",
+      "destination_id": "order-queue",
+      "description": "Queues accepted work",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-5"
+      ],
+      "technology": "SQS"
+    },
+    {
+      "id": "component-worker-r1",
+      "source_id": "order-queue",
+      "destination_id": "fulfillment",
+      "description": "Delivers work",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-6"
+      ],
+      "technology": "event"
+    },
+    {
+      "id": "component-worker-r2",
+      "source_id": "fulfillment",
+      "destination_id": "order-store",
+      "description": "Stores result",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-7"
+      ],
+      "technology": "DynamoDB"
+    },
+    {
+      "id": "code-request-controller-r1",
+      "source_id": "customer",
+      "destination_id": "requesthandler",
+      "description": "Submits request",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-1"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "code-request-controller-r2",
+      "source_id": "requesthandler",
+      "destination_id": "requestvalidator",
+      "description": "Validates input",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-2"
+      ],
+      "technology": "method"
+    },
+    {
+      "id": "code-request-controller-r3",
+      "source_id": "requesthandler",
+      "destination_id": "payment-adapter",
+      "description": "Requests authorization",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-3"
+      ],
+      "technology": "method"
+    },
+    {
+      "id": "code-request-controller-r4",
+      "source_id": "requesthandler",
+      "destination_id": "order-queue",
+      "description": "Queues accepted work",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-5"
+      ],
+      "technology": "SQS"
+    },
+    {
+      "id": "code-payment-adapter-r1",
+      "source_id": "request-controller",
+      "destination_id": "paymentclient",
+      "description": "Requests authorization",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-3"
+      ],
+      "technology": "method"
+    },
+    {
+      "id": "code-payment-adapter-r2",
+      "source_id": "paymentclient",
+      "destination_id": "payment-provider",
+      "description": "Authorizes payment",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-4"
+      ],
+      "technology": "HTTPS"
+    },
+    {
+      "id": "code-fulfillment-r1",
+      "source_id": "order-queue",
+      "destination_id": "fulfillmentjob",
+      "description": "Delivers work",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-6"
+      ],
+      "technology": "event"
+    },
+    {
+      "id": "code-fulfillment-r2",
+      "source_id": "fulfillmentjob",
+      "destination_id": "order-store",
+      "description": "Stores result",
+      "evidence_ids": [
+        "evidence-1"
+      ],
+      "flow_ids": [
+        "flow-7"
+      ],
+      "technology": "DynamoDB"
+    }
+  ],
+  "views": [
+    {
+      "id": "system-context",
+      "type": "context",
+      "element_ids": [
+        "order-platform",
+        "customer",
+        "payment-provider"
+      ],
+      "relationship_ids": [
+        "system-context-r1",
+        "system-context-r2"
+      ],
+      "title": "Order Platform \u2014 Context",
+      "direction": "auto"
+    },
+    {
+      "id": "containers",
+      "type": "container",
+      "boundary_id": "order-platform",
+      "element_ids": [
+        "order-platform",
+        "customer",
+        "payment-provider",
+        "api",
+        "worker",
+        "order-queue",
+        "order-store"
+      ],
+      "relationship_ids": [
+        "containers-r1",
+        "containers-r2",
+        "containers-r3",
+        "containers-r4",
+        "containers-r5"
+      ],
+      "title": "Order Platform \u2014 Container",
+      "direction": "auto"
+    },
+    {
+      "id": "component-api",
+      "type": "component",
+      "boundary_id": "api",
+      "element_ids": [
+        "api",
+        "customer",
+        "payment-provider",
+        "request-controller",
+        "payment-adapter",
+        "order-queue"
+      ],
+      "relationship_ids": [
+        "component-api-r1",
+        "component-api-r2",
+        "component-api-r3",
+        "component-api-r4"
+      ],
+      "title": "API \u2014 Component",
+      "direction": "auto"
+    },
+    {
+      "id": "component-worker",
+      "type": "component",
+      "boundary_id": "worker",
+      "element_ids": [
+        "worker",
+        "fulfillment",
+        "order-queue",
+        "order-store"
+      ],
+      "relationship_ids": [
+        "component-worker-r1",
+        "component-worker-r2"
+      ],
+      "title": "Worker \u2014 Component",
+      "direction": "auto"
+    },
+    {
+      "id": "code-request-controller",
+      "type": "code",
+      "boundary_id": "request-controller",
+      "element_ids": [
+        "request-controller",
+        "customer",
+        "requesthandler",
+        "requestvalidator",
+        "payment-adapter",
+        "order-queue"
+      ],
+      "relationship_ids": [
+        "code-request-controller-r1",
+        "code-request-controller-r2",
+        "code-request-controller-r3",
+        "code-request-controller-r4"
+      ],
+      "title": "Request Controller \u2014 Code",
+      "direction": "auto"
+    },
+    {
+      "id": "code-payment-adapter",
+      "type": "code",
+      "boundary_id": "payment-adapter",
+      "element_ids": [
+        "payment-adapter",
+        "payment-provider",
+        "request-controller",
+        "paymentclient"
+      ],
+      "relationship_ids": [
+        "code-payment-adapter-r1",
+        "code-payment-adapter-r2"
+      ],
+      "title": "Payment Adapter \u2014 Code",
+      "direction": "auto"
+    },
+    {
+      "id": "code-fulfillment",
+      "type": "code",
+      "boundary_id": "fulfillment",
+      "element_ids": [
+        "fulfillment",
+        "fulfillmentjob",
+        "order-queue",
+        "order-store"
+      ],
+      "relationship_ids": [
+        "code-fulfillment-r1",
+        "code-fulfillment-r2"
+      ],
+      "title": "Fulfillment \u2014 Code",
+      "direction": "auto"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence-1",
+      "reference": "fictional brief",
+      "kind": "plan"
+    }
+  ],
+  "assumptions": [
+    "All architecture and deployment facts in this example are fictional."
+  ],
+  "gaps": [],
+  "deployment": {
+    "provider": "aws",
+    "nodes": [
+      {
+        "id": "aws-cloud",
+        "name": "AWS Cloud",
+        "type": "cloud"
+      },
+      {
+        "name": "Example Account",
+        "type": "account",
+        "id": "example-account",
+        "parent_id": "aws-cloud"
+      },
+      {
+        "name": "us-east-1",
+        "type": "region",
+        "id": "us-east-1",
+        "parent_id": "example-account"
+      },
+      {
+        "name": "Application VPC",
+        "type": "vpc",
+        "id": "application-vpc",
+        "parent_id": "us-east-1"
+      },
+      {
+        "name": "Private Subnet",
+        "type": "subnet",
+        "id": "private-subnet",
+        "parent_id": "application-vpc"
+      }
+    ],
+    "placements": [
+      {
+        "element_id": "api",
+        "node_id": "private-subnet"
+      },
+      {
+        "element_id": "worker",
+        "node_id": "us-east-1"
+      },
+      {
+        "element_id": "order-queue",
+        "node_id": "us-east-1"
+      },
+      {
+        "element_id": "order-store",
+        "node_id": "us-east-1"
+      }
+    ]
+  }
+}

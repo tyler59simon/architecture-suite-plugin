@@ -1,0 +1,134 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["RidePulse — Context"]
+  n1["RidePulse#10;«software_system»#10;Real-time ride dispatch and fleet telemetry#10;platform"]
+  n2["Rider#10;«person»#10;Requests and takes trips"]
+  n3["Driver#10;«person»#10;Accepts offers and drives trips"]
+  n4["Operations Analyst#10;«person»#10;Monitors fleet health and demand"]
+  n5["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+  n6["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n7["SMS Gateway#10;«software_system»#10;Text message delivery"]
+  n8["RidePulse — Container"]
+  n9["Rider#10;«person»#10;Requests and takes trips"]
+  n10["Driver#10;«person»#10;Accepts offers and drives trips"]
+  n11["Operations Analyst#10;«person»#10;Monitors fleet health and demand"]
+  n12["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+  n13["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n14["SMS Gateway#10;«software_system»#10;Text message delivery"]
+  subgraph n15["RidePulse"]
+    n16["Rider Gateway#10;«container»#10;Go gRPC and HTTPS#10;Terminates rider and driver mobile traffic"]
+    n17["Dispatch Service#10;«container»#10;Java on Cloud Run#10;Matches riders with nearby drivers and#10;prices fares"]
+    n18["Location Ingest#10;«container»#10;Rust on Cloud Run#10;Accepts driver GPS pings at high volume"]
+    n19["Notification Worker#10;«container»#10;Node.js#10;Sends push and SMS alerts"]
+    n20(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+    style n20 fill:#fff3e6,stroke:#e65100
+    n21[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+    style n21 fill:#eaf6ec,stroke:#2e7d32
+    n22[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+    style n22 fill:#eaf6ec,stroke:#2e7d32
+    n23[("Fleet Time Series#10;«container»#10;Bigtable#10;High-rate telemetry history")]
+    style n23 fill:#eaf6ec,stroke:#2e7d32
+    n24[("Telemetry Lake#10;«container»#10;BigQuery#10;Analytics warehouse")]
+    style n24 fill:#eaf6ec,stroke:#2e7d32
+    n25[("Location Archive#10;«container»#10;Object storage#10;Daily telemetry snapshots")]
+    style n25 fill:#e4f5f7,stroke:#00838f
+    n26["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+    style n26 fill:#f5eafa,stroke:#7b1fa2
+  end
+  n27["Dispatch Service — Component"]
+  n28["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+  n29(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n29 fill:#fff3e6,stroke:#e65100
+  n30[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n30 fill:#eaf6ec,stroke:#2e7d32
+  n31[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+  style n31 fill:#eaf6ec,stroke:#2e7d32
+  n32["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+  style n32 fill:#f5eafa,stroke:#7b1fa2
+  subgraph n33["Dispatch Service"]
+    n34["Matching Engine#10;«component»#10;Scores candidate drivers"]
+    n35["Fare Pricer#10;«component»#10;Quotes surge-aware fares"]
+  end
+  n36["Rider Gateway — Component"]
+  n37["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n38(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n38 fill:#fff3e6,stroke:#e65100
+  n39[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n39 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n40["Rider Gateway"]
+    n41["Auth Middleware#10;«component»#10;Authenticates callers and enforces#10;quotas"]
+    n42["Trip Controller#10;«component»#10;Accepts trip requests and publishes#10;events"]
+  end
+  n43["Auth Middleware — Code"]
+  n44[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n44 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n45["Auth Middleware"]
+    n46["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
+  end
+  n47["Fare Pricer — Code"]
+  n48[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n48 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n49["Fare Pricer"]
+    n50["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
+  end
+  n51["Matching Engine — Code"]
+  n52["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+  n53(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n53 fill:#fff3e6,stroke:#e65100
+  n54[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+  style n54 fill:#eaf6ec,stroke:#2e7d32
+  n55["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+  style n55 fill:#f5eafa,stroke:#7b1fa2
+  subgraph n56["Matching Engine"]
+    n57["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
+  end
+  n58["Trip Controller — Code"]
+  n59["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n60(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n60 fill:#fff3e6,stroke:#e65100
+  subgraph n61["Trip Controller"]
+    n62["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
+  end
+  n2 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n1
+  n3 -->|"Accepts offers and reports trip status; Streams GPS pings#10;#91;gRPC; HTTPS#93;"| n1
+  n4 -->|"Runs fleet reports #91;SQL#93;"| n1
+  n1 -->|"Charges completed trips #91;HTTPS#93;"| n6
+  n1 -->|"Fetches road routes #91;HTTPS#93;"| n5
+  n1 -->|"Sends rider and driver alerts #91;HTTPS#93;"| n7
+  n9 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n16
+  n17 -->|"Requests arrival estimates #91;HTTPS#93;"| n26
+  n17 -->|"Fetches road routes #91;HTTPS#93;"| n12
+  n17 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n21
+  n17 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n20
+  n18 -->|"Updates driver position #91;Redis#93;"| n22
+  n18 -->|"Appends telemetry samples #91;Bigtable API#93;"| n23
+  n18 -->|"Publishes location samples #91;Pub/Sub#93;"| n20
+  n20 -->|"Delivers assignment events #91;event#93;"| n19
+  n19 -->|"Sends rider and driver alerts #91;HTTPS#93;"| n14
+  n20 -->|"Streams events for analytics #91;BigQuery subscription#93;"| n24
+  n10 -->|"Accepts offers and reports trip status #91;gRPC#93;"| n16
+  n23 -->|"Exports daily snapshots #91;Dataflow template#93;"| n25
+  n10 -->|"Streams GPS pings #91;HTTPS#93;"| n18
+  n11 -->|"Runs fleet reports #91;SQL#93;"| n24
+  n16 -->|"Verifies rider accounts #91;Spanner API#93;"| n21
+  n16 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n20
+  n16 -->|"Charges completed trips #91;HTTPS#93;"| n13
+  n20 -->|"Delivers trip events #91;push subscription#93;"| n17
+  n17 -->|"Finds nearby drivers #91;Redis#93;"| n22
+  n29 -->|"Delivers trip events #91;push subscription#93;"| n34
+  n34 -->|"Finds nearby drivers #91;Redis#93;"| n31
+  n34 -->|"Requests arrival estimates #91;HTTPS#93;"| n32
+  n34 -->|"Fetches road routes #91;HTTPS#93;"| n28
+  n35 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n30
+  n41 -->|"Verifies rider accounts #91;Spanner API#93;"| n39
+  n42 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n38
+  n42 -->|"Charges completed trips #91;HTTPS#93;"| n37
+  n46 -->|"Verifies rider accounts #91;Spanner API#93;"| n44
+  n50 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n48
+  n53 -->|"Delivers trip events #91;push subscription#93;"| n57
+  n57 -->|"Finds nearby drivers #91;Redis#93;"| n54
+  n57 -->|"Requests arrival estimates #91;HTTPS#93;"| n55
+  n57 -->|"Fetches road routes #91;HTTPS#93;"| n52
+  n62 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n60
+  n62 -->|"Charges completed trips #91;HTTPS#93;"| n59
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

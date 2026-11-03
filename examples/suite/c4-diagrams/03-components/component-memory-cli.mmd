@@ -1,0 +1,31 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Agent Harness#10;«software_system»#10;Codex, Claude Code, Factory or Copilot;#10;fires lifecycle hooks and runs the agent#10;that decides what to capture"]
+  n1["Obsidian#10;«software_system»#10;Optional vault receiving a staged overlay#10;of notes, canvas and dashboards"]
+  n2["Headless Browser#10;«software_system»#10;Renders approved corporate PDFs in an#10;isolated temporary profile"]
+  n3["Hook Adapters#10;«container»#10;Python#10;Per-harness lifecycle hooks that inject#10;protocol and retrieved context at session#10;start and request one capture review at#10;stop"]
+  n4["Canonical Note Store#10;«container»#10;Markdown files#10;Markdown notes with JSON-compatible#10;frontmatter, bindings, taxonomy and#10;operation journals"]
+  n5["Derived Index#10;«container»#10;SQLite FTS5#10;Disposable SQLite FTS5 databases and#10;catalogs, rebuildable from the note store"]
+  subgraph n6["Memory CLI"]
+    n7["Command Dispatcher#10;«component»#10;Parses subcommands, payloads and#10;domain flags; runs doctor"]
+    n8["Domain Resolver#10;«component»#10;Longest-prefix project binding and scope#10;selection"]
+    n9["Capture and Tagging#10;«component»#10;Controlled tag facets, idempotency and#10;duplicate checks"]
+    n10["Governance and Journal#10;«component»#10;Approved plans for rename, retag, merge,#10;delete, remap and undo; durable pre/post#10;journal"]
+    n11["Search and Read#10;«component»#10;Scoped FTS5 and canonical BM25#10;retrieval with rank fusion"]
+    n12["Improvement Engines#10;«component»#10;Twelve deterministic evidence engines in#10;off, shadow or active mode"]
+    n13["Obsidian Sync#10;«component»#10;Staged manifest-based overlay publisher"]
+    n14["PDF Publisher#10;«component»#10;Builds reviewed, classified PDFs from a#10;selection cart"]
+  end
+  n3 -->|"Requests retrieval and records turns"| n7
+  n12 -->|"Reads categorical evidence"| n11
+  n13 -->|"Publishes staged overlay"| n1
+  n14 -->|"Renders approved PDF"| n2
+  n0 -->|"Agent invokes capture and governance scripts #91;CLI#93;"| n7
+  n7 -->|"Resolves project domain"| n8
+  n7 -->|"Validates and stages new notes"| n9
+  n7 -->|"Runs scoped retrieval"| n11
+  n7 -->|"Applies approved plans"| n10
+  n9 -->|"Atomic locked writes with revision checks"| n4
+  n10 -->|"Journaled mutations and recovery"| n4
+  n11 -->|"Queries and rebuilds the index #91;SQLite#93;"| n5
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

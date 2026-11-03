@@ -1,0 +1,118 @@
+# Plan fidelity
+
+```json
+{
+  "declared": {
+    "elements": 26,
+    "flows": 20,
+    "views": 8
+  },
+  "compiled": {
+    "elements": 26,
+    "flows": 42,
+    "views": 8
+  },
+  "merged": [
+    "system-context-r2: flow-2, flow-3"
+  ],
+  "dropped": [],
+  "views": [
+    "system-context",
+    "containers",
+    "component-rider-gateway",
+    "component-dispatch-service",
+    "code-auth-middleware",
+    "code-trip-controller",
+    "code-matching-engine",
+    "code-fare-pricer"
+  ],
+  "lossless": true,
+  "augmented": false,
+  "layout": {
+    "ok": true,
+    "diagrams": {
+      "01-system-context/system-context": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 8,
+        "aspect_ratio": 1.032,
+        "score": 25.032287822878228,
+        "advisories": []
+      },
+      "02-containers/containers": {
+        "findings": [],
+        "crossings": 2,
+        "bends": 30,
+        "aspect_ratio": 3.016,
+        "score": 293.0160953800298,
+        "advisories": []
+      },
+      "03-components/component-dispatch-service": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 6,
+        "aspect_ratio": 1.107,
+        "score": 19.107335267302112,
+        "advisories": []
+      },
+      "03-components/component-rider-gateway": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 4,
+        "aspect_ratio": 1.009,
+        "score": 13.008534136546185,
+        "advisories": []
+      },
+      "04-code/code-auth-middleware": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 0,
+        "aspect_ratio": 1.509,
+        "score": 1.509090909090909,
+        "advisories": []
+      },
+      "04-code/code-fare-pricer": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 0,
+        "aspect_ratio": 1.509,
+        "score": 1.509090909090909,
+        "advisories": []
+      },
+      "04-code/code-matching-engine": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 4,
+        "aspect_ratio": 1.621,
+        "score": 13.62135922330097,
+        "advisories": []
+      },
+      "04-code/code-trip-controller": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 2,
+        "aspect_ratio": 1.19,
+        "score": 7.189842805320435,
+        "advisories": []
+      },
+      "05-overview/overview-progressive": {
+        "findings": [],
+        "crossings": 9,
+        "bends": 36,
+        "aspect_ratio": 1.522,
+        "score": 1009.522283205269,
+        "advisories": []
+      },
+      "06-gcp-deployment/gcp-deployment": {
+        "findings": [],
+        "crossings": 2,
+        "bends": 34,
+        "aspect_ratio": 1.65,
+        "score": 303.65018837766866,
+        "advisories": []
+      }
+    }
+  },
+  "advisories": []
+}
+```

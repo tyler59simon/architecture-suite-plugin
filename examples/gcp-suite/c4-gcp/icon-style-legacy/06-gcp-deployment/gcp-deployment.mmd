@@ -1,0 +1,48 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  subgraph n0["Google Cloud"]
+    subgraph n1["Example Organization"]
+      subgraph n2["ridepulse-prod"]
+        n3(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+        style n3 fill:#fff3e6,stroke:#e65100
+        n4[("Fleet Time Series#10;«container»#10;Bigtable#10;High-rate telemetry history")]
+        style n4 fill:#eaf6ec,stroke:#2e7d32
+        n5[("Location Archive#10;«container»#10;Object storage#10;Daily telemetry snapshots")]
+        style n5 fill:#e4f5f7,stroke:#00838f
+        n6[("Telemetry Lake#10;«container»#10;BigQuery#10;Analytics warehouse")]
+        style n6 fill:#eaf6ec,stroke:#2e7d32
+        n7[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+        style n7 fill:#eaf6ec,stroke:#2e7d32
+        subgraph n8["us-central1"]
+          n9["Dispatch Service#10;«container»#10;Java on Cloud Run#10;Matches riders with nearby drivers and#10;prices fares"]
+          n10["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+          style n10 fill:#f5eafa,stroke:#7b1fa2
+          n11["Location Ingest#10;«container»#10;Rust on Cloud Run#10;Accepts driver GPS pings at high volume"]
+          n12["Notification Worker#10;«container»#10;Node.js#10;Sends push and SMS alerts"]
+          subgraph n13["ridepulse-vpc"]
+            subgraph n14["app-subnet"]
+              n15["Rider Gateway#10;«container»#10;Go gRPC and HTTPS#10;Terminates rider and driver mobile traffic"]
+            end
+            subgraph n16["data-subnet"]
+              n17[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+              style n17 fill:#eaf6ec,stroke:#2e7d32
+            end
+          end
+        end
+      end
+    end
+  end
+  n9 -->|"Requests arrival estimates #91;HTTPS#93;"| n10
+  n9 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n7
+  n9 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n3
+  n11 -->|"Updates driver position #91;Redis#93;"| n17
+  n11 -->|"Appends telemetry samples #91;Bigtable API#93;"| n4
+  n11 -->|"Publishes location samples #91;Pub/Sub#93;"| n3
+  n3 -->|"Delivers assignment events #91;event#93;"| n12
+  n3 -->|"Streams events for analytics #91;BigQuery subscription#93;"| n6
+  n4 -->|"Exports daily snapshots #91;Dataflow template#93;"| n5
+  n15 -->|"Verifies rider accounts #91;Spanner API#93;"| n7
+  n15 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n3
+  n3 -->|"Delivers trip events #91;push subscription#93;"| n9
+  n9 -->|"Finds nearby drivers #91;Redis#93;"| n17
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

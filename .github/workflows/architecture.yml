@@ -1,0 +1,93 @@
+name: Architecture validation
+on: [push, pull_request, workflow_dispatch, workflow_call]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install ruff==0.11.2
+      - run: ruff check .
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.11', '3.13', '3.14']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked development tree
+        run: |
+          python -m pip install -r requirements-lock.txt
+          python -m pip install --no-deps -e .
+      - run: python -m playwright install --with-deps chromium
+      - run: npm ci --ignore-scripts
+      - name: Tests with coverage
+        run: python -m pytest --cov=architecture_suite --cov-branch --cov-report=json:test-results/coverage.json --junitxml=test-results/junit.xml
+      - name: Coverage and public-callable gate
+        run: python tools/record_validation.py
+      - run: python tools/package_hosts.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-${{ matrix.os }}-py${{ matrix.python }}
+          path: |
+            test-results
+            reports/validation-results.json
+            dist/hosts
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install pip-audit==2.9.0
+      - name: Audit the runtime lock
+        run: pip-audit --require-hashes -r skills/architecture-suite-runtime/scripts/requirements-runtime.lock
+      - name: Runtime lock installs from wheels on every supported Python and OS
+        run: python tools/check_wheels.py
+      - name: Audit Node tooling
+        run: npm audit --audit-level=moderate
+
+  bootstrap:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - if: runner.os == 'Linux'
+        run: npx --yes playwright@1.51.0 install-deps chromium
+      - name: Portable bootstrap (as a skill user would run it)
+        shell: bash
+        run: python skills/architecture-suite-runtime/scripts/bootstrap.py --target "$RUNNER_TEMP/rt"
+      - name: Launcher doctor from the bootstrapped runtime
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then PY="$RUNNER_TEMP/rt/Scripts/python.exe"; else PY="$RUNNER_TEMP/rt/bin/python"; fi
+          "$PY" skills/architecture-suite-runtime/scripts/architecture-suite.py doctor

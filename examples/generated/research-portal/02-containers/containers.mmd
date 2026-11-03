@@ -1,0 +1,18 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Customer#10;«person»#10;Submits requests"]
+  n1["Payment Provider#10;«software_system»#10;Authorizes payments"]
+  subgraph n2["Research Portal"]
+    n3["API#10;«container»#10;Python HTTPS#10;Accepts customer requests"]
+    n4["Worker#10;«container»#10;Go#10;Processes queued requests"]
+    n5(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+    style n5 fill:#fff3e6,stroke:#e65100
+    n6[("Order Store#10;«container»#10;DynamoDB#10;Persists request state")]
+    style n6 fill:#eaf6ec,stroke:#2e7d32
+  end
+  n0 -->|"Submits request #91;HTTPS#93;"| n3
+  n3 -->|"Authorizes payment #91;HTTPS#93;"| n1
+  n3 -->|"Queues accepted work #91;SQS#93;"| n5
+  n5 -->|"Delivers work #91;event#93;"| n4
+  n4 -->|"Stores result #91;DynamoDB#93;"| n6
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

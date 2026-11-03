@@ -1,0 +1,53 @@
+# Plan fidelity
+
+```json
+{
+  "declared": {
+    "elements": 21,
+    "flows": 15,
+    "views": 6
+  },
+  "compiled": {
+    "elements": 21,
+    "flows": 28,
+    "views": 6
+  },
+  "merged": [
+    "system-context-r2: flow-2, flow-4",
+    "containers-r5: flow-9, flow-10"
+  ],
+  "dropped": [],
+  "views": [
+    "system-context",
+    "containers",
+    "component-hook-adapters",
+    "component-memory-cli",
+    "code-command-dispatcher",
+    "code-search-and-read"
+  ],
+  "lossless": true,
+  "augmented": true,
+  "layout": {
+    "ok": true,
+    "diagrams": {
+      "03-components/component-hook-adapters": {
+        "findings": [],
+        "crossings": 1,
+        "bends": 2,
+        "aspect_ratio": 1.332,
+        "score": 107.3320628870891,
+        "advisories": []
+      },
+      "03-components/component-memory-cli": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 16,
+        "aspect_ratio": 1.929,
+        "score": 49.92926045016077,
+        "advisories": []
+      }
+    }
+  },
+  "advisories": []
+}
+```

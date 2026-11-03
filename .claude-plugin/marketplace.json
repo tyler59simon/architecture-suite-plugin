@@ -1,0 +1,15 @@
+{
+  "name": "architecture-suite",
+  "description": "Offline, evidence-backed C4 architecture diagram skills",
+  "owner": {
+    "name": "Tyler Simon"
+  },
+  "plugins": [
+    {
+      "name": "architecture-suite",
+      "source": ".",
+      "version": "1.0.0",
+      "description": "Offline evidence-backed C4 architecture diagrams: c4-diagrams, reverse-engineer-c4, c4-system, c4-container, c4-component, c4-code, c4-overview, c4-aws and c4-gcp"
+    }
+  ]
+}

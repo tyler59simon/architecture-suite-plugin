@@ -1,0 +1,79 @@
+# Plan fidelity
+
+```json
+{
+  "declared": {
+    "elements": 21,
+    "flows": 15,
+    "views": 6
+  },
+  "compiled": {
+    "elements": 21,
+    "flows": 28,
+    "views": 6
+  },
+  "merged": [
+    "system-context-r2: flow-2, flow-4",
+    "containers-r5: flow-9, flow-10"
+  ],
+  "dropped": [],
+  "views": [
+    "system-context",
+    "containers",
+    "component-hook-adapters",
+    "component-memory-cli",
+    "code-command-dispatcher",
+    "code-search-and-read"
+  ],
+  "lossless": true,
+  "augmented": true,
+  "layout": {
+    "ok": true,
+    "diagrams": {
+      "05-overview/overview-executive": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 16,
+        "aspect_ratio": 1.615,
+        "score": 49.61471458310507,
+        "advisories": []
+      },
+      "05-overview/overview-progressive": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 20,
+        "aspect_ratio": 3.089,
+        "score": 63.08862745098039,
+        "advisories": []
+      },
+      "05-overview/overview-hierarchy": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 0,
+        "aspect_ratio": 4.626,
+        "score": 4.625757575757576,
+        "advisories": []
+      },
+      "05-overview/overview-small-multiples": {
+        "findings": [],
+        "crossings": 1,
+        "bends": 38,
+        "aspect_ratio": 1.141,
+        "score": 215.14069519981084,
+        "advisories": [
+          "Dense view; split by scope or use small-multiples"
+        ]
+      },
+      "05-overview/overview-complete": {
+        "findings": [],
+        "crossings": 0,
+        "bends": 18,
+        "aspect_ratio": 3.024,
+        "score": 57.02386278896346,
+        "advisories": []
+      }
+    }
+  },
+  "advisories": []
+}
+```

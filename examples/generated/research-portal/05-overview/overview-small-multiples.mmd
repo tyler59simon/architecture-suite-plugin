@@ -1,0 +1,79 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Research Portal — Context"]
+  n1["Research Portal#10;«software_system»#10;Portal and query service"]
+  n2["Customer#10;«person»#10;Submits requests"]
+  n3["Payment Provider#10;«software_system»#10;Authorizes payments"]
+  n4["Research Portal — Container"]
+  n5["Customer#10;«person»#10;Submits requests"]
+  n6["Payment Provider#10;«software_system»#10;Authorizes payments"]
+  subgraph n7["Research Portal"]
+    n8["API#10;«container»#10;Python HTTPS#10;Accepts customer requests"]
+    n9["Worker#10;«container»#10;Go#10;Processes queued requests"]
+    n10(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+    style n10 fill:#fff3e6,stroke:#e65100
+    n11[("Order Store#10;«container»#10;DynamoDB#10;Persists request state")]
+    style n11 fill:#eaf6ec,stroke:#2e7d32
+  end
+  n12["API — Component"]
+  n13["Customer#10;«person»#10;Submits requests"]
+  n14["Payment Provider#10;«software_system»#10;Authorizes payments"]
+  n15(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+  style n15 fill:#fff3e6,stroke:#e65100
+  subgraph n16["API"]
+    n17["Request Controller#10;«component»#10;Validates and routes requests"]
+    n18["Payment Adapter#10;«component»#10;Calls payment provider"]
+  end
+  n19["Worker — Component"]
+  n20(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+  style n20 fill:#fff3e6,stroke:#e65100
+  n21[("Order Store#10;«container»#10;DynamoDB#10;Persists request state")]
+  style n21 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n22["Worker"]
+    n23["Fulfillment#10;«component»#10;Dispatches fulfillment work"]
+  end
+  n24["Request Controller — Code"]
+  n25["Customer#10;«person»#10;Submits requests"]
+  n26["Payment Adapter#10;«component»#10;Calls payment provider"]
+  n27(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+  style n27 fill:#fff3e6,stroke:#e65100
+  subgraph n28["Request Controller"]
+    n29["RequestHandler#10;«class»#10;Illustrative implementation#10;+handle(request): Response"]
+    n30["RequestValidator#10;«class»#10;Illustrative implementation#10;+validate(request): bool"]
+  end
+  n31["Payment Adapter — Code"]
+  n32["Payment Provider#10;«software_system»#10;Authorizes payments"]
+  n33["Request Controller#10;«component»#10;Validates and routes requests"]
+  subgraph n34["Payment Adapter"]
+    n35["PaymentClient#10;«class»#10;Illustrative implementation#10;+authorize(order): Result"]
+  end
+  n36["Fulfillment — Code"]
+  n37(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+  style n37 fill:#fff3e6,stroke:#e65100
+  n38[("Order Store#10;«container»#10;DynamoDB#10;Persists request state")]
+  style n38 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n39["Fulfillment"]
+    n40["FulfillmentJob#10;«class»#10;Illustrative implementation#10;+run(order): Result"]
+  end
+  n2 -->|"Submits request #91;HTTPS#93;"| n1
+  n1 -->|"Authorizes payment #91;HTTPS#93;"| n3
+  n5 -->|"Submits request #91;HTTPS#93;"| n8
+  n8 -->|"Authorizes payment #91;HTTPS#93;"| n6
+  n8 -->|"Queues accepted work #91;SQS#93;"| n10
+  n10 -->|"Delivers work #91;event#93;"| n9
+  n9 -->|"Stores result #91;DynamoDB#93;"| n11
+  n13 -->|"Submits request #91;HTTPS#93;"| n17
+  n17 -->|"Requests authorization #91;method#93;"| n18
+  n18 -->|"Authorizes payment #91;HTTPS#93;"| n14
+  n17 -->|"Queues accepted work #91;SQS#93;"| n15
+  n20 -->|"Delivers work #91;event#93;"| n23
+  n23 -->|"Stores result #91;DynamoDB#93;"| n21
+  n25 -->|"Submits request #91;HTTPS#93;"| n29
+  n29 -->|"Validates input #91;method#93;"| n30
+  n29 -->|"Requests authorization #91;method#93;"| n26
+  n29 -->|"Queues accepted work #91;SQS#93;"| n27
+  n33 -->|"Requests authorization #91;method#93;"| n35
+  n35 -->|"Authorizes payment #91;HTTPS#93;"| n32
+  n37 -->|"Delivers work #91;event#93;"| n40
+  n40 -->|"Stores result #91;DynamoDB#93;"| n38
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

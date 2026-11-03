@@ -1,0 +1,22 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  subgraph n0["AWS Cloud"]
+    subgraph n1["Example Account"]
+      subgraph n2["us-east-1"]
+        n3["Worker#10;«container»#10;Go#10;Processes queued requests"]
+        n4(["Order Queue#10;«container»#10;SQS#10;Buffers accepted work"])
+        style n4 fill:#fff3e6,stroke:#e65100
+        n5[("Order Store#10;«container»#10;DynamoDB#10;Persists request state")]
+        style n5 fill:#eaf6ec,stroke:#2e7d32
+        subgraph n6["Application VPC"]
+          subgraph n7["Private Subnet"]
+            n8["API#10;«container»#10;Python HTTPS#10;Accepts customer requests"]
+          end
+        end
+      end
+    end
+  end
+  n8 -->|"Queues accepted work #91;SQS#93;"| n4
+  n4 -->|"Delivers work #91;event#93;"| n3
+  n3 -->|"Stores result #91;DynamoDB#93;"| n5
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]
