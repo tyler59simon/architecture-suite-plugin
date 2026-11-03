@@ -225,7 +225,7 @@ def test_dense_relationships_remain_in_scene():
 
 
 def test_all_generated_formats_are_valid():
-    samples = ROOT / "examples/generated"
+    samples = ROOT / "examples/starter-systems"
     assert len(list(samples.rglob("*.png"))) == 39
     for path in samples.rglob("*"):
         if path.suffix in {".svg", ".drawio"}:

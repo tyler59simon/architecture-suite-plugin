@@ -1,14 +1,23 @@
-"""Build reproducible extension fixtures and usable offline artifacts."""
+"""Build the CLI feature examples in examples/cli-features/ and the fixtures the plugin ships."""
 
+import copy
 import json
 from pathlib import Path
 from architecture_suite.cli import main
 from architecture_suite.examples import example_model
 
 root = Path(__file__).resolve().parents[1]
-out = root / "examples/extensions"
+out = root / "examples/cli-features"
 out.mkdir(parents=True, exist_ok=True)
 model = example_model()
+# A later version of the same model for the diff example: one technology changes and one
+# code-level dependency is removed.
+after = copy.deepcopy(model)
+next(e for e in after["elements"] if e["id"] == "api")["technology"] = "Go HTTPS"
+removed = after["relationships"][-1]["id"]
+after["relationships"] = [r for r in after["relationships"] if r["id"] != removed]
+for view in after["views"]:
+    view["relationship_ids"] = [r for r in view.get("relationship_ids", []) if r != removed]
 scenario = {
     "schema_version": "architecture-scenario/v1",
     "name": "Order submission",
@@ -51,6 +60,7 @@ for name, value in {
             }
         ],
     },
+    "model-after.json": after,
     "compose.json": {
         "services": {
             "api": {"depends_on": ["database"]},
@@ -90,7 +100,7 @@ commands = [
         "--before",
         str(out / "model.json"),
         "--after",
-        str(out / "model.json"),
+        str(out / "model-after.json"),
         "--output",
         str(out / "diff"),
     ],

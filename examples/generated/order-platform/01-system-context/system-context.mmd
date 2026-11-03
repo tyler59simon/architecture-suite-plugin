@@ -1,8 +1,0 @@
-%% Architecture Suite schema 2.0; portable layout is independent of ELK
-flowchart LR
-  n0["Order Platform#10;«software_system»#10;API and asynchronous worker"]
-  n1["Customer#10;«person»#10;Submits requests"]
-  n2["Payment Provider#10;«software_system»#10;Authorizes payments"]
-  n1 -->|"Submits request #91;HTTPS#93;"| n0
-  n0 -->|"Authorizes payment #91;HTTPS#93;"| n2
-  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

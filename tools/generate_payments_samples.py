@@ -10,7 +10,7 @@ rendered as a complete package:
   examples/payments/<cloud>/01-system-context ... 04-code   C4 levels 1-4
   examples/payments/<cloud>/05-overview            executive and hierarchy overviews
   examples/payments/<cloud>/06-<cloud>-deployment  deployment diagram
-  examples/payments/<cloud>/overview-vector-only/  progressive, small-multiples, complete (SVG/Draw.io)
+  examples/payments/<cloud>/large-overviews/  progressive, small-multiples, complete (SVG/Draw.io)
   examples/payments/<cloud>/c4-dynamic.mmd         card payment authorization sequence
 
 Levels 1-4 are identical in both packages apart from cloud icons; the deployment differs.
@@ -304,7 +304,7 @@ sequenceDiagram
 JOBS = {
     ".": ["--level", "all", "--overview-style", "executive,hierarchy"],
     # These overview styles exceed the 6,000 px PNG width limit at this size: vector formats only.
-    "overview-vector-only": [
+    "large-overviews": [
         "--level", "overview", "--overview-style", "progressive,small-multiples,complete",
     ],
 }
@@ -333,7 +333,7 @@ match apart from cloud service icons; the deployment diagrams differ.
 | L4 code | [aws/04-code](aws/04-code) | [gcp/04-code](gcp/04-code) |
 | Overviews | [aws/05-overview](aws/05-overview) | [gcp/05-overview](gcp/05-overview) |
 | Deployment | [aws/06-aws-deployment](aws/06-aws-deployment) | [gcp/06-gcp-deployment](gcp/06-gcp-deployment) |
-| Progressive, small-multiples, complete (SVG/Draw.io) | [aws/overview-vector-only](aws/overview-vector-only) | [gcp/overview-vector-only](gcp/overview-vector-only) |
+| Progressive, small-multiples, complete (SVG/Draw.io) | [aws/large-overviews](aws/large-overviews) | [gcp/large-overviews](gcp/large-overviews) |
 
 Regenerate with `python tools/generate_payments_samples.py`. Every fact here is fictional.
 """
@@ -350,7 +350,7 @@ def main():
         run("plan-lint", "--plan", plan_path, "--strict", label=f"{cloud} plan-lint")
         for job, extra in JOBS.items():
             target = folder if job == "." else folder / job
-            formats = "mermaid,drawio,svg" if job.endswith("vector-only") else "mermaid,drawio,png,svg"
+            formats = "mermaid,drawio,svg" if job == "large-overviews" else "mermaid,drawio,png,svg"
             run("plan-render", "--plan", plan_path, "--output", target, "--format", formats,
                 "--confirm-write", *extra, label=f"{cloud} {job} render")
         (folder / "c4-dynamic.mmd").write_bytes(DYNAMIC_SEQUENCE.encode("utf-8"))
