@@ -1,0 +1,67 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  subgraph n0["Google Cloud"]
+    subgraph n1["Example Organization"]
+      subgraph n2["paystream-prod"]
+        n3[("Ledger Store#10;«container»#10;Distributed SQL#10;Strongly consistent journal and balance#10;records")]
+        style n3 fill:#eaf6ec,stroke:#2e7d32
+        n4["Merchant Dashboard#10;«container»#10;React single-page app#10;Payments, refunds, disputes and payouts#10;for merchants"]
+        n5[("Reporting Warehouse#10;«container»#10;Columnar warehouse#10;Reconciliation and finance analytics")]
+        style n5 fill:#eaf6ec,stroke:#2e7d32
+        subgraph n6["europe-west1"]
+          n7["Fraud Scoring#10;«container»#10;Python ML model#10;Scores each payment for fraud risk before#10;authorization"]
+          style n7 fill:#f5eafa,stroke:#7b1fa2
+          n8(["Payment Event Stream#10;«container»#10;Event bus#10;Ordered payment lifecycle events"])
+          style n8 fill:#fff3e6,stroke:#e65100
+          n9[("Settlement Archive#10;«container»#10;Object storage#10;Raw acquirer settlement files")]
+          style n9 fill:#e4f5f7,stroke:#00838f
+          n10["Settlement Worker#10;«container»#10;Python batch jobs#10;Reconciles acquirer settlement files and#10;initiates payouts"]
+          n11[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
+          style n11 fill:#eaf6ec,stroke:#2e7d32
+          n12["Webhook Dispatcher#10;«container»#10;Node.js#10;Signs and delivers payment events to#10;merchants, with retries"]
+          subgraph n13["payments-vpc"]
+            subgraph n14["app-subnet"]
+              n15["Ledger Service#10;«container»#10;Kotlin#10;Double-entry ledger of balances, fees and#10;payouts"]
+              n16["Payments API#10;«container»#10;Go#10;Public REST API for payment intents,#10;captures and refunds"]
+              subgraph n17["orchestrator-cluster"]
+                n18["Payment Orchestrator#10;«container»#10;Java#10;Drives each payment through#10;authorization, capture and refund"]
+              end
+            end
+            subgraph n19["cde-subnet (cardholder data)"]
+              subgraph n20["vault-cluster"]
+                n21["Card Vault#10;«container»#10;Rust#10;Tokenizes card numbers inside the#10;cardholder data environment"]
+              end
+            end
+            subgraph n22["data-subnet"]
+              n23[("Idempotency Cache#10;«container»#10;Redis#10;Short-lived idempotency keys and#10;responses")]
+              style n23 fill:#eaf6ec,stroke:#2e7d32
+              n24[("Payments Database#10;«container»#10;PostgreSQL#10;Payment intents, merchants and API keys")]
+              style n24 fill:#eaf6ec,stroke:#2e7d32
+            end
+          end
+        end
+      end
+    end
+  end
+  subgraph n25["Shopper browser"]
+    subgraph n26["Web browser"]
+      n27["Checkout Web SDK#10;«container»#10;TypeScript in the shopper's browser#10;Hosted payment fields embedded in#10;merchant checkout pages"]
+    end
+  end
+  n18 -->|"Requests a fraud score #91;gRPC#93;"| n7
+  n18 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n21
+  n21 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n11
+  n18 -->|"Publishes payment lifecycle events #91;events#93;"| n8
+  n8 -->|"Delivers captured, refunded and fee events #91;events#93;"| n15
+  n15 -->|"Posts double-entry journal entries #91;SQL#93;"| n3
+  n15 -->|"Streams journal entries #91;batch export#93;"| n5
+  n27 -->|"Submits card data for a token #91;HTTPS#93;"| n21
+  n8 -->|"Delivers merchant-facing events #91;events#93;"| n12
+  n10 -->|"Archives settlement files #91;object API#93;"| n9
+  n10 -->|"Reconciles merchant balances #91;gRPC#93;"| n15
+  n27 -->|"Confirms the payment with the card token #91;HTTPS#93;"| n16
+  n4 -->|"Lists payments and issues refunds #91;HTTPS#93;"| n16
+  n16 -->|"Looks up API keys; Persists payment intents #91;SQL#93;"| n24
+  n16 -->|"Stores request keys and responses #91;Redis#93;"| n23
+  n16 -->|"Starts authorization #91;gRPC#93;"| n18
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

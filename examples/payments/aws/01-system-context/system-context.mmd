@@ -1,0 +1,21 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["PayStream#10;«software_system»#10;Online payments platform: checkout, card#10;processing, ledger and payouts"]
+  n1["Shopper#10;«person»#10;Pays for orders at merchant checkouts"]
+  n2["Merchant#10;«person»#10;Accepts payments and receives payouts"]
+  n3["Risk Analyst#10;«person»#10;Reviews flagged payments and fraud#10;rules"]
+  n4["Finance Operations#10;«person»#10;Reconciles settlements and payouts"]
+  n5["Acquirer Processor#10;«software_system»#10;Card authorization, capture and settlement"]
+  n6["3-D Secure Directory Server#10;«software_system»#10;Card network cardholder authentication"]
+  n7["Bank Payout Rail#10;«software_system»#10;Bank transfers for merchant payouts"]
+  n8["Merchant Webhook Endpoint#10;«software_system»#10;Merchant back-end that calls the API and#10;receives events"]
+  n1 -->|"Enters card details at checkout #91;HTTPS#93;"| n0
+  n2 -->|"Reviews payments, refunds and payouts #91;HTTPS#93;"| n0
+  n8 -->|"Calls the API server-side with a secret key #91;HTTPS#93;"| n0
+  n3 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n0
+  n0 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n6
+  n0 -->|"Authorizes, captures and refunds; Downloads settlement#10;files #91;ISO 8583 over TLS; SFTP#93;"| n5
+  n0 -->|"Delivers signed webhooks #91;HTTPS#93;"| n8
+  n0 -->|"Initiates merchant payouts #91;ISO 20022#93;"| n7
+  n4 -->|"Runs reconciliation and payout reports #91;SQL#93;"| n0
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

@@ -1,0 +1,24 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Merchant Webhook Endpoint#10;«software_system»#10;Merchant back-end that calls the API and#10;receives events"]
+  n1["Checkout Web SDK#10;«container»#10;TypeScript in the shopper's browser#10;Hosted payment fields embedded in#10;merchant checkout pages"]
+  n2["Merchant Dashboard#10;«container»#10;React single-page app#10;Payments, refunds, disputes and payouts#10;for merchants"]
+  n3["Payment Orchestrator#10;«container»#10;Java#10;Drives each payment through#10;authorization, capture and refund"]
+  n4[("Payments Database#10;«container»#10;PostgreSQL#10;Payment intents, merchants and API keys")]
+  style n4 fill:#eaf6ec,stroke:#2e7d32
+  n5[("Idempotency Cache#10;«container»#10;Redis#10;Short-lived idempotency keys and#10;responses")]
+  style n5 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n6["Payments API"]
+    n7["Merchant Authenticator#10;«component»#10;Go#10;Validates secret API keys and scopes"]
+    n8["Idempotency Guard#10;«component»#10;Go#10;Makes retried requests return the original#10;result"]
+    n9["Payment Intents Controller#10;«component»#10;Go#10;Creates and confirms payment intents"]
+  end
+  n1 -->|"Confirms the payment with the card token #91;HTTPS#93;"| n9
+  n2 -->|"Lists payments and issues refunds #91;HTTPS#93;"| n9
+  n0 -->|"Calls the API server-side with a secret key #91;HTTPS#93;"| n7
+  n7 -->|"Looks up API keys #91;SQL#93;"| n4
+  n9 -->|"Reserves the idempotency key #91;in-process#93;"| n8
+  n8 -->|"Stores request keys and responses #91;Redis#93;"| n5
+  n9 -->|"Persists payment intents #91;SQL#93;"| n4
+  n9 -->|"Starts authorization #91;gRPC#93;"| n3
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

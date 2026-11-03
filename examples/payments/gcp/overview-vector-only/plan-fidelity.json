@@ -1,0 +1,76 @@
+{
+  "declared": {
+    "elements": 50,
+    "flows": 33,
+    "views": 19
+  },
+  "compiled": {
+    "elements": 50,
+    "flows": 63,
+    "views": 19
+  },
+  "merged": [
+    "system-context-r6: flow-20, flow-29",
+    "containers-r7: flow-7, flow-10"
+  ],
+  "dropped": [],
+  "views": [
+    "system-context",
+    "containers",
+    "component-payments-api",
+    "component-card-vault",
+    "component-payment-orchestrator",
+    "component-fraud-scoring",
+    "component-ledger-service",
+    "code-merchant-authenticator",
+    "code-idempotency-guard",
+    "code-payment-intents-controller",
+    "code-card-tokenizer",
+    "code-envelope-encryptor",
+    "code-payment-state-machine",
+    "code-acquirer-router",
+    "code-3ds-handler",
+    "code-risk-scorer",
+    "code-rules-engine",
+    "code-journal-writer",
+    "code-balance-calculator"
+  ],
+  "lossless": true,
+  "augmented": false,
+  "layout": {
+    "ok": true,
+    "diagrams": {
+      "05-overview/overview-progressive": {
+        "findings": [],
+        "crossings": 2,
+        "bends": 54,
+        "aspect_ratio": 3.458,
+        "score": 365.4584492350487,
+        "advisories": [
+          "Dense view; split by scope or use small-multiples"
+        ]
+      },
+      "05-overview/overview-small-multiples": {
+        "findings": [],
+        "crossings": 8,
+        "bends": 104,
+        "aspect_ratio": 1.719,
+        "score": 1113.7186398872445,
+        "advisories": [
+          "Dense view; split by scope or use small-multiples"
+        ]
+      },
+      "05-overview/overview-complete": {
+        "findings": [],
+        "crossings": 2,
+        "bends": 54,
+        "aspect_ratio": 3.6,
+        "score": 365.60047656870535,
+        "advisories": [
+          "Dense view; split by scope or use small-multiples"
+        ]
+      }
+    }
+  },
+  "advisories": []
+}

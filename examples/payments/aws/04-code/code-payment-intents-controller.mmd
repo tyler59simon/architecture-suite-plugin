@@ -1,0 +1,6 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  subgraph n0["Payment Intents Controller"]
+    n1["PaymentIntentController#10;«class»#10;Illustrative implementation#10;+create(request): PaymentIntent#10;+confirm(id, cardToken): PaymentIntent#10;+refund(id, amount): Refund"]
+  end
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

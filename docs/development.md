@@ -49,6 +49,7 @@ python tools/generate_samples.py         # examples/generated
 python tools/generate_extensions.py      # examples/extensions, and the small fixtures the plugin ships
 python tools/generate_sample_suite.py    # examples/suite
 python tools/generate_gcp_samples.py     # examples/gcp-suite
+python tools/generate_payments_samples.py  # examples/payments (PayStream on AWS and Google Cloud)
 ```
 
 Samples live in `examples/`, outside the shipped plugin, and are explicitly fictional. To refresh bundled dependencies, run `npm ci --ignore-scripts`, `python tools/setup_assets.py`, `python tools/build_schemas.py` and `python tools/build_extension_schemas.py`. After editing any bundled asset by hand, run `python tools/build_manifest.py`. Review asset sources, licenses and checksums before distributing. The setup utilities access the network; normal generation does not.

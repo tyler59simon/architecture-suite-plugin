@@ -1,0 +1,30 @@
+%% Illustrative scenario; authored separately from schema 2.0 C4 views.
+sequenceDiagram
+  actor Shopper
+  participant SDK as Checkout Web SDK
+  participant Vault as Card Vault
+  participant API as Payments API
+  participant Orch as Payment Orchestrator
+  participant Fraud as Fraud Scoring
+  participant DS as 3-D Secure Directory Server
+  participant Acq as Acquirer Processor
+  participant Bus as Payment Event Stream
+  participant Ledger as Ledger Service
+  Shopper->>SDK: Enter card details
+  SDK->>Vault: Tokenize card
+  Vault-->>SDK: Card token
+  SDK->>API: Confirm payment intent (token, idempotency key)
+  API->>Orch: Authorize payment
+  Orch->>Fraud: Score payment
+  Fraud-->>Orch: Risk score and decision
+  alt challenge required
+    Orch->>DS: Authenticate cardholder
+    DS-->>Orch: Authentication result
+  end
+  Orch->>Vault: Detokenize for network request
+  Orch->>Acq: Authorization request
+  Acq-->>Orch: Approved
+  Orch->>Bus: payment.authorized
+  Bus->>Ledger: Post pending journal entries
+  Orch-->>API: Authorized
+  API-->>SDK: Payment succeeded

@@ -65,6 +65,7 @@ tools/ tests/ docs/ reports/        Development tools, tests, docs, validation r
 .github/workflows/                  CI (architecture.yml) and release (release.yml)
 ```
 
+- [Online payments example on AWS and Google Cloud](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/examples/payments/README.md): full L1-L4, overviews and both deployment diagrams
 - [Examples](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/examples/generated/index.md) and the [interactive explorer](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/examples/extensions/explorer/explorer.html)
 - [Development guide](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/docs/development.md), [validation](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/docs/validation.md), [changelog](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/CHANGELOG.md), [security](https://github.com/tyler59simon/architecture-suite-plugin/blob/main/SECURITY.md)
 

@@ -1,0 +1,78 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["3-D Secure Directory Server#10;«software_system»#10;Card network cardholder authentication"]
+  n1["Acquirer Processor#10;«software_system»#10;Card authorization, capture and settlement"]
+  n2["Bank Payout Rail#10;«software_system»#10;Bank transfers for merchant payouts"]
+  n3["Finance Operations#10;«person»#10;Reconciles settlements and payouts"]
+  n4["Merchant#10;«person»#10;Accepts payments and receives payouts"]
+  n5["Merchant Webhook Endpoint#10;«software_system»#10;Merchant back-end that calls the API and#10;receives events"]
+  n6["Risk Analyst#10;«person»#10;Reviews flagged payments and fraud#10;rules"]
+  n7["Shopper#10;«person»#10;Pays for orders at merchant checkouts"]
+  subgraph n8["PayStream"]
+    n9["Checkout Web SDK#10;«container»#10;TypeScript in the shopper's browser#10;Hosted payment fields embedded in#10;merchant checkout pages"]
+    n10[("Idempotency Cache#10;«container»#10;Redis#10;Short-lived idempotency keys and#10;responses")]
+    style n10 fill:#eaf6ec,stroke:#2e7d32
+    n11[("Ledger Store#10;«container»#10;Distributed SQL#10;Strongly consistent journal and balance#10;records")]
+    style n11 fill:#eaf6ec,stroke:#2e7d32
+    n12["Merchant Dashboard#10;«container»#10;React single-page app#10;Payments, refunds, disputes and payouts#10;for merchants"]
+    n13(["Payment Event Stream#10;«container»#10;Event bus#10;Ordered payment lifecycle events"])
+    style n13 fill:#fff3e6,stroke:#e65100
+    n14[("Payments Database#10;«container»#10;PostgreSQL#10;Payment intents, merchants and API keys")]
+    style n14 fill:#eaf6ec,stroke:#2e7d32
+    n15[("Reporting Warehouse#10;«container»#10;Columnar warehouse#10;Reconciliation and finance analytics")]
+    style n15 fill:#eaf6ec,stroke:#2e7d32
+    n16[("Settlement Archive#10;«container»#10;Object storage#10;Raw acquirer settlement files")]
+    style n16 fill:#e4f5f7,stroke:#00838f
+    n17["Settlement Worker#10;«container»#10;Python batch jobs#10;Reconciles acquirer settlement files and#10;initiates payouts"]
+    n18[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
+    style n18 fill:#eaf6ec,stroke:#2e7d32
+    n19["Webhook Dispatcher#10;«container»#10;Node.js#10;Signs and delivers payment events to#10;merchants, with retries"]
+    subgraph n20["Payments API"]
+      subgraph n21["Payment Intents Controller"]
+        n22["PaymentIntentController#10;«class»#10;Illustrative implementation#10;+create(request): PaymentIntent#10;+confirm(id, cardToken): PaymentIntent#10;+refund(id, amount): Refund"]
+      end
+      subgraph n23["Merchant Authenticator"]
+        n24["ApiKeyAuthenticator#10;«class»#10;Illustrative implementation#10;+authenticate(apiKey): Merchant#10;+requireScope(merchant, scope)"]
+      end
+      subgraph n25["Idempotency Guard"]
+        n26["IdempotencyGuard#10;«class»#10;Illustrative implementation#10;+reserve(key, requestHash): Reservation#10;+complete(key, response)"]
+      end
+    end
+    subgraph n27["Card Vault"]
+      subgraph n28["Card Tokenizer"]
+        n29["CardTokenizer#10;«class»#10;Illustrative implementation#10;+tokenize(pan, expiry): CardToken#10;+detokenize(token): CardData"]
+      end
+      subgraph n30["Envelope Encryptor"]
+        n31["EnvelopeEncryptor#10;«class»#10;Illustrative implementation#10;+encrypt(plaintext, keyId): Ciphertext#10;+decrypt(ciphertext): Bytes"]
+      end
+    end
+    subgraph n32["Fraud Scoring"]
+      subgraph n33["Rules Engine"]
+        n34["RuleSet#10;«class»#10;Illustrative implementation#10;+evaluate(payment, score): Decision"]
+      end
+      subgraph n35["Risk Scorer"]
+        n36["RiskScorer#10;«class»#10;Illustrative implementation#10;+score(payment): RiskScore"]
+      end
+    end
+    subgraph n37["Ledger Service"]
+      subgraph n38["Balance Calculator"]
+        n39["BalanceCalculator#10;«class»#10;Illustrative implementation#10;+balance(merchantId, currency): Balance"]
+      end
+      subgraph n40["Journal Writer"]
+        n41["JournalWriter#10;«class»#10;Illustrative implementation#10;+post(entries): JournalId"]
+      end
+    end
+    subgraph n42["Payment Orchestrator"]
+      subgraph n43["Acquirer Router"]
+        n44["AcquirerRouter#10;«class»#10;Illustrative implementation#10;+route(payment): AcquirerConnection"]
+      end
+      subgraph n45["3DS Handler"]
+        n46["ThreeDSecureClient#10;«class»#10;Illustrative implementation#10;+authenticate(payment):#10;AuthenticationResult"]
+      end
+      subgraph n47["Payment State Machine"]
+        n48["PaymentState#10;«interface»#10;Illustrative implementation#10;+next(event): PaymentState"]
+        n49["PaymentStateMachine#10;«class»#10;Illustrative implementation#10;+authorize(payment): Authorization#10;+capture(payment, amount): Capture#10;+refund(payment, amount): Refund"]
+      end
+    end
+  end
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

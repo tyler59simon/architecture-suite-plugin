@@ -1,0 +1,85 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["3-D Secure Directory Server#10;«software_system»#10;Card network cardholder authentication"]
+  n1["Acquirer Processor#10;«software_system»#10;Card authorization, capture and settlement"]
+  n2["Bank Payout Rail#10;«software_system»#10;Bank transfers for merchant payouts"]
+  n3["Finance Operations#10;«person»#10;Reconciles settlements and payouts"]
+  n4["Merchant#10;«person»#10;Accepts payments and receives payouts"]
+  n5["Merchant Webhook Endpoint#10;«software_system»#10;Merchant back-end that calls the API and#10;receives events"]
+  n6["Risk Analyst#10;«person»#10;Reviews flagged payments and fraud#10;rules"]
+  n7["Shopper#10;«person»#10;Pays for orders at merchant checkouts"]
+  subgraph n8["PayStream"]
+    n9["Checkout Web SDK#10;«container»#10;TypeScript in the shopper's browser#10;Hosted payment fields embedded in#10;merchant checkout pages"]
+    n10[("Idempotency Cache#10;«container»#10;Redis#10;Short-lived idempotency keys and#10;responses")]
+    style n10 fill:#eaf6ec,stroke:#2e7d32
+    n11[("Ledger Store#10;«container»#10;Distributed SQL#10;Strongly consistent journal and balance#10;records")]
+    style n11 fill:#eaf6ec,stroke:#2e7d32
+    n12["Merchant Dashboard#10;«container»#10;React single-page app#10;Payments, refunds, disputes and payouts#10;for merchants"]
+    n13(["Payment Event Stream#10;«container»#10;Event bus#10;Ordered payment lifecycle events"])
+    style n13 fill:#fff3e6,stroke:#e65100
+    n14[("Payments Database#10;«container»#10;PostgreSQL#10;Payment intents, merchants and API keys")]
+    style n14 fill:#eaf6ec,stroke:#2e7d32
+    n15[("Reporting Warehouse#10;«container»#10;Columnar warehouse#10;Reconciliation and finance analytics")]
+    style n15 fill:#eaf6ec,stroke:#2e7d32
+    n16[("Settlement Archive#10;«container»#10;Object storage#10;Raw acquirer settlement files")]
+    style n16 fill:#e4f5f7,stroke:#00838f
+    n17["Settlement Worker#10;«container»#10;Python batch jobs#10;Reconciles acquirer settlement files and#10;initiates payouts"]
+    n18[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
+    style n18 fill:#eaf6ec,stroke:#2e7d32
+    n19["Webhook Dispatcher#10;«container»#10;Node.js#10;Signs and delivers payment events to#10;merchants, with retries"]
+    subgraph n20["Fraud Scoring"]
+      n21["Risk Scorer#10;«component»#10;Python#10;Returns a risk score from the hosted#10;model#10;Drill-down: 1 code"]
+      n22["Rules Engine#10;«component»#10;Python#10;Applies merchant and platform block rules#10;Drill-down: 1 code"]
+    end
+    subgraph n23["Ledger Service"]
+      n24["Balance Calculator#10;«component»#10;Kotlin#10;Computes available and pending#10;merchant balances#10;Drill-down: 1 code"]
+      n25["Journal Writer#10;«component»#10;Kotlin#10;Posts balanced journal entries for money#10;movements#10;Drill-down: 1 code"]
+    end
+    subgraph n26["Card Vault"]
+      n27["Card Tokenizer#10;«component»#10;Rust#10;Swaps card numbers for single-purpose#10;tokens#10;Drill-down: 1 code"]
+      n28["Envelope Encryptor#10;«component»#10;Rust#10;Encrypts card data with per-record data#10;keys#10;Drill-down: 1 code"]
+    end
+    subgraph n29["Payments API"]
+      n30["Idempotency Guard#10;«component»#10;Go#10;Makes retried requests return the original#10;result#10;Drill-down: 1 code"]
+      n31["Merchant Authenticator#10;«component»#10;Go#10;Validates secret API keys and scopes#10;Drill-down: 1 code"]
+      n32["Payment Intents Controller#10;«component»#10;Go#10;Creates and confirms payment intents#10;Drill-down: 1 code"]
+    end
+    subgraph n33["Payment Orchestrator"]
+      n34["3DS Handler#10;«component»#10;Java#10;Runs 3-D Secure cardholder#10;authentication#10;Drill-down: 1 code"]
+      n35["Acquirer Router#10;«component»#10;Java#10;Chooses the acquiring connection by card#10;and region#10;Drill-down: 1 code"]
+      n36["Payment State Machine#10;«component»#10;Java#10;Owns payment state transitions and#10;retries#10;Drill-down: 2 code"]
+    end
+  end
+  n9 -->|"Submits card data for a token #91;HTTPS#93;"| n27
+  n33 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n27
+  n27 -->|"Encrypts card records #91;in-process#93;"| n28
+  n28 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n18
+  n33 -->|"Requests a fraud score #91;gRPC#93;"| n21
+  n21 -->|"Applies block and review rules #91;in-process#93;"| n22
+  n6 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n22
+  n13 -->|"Delivers captured, refunded and fee events #91;events#93;"| n25
+  n25 -->|"Posts double-entry journal entries #91;SQL#93;"| n11
+  n25 -->|"Streams journal entries #91;batch export#93;"| n15
+  n17 -->|"Reconciles merchant balances #91;gRPC#93;"| n24
+  n29 -->|"Starts authorization #91;gRPC#93;"| n36
+  n36 -->|"Requests cardholder authentication #91;in-process#93;"| n34
+  n34 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n0
+  n36 -->|"Sends authorization and capture #91;in-process#93;"| n35
+  n35 -->|"Authorizes, captures and refunds #91;ISO 8583 over TLS#93;"| n1
+  n36 -->|"Publishes payment lifecycle events #91;events#93;"| n13
+  n9 -->|"Confirms the payment with the card token #91;HTTPS#93;"| n32
+  n12 -->|"Lists payments and issues refunds #91;HTTPS#93;"| n32
+  n5 -->|"Calls the API server-side with a secret key #91;HTTPS#93;"| n31
+  n31 -->|"Looks up API keys #91;SQL#93;"| n14
+  n32 -->|"Reserves the idempotency key #91;in-process#93;"| n30
+  n30 -->|"Stores request keys and responses #91;Redis#93;"| n10
+  n32 -->|"Persists payment intents #91;SQL#93;"| n14
+  n7 -->|"Enters card details at checkout #91;HTTPS#93;"| n9
+  n13 -->|"Delivers merchant-facing events #91;events#93;"| n19
+  n19 -->|"Delivers signed webhooks #91;HTTPS#93;"| n5
+  n17 -->|"Downloads settlement files #91;SFTP#93;"| n1
+  n17 -->|"Archives settlement files #91;object API#93;"| n16
+  n17 -->|"Initiates merchant payouts #91;ISO 20022#93;"| n2
+  n3 -->|"Runs reconciliation and payout reports #91;SQL#93;"| n15
+  n4 -->|"Reviews payments, refunds and payouts #91;HTTPS#93;"| n12
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

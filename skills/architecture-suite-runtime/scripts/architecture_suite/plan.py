@@ -26,6 +26,7 @@ SECTION_KEYS = (
 ERROR, ADVISORY = "error", "advisory"
 META_KEYS = {"schema_version", "title", "gcp_icon_style"}
 CLOUD_ROOTS = {"aws": ("aws-cloud", "AWS Cloud"), "gcp": ("gcp-cloud", "Google Cloud")}
+OFF_CLOUD_TYPES = {"device", "off-cloud"}
 
 
 class PlanError(ValueError):
@@ -182,7 +183,11 @@ def _deployment(deployment: dict, names: dict, provider: str = "aws") -> dict:
             nodes.append(node)
             walk(item.get("children", item.get("nodes", [])), ident)
 
-    walk(entries, cloud)
+    # Top-level devices and off-cloud locations (a shopper's browser, an on-premises site)
+    # sit beside the supplied cloud root, not inside it.
+    outside = [n for n in entries if n.get("type") in OFF_CLOUD_TYPES]
+    walk([n for n in entries if n not in outside], cloud)
+    walk(outside, None)
     node_names = {n["name"]: n["id"] for n in nodes}
     placements = []
     for p in deployment.get("placements", []):

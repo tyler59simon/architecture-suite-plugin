@@ -276,3 +276,19 @@ def test_labels_wrap_at_word_boundaries_not_mid_word():
     long = "x" * 80
     pieces = wrap_to_width(long, 120, 11)
     assert len(pieces) > 1 and "".join(pieces) == long
+
+
+def test_devices_and_off_cloud_nodes_sit_outside_the_cloud_root(plan):
+    plan = deepcopy(plan)
+    plan["deployment"]["nodes"].append(
+        {"id": "browser", "name": "Shopper browser", "type": "device",
+         "children": [{"id": "runtime", "name": "Web browser", "type": "execution-environment"}]}
+    )
+    plan["deployment"]["nodes"].append({"id": "dc", "name": "Head office", "type": "off-cloud"})
+    model = compile_plan(plan)[0]
+    nodes = {n["id"]: n for n in model["deployment"]["nodes"]}
+    assert "parent_id" not in nodes["browser"] and "parent_id" not in nodes["dc"]
+    assert nodes["runtime"]["parent_id"] == "browser"
+    cloud = next(n for n in nodes.values() if n["type"] == "cloud")
+    assert any(n.get("parent_id") == cloud["id"] for n in nodes.values())
+    assert not models.validate_model(model)
