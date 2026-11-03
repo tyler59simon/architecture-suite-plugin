@@ -58,8 +58,8 @@ Repository boundary; runtime ownership unconfirmed
       "findings": [],
       "crossings": 0,
       "bends": 0,
-      "aspect_ratio": 3.664,
-      "score": 3.6636363636363636,
+      "aspect_ratio": 4.318,
+      "score": 4.318181818181818,
       "advisories": []
     },
     "03-components/component-ridepulse-repo-go-notifier": {
@@ -114,8 +114,8 @@ Repository boundary; runtime ownership unconfirmed
       "findings": [],
       "crossings": 0,
       "bends": 0,
-      "aspect_ratio": 2.738,
-      "score": 2.7376283846872083,
+      "aspect_ratio": 3.141,
+      "score": 3.1409897292250233,
       "advisories": []
     }
   }

@@ -57,16 +57,6 @@
     },
     {
       "module": "aws.py",
-      "function": "gcp_icon_sources",
-      "executed": true
-    },
-    {
-      "module": "aws.py",
-      "function": "install_gcp_icons",
-      "executed": true
-    },
-    {
-      "module": "aws.py",
       "function": "resolve_gcp_service",
       "executed": true
     },
@@ -123,11 +113,6 @@
     {
       "module": "cli.py",
       "function": "cmd_doctor",
-      "executed": true
-    },
-    {
-      "module": "cli.py",
-      "function": "cmd_install_gcp_icons",
       "executed": true
     },
     {
@@ -751,11 +736,11 @@
       135
     ],
     "cli.py": [
-      80,
-      104,
-      108,
-      228,
-      288
+      74,
+      98,
+      102,
+      201,
+      261
     ],
     "infrastructure.py": [
       26

@@ -48,20 +48,21 @@ claude plugin eval . --tag e2e --allow-tools Bash Write Edit --no-publish
 python tools/generate_samples.py         # examples/generated
 python tools/generate_extensions.py      # examples/extensions, and the small fixtures the plugin ships
 python tools/generate_sample_suite.py    # examples/suite
-python tools/generate_gcp_samples.py     # examples/gcp-suite (run with no GCP icons installed)
+python tools/generate_gcp_samples.py     # examples/gcp-suite
 ```
 
 Samples live in `examples/`, outside the shipped plugin, and are explicitly fictional. To refresh bundled dependencies, run `npm ci --ignore-scripts`, `python tools/setup_assets.py`, `python tools/build_schemas.py` and `python tools/build_extension_schemas.py`. After editing any bundled asset by hand, run `python tools/build_manifest.py`. Review asset sources, licenses and checksums before distributing. The setup utilities access the network; normal generation does not.
 
 ## Google Cloud icons
 
-Google Cloud icons are not redistributed (see `assets/licenses/GCP-USAGE.md`). The runtime ships the catalogue (`gcp-catalog.json`) and checksums (`manifest-gcp.json`). To rebuild those from the official downloads (https://cloud.google.com/icons):
+Both official Google Cloud icon sets are vendored from user-supplied downloads (https://cloud.google.com/icons), not by `setup_assets.py`:
 
 ```text
 python tools/setup_gcp_assets.py --modern <gcp-icons folder> --legacy-zip <google-cloud-legacy-icons.zip>
+python tools/generate_gcp_samples.py
 ```
 
-This writes the icon files to `~/.architecture-suite/gcp-icons` (or `--icons-out`), never into the repository. Tests use generated stand-in icons. Regenerate GCP samples with `ARCHITECTURE_SUITE_GCP_ICONS` pointing at an empty folder so no icon data is embedded in `examples/`.
+It writes `assets/gcp/modern/` and `assets/gcp/legacy/` (SVG only, unmodified), `gcp-catalog.json`, `manifest-gcp.json`, `provenance.json` and `manifest.json`. No license file ships with the downloads; see `assets/licenses/GCP-USAGE.md` and re-check the terms before updating.
 
 ## Distribution and release
 

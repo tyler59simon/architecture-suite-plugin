@@ -18,4 +18,4 @@ where = ["."]
 include = ["architecture_suite*"]
 
 [tool.setuptools.package-data]
-architecture_suite = ["assets/*", "assets/aws/*", "assets/licenses/*", "*.js"]
+architecture_suite = ["assets/*", "assets/aws/*", "assets/gcp/*/*", "assets/licenses/*", "*.js"]

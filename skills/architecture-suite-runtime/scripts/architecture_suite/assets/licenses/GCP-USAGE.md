@@ -1,18 +1,10 @@
-# Google Cloud icons (optional, not redistributed)
+# Google Cloud icons
 
-Architecture Suite does not ship Google Cloud icon files. Google's published guidance allows the
-icons to be used in architecture diagrams, but we could not confirm terms that permit bundling them
-in a redistributed tool (reviewed 2026-11-03). Source page: https://cloud.google.com/icons
+Bundled, unmodified, from the official Google Cloud icon downloads at https://cloud.google.com/icons (retrieved 2026-11-03):
 
-What ships instead:
+- `gcp/modern/`: newer category and product icons (SVG only).
+- `gcp/legacy/`: per-service icons (SVG only).
 
-- `gcp-catalog.json`: service names, aliases and the expected file name of each icon.
-- `manifest-gcp.json`: the SHA-256 of each icon file, so only unmodified official icons are accepted.
+No license file shipped with either download. Google's published guidance permits using these icons to reference Google Cloud products, for example in architecture diagrams. We found no terms that explicitly address redistributing them inside a tool. The maintainer has chosen to bundle them, unmodified, solely so users can create architecture diagrams. Re-check the source page when updating the icons, and remove them if Google's terms object.
 
-To use icons, download both official sets from https://cloud.google.com/icons yourself and run:
-
-    architecture-suite install-gcp-icons --modern <extracted modern folder> --legacy-zip <legacy zip> --confirm-write
-
-They are installed into `~/.architecture-suite/gcp-icons` (or the folder named by
-`ARCHITECTURE_SUITE_GCP_ICONS`). Without them, Google Cloud elements render without icons and
-everything else works. Google Cloud product names and icons are trademarks of Google LLC.
+Google Cloud, its product names and icons are trademarks of Google LLC and are not covered by the Architecture Suite license.

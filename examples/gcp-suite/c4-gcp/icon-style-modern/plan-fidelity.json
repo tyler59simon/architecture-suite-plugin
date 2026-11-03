@@ -40,48 +40,48 @@
         "findings": [],
         "crossings": 3,
         "bends": 32,
-        "aspect_ratio": 1.281,
-        "score": 397.28116945566455,
+        "aspect_ratio": 1.183,
+        "score": 397.1828804830403,
         "advisories": []
       },
       "03-components/component-dispatch-service": {
         "findings": [],
         "crossings": 0,
         "bends": 6,
-        "aspect_ratio": 1.107,
-        "score": 19.107335267302112,
+        "aspect_ratio": 1.147,
+        "score": 19.147119767923748,
         "advisories": []
       },
       "03-components/component-rider-gateway": {
         "findings": [],
         "crossings": 0,
         "bends": 4,
-        "aspect_ratio": 1.009,
-        "score": 13.008534136546185,
+        "aspect_ratio": 1.039,
+        "score": 13.039323046291688,
         "advisories": []
       },
       "04-code/code-auth-middleware": {
         "findings": [],
         "crossings": 0,
         "bends": 0,
-        "aspect_ratio": 1.509,
-        "score": 1.509090909090909,
+        "aspect_ratio": 1.582,
+        "score": 1.5818181818181818,
         "advisories": []
       },
       "04-code/code-fare-pricer": {
         "findings": [],
         "crossings": 0,
         "bends": 0,
-        "aspect_ratio": 1.509,
-        "score": 1.509090909090909,
+        "aspect_ratio": 1.582,
+        "score": 1.5818181818181818,
         "advisories": []
       },
       "04-code/code-matching-engine": {
         "findings": [],
         "crossings": 0,
         "bends": 4,
-        "aspect_ratio": 1.607,
-        "score": 13.606796116504855,
+        "aspect_ratio": 1.665,
+        "score": 13.66504854368932,
         "advisories": []
       },
       "04-code/code-trip-controller": {
@@ -96,16 +96,16 @@
         "findings": [],
         "crossings": 3,
         "bends": 28,
-        "aspect_ratio": 1.207,
-        "score": 385.20658761528324,
+        "aspect_ratio": 1.116,
+        "score": 385.11585726718886,
         "advisories": []
       },
       "06-gcp-deployment/gcp-deployment": {
         "findings": [],
-        "crossings": 2,
-        "bends": 36,
-        "aspect_ratio": 1.664,
-        "score": 309.66386554621846,
+        "crossings": 3,
+        "bends": 40,
+        "aspect_ratio": 1.146,
+        "score": 421.1460659223817,
         "advisories": []
       }
     }

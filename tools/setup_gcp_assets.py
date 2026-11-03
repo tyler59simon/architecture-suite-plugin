@@ -1,15 +1,14 @@
-"""Rebuild the Google Cloud icon catalogue and checksums from the official downloads.
+"""Vendor the Google Cloud icon sets from the official downloads (offline; reads files you supply).
 
 Usage: python tools/setup_gcp_assets.py --modern A:/Downloads/gcp-icons
-           --legacy-zip A:/Downloads/google-cloud-legacy-icons.zip [--icons-out DIR]
+           --legacy-zip A:/Downloads/google-cloud-legacy-icons.zip
 
-Maintainer tool (offline; reads downloads you supply). Google Cloud icons are not
-redistributed, so only our own data is written into the runtime assets:
-  assets/gcp-catalog.json   service names, styles, source names and expected file names
-  assets/manifest-gcp.json  SHA-256 per icon file
-The icon files go to --icons-out (default ~/.architecture-suite/gcp-icons), the same
-layout `architecture-suite install-gcp-icons` writes. Review assets/licenses/GCP-USAGE.md
-by hand when the terms or sources change.
+Writes into the runtime assets:
+  assets/gcp/modern/, assets/gcp/legacy/  icon files (SVG only, unmodified)
+  assets/gcp-catalog.json                 service names, styles, sources and file names
+  assets/manifest-gcp.json                SHA-256 per icon file
+and refreshes provenance.json and manifest.json. Review assets/licenses/GCP-USAGE.md by hand
+when the terms or sources change.
 """
 
 import argparse
@@ -23,7 +22,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "skills/architecture-suite-runtime/scripts"
 sys.path.insert(0, str(RUNTIME))
-from architecture_suite.aws import gcp_icon_root, gcp_key, validate_svg  # noqa: E402
+from architecture_suite.aws import gcp_key, validate_svg  # noqa: E402
 
 ASSETS = RUNTIME / "architecture_suite/assets"
 
@@ -94,7 +93,7 @@ def main():
     parser.add_argument("--legacy-zip", required=True)
     parser.add_argument("--icons-out", type=Path, default=None)
     args = parser.parse_args()
-    icons = args.icons_out or gcp_icon_root()
+    icons = args.icons_out or ASSETS / "gcp"
     catalog, hashes = {}, {}
     modern_dir, legacy_dir = icons / "modern", icons / "legacy"
     for directory in (modern_dir, legacy_dir):
@@ -155,7 +154,7 @@ def main():
     provenance["gcp"] = {
         "source": "https://cloud.google.com/icons",
         "retrieved": provenance.get("gcp", {}).get("retrieved", "unknown"),
-        "redistributed": False,
+        "redistributed": True,
         "modern_sha256": modern_hash.hexdigest(),
         "legacy_archive_sha256": hashlib.sha256(archive).hexdigest(),
         "modern_icons": sum(e["style"] == "modern" for e in catalog.values()),

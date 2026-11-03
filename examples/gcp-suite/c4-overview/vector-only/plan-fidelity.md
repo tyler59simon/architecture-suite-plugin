@@ -33,20 +33,20 @@
     "diagrams": {
       "05-overview/overview-small-multiples": {
         "findings": [],
-        "crossings": 2,
-        "bends": 54,
-        "aspect_ratio": 1.342,
-        "score": 363.3415681352797,
+        "crossings": 3,
+        "bends": 52,
+        "aspect_ratio": 1.222,
+        "score": 457.2215071871053,
         "advisories": [
           "Dense view; split by scope or use small-multiples"
         ]
       },
       "05-overview/overview-complete": {
         "findings": [],
-        "crossings": 6,
-        "bends": 34,
-        "aspect_ratio": 1.891,
-        "score": 703.8907035175879,
+        "crossings": 9,
+        "bends": 36,
+        "aspect_ratio": 1.379,
+        "score": 1009.3786188579018,
         "advisories": []
       }
     }

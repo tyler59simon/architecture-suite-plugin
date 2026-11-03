@@ -41,8 +41,6 @@ One plugin, nine skills, one shared offline runtime.
 
 Scenarios, diffs, rule checks and the explorer are CLI commands reachable from these skills (see [extensions](skills/architecture-suite-runtime/references/extensions.md)).
 
-**Google Cloud icons are optional.** Google's terms do not cover redistributing its icons, so they are not bundled. GCP diagrams render without icons until you download the official sets from https://cloud.google.com/icons and run `architecture-suite install-gcp-icons --modern <folder> --legacy-zip <zip> --confirm-write`. Only files that match the official checksums are accepted. AWS icons are bundled.
-
 ## Command line
 
 ```powershell
@@ -76,4 +74,4 @@ Analysis never executes repository code, never calls cloud APIs and never downlo
 
 ## License
 
-Apache License 2.0; see [LICENSE](LICENSE). Bundled third-party assets (ELK, Roboto, AWS icons) keep their own terms; see [NOTICE](NOTICE).
+Apache License 2.0; see [LICENSE](LICENSE). Bundled third-party assets (ELK, Roboto, AWS and Google Cloud icons) keep their own terms; see [NOTICE](NOTICE).

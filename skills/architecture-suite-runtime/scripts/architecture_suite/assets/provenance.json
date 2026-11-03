@@ -17,7 +17,7 @@
   "gcp": {
     "source": "https://cloud.google.com/icons",
     "retrieved": "2026-11-03",
-    "redistributed": false,
+    "redistributed": true,
     "modern_sha256": "387e7c60cd538f0f98dc40e17129fc2c370d0f02a74a9cf8ccb378deaafe93b1",
     "legacy_archive_sha256": "a6d9d7921758042538b462f03cf64614c2cebd96743b3ed63580a769fc7de3e9",
     "modern_icons": 45,

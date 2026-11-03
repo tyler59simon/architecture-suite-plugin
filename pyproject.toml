@@ -21,7 +21,7 @@ include-package-data = true
 where = ["skills/architecture-suite-runtime/scripts"]
 
 [tool.setuptools.package-data]
-architecture_suite = ["assets/*", "assets/aws/*", "assets/licenses/*", "*.js"]
+architecture_suite = ["assets/*", "assets/aws/*", "assets/gcp/*/*", "assets/licenses/*", "*.js"]
 
 [tool.pytest.ini_options]
 pythonpath = ["skills/architecture-suite-runtime/scripts"]

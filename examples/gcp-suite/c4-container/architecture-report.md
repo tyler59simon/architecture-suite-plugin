@@ -23,10 +23,10 @@ Illustrative owned services running on Google Cloud
   "diagrams": {
     "02-containers/containers": {
       "findings": [],
-      "crossings": 2,
-      "bends": 30,
-      "aspect_ratio": 3.016,
-      "score": 293.0160953800298,
+      "crossings": 3,
+      "bends": 28,
+      "aspect_ratio": 2.454,
+      "score": 386.45428086344896,
       "advisories": []
     }
   }

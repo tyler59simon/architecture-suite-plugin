@@ -7,6 +7,6 @@ Thanks for helping. See [docs/development.md](docs/development.md) for the full 
 3. Before opening a pull request, run `ruff check .`, the full `pytest` suite with coverage, and `python tools/record_validation.py` (at least 90% lines and 85% branches, and every public function executed by a test).
 4. If you change how the skills behave, run the trigger, negative and safety evals (`claude plugin eval . --tag trigger negative safety --ablation none --no-publish`).
 5. Keep generation offline: no network access, repository code execution or cloud API calls outside `bootstrap.py` and the maintainer tools in `tools/`.
-6. Do not add Google Cloud icon files to the repository (see `assets/licenses/GCP-USAGE.md`).
+6. Update bundled icon sets only through `tools/setup_assets.py` (AWS) and `tools/setup_gcp_assets.py` (Google Cloud) so checksums and provenance stay in step.
 
 By contributing you agree that your contributions are licensed under the Apache License 2.0.

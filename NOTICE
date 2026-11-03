@@ -22,7 +22,8 @@ and manifest.json.
   affiliates. See assets/licenses/AWS-USAGE.md and
   https://aws.amazon.com/architecture/icons/.
 
-Google Cloud icons are not distributed with this product. The runtime ships
-only a catalogue of service names and the checksums of the official files;
-users install the icons from their own download (see
-assets/licenses/GCP-USAGE.md). Google Cloud is a trademark of Google LLC.
+- Google Cloud icons, modern and legacy sets retrieved 2026-11-03 (assets/gcp/,
+  gcp-catalog.json). Official downloads from https://cloud.google.com/icons,
+  bundled unmodified for creating architecture diagrams; no license file was
+  supplied with them. Google Cloud and its product names and icons are
+  trademarks of Google LLC. See assets/licenses/GCP-USAGE.md.

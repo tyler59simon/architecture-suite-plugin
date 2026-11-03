@@ -10,13 +10,7 @@ import sys
 import tempfile
 from . import __version__
 from .analyzer import analyze_repository, draft_plan
-from .aws import (
-    gcp_icon_root,
-    gcp_icon_sources,
-    gcp_icon_status,
-    install_gcp_icons,
-    verify_assets,
-)
+from .aws import gcp_icon_status, verify_assets
 from .draft import render_plan
 from .examples import SCENARIOS, example_model, example_plan
 from .layout_host import layout_graph
@@ -128,7 +122,7 @@ def cmd_doctor(args) -> int:
             result[key] = str(exc)
     # "unmanaged" (no bootstrap stamp: developer or CI environment) is informational.
     result["runtime_deps"] = check_stamp()
-    try:  # optional and user-installed, so informational only
+    try:  # the assets check already gates bundled icons; this reports an override folder
         result["gcp_icons"] = gcp_icon_status()
     except (OSError, ValueError) as exc:
         result["gcp_icons"] = str(exc)
@@ -139,27 +133,6 @@ def cmd_doctor(args) -> int:
         "unmanaged",
     }
     return 0 if healthy else 3
-
-
-def cmd_install_gcp_icons(args) -> int:
-    if not (args.modern or args.legacy_zip or args.from_dir):
-        raise ValueError("give --modern, --legacy-zip and/or --from")
-    sources = gcp_icon_sources(
-        modern=canonical_existing_directory(Path(args.modern)) if args.modern else None,
-        legacy_zip=canonical_existing_file(Path(args.legacy_zip)) if args.legacy_zip else None,
-        from_dir=canonical_existing_directory(Path(args.from_dir)) if args.from_dir else None,
-    )
-    target = canonical_output_directory(Path(args.target) if args.target else gcp_icon_root())
-    if args.dry_run:
-        _json_print({"operation": "install-gcp-icons", "target": str(target), "found": len(sources)})
-        return 0
-    require_write_authorization(target, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(target) as stage:
-        result = install_gcp_icons(sources, stage)
-    _json_print({"target": str(target), **result})
-    if not result["installed"]:
-        return 2
-    return 1 if result["checksum_mismatch"] else 0
 
 
 def cmd_plan_lint(args) -> int:
@@ -407,17 +380,6 @@ def build_parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "doctor", help="Inspect offline runtime readiness"
     ).set_defaults(func=cmd_doctor)
-    icons = commands.add_parser(
-        "install-gcp-icons",
-        help="Install optional Google Cloud icons from your own download (https://cloud.google.com/icons)",
-    )
-    icons.add_argument("--modern", help="extracted modern icon folder")
-    icons.add_argument("--legacy-zip", help="legacy icon archive (.zip)")
-    icons.add_argument("--from", dest="from_dir", help="folder laid out as modern/ and legacy/")
-    icons.add_argument("--target", help="install folder (default ~/.architecture-suite/gcp-icons)")
-    for flag in ("dry-run", "confirm-write", "confirm-overwrite"):
-        icons.add_argument("--" + flag, action="store_true")
-    icons.set_defaults(func=cmd_install_gcp_icons)
     for name in (
         "analyze",
         "render",

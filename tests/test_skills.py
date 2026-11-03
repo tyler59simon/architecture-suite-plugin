@@ -87,7 +87,7 @@ def test_license_metadata_and_legal_files_ship(tmp_path):
     with zipfile.ZipFile(tmp_path / "claude.zip") as bundle:
         names = set(bundle.namelist())
     assert {"LICENSE", "NOTICE", f"skills/{RUNTIME_NAME}/LICENSE"} <= names
-    assert not any("/assets/gcp/" in name for name in names)  # GCP icons are never shipped
+    assert sum("/assets/gcp/" in name for name in names) == 261  # bundled GCP icons ship
     with zipfile.ZipFile(tmp_path / "codex.zip") as bundle:
         assert f".agents/skills/{RUNTIME_NAME}/NOTICE" in bundle.namelist()
     target = install_host(SKILLS, "claude", "project", tmp_path / "project")

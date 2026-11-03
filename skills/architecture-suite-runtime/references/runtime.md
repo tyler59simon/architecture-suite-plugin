@@ -19,15 +19,7 @@ Skill code is never installed into that environment. Run the CLI through the ski
 
 In a development checkout, `pip install -e .` provides the `architecture-suite` console command and `python -m architecture_suite`. ELK prefers a local Node.js and falls back to local Chromium. `ARCHITECTURE_SUITE_LAYOUT_HOST=node|browser` pins the host; `ARCHITECTURE_SUITE_NODE` selects a Node executable.
 
-Only setup accesses the network. Provenance, licenses and SHA-256 values are in `scripts/architecture_suite/assets/{provenance.json,manifest.json,licenses/}`. Generation never downloads dependencies, contacts AWS or Google Cloud, or executes repository code.
-
-Google Cloud icons are optional and not bundled (see `assets/licenses/GCP-USAGE.md`). Install them from your own download of https://cloud.google.com/icons:
-
-```text
-architecture-suite install-gcp-icons --modern <extracted folder> --legacy-zip <legacy zip> [--target DIR] --confirm-write
-```
-
-They go to `~/.architecture-suite/gcp-icons` (or `ARCHITECTURE_SUITE_GCP_ICONS`). Only files matching `assets/manifest-gcp.json` are accepted. Without them, GCP elements render without icons.
+Only setup accesses the network. AWS and Google Cloud icon sets are bundled. Provenance, licenses and SHA-256 values are in `scripts/architecture_suite/assets/{provenance.json,manifest.json,licenses/}`. Generation never downloads dependencies, contacts AWS or Google Cloud, or executes repository code.
 
 ## Commands
 
@@ -35,7 +27,6 @@ Use the path-based launcher if the console command is not on PATH.
 
 ```text
 architecture-suite doctor
-architecture-suite install-gcp-icons --modern <dir> --legacy-zip <zip> --confirm-write
 architecture-suite plan-draft --repo <repo> --output <plan.md> --dry-run
 architecture-suite plan-draft --repo <repo> --output <plan.md> --confirm-write
 architecture-suite plan-lint --plan <plan.md> [--strict]
@@ -71,4 +62,4 @@ Schemas: [plan](../scripts/architecture_suite/assets/architecture-plan.schema.js
 
 ## Failures
 
-`doctor` must report `assets`, `layout_engine` and `browser` as ok, and `runtime_deps` as ok or unmanaged (no bootstrap stamp, as in a development checkout). If `runtime_deps` says dependencies changed, re-run bootstrap. `gcp_icons` is informational. Install pinned dependencies/Chromium if missing. Restore reviewed assets on checksum failure; do not change expected digests to accept unknown content. PNG limits: width 6,000, total 24,000,000 pixels. Use narrower scopes, small-multiples, or SVG/Draw.io for large models. Blank PNGs are rejected. Fix layout findings through scope, grouping or reading direction and reverify before publication.
+`doctor` must report `assets`, `layout_engine` and `browser` as ok, and `runtime_deps` as ok or unmanaged (no bootstrap stamp, as in a development checkout). If `runtime_deps` says dependencies changed, re-run bootstrap. `gcp_icons` reports the bundled Google Cloud icons (or the `ARCHITECTURE_SUITE_GCP_ICONS` override folder). Install pinned dependencies/Chromium if missing. Restore reviewed assets on checksum failure; do not change expected digests to accept unknown content. PNG limits: width 6,000, total 24,000,000 pixels. Use narrower scopes, small-multiples, or SVG/Draw.io for large models. Blank PNGs are rejected. Fix layout findings through scope, grouping or reading direction and reverify before publication.

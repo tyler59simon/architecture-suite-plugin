@@ -25,32 +25,32 @@ Illustrative owned services running on Google Cloud
       "findings": [],
       "crossings": 0,
       "bends": 0,
-      "aspect_ratio": 1.509,
-      "score": 1.509090909090909,
+      "aspect_ratio": 1.582,
+      "score": 1.5818181818181818,
       "advisories": []
     },
     "04-code/code-fare-pricer": {
       "findings": [],
       "crossings": 0,
       "bends": 0,
-      "aspect_ratio": 1.509,
-      "score": 1.509090909090909,
+      "aspect_ratio": 1.582,
+      "score": 1.5818181818181818,
       "advisories": []
     },
     "04-code/code-matching-engine": {
       "findings": [],
       "crossings": 0,
       "bends": 4,
-      "aspect_ratio": 1.621,
-      "score": 13.62135922330097,
+      "aspect_ratio": 1.738,
+      "score": 13.737864077669903,
       "advisories": []
     },
     "04-code/code-trip-controller": {
       "findings": [],
       "crossings": 0,
       "bends": 2,
-      "aspect_ratio": 1.19,
-      "score": 7.189842805320435,
+      "aspect_ratio": 1.248,
+      "score": 7.2478839177750904,
       "advisories": []
     }
   }

@@ -16,17 +16,17 @@ flowchart LR
     n8[("GCP resource infra/main.tf line 39#10;GCP-Cloud-Storage#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
     style n8 fill:#e4f5f7,stroke:#00838f
     n9["GCP resource infra/main.tf line 7#10;GCP-Cloud-Run#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
-    subgraph n10["Ridepulse Repo Node ingest"]
-      n11["Ridepulse Repo Node ingest ingest/#10;handler.js#10;«component»#10;Node#10;Source module ingest/handler.js;#10;responsibility requires review"]
+    subgraph n10["Ridepulse Repo Go notifier"]
+      n11["Ridepulse Repo Go notifier notifier/#10;main.go#10;«component»#10;Go#10;Source module notifier/main.go;#10;responsibility requires review#10;Drill-down: 1 code"]
     end
-    subgraph n12["Ridepulse Repo Go notifier"]
-      n13["Ridepulse Repo Go notifier notifier/#10;main.go#10;«component»#10;Go#10;Source module notifier/main.go;#10;responsibility requires review#10;Drill-down: 1 code"]
+    subgraph n12["Ridepulse Repo Python dispatch"]
+      n13["Ridepulse Repo Python dispatch#10;dispatch/dispatch/__init__.py#10;«component»#10;Python#10;Source module dispatch/dispatch/__init__#10;.py; responsibility requires review"]
+      n14["Ridepulse Repo Python dispatch#10;dispatch/dispatch/matching.py#10;«component»#10;Python#10;Source module dispatch/dispatch/#10;matching.py; responsibility requires review#10;Drill-down: 1 code"]
+      n15["Ridepulse Repo Python dispatch#10;dispatch/dispatch/pricing.py#10;«component»#10;Python#10;Source module dispatch/dispatch/pricing.#10;py; responsibility requires review#10;Drill-down: 1 code"]
     end
-    subgraph n14["Ridepulse Repo Python dispatch"]
-      n15["Ridepulse Repo Python dispatch#10;dispatch/dispatch/__init__.py#10;«component»#10;Python#10;Source module dispatch/dispatch/__init__#10;.py; responsibility requires review"]
-      n16["Ridepulse Repo Python dispatch#10;dispatch/dispatch/matching.py#10;«component»#10;Python#10;Source module dispatch/dispatch/#10;matching.py; responsibility requires review#10;Drill-down: 1 code"]
-      n17["Ridepulse Repo Python dispatch#10;dispatch/dispatch/pricing.py#10;«component»#10;Python#10;Source module dispatch/dispatch/pricing.#10;py; responsibility requires review#10;Drill-down: 1 code"]
+    subgraph n16["Ridepulse Repo Node ingest"]
+      n17["Ridepulse Repo Node ingest ingest/#10;handler.js#10;«component»#10;Node#10;Source module ingest/handler.js;#10;responsibility requires review"]
     end
   end
-  n16 -->|"Imports source module #91;static dependency#93;"| n17
+  n14 -->|"Imports source module #91;static dependency#93;"| n15
   notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

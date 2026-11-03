@@ -1,9 +1,8 @@
 """Static official AWS and Google Cloud catalogue access; no cloud client or network usage.
 
-AWS icons are bundled. Google Cloud icons are optional: the catalogue and checksums ship with
-the runtime, but the icon files are installed by the user from their own download
-(`architecture-suite install-gcp-icons`) into ~/.architecture-suite/gcp-icons, or the folder
-named by ARCHITECTURE_SUITE_GCP_ICONS. Without them, GCP elements render without icons.
+AWS and Google Cloud icons are bundled and verified against SHA-256 manifests.
+ARCHITECTURE_SUITE_GCP_ICONS may point at another folder with the same layout (tests use it);
+a GCP icon missing from that folder renders without an icon.
 """
 
 from __future__ import annotations
@@ -92,9 +91,9 @@ def _read_json(path: Path) -> dict:
 
 
 def gcp_icon_root() -> Path:
-    """Where optional Google Cloud icons are installed."""
+    """Bundled Google Cloud icons, unless ARCHITECTURE_SUITE_GCP_ICONS names another folder."""
     override = os.environ.get(GCP_ICON_ENV)
-    return Path(override) if override else Path.home() / ".architecture-suite" / "gcp-icons"
+    return Path(override) if override else ASSETS / "gcp"
 
 
 def gcp_manifest() -> dict[str, str]:
@@ -113,69 +112,17 @@ def icon_available(service: str | None) -> bool:
 
 
 def gcp_icon_status() -> str:
-    """'ok (n of m)', or 'not installed (optional)'; raises on a tampered icon."""
+    """'ok (n of m icons)', or 'missing' when the icon folder is empty; raises on a tampered icon."""
     expected = gcp_manifest()
     root = gcp_icon_root()
     present = [rel for rel in expected if (root / rel).is_file()]
     if not present:
-        return "not installed (optional; see install-gcp-icons)"
+        return f"missing: no icons in {root}"
     for rel in present:
         data = contained_path(root, rel).read_bytes()
         if hashlib.sha256(data).hexdigest() != expected[rel]:
             raise SafetyError(f"GCP icon checksum mismatch: {rel}")
     return f"ok ({len(present)} of {len(expected)} icons)"
-
-
-def gcp_icon_sources(modern=None, legacy_zip=None, from_dir=None) -> dict[str, bytes]:
-    """Collect icon bytes from the user's downloads, keyed by catalogue file path.
-
-    modern: the extracted modern icon folder; legacy_zip: the legacy icon archive;
-    from_dir: a folder already laid out as modern/ and legacy/ (an earlier install).
-    """
-    import zipfile
-
-    found: dict[str, bytes] = {}
-    entries = catalog("gcp").values()
-    if from_dir:
-        root = Path(from_dir)
-        for entry in entries:
-            path = root / entry["file"]
-            if path.is_file():
-                found[entry["file"]] = path.read_bytes()
-    if modern:
-        root = Path(modern)
-        for entry in entries:
-            path = root / entry["source"]
-            if entry["style"] == "modern" and path.is_file():
-                found[entry["file"]] = path.read_bytes()
-    if legacy_zip:
-        with zipfile.ZipFile(legacy_zip) as bundle:
-            names = set(bundle.namelist())
-            for entry in entries:
-                if entry["style"] == "legacy" and entry["source"] in names:
-                    found[entry["file"]] = bundle.read(entry["source"])
-    return found
-
-
-def install_gcp_icons(sources: dict[str, bytes], stage: Path) -> dict:
-    """Write checksum-verified, safety-checked icons into stage; report what was skipped."""
-    expected = gcp_manifest()
-    installed, mismatched = [], []
-    for rel, data in sorted(sources.items()):
-        if expected.get(rel) != hashlib.sha256(data).hexdigest():
-            mismatched.append(rel)
-            continue
-        validate_svg(data)
-        target = contained_path(stage, rel)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(data)
-        installed.append(rel)
-    return {
-        "installed": len(installed),
-        "expected": len(expected),
-        "missing": sorted(set(expected) - set(sources)),
-        "checksum_mismatch": mismatched,
-    }
 
 
 def resolve_gcp_service(value: str, style: str = "auto") -> str | None:
