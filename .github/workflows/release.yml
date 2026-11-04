@@ -30,6 +30,12 @@ jobs:
         run: |
           version=$(python -c "import architecture_suite; print(architecture_suite.__version__)")
           test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
+          echo "PLUGIN_BRANCH=architecture-suite-$version" >> "$GITHUB_ENV"
+      - name: Versioned plugin branch does not exist yet
+        run: |
+          if git ls-remote --exit-code --heads origin "$PLUGIN_BRANCH" >/dev/null; then
+            echo "Branch $PLUGIN_BRANCH already exists; each release branch is published once."; exit 1
+          fi
       - name: Build host archives and the release plugin tree
         run: python tools/package_hosts.py
       - name: Checksums
@@ -41,20 +47,15 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
             --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
-      - name: Publish the slim plugin to the release branch
+      - name: Publish the slim plugin to its versioned branch
+        # One immutable branch per release (architecture-suite-<version>) holding only the
+        # marketplace + plugin; users add it with owner/repo#architecture-suite-<version>.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git ls-remote --exit-code --heads origin release >/dev/null; then
-            git fetch origin release
-            git worktree add release-tree origin/release
-            git -C release-tree switch -c release
-          else
-            git worktree add --orphan -b release release-tree
-          fi
-          rsync -a --delete --exclude .git dist/plugin/ release-tree/
-          cd release-tree
+          git worktree add --orphan -b "$PLUGIN_BRANCH" plugin-tree
+          rsync -a --delete --exclude .git dist/plugin/ plugin-tree/
+          cd plugin-tree
           git add -A
           git commit -m "Architecture Suite $GITHUB_REF_NAME"
-          git tag "plugin-$GITHUB_REF_NAME"
-          git push origin release "plugin-$GITHUB_REF_NAME"
+          git push origin "$PLUGIN_BRANCH"

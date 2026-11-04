@@ -46,6 +46,8 @@ def test_single_version_source():
     assert market["plugins"][0]["version"] == VERSION
     assert json.loads((ROOT / "package.json").read_text())["version"] == VERSION
     assert f"## {VERSION}" in (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    # The README installs from this version's plugin branch.
+    assert f"#architecture-suite-{VERSION}" in (ROOT / "README.md").read_text(encoding="utf-8")
 
 
 def test_both_pyprojects_declare_the_same_runtime():

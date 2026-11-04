@@ -3,7 +3,7 @@
     python tools/package_hosts.py
 
 Writes dist/hosts/<host>.zip and dist/plugin/ (the slim marketplace + plugin that the
-release workflow pushes to the `release` branch).
+release workflow pushes to the `architecture-suite-<version>` branch).
 """
 
 from pathlib import Path

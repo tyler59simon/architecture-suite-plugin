@@ -6,7 +6,7 @@ Nine Claude Code skills (`c4-diagrams`, `reverse-engineer-c4`, `c4-system`, `c4-
 
 Changes since the internal 2.1.0 builds:
 
-- **Install:** Claude Code users install from the slim `release` branch marketplace. Host archives for Codex, Copilot and Factory are attached to GitHub releases.
+- **Install:** Claude Code users install from the slim `architecture-suite-1.0.0` branch, which is a self-contained marketplace. Host archives for Codex, Copilot and Factory are attached to GitHub releases.
 - **Python 3.11-3.14.** Dropped end-of-life 3.10. Updated PyYAML to 6.0.3 and Pillow to 13.0.0, which fixes 39 Pillow advisories. The runtime lock is hash-pinned, and CI proves it installs from wheels on Windows, Linux and macOS.
 - **Bootstrap** installs only dependencies into `~/.architecture-suite/runtime`. The skills always run their own code through `scripts/architecture-suite.py`, so plugin updates take effect without a reinstall. Bootstrap picks a supported Python automatically, supports `--no-browser` and `--target`, and reports failures clearly. `doctor` flags a dependency lock that changed since setup (`runtime_deps`).
 - **Google Cloud icons** (modern and legacy official sets) are bundled and verified against `manifest-gcp.json`. `doctor` reports `gcp_icons`. `ARCHITECTURE_SUITE_GCP_ICONS` can point at another icon folder; missing icons render without one.

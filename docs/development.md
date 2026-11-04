@@ -69,11 +69,11 @@ It writes `assets/gcp/modern/` and `assets/gcp/legacy/` (SVG only, unmodified), 
 ```text
 python tools/generate_skills.py        # regenerate the nine SKILL.md files
 python tools/sync_manifests.py         # plugin and marketplace manifests from distribution.py
-python tools/package_hosts.py          # dist/hosts/<host>.zip and dist/plugin/ (the release branch tree)
+python tools/package_hosts.py          # dist/hosts/<host>.zip and dist/plugin/ (the versioned plugin branch tree)
 python tools/install_skill.py --host claude --scope project --project <repository>
 claude plugin validate dist/plugin
 ```
 
-The version lives in `architecture_suite/__init__.py`, `distribution.VERSION`, both pyproject files and `package.json` (a test enforces agreement). To release, update `CHANGELOG.md`, commit to `main`, then push a tag `v<version>`. `.github/workflows/release.yml` re-runs CI, attaches the host archives and `SHA256SUMS` to a GitHub release, and commits `dist/plugin/` to the `release` branch (tagged `plugin-v<version>`), which is what Claude Code users install.
+The version lives in `architecture_suite/__init__.py`, `distribution.VERSION`, both pyproject files and `package.json` (a test enforces agreement). To release, update `CHANGELOG.md`, commit to `main`, then push a tag `v<version>`. `.github/workflows/release.yml` re-runs CI, attaches the host archives and `SHA256SUMS` to a GitHub release, and publishes `dist/plugin/` as a new branch, `architecture-suite-<version>`, which is what Claude Code users install. Update the version in the README install line too (a test checks it).
 
 Claude and Factory packages use plugin layouts; Codex and Copilot packages use repository skill layouts. Host installers share one engine and do not modify agent configuration. Existing-output controls and backups apply; backups stay outside skill discovery folders.
