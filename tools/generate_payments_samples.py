@@ -21,6 +21,7 @@ from copy import deepcopy
 import shutil
 import subprocess
 import sys
+import sysconfig
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,9 @@ sys.path.insert(0, str(ROOT / "skills/architecture-suite-runtime/scripts"))
 from architecture_suite.draft import render_plan  # noqa: E402
 
 OUT = ROOT / "examples/payments"
-CLI = Path(sys.executable).with_name(
+# Console scripts live in the interpreter's scripts folder (Scripts\ on Windows, bin/ elsewhere),
+# which is not always the folder holding the interpreter itself.
+CLI = Path(sysconfig.get_path("scripts")) / (
     "architecture-suite.exe" if sys.platform == "win32" else "architecture-suite"
 )
 BRIEF = "fictional brief"

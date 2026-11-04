@@ -2,7 +2,7 @@
 
 Architecture Suite is a Python 3.11-3.14 CLI and a set of agent skills sharing one runtime. Python dependencies are pinned with hashes, and every supported Python on Windows, Linux and macOS (x64 and arm64) installs from wheels. ELK 0.9.3 runs through local Node.js or Chromium; PNG generation requires the pinned Playwright browser. Setup is separate from offline generation.
 
-The CI matrix tests Windows, macOS and Linux on Python 3.11, 3.13 and 3.14, and smoke-tests the portable bootstrap on each OS. Claude Code agent behavior is checked with the `claude plugin eval` suite in `evals/`. Codex, GitHub Copilot and Factory/Droid packages use their documented skill layouts and are package-validated; their agent behavior is not separately evaluated.
+The CI matrix tests Windows and Linux on Python 3.11, 3.13 and 3.14 and macOS on Python 3.13, and smoke-tests the portable bootstrap on each OS. Claude Code agent behavior is checked with the `claude plugin eval` suite in `evals/`. Codex, GitHub Copilot and Factory/Droid packages use their documented skill layouts and are package-validated; their agent behavior is not separately evaluated.
 
 Canonical model schema 2.0 contains context, container, component and code views. Overviews and deployment are companion outputs; structured scenarios use their own versioned documents. Existing model and plan workflows remain supported. Refer to [extensions.md](extensions.md) for inventories, infrastructure imports, scenario exports, diffs/rules and the offline explorer.
 

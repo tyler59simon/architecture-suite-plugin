@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import sysconfig
 import pytest
 from architecture_suite.cli import (
     main,
@@ -259,8 +260,10 @@ def test_module_and_console_entrypoints(tmp_path):
     for command in (
         [sys.executable, "-m", "architecture_suite", "--version"],
         [
+            # The scripts folder, not the interpreter's folder: they differ for a system
+            # (non-venv) Python on Windows, as on CI runners.
             str(
-                Path(sys.executable).parent
+                Path(sysconfig.get_path("scripts"))
                 / (
                     "architecture-suite.exe"
                     if sys.platform == "win32"

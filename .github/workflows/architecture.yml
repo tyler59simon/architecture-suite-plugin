@@ -23,7 +23,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ['3.11', '3.13', '3.14']
+        # Hosted macOS runners are scarce (jobs have gone unassigned) and bill at 10x on
+        # private repositories: test one Python there; Linux and Windows cover the range.
+        exclude:
+          - os: macos-latest
+            python: '3.11'
+          - os: macos-latest
+            python: '3.14'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
