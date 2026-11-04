@@ -74,6 +74,6 @@ python tools/install_skill.py --host claude --scope project --project <repositor
 claude plugin validate dist/plugin
 ```
 
-The version lives in `architecture_suite/__init__.py`, `distribution.VERSION`, both pyproject files and `package.json` (a test enforces agreement). To release, update `CHANGELOG.md`, commit to `main`, then push a tag `v<version>`. `.github/workflows/release.yml` re-runs CI, attaches the host archives and `SHA256SUMS` to a GitHub release, and publishes `dist/plugin/` as a new branch, `architecture-suite-<version>`, which is what Claude Code users install. Update the version in the README install line too (a test checks it).
+The version lives in `architecture_suite/__init__.py`, `distribution.VERSION`, both pyproject files and `package.json` (a test enforces agreement). To release, update `CHANGELOG.md`, commit to `main`, then push a tag `v<version>`. `.github/workflows/release.yml` re-runs CI, attaches the host archives and `SHA256SUMS` to a GitHub release, and publishes `dist/plugin/` as a new branch, `architecture-suite-<version>`, and commits the same tree on top of the `latest` branch. Claude Code users install from `latest` (updates) or a version branch (pinned). Update the version in the README install line too (a test checks it).
 
 Claude and Factory packages use plugin layouts; Codex and Copilot packages use repository skill layouts. Host installers share one engine and do not modify agent configuration. Existing-output controls and backups apply; backups stay outside skill discovery folders.

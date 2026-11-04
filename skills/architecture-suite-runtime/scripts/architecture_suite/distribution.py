@@ -160,10 +160,10 @@ def package_hosts(skills, output, hosts=None):
 
 
 def write_plugin_tree(skills, target):
-    """Write the slim, self-contained marketplace + plugin published on the architecture-suite-<version> branch.
+    """Write the slim, self-contained marketplace + plugin published on the architecture-suite-<version> and latest branches.
 
     Holds only what a user needs: the skills, the shared runtime, LICENSE/NOTICE, README and
-    the Claude/Factory manifests. Users add it with `/plugin marketplace add <owner>/<repo>#architecture-suite-<version>`.
+    the Claude/Factory manifests. Users add it with `/plugin marketplace add <owner>/<repo>#latest` (or a version branch).
     """
     skills = Path(skills)
     target = Path(target)

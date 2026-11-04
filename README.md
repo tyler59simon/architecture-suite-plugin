@@ -5,11 +5,17 @@ Offline, evidence-backed C4 architecture diagrams for coding agents and the comm
 ## Install in Claude Code
 
 ```text
-/plugin marketplace add tyler59simon/architecture-suite-plugin#architecture-suite-1.0.0
+/plugin marketplace add tyler59simon/architecture-suite-plugin#latest
 /plugin install architecture-suite@architecture-suite
 ```
 
-Each release is published to its own branch, `architecture-suite-<version>`, which holds only the plugin (skills, runtime, license files). To move to a newer release, add the marketplace again with the new branch name.
+The `latest` branch always holds the newest release and only the plugin (skills, runtime, license files). Get new releases with `/plugin marketplace update architecture-suite`, or turn on auto-update for this marketplace in `/plugin`.
+
+To stay on one version instead, add its own branch, for example:
+
+```text
+/plugin marketplace add tyler59simon/architecture-suite-plugin#architecture-suite-1.0.0
+```
 
 The skills share one Python runtime. The first time a skill runs, it asks before running the one-time setup:
 

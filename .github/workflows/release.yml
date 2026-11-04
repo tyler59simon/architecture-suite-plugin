@@ -59,3 +59,18 @@ jobs:
           git add -A
           git commit -m "Architecture Suite $GITHUB_REF_NAME"
           git push origin "$PLUGIN_BRANCH"
+      - name: Advance the latest branch
+        # 'latest' always holds the newest release, committed on top of its own history so
+        # marketplace updates see a new commit; the versioned branches stay as fixed pins.
+        run: |
+          if git ls-remote --exit-code --heads origin latest >/dev/null; then
+            git fetch origin latest
+            git worktree add -B latest latest-tree origin/latest
+          else
+            git worktree add --orphan -b latest latest-tree
+          fi
+          rsync -a --delete --exclude .git dist/plugin/ latest-tree/
+          cd latest-tree
+          git add -A
+          git commit -m "Architecture Suite $GITHUB_REF_NAME"
+          git push origin latest
