@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,30 +48,38 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
             --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
-      - name: Publish the slim plugin to its versioned branch
-        # One immutable branch per release (architecture-suite-<version>) holding only the
-        # marketplace + plugin; users add it with owner/repo#architecture-suite-<version>.
+      # latest and architecture-suite-* are protected by a ruleset: no updates except through a
+      # reviewed pull request, no force-pushes, no deletions. Creating a new branch is allowed,
+      # so the versioned branch (and latest, on the first release) is created by push; later
+      # updates to latest arrive as a pull request for the maintainer to approve and merge.
+      - name: Publish the versioned branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git worktree add --orphan -b "$PLUGIN_BRANCH" plugin-tree
-          rsync -a --delete --exclude .git dist/plugin/ plugin-tree/
-          cd plugin-tree
-          git add -A
-          git commit -m "Architecture Suite $GITHUB_REF_NAME"
+          git worktree add --orphan -b "$PLUGIN_BRANCH" version-tree
+          rsync -a --delete --exclude .git dist/plugin/ version-tree/
+          git -C version-tree add -A
+          git -C version-tree commit -m "Architecture Suite $GITHUB_REF_NAME"
           git push origin "$PLUGIN_BRANCH"
-      - name: Advance the latest branch
-        # 'latest' always holds the newest release, committed on top of its own history so
-        # marketplace updates see a new commit; the versioned branches stay as fixed pins.
+      - name: Create latest, or open the pull request that updates it
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if git ls-remote --exit-code --heads origin latest >/dev/null; then
-            git fetch origin latest
-            git worktree add -B latest latest-tree origin/latest
-          else
-            git worktree add --orphan -b latest latest-tree
+          if ! git ls-remote --exit-code --heads origin latest >/dev/null; then
+            git push origin "$PLUGIN_BRANCH:refs/heads/latest"
+            echo "Created latest at $GITHUB_REF_NAME."
+            exit 0
           fi
+          staging="plugin-staging/latest-$GITHUB_REF_NAME"
+          git fetch origin latest
+          git worktree add -b "$staging" latest-tree origin/latest
           rsync -a --delete --exclude .git dist/plugin/ latest-tree/
-          cd latest-tree
-          git add -A
-          git commit -m "Architecture Suite $GITHUB_REF_NAME"
-          git push origin latest
+          git -C latest-tree add -A
+          git -C latest-tree commit -m "Architecture Suite $GITHUB_REF_NAME"
+          git push origin "$staging"
+          body="Updates the latest plugin branch to $GITHUB_REF_NAME, built by the release workflow"
+          body="$body from the $GITHUB_REF_NAME tag and identical to $PLUGIN_BRANCH."
+          body="$body Users on #latest receive the update once this is merged."
+          body="$body Delete the head branch after merging."
+          gh pr create --base latest --head "$staging" \
+            --title "Publish Architecture Suite $GITHUB_REF_NAME to latest" --body "$body"
