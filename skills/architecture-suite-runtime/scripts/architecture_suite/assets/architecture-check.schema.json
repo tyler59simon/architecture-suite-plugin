@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "architecture-check/v1"
+    },
+    "findings": {
+      "type": "array"
+    },
+    "fingerprints": {
+      "type": "array"
+    },
+    "new_errors": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "findings",
+    "fingerprints",
+    "new_errors"
+  ]
+}

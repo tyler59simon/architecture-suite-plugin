@@ -1,0 +1,286 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "system": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "classification",
+        "scope"
+      ]
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "parent_id": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "cloud": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string"
+              },
+              "service": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "provider",
+              "service"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "type"
+        ]
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "destination_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "flow_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source_id",
+          "destination_id",
+          "description"
+        ]
+      }
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "boundary_id": {
+            "type": "string"
+          },
+          "element_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "relationship_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "direction": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title",
+          "element_ids",
+          "relationship_ids"
+        ]
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "enum": [
+            "aws",
+            "gcp"
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "parent_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "name"
+            ]
+          }
+        },
+        "placements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element_id": {
+                "type": "string"
+              },
+              "node_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "element_id",
+              "node_id"
+            ]
+          }
+        }
+      },
+      "required": [
+        "nodes",
+        "placements"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "system",
+    "elements",
+    "relationships",
+    "views",
+    "evidence"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
