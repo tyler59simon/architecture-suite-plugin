@@ -128,7 +128,7 @@ def test_packages_are_slim_and_release_tree_is_self_contained(tmp_path):
     tree = write_plugin_tree(SKILLS, tmp_path / "plugin")
     write_plugin_tree(SKILLS, tree)  # rebuilding replaces the previous tree
     assert {
-        "LICENSE", "NOTICE", "README.md", ".gitattributes", ".claude-plugin", ".factory-plugin",
+        "LICENSE", "NOTICE", "README.md", "CHANGELOG.md", ".gitattributes", ".claude-plugin", ".factory-plugin",
         "skills",
     } == {
         p.name for p in tree.iterdir()

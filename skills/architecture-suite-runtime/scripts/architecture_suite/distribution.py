@@ -162,8 +162,8 @@ def package_hosts(skills, output, hosts=None):
 def write_plugin_tree(skills, target):
     """Write the slim, self-contained marketplace + plugin published on the architecture-suite-<version> and latest branches.
 
-    Holds only what a user needs: the skills, the shared runtime, LICENSE/NOTICE, README and
-    the Claude/Factory manifests. Users add it with `/plugin marketplace add <owner>/<repo>#latest` (or a version branch).
+    Holds only what a user needs: the skills, the shared runtime, LICENSE/NOTICE, README,
+    CHANGELOG and the Claude/Factory manifests. Users add it with `/plugin marketplace add <owner>/<repo>#latest` (or a version branch).
     """
     skills = Path(skills)
     target = Path(target)
@@ -181,9 +181,9 @@ def write_plugin_tree(skills, target):
                 shutil.copyfile(path, destination)
     for legal in legal_files(skills):
         shutil.copyfile(legal, target / legal.name)
-    # README for users; .gitattributes keeps checksummed assets byte-exact when the release
+    # README and CHANGELOG for users; .gitattributes keeps checksummed assets byte-exact when the release
     # branch is cloned on Windows with core.autocrlf=true (as Claude Code's installer does).
-    for name in ("README.md", ".gitattributes"):
+    for name in ("README.md", "CHANGELOG.md", ".gitattributes"):
         source = skills.resolve().parent / name
         if source.is_file():
             shutil.copyfile(source, target / name)
