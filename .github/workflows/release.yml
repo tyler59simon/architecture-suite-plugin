@@ -9,6 +9,20 @@ jobs:
     uses: ./.github/workflows/architecture.yml
     permissions:
       contents: read
+    with:
+      os: '["ubuntu-latest", "windows-latest"]'
+
+  # Hosted macOS arm64 runners are capacity-constrained and have gone unassigned for whole
+  # runs ("The job was not acquired by Runner"), which blocked the first v1.0.0 release.
+  # macOS still runs on every release and every push to main, but does not gate publishing;
+  # check this job's result before approving the pull request that updates latest.
+  verify-macos:
+    uses: ./.github/workflows/architecture.yml
+    permissions:
+      contents: read
+    with:
+      os: '["macos-latest"]'
+      skip-os-independent: true
 
   publish:
     needs: verify

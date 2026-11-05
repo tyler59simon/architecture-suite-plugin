@@ -1,13 +1,31 @@
 name: Architecture validation
-on: [push, pull_request, workflow_dispatch, workflow_call]
+on:
+  push:
+    # Tags are verified by release.yml, which calls this workflow; running it here as well
+    # would double the demand for scarce macOS runners.
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      os:
+        description: JSON list of runner images for the test and bootstrap matrices
+        type: string
+        default: '["ubuntu-latest", "windows-latest", "macos-latest"]'
+      skip-os-independent:
+        description: Skip the OS-independent lint and dependency jobs
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # inputs.os keeps the release workflow's two calls (required and macOS) from cancelling each other.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.os }}
   cancel-in-progress: true
 
 jobs:
   lint:
+    if: ${{ !inputs.skip-os-independent }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: ${{ fromJSON(inputs.os || '["ubuntu-latest", "windows-latest", "macos-latest"]') }}
         python: ['3.11', '3.13', '3.14']
         # Hosted macOS runners are scarce (jobs have gone unassigned) and bill at 10x on
         # private repositories: test one Python there; Linux and Windows cover the range.
@@ -61,6 +79,7 @@ jobs:
             dist/hosts
 
   dependencies:
+    if: ${{ !inputs.skip-os-independent }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: ${{ fromJSON(inputs.os || '["ubuntu-latest", "windows-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
