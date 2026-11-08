@@ -230,8 +230,10 @@ def element_label(
         if element.get("type") != "code" or code_icons
         else None
     )
-    # Optional GCP icons may not be installed; the element then renders without one.
-    icon = service if icon_available(service) else None
+    # Optional GCP icons may not be installed, and a forced icon style may lack artwork
+    # ("icon": false); the element then renders without one but keeps its service.
+    show = element.get("cloud", {}).get("icon", True)
+    icon = service if show and icon_available(service) else None
     visual = element_visual(element)
     pad = CAP_PAD if visual and visual.shape == "cylinder" else 0
     return Label(lines, icon=icon, top_pad=pad)

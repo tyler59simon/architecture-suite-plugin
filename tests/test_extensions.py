@@ -313,6 +313,9 @@ def test_packages_and_install(tmp_path):
         )
     (skills / "architecture-suite-runtime/scripts").mkdir(parents=True)
     (skills / "architecture-suite-runtime/scripts/tool.py").write_text("x=1")
+    # Legal files beside skills/ are packaged too; they must not leak into VALIDATION.json.
+    (tmp_path / "LICENSE").write_text("license")
+    (tmp_path / "NOTICE").write_text("notice")
     out = tmp_path / "packages"
     out.mkdir()
     package_hosts(skills, out)

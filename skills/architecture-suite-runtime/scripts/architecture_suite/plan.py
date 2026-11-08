@@ -244,7 +244,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         if not isinstance(item, dict):
             add("element-object", "Element must be a mapping", typ)
             continue
-        allowed = {"name", "description", "technology", "group", "evidence"}
+        allowed = {"name", "description", "technology", "group", "evidence", "tags"}
         allowed |= {"classification", "scope"} if typ == "system" else set()
         allowed |= {"components", "aws_service", "gcp_service"} if typ == "container" else set()
         allowed |= {"code", "aws_service", "gcp_service"} if typ == "component" else set()
@@ -285,6 +285,11 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         for text_key in ("technology", "group"):
             if text_key in item and not isinstance(item[text_key], str):
                 add("element-field", f"{text_key} must be a string", name)
+        if "tags" in item and not (
+            isinstance(item["tags"], list)
+            and all(isinstance(tag, str) and tag.strip() for tag in item["tags"])
+        ):
+            add("element-tags", "Tags must be a list of non-empty strings", name)
         if item.get("aws_service") and (
             not isinstance(item["aws_service"], str)
             or not resolve_service(item["aws_service"])
@@ -298,7 +303,8 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             elif not resolve_service(item["gcp_service"], "gcp", style):
                 add(
                     "gcp-icon-unavailable",
-                    f"No {style} icon for this service; it renders without an icon",
+                    f"No {style} icon for this service; it renders without an icon "
+                    "(the service is kept)",
                     name,
                     ADVISORY,
                 )
@@ -398,6 +404,16 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                 add("unknown-view", "Layout names an absent view", v)
             if direction not in {"auto", "down", "right"}:
                 add("layout-direction", "Unknown layout direction", v)
+    if (
+        isinstance(plan.get("deployment"), dict)
+        and "provider" in plan["deployment"]
+        and plan["deployment"]["provider"] not in PROVIDERS
+    ):
+        add(
+            "unknown-provider",
+            "deployment.provider must be " + " or ".join(PROVIDERS),
+            "deployment",
+        )
     if "deployment" in plan:
         try:
             deployment = _deployment(plan["deployment"], names, plan_provider(plan))
@@ -497,18 +513,22 @@ def compile_plan(
         if typ == "code":
             element["kind"] = item.get("kind", "class")
             element["members"] = [safe_text(m) for m in item["members"]]
+        if item.get("tags"):
+            element["tags"] = [safe_text(tag) for tag in item["tags"]]
         if item.get("aws_service"):
             element["cloud"] = {
                 "provider": "aws",
                 "service": resolve_service(item["aws_service"]),
             }
-        elif item.get("gcp_service") and resolve_service(
-            item["gcp_service"], "gcp", style
-        ):
+        elif item.get("gcp_service"):
+            # Icon style is presentation only: a style without artwork keeps the service.
+            service = resolve_service(item["gcp_service"], "gcp", style)
             element["cloud"] = {
                 "provider": "gcp",
-                "service": resolve_service(item["gcp_service"], "gcp", style),
+                "service": service or resolve_service(item["gcp_service"], "gcp"),
             }
+            if not service:
+                element["cloud"]["icon"] = False
         element["evidence_ids"] = evidence_ids(item.get("evidence"))
         elements.append(element)
     for i, flow in enumerate(plan["flows"]):

@@ -201,6 +201,8 @@ def test_plan_merging_and_limits():
         lambda p: p["people"][0].update(evidence=2),
         lambda p: p["containers"][0].update(aws_service="made up service"),
         lambda p: p["containers"][0].update(components={}),
+        lambda p: p["containers"][0].update(tags="pci"),
+        lambda p: p["containers"][0].update(tags=[""]),
         lambda p: p["containers"][0]["components"][0]["code"][0].update(kind="enum"),
         lambda p: p["containers"][0]["components"][0]["code"][0].update(members=[]),
         lambda p: p["flows"].append(2),
@@ -223,6 +225,21 @@ def test_lint_rejects_lossy_inputs(plan, mutate):
     assert errors(lint_plan(plan))
     with pytest.raises(PlanError):
         compile_plan(plan)
+
+
+def test_plan_tags_reach_rule_selectors(plan):
+    from architecture_suite.changes import check_rules
+
+    plan["containers"][0]["tags"] = ["pci"]
+    assert not errors(lint_plan(plan))
+    model, _ = compile_plan(plan)
+    tagged = [e for e in model["elements"] if e.get("tags")]
+    assert [e["tags"] for e in tagged] == [["pci"]]
+    assert not models.validate_model(model)
+    rules = {
+        "rules": [{"id": "no-pci-calls", "effect": "deny", "source": {"tags": ["pci"]}}]
+    }
+    assert check_rules(model, rules)["new_errors"] >= 1
 
 
 def test_advisories_groups_and_explicit_deployment(plan):

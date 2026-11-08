@@ -66,6 +66,12 @@
                 }
               }
             ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -103,6 +109,12 @@
                 }
               }
             ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -141,6 +153,12 @@
               }
             ]
           },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "aws_service": {
             "type": "string"
           },
@@ -177,6 +195,12 @@
                     }
                   ]
                 },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "aws_service": {
                   "type": "string"
                 },
@@ -212,6 +236,12 @@
                             }
                           }
                         ]
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
                       },
                       "kind": {
                         "enum": [

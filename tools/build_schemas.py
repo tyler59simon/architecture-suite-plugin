@@ -39,8 +39,10 @@ def main():
             "members": STRINGS,
             "evidence_ids": STRINGS,
             "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+            "tags": STRINGS,
             "cloud": obj(
-                {"provider": STRING, "service": STRING}, ("provider", "service")
+                {"provider": STRING, "service": STRING, "icon": {"type": "boolean"}},
+                ("provider", "service"),
             ),
         },
         ("id", "name", "description", "type"),
@@ -113,6 +115,7 @@ def main():
         "technology": STRING,
         "group": STRING,
         "evidence": refs,
+        "tags": STRINGS,
     }
     code = obj(
         {
@@ -183,9 +186,8 @@ def main():
 
     for path in ASSETS.glob("*.schema.json"):
         manifest[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
-    (ASSETS / "manifest.json").write_text(
-        json.dumps(manifest, indent=2), encoding="utf-8"
-    )
+    # Bytes, not text: the manifest is LF in the repository on every OS (as in build_manifest.py).
+    (ASSETS / "manifest.json").write_bytes(json.dumps(manifest, indent=2).encode())
 
 
 if __name__ == "__main__":

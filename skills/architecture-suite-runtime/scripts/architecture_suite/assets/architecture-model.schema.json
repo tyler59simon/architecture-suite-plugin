@@ -67,6 +67,12 @@
             "minimum": 0,
             "maximum": 1
           },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "cloud": {
             "type": "object",
             "properties": {
@@ -75,6 +81,9 @@
               },
               "service": {
                 "type": "string"
+              },
+              "icon": {
+                "type": "boolean"
               }
             },
             "required": [
