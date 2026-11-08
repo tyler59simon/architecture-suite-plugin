@@ -181,6 +181,89 @@ def test_infra_formats(tmp_path, doc):
         import_infrastructure([path])
 
 
+def test_terraform_sensitivity_and_unknown_masks(tmp_path):
+    marker = "AUDIT-SYNTHETIC-PRIVATE-VALUE"
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    {
+                        "address": "random_password.db",
+                        "type": "random_password",
+                        "values": {
+                            "result": marker,
+                            "length": 24,
+                            "nested": {"note": marker, "keep": "visible"},
+                            "items": [marker, "plain"],
+                        },
+                        "sensitive_values": {
+                            "result": True,
+                            "nested": {"note": True},
+                            "items": [True, False],
+                        },
+                    }
+                ]
+            }
+        },
+        "resource_changes": [
+            {
+                "address": "random_password.db",
+                "change": {"after_unknown": {"id": True}, "after_sensitive": {}},
+            }
+        ],
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    topology = import_infrastructure([path])
+    payload = json.dumps(topology) + json.dumps(topology_plan(topology))
+    assert marker not in payload
+    props = topology["resources"][0]["properties"]
+    assert props["result"] == "[SENSITIVE]" and props["length"] == 24
+    assert props["nested"] == {"note": "[SENSITIVE]", "keep": "visible"}
+    assert props["items"] == ["[SENSITIVE]", "plain"]
+    assert props["id"] == "[UNKNOWN AFTER APPLY]"
+    messages = [f["message"] for f in topology["findings"]]
+    assert "Sensitive values masked: items[0], nested.note, result" in messages
+    assert "Values unknown until apply: id" in messages
+
+
+def test_infrastructure_references_are_exact(tmp_path):
+    def resource(address, kind, values):
+        return {"address": address, "type": kind, "values": values}
+
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    resource("aws_vpc.a", "aws_vpc", {"id": "vpc-1"}),
+                    resource("aws_vpc.b", "aws_vpc", {"id": "vpc-123", "note": "not vpc-1"}),
+                    resource("aws_subnet.s", "aws_subnet", {"id": "subnet-9", "vpc_id": "vpc-123"}),
+                ]
+            }
+        }
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    topology = import_infrastructure([path])
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-aws-subnet-s", "input-0-aws-vpc-b")}
+    subnet = next(r for r in topology["resources"] if r["type"] == "aws_subnet")
+    assert subnet["parent_id"] == "input-0-aws-vpc-b"
+    template = {
+        "Resources": {
+            "Bucket": {"Type": "AWS::S3::Bucket", "Properties": {}},
+            "Fn": {"Type": "AWS::Lambda::Function", "DependsOn": "Bucket", "Properties": {}},
+            "Fn2": {"Type": "AWS::Lambda::Function", "DependsOn": ["Bucket", "Missing"]},
+        }
+    }
+    path.write_text(json.dumps(template))
+    relations = import_infrastructure([path])["relationships"]
+    assert sorted((e["source_id"], e["kind"]) for e in relations) == [
+        ("input-0-fn", "depends-on"),
+        ("input-0-fn2", "depends-on"),
+    ]
+
+
 def test_tree_inventory():
     files = {
         "main.py": 'from worker import work\n@app.get("/items")\ndef main():\n return work()',
