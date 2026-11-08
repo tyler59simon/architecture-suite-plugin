@@ -22,7 +22,15 @@ from .safety import SafetyError, contained_path
 from .style import box_style, element_visual
 from .scene import scene_collisions
 
-ARTIFACT_LEVELS = ("all", "system", "container", "component", "code", "overview")
+ARTIFACT_LEVELS = (
+    "all",
+    "system",
+    "container",
+    "component",
+    "code",
+    "overview",
+    "deployment",
+)
 ARTIFACT_VIEW_TYPES = {
     "system": "context",
     "container": "container",
@@ -56,7 +64,7 @@ def diagram_specs(
             )
             for s in normalize_overview_styles(overview_styles)
         )
-    if level == "all" and model.get("deployment"):
+    if level in {"all", "deployment"} and model.get("deployment"):
         provider = model["deployment"].get("provider", "aws")
         specs.append(
             (

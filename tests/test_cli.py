@@ -43,6 +43,54 @@ def test_defaults_and_invalid_arguments():
             parser.parse_args(argv)
 
 
+def test_deployment_level_needs_no_component_or_code_views(tmp_path, capsys):
+    plan = {
+        "system": {
+            "name": "Shop",
+            "description": "Online shop",
+            "classification": "Internal",
+            "scope": "Checkout",
+        },
+        "containers": [
+            {
+                "name": "Orders API",
+                "description": "Takes orders",
+                "technology": "Python",
+                "aws_service": "AWS Lambda",
+                "evidence": "brief:1",
+            }
+        ],
+        "flows": [],
+        "deployment": {
+            "nodes": [{"name": "Production account", "type": "account"}],
+            "placements": [{"element": "Orders API", "node": "Production account"}],
+        },
+    }
+    source = tmp_path / "plans" / "plan.md"
+    source.parent.mkdir()
+    source.write_text(render_plan(plan), encoding="utf-8")
+    output = tmp_path / "out"
+    base = ["plan-render", "--plan", str(source), "--output", str(output)]
+    base += ["--format", "mermaid,drawio,svg"]
+    assert main(["plan-lint", "--plan", str(source), "--strict"]) == 0
+    assert main(base + ["--level", "all", "--dry-run"]) == 3  # still needs L1-L4 evidence
+    assert main(base + ["--level", "deployment", "--confirm-write"]) == 0
+    capsys.readouterr()
+    diagrams = sorted(
+        p.relative_to(output).as_posix() for p in output.rglob("*") if p.suffix != ".md"
+        and p.is_file() and p.name != "plan-fidelity.json"
+    )
+    assert diagrams == [
+        "06-aws-deployment/aws-deployment.drawio",
+        "06-aws-deployment/aws-deployment.mmd",
+        "06-aws-deployment/aws-deployment.svg",
+    ]
+    plan.pop("deployment")
+    source.write_text(render_plan(plan), encoding="utf-8")
+    assert main(base + ["--level", "deployment", "--dry-run"]) == 3
+    assert "no deployment section" in capsys.readouterr().err
+
+
 @pytest.mark.parametrize(
     "command,input_flag", [("render", "--model"), ("plan-render", "--plan")]
 )

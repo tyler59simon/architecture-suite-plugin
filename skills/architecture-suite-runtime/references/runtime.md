@@ -38,7 +38,7 @@ architecture-suite verify --model <model.json> --overview-style all
 architecture-suite examples --output <out> --overview-style all --confirm-write
 ```
 
-`analyze`, `render`, `plan-render`, and `verify` accept `--level all|system|container|component|code|overview` (default all). Scoped requests validate the required contiguous prefix but publish only the selected level. `--overview-style` is repeatable and comma-separated; allowed styles are executive, progressive, hierarchy, small-multiples, complete, or all. CLI default: progressive. Styles apply only to all/overview.
+`analyze`, `render`, `plan-render`, and `verify` accept `--level all|system|container|component|code|overview|deployment` (default all). Scoped requests validate the required contiguous prefix but publish only the selected level. `deployment` publishes only the `06-<provider>-deployment` diagram and needs evidence only down to containers (components when the plan has them); it fails when the plan has no deployment section. `--overview-style` is repeatable and comma-separated; allowed styles are executive, progressive, hierarchy, small-multiples, complete, or all. CLI default: progressive. Styles apply only to all/overview.
 
 Default `--format all` means mermaid,drawio,png. SVG is explicit. Examples always publish default formats. `plan-render --emit-model` emits internal JSON; otherwise the editable plan is the source of truth. `--augmented` records architectural judgment. `--allow-layout-findings` records accepted defects in fidelity reports.
 

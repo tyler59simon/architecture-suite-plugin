@@ -63,6 +63,18 @@ def _selected_model(model, level, styles):
     if level == "all":
         selected = model
         profile = "code"
+    elif level == "deployment":
+        # Deployment needs only the placed containers/components, never code-level detail.
+        has_components = any(v.get("type") == "component" for v in model.get("views", []))
+        profile = "component" if has_components else "container"
+        try:
+            selected = project_model(model, profile)
+        except (KeyError, TypeError, AttributeError) as exc:
+            raise SafetyError("Malformed architecture model cannot be projected") from exc
+        if not selected.get("deployment"):
+            raise SafetyError(
+                "Plan has no deployment section; add deployment nodes and placements"
+            )
     else:
         profile = {
             "system": "context",
