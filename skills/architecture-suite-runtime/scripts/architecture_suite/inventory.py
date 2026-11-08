@@ -123,7 +123,11 @@ def dependency_inventory(files):
                         }
                     )
         patterns = [
-            r"\.(?:get|post|put|delete|patch)\(\s*[\"\']([^\"\']+)",
+            # A server registration: a router-like receiver and a path. Client calls such as
+            # client.get("https://...") or dict.get("key") are not routes (URLs are
+            # recorded under connections).
+            r"(?<![\w.])(?i:\w*(?:app|router|api|server|bp|blueprint|routes?))"
+            r"\.(?:get|post|put|delete|patch)\(\s*[\"\'](/[^\"\']*)",
             r'\[Http(?:Get|Post|Put|Delete)\(\s*"([^"]+)"',
             r'@(?:Get|Post|Request)Mapping\(\s*"([^"]+)"',
             r'http\.HandleFunc\(\s*"([^"]+)"',

@@ -277,7 +277,13 @@ def test_tree_inventory():
         "ignore.txt": "none",
     }
     report = dependency_inventory(files)
-    assert len(report["declarations"]) >= 7 and report["routes"]
+    assert len(report["declarations"]) >= 7
+    assert [r["path"] for r in report["routes"]] == ["/items"]
+    client = dependency_inventory(
+        {"c.py": 'client.get("https://example.com/health")\nsettings.get("key")\n'}
+    )
+    assert not client["routes"]
+    assert [c["target"] for c in client["connections"]] == ["https://example.com/health"]
     assert report["findings"]
     assert any(r.get("resolved_file") == "worker.py" for r in report["references"])
 

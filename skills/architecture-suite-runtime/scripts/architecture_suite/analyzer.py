@@ -202,10 +202,7 @@ def draft_plan(
             if manifests
             else "No recognized manifest; source language signals only, packaging ambiguous."
         )
-    if tests:
-        plan["gaps"].append(
-            f"Test code under {', '.join(t + '/' for t in tests)} is not modeled as containers."
-        )
+    tests = set(tests)
     modules = {}
     for (folder, stack), info in sorted(roots.items()):
         prefix = "" if folder == "." else folder + "/"
@@ -240,6 +237,12 @@ def draft_plan(
                 for other, other_stack in roots
             ):
                 continue
+            # Test folders inside a manifest root are not runtime components either.
+            parts = PurePosixPath(path[len(prefix):]).parts[:-1]
+            hit = next((i for i, part in enumerate(parts) if part in TEST_DIRS), None)
+            if hit is not None:
+                tests.add(prefix + "/".join(parts[: hit + 1]))
+                continue
             component_name = f"{name} {path}"
             component = {
                 "name": component_name,
@@ -261,6 +264,11 @@ def draft_plan(
             container["components"].append(component)
             modules[path] = component_name
         plan["containers"].append(container)
+    if tests:
+        plan["gaps"].append(
+            f"Test code under {', '.join(t + '/' for t in sorted(tests))} "
+            "is not modeled as containers."
+        )
     # Imports establish a source dependency, not an invented runtime request.
     for path, component_name in modules.items():
         text = files[path]
