@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from .model import load_model, validate_model
 from .safety import (
+    OUTPUT_MANIFEST,
     SafetyError,
     canonical_existing_directory,
     canonical_existing_file,
@@ -11,6 +12,7 @@ from .safety import (
     atomic_output_directory,
     require_write_authorization,
     contained_path,
+    ownership_changes,
 )
 from .plan import parse_yaml
 from .changes import diff_models, check_rules, markdown_report
@@ -148,16 +150,21 @@ def _cmd_extension(args):
             )
         }
     output = canonical_output_directory(Path(args.output))
+    changes = ownership_changes(output, args.command, list(files))
     summary = {
         "operation": args.command,
-        "files": sorted(files),
+        "files": sorted([*files, OUTPUT_MANIFEST]),
         "status": "findings" if status else "ok",
+        "conflicts": changes["conflicts"],
     }
     if args.dry_run:
-        print(json.dumps(summary))
+        print(json.dumps({**summary, "would_remove": changes["remove"]}))
         return status
     require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(output) as stage:
+    summary["removed"] = changes["remove"]
+    with atomic_output_directory(
+        output, owner=args.command, command=args.command, files=list(files)
+    ) as stage:
         for name, value in files.items():
             path = contained_path(stage, name)
             if value is None:

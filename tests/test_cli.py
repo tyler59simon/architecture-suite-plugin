@@ -79,8 +79,7 @@ def test_deployment_level_needs_no_component_or_code_views(tmp_path, capsys):
     assert main(base + ["--level", "deployment", "--confirm-write"]) == 0
     capsys.readouterr()
     diagrams = sorted(
-        p.relative_to(output).as_posix() for p in output.rglob("*") if p.suffix != ".md"
-        and p.is_file() and p.name != "plan-fidelity.json"
+        p.relative_to(output).as_posix() for p in output.glob("0*/*") if p.is_file()
     )
     assert diagrams == [
         "06-aws-deployment/aws-deployment.drawio",
@@ -141,6 +140,22 @@ def test_publish_dry_write_overwrite(inputs, tmp_path, capsys, command, input_fl
         )
         assert (output / "architecture-model.json").is_file()
         assert json.loads((output / "plan-fidelity.json").read_text())["augmented"]
+    # Re-rendering another level retires unchanged container files; edits are kept.
+    capsys.readouterr()
+    system = [arg if arg != "container" else "system" for arg in argv]
+    edited = output / "02-containers/containers.mmd"
+    edited.write_text("hand edit", encoding="utf-8")
+    (output / "notes.md").write_text("mine", encoding="utf-8")
+    assert main(system + ["--dry-run"]) == 0
+    preview = json.loads(capsys.readouterr().out)
+    assert preview["conflicts"] == ["02-containers/containers.mmd"]
+    assert "02-containers/containers.svg" in preview["would_remove"]
+    assert main(system + ["--confirm-write", "--confirm-overwrite"]) == 0
+    assert json.loads(capsys.readouterr().out)["removed"] == preview["would_remove"]
+    assert edited.read_text(encoding="utf-8") == "hand edit"
+    assert (output / "notes.md").read_text(encoding="utf-8") == "mine"
+    assert not (output / "02-containers/containers.svg").exists()
+    assert (output / "01-system-context/system-context.svg").is_file()
 
 
 def test_plan_draft_lint_and_analyze(tmp_path, capsys):

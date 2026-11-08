@@ -57,4 +57,4 @@ architecture-suite explore --model <model.json> [--scenario <scenario.json>] [--
 
 Open `explorer.html` directly. It embeds diagrams/data/fonts/icons, supports search, type filters, keyboard-operable containment trees, view selection, element/evidence inspection, drill-down to repeated scopes, scenarios, gaps and diff inspection. It cannot edit or write plans. Evidence locations are displayed rather than fetched from local disk. Files can be shared offline; inspect evidence before sharing.
 
-All writing extension commands accept dry-run and existing write/overwrite controls. Their output directories use transactional staging and path checks. Examples are under `samples/extensions`.
+All writing extension commands accept dry-run and existing write/overwrite controls. Their output directories use transactional staging and path checks. Each command owns its own files in `.architecture-suite-manifest.json`, so a scenario rendered into a C4 output folder never removes the C4 diagrams (see runtime.md). Examples are under `samples/extensions`.

@@ -9,3 +9,5 @@ dist/
 htmlcov/
 .ruff_cache/
 test-results/
+# Output ownership manifests carry the tool version; examples regenerate them.
+examples/**/.architecture-suite-manifest.json

@@ -358,6 +358,18 @@ def test_new_cli(inputs, tmp_path, scenario, model):
         assert not out.exists()
         assert main(command + ["--output", str(out), "--confirm-write"]) == 0
     assert validate_png(tmp_path / "out-4/scenario.png")
+    # A scenario rendered into a C4 output folder never retires the C4 files.
+    shared = tmp_path / "shared"
+    c4 = ["render", "--model", str(inputs[0]), "--output", str(shared), "--format", "mermaid"]
+    assert main(c4 + ["--level", "system", "--confirm-write"]) == 0
+    assert (
+        main(commands[4] + ["--output", str(shared), "--format", "mermaid", "--confirm-write",
+                            "--confirm-overwrite"])
+        == 0
+    )
+    assert (shared / "01-system-context/system-context.mmd").is_file()
+    owners = json.loads((shared / ".architecture-suite-manifest.json").read_text())["owners"]
+    assert set(owners) == {"c4", "scenario-render"}
     assert (
         main(
             commands[3]

@@ -28,11 +28,13 @@ from .renderers import (
 from .report import render_architecture_report
 from .runtime_env import check_stamp
 from .safety import (
+    OUTPUT_MANIFEST,
     SafetyError,
     atomic_output_directory,
     canonical_existing_directory,
     canonical_existing_file,
     canonical_output_directory,
+    ownership_changes,
     require_write_authorization,
     scan_repository,
 )
@@ -277,21 +279,26 @@ def cmd_publish(args) -> int:
         paths.extend(["plan-fidelity.md", "plan-fidelity.json"])
     if args.command != "plan-render" or args.emit_model:
         paths.append("architecture-model.json")
+    changes = ownership_changes(output, "c4", paths)
     summary = {
         "operation": args.command,
         "output_root": str(output),
-        "files": paths,
-        "expected_file_count": len(paths),
+        "files": paths + [OUTPUT_MANIFEST],
+        "expected_file_count": len(paths) + 1,
         "formats": sorted(formats),
         "overview_styles": list(styles),
         "write_confirmation_required": True,
         "overwrite_confirmation_required": output.exists() and any(output.iterdir()),
+        "conflicts": changes["conflicts"],
     }
     if args.dry_run:
-        _json_print(summary)
+        _json_print({**summary, "would_remove": changes["remove"]})
         return 0
     require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(output) as stage:
+    summary["removed"] = changes["remove"]
+    with atomic_output_directory(
+        output, owner="c4", command=args.command, files=paths
+    ) as stage:
         write_rendered_artifacts(
             model,
             stage,
@@ -346,13 +353,22 @@ def cmd_examples(args) -> int:
         )
     paths.append("index.md")
     paths.append("README.md")
+    changes = ownership_changes(output, "examples", paths)
     if args.dry_run:
         _json_print(
-            {"operation": "examples", "files": paths, "systems": len(SCENARIOS)}
+            {
+                "operation": "examples",
+                "files": paths + [OUTPUT_MANIFEST],
+                "systems": len(SCENARIOS),
+                "would_remove": changes["remove"],
+                "conflicts": changes["conflicts"],
+            }
         )
         return 0
     require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(output) as stage:
+    with atomic_output_directory(
+        output, owner="examples", command="examples", files=paths
+    ) as stage:
         for index, scenario in enumerate(SCENARIOS):
             folder = stage / scenario["id"]
             folder.mkdir(exist_ok=True)
@@ -376,7 +392,14 @@ def cmd_examples(args) -> int:
             + "\n",
             encoding="utf-8",
         )
-    _json_print({"operation": "examples", "files": paths})
+    _json_print(
+        {
+            "operation": "examples",
+            "files": paths + [OUTPUT_MANIFEST],
+            "removed": changes["remove"],
+            "conflicts": changes["conflicts"],
+        }
+    )
     return 0
 
 
