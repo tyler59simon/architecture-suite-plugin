@@ -52,8 +52,9 @@ def overview_data(model: dict, style: str):
             e["description"] += ("\nDrill-down: " + counts) if counts else ""
         if e.get("parent_id") in visible:
             parents[e["id"]] = e["parent_id"]
-    for parent in set(parents.values()):
-        frames[parent] = next(e for e in elements if e["id"] == parent)
+    # Model order, not set order: frame order feeds ELK and must not depend on hash seeds.
+    framed = set(parents.values())
+    frames.update((e["id"], e) for e in elements if e["id"] in framed)
     # One representative per original flow, at the finest scope whose endpoints remain visible.
     selected = {}
     for r in model["relationships"]:
