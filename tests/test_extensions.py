@@ -319,8 +319,13 @@ def test_new_cli(inputs, tmp_path, scenario, model):
     rules.write_text(json.dumps({"rules": [{"id": "deny", "effect": "deny"}]}))
     infra = tmp_path / "compose.yaml"
     infra.write_text("services:\n  api: {}\n")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "main.py").write_text("def main():\n    return 1\n")
+    inside = ["inventory", "--repo", str(repo), "--output", str(repo / "inventory")]
+    assert main(inside + ["--dry-run"]) == 3  # never inside the analyzed repository
     commands = [
-        ["inventory", "--repo", str(tmp_path)],
+        ["inventory", "--repo", str(repo)],
         ["import-infra", "--input", str(infra)],
         ["diff", "--before", str(inputs[0]), "--after", str(inputs[0])],
         ["check", "--model", str(inputs[0]), "--rules", str(rules)],

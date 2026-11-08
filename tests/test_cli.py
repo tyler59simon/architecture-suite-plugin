@@ -155,6 +155,9 @@ def test_plan_draft_lint_and_analyze(tmp_path, capsys):
     assert main(base + ["--confirm-write"]) == 3
     assert main(base + ["--confirm-write", "--confirm-overwrite"]) == 0
     assert main(["plan-lint", "--plan", str(plan)]) == 0
+    inside = ["plan-draft", "--repo", str(repo), "--output", str(repo / "docs/plan.md")]
+    assert main(inside + ["--confirm-write"]) == 3  # never inside the analyzed repository
+    assert not (repo / "docs").exists()
     out = tmp_path / "analysis"
     base = [
         "analyze",

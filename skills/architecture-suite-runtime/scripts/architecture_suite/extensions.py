@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from .model import load_model, validate_model
 from .safety import (
+    SafetyError,
+    canonical_existing_directory,
     canonical_existing_file,
     canonical_output_directory,
     atomic_output_directory,
@@ -54,7 +56,11 @@ def _cmd_extension(args):
     files = {}
     binary = None
     if args.command == "inventory":
-        scan = scan_repository(Path(args.repo))
+        repo = canonical_existing_directory(Path(args.repo))
+        target = canonical_output_directory(Path(args.output))
+        if target.is_relative_to(repo) or repo.is_relative_to(target):
+            raise SafetyError("Inventory output must be outside the analyzed repository")
+        scan = scan_repository(repo)
         report = dependency_inventory(scan.texts)
         report["scan"] = {"truncated": scan.truncated, "gaps": scan.skipped}
         files["dependency-inventory.json"] = report

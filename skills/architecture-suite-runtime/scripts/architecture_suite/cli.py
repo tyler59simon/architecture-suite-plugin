@@ -176,11 +176,8 @@ def cmd_plan_draft(args) -> int:
     _no_links(output)
     if output.exists() and not output.is_file():
         raise SafetyError("Plan output must be a file")
-    if output.resolve().is_relative_to(root) and output.suffix.lower() not in {
-        ".md",
-        ".markdown",
-    }:
-        raise SafetyError("A plan inside the repository must use a Markdown filename")
+    if output.resolve().is_relative_to(root):
+        raise SafetyError("Plan output must be outside the analyzed repository")
     scan = scan_repository(
         root,
         max_files=args.max_files,
