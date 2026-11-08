@@ -16,6 +16,7 @@ containers:
     description: Replace with the established responsibility
     technology: Unspecified
     evidence: Replace with a brief or file reference
+    # status: proposed   # optional: observed | inferred | proposed | unknown (also on flows)
 flows: []
 assumptions: []
 gaps:

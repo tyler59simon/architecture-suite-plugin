@@ -48,7 +48,7 @@ SKILL_DEFS = {
 Use when the source is a brief, spec, document set, or this conversation (for code in a repo use `reverse-engineer-c4`). Produces L1-L4 plus an overview, and optionally cloud deployment (`c4-aws` for AWS, `c4-gcp` for Google Cloud).
 
 1. Gather purpose, audience, ownership boundary, people, external systems, containers, key flows. Ask only for what blocks the plan; otherwise record gaps.
-2. Write `plan.md` from `assets/architecture-plan-template.md` in this skill. Declare each fact once by nesting (containers > components > code) and give flows at the most specific known level; the compiler derives coarser arrows. Cite the source for each element; put judgment under `assumptions` and render with `--augmented`.
+2. Write `plan.md` from `assets/architecture-plan-template.md` in this skill. Declare each fact once by nesting (containers > components > code) and give flows at the most specific known level; the compiler derives coarser arrows. Cite the source for each element; put judgment under `assumptions` and render with `--augmented`. Mark individual elements or flows that are not yet true with `status: proposed` (or `inferred`/`unknown`); diagrams then show them dotted with a «status» tag, so a forwarded image keeps the distinction.
 3. `architecture-suite plan-lint --plan plan.md --strict`, fix findings.
 4. `architecture-suite plan-render --plan plan.md --output <out> --level all --overview-style progressive --dry-run`, then `--confirm-write`.
 5. Use `--level all` only if L1-L4 all have evidence; otherwise render the evidenced prefix (see `c4-system`, `c4-container`, `c4-component`, `c4-code`).
@@ -64,7 +64,7 @@ Static analysis gives candidates, not truth. `plan-draft` makes each packaging m
 
 1. `architecture-suite doctor`
 2. `architecture-suite plan-draft --repo <repo> --output <work>/plan.md --dry-run`, then `--confirm-write`. Optional deeper evidence: `architecture-suite inventory --repo <repo> --output <work>/inventory --confirm-write` (Python, C#, Java, Kotlin, Go, JS/TS).
-3. Review `prompt_injection_paths`, truncated and unreadable-file findings. Open the cited sources. Rewrite container boundaries, names and descriptions to match what you verified; replace tool-generated long names; add people and external systems only if evidenced; add flows with evidence.
+3. Review `prompt_injection_paths`, truncated and unreadable-file findings. Open the cited sources. Rewrite container boundaries, names and descriptions to match what you verified; replace tool-generated long names; add people and external systems only if evidenced; add flows with evidence. Drafted containers, components and flows carry `status: inferred` (shown dotted with «inferred»); change it to `observed` only for what you verified, and leave the rest inferred.
 4. `architecture-suite plan-lint --plan plan.md --strict`
 5. Render with the level skills (`c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`) or `plan-render --level all --overview-style progressive --confirm-write`.
 6. Report what was verified versus assumed, and that deployability, ownership and runtime call graphs are not proven by static analysis.

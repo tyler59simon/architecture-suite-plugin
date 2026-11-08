@@ -393,3 +393,64 @@ def test_reserved_renderer_names_do_not_collide():
     for content in (render_scene_svg(scene), render_scene_drawio(scene)):
         ids = [e.get("id") for e in ET.fromstring(content).iter() if e.get("id")]
         assert len(ids) == len(set(ids))
+
+
+def test_claim_status_cues_in_every_format(plan):
+    from architecture_suite.overview_layout import build_cloud_scene
+    from architecture_suite.plan import compile_plan
+    from architecture_suite.report import render_architecture_report
+    from architecture_suite.style import claim_cue
+
+    assert claim_cue(None) == claim_cue("observed") == ""
+    assert claim_cue("proposed") == "«proposed»"
+    plain, _ = compile_plan(plan)
+    container_view = next(v for v in plain["views"] if v["type"] == "container")
+    baseline = {
+        "svg": renderers.render_svg(plain, container_view),
+        "drawio": renderers.render_drawio(plain, container_view),
+        "mmd": renderers.render_mermaid(plain, container_view),
+    }
+    assert "## Claim status" not in render_architecture_report(plain)
+    # Explicitly observed claims render exactly like unannotated ones.
+    observed = deepcopy(plan)
+    for item in observed["containers"] + observed["flows"]:
+        item["status"] = "observed"
+    model, _ = compile_plan(observed)
+    assert renderers.render_svg(model, container_view) == baseline["svg"]
+    assert renderers.render_mermaid(model, container_view) == baseline["mmd"]
+
+    claimed = deepcopy(plan)
+    claimed["containers"][2]["status"] = "proposed"
+    target = claimed["containers"][2]["name"]
+    index = next(
+        i for i, f in enumerate(claimed["flows"]) if target in (f["from"], f["to"])
+    )
+    claimed["flows"][index]["status"] = "inferred"
+    model, _ = compile_plan(claimed)
+    ident = next(e["id"] for e in model["elements"] if e["name"] == target)
+    svg = renderers.render_svg(model, container_view)
+    assert "«container» «proposed»" in svg and "«inferred»" in svg
+    assert re.search(rf'id="box-{ident}"[^>]*stroke-dasharray="2 3"', svg)
+    assert re.search(r'<polyline id="edge-[^"]+"[^>]*stroke-dasharray="2 3"', svg)
+    assert "claim not observed" in svg
+    drawio = renderers.render_drawio(model, container_view)
+    assert drawio.count("dashPattern=2 3") >= 2 and "claim not observed" in drawio
+    mermaid = renderers.render_mermaid(model, container_view)
+    assert "classDef claim stroke-dasharray:3 3" in mermaid
+    assert re.search(r"^  class n\d+ claim$", mermaid, re.M)
+    assert re.search(r"^  linkStyle \d+(,\d+)* stroke-dasharray:3 3$", mermaid, re.M)
+    assert "claim not observed" in mermaid
+    for scene in (
+        build_overview_scene(model, "executive"),
+        build_overview_scene(model, "small-multiples"),
+        build_cloud_scene(model),
+    ):
+        assert "«proposed»" in render_scene_svg(scene)
+    report = render_architecture_report(model)
+    assert "## Claim status" in report and "- proposed: 1 elements" in report
+    script = ROOT / "node_modules/mermaid/dist/mermaid.min.js"
+    with renderers.browser_page() as page:
+        page.set_content("<html><body></body></html>")
+        page.add_script_tag(path=str(script))
+        page.evaluate("mermaid.initialize({startOnLoad:false,securityLevel:'strict'})")
+        assert page.evaluate("async s=>!!(await mermaid.parse(s))", mermaid)

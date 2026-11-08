@@ -205,14 +205,23 @@ class Label:
         return "\n".join(ln.text for ln in self.lines)
 
 
+CLAIM_CUES = {"inferred": "«inferred»", "proposed": "«proposed»", "unknown": "«unknown»"}
+
+
+def claim_cue(status: str | None) -> str:
+    """Text cue for a claim that is not observed; empty when observed or not stated."""
+    return CLAIM_CUES.get(status, "")
+
+
 def element_label(
     element: dict, *, compact: bool = False, code_icons: bool = False
 ) -> Label:
+    cue = claim_cue(element.get("status"))
     lines = [
         TextLine(t, size)
         for text, size in (
             (element["name"], 15),
-            (f"«{element.get('kind', element['type'])}»", 12),
+            (f"«{element.get('kind', element['type'])}»" + (" " + cue if cue else ""), 12),
             (element.get("technology", ""), 12),
             (element.get("description", ""), 13),
         )

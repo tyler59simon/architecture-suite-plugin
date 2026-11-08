@@ -7,7 +7,7 @@ import re
 from typing import Any
 import yaml
 from .aws import PROVIDERS, normalize_gcp_icon_style, resolve_service
-from .model import derive_views, slugify, validate_model
+from .model import CLAIM_STATUSES, derive_views, slugify, validate_model
 from .safety import SECRET, safe_text
 
 PLAN_SCHEMA_VERSION = "architecture-plan/v1"
@@ -244,7 +244,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         if not isinstance(item, dict):
             add("element-object", "Element must be a mapping", typ)
             continue
-        allowed = {"name", "description", "technology", "group", "evidence", "tags"}
+        allowed = {"name", "description", "technology", "group", "evidence", "tags", "status"}
         allowed |= {"classification", "scope"} if typ == "system" else set()
         allowed |= {"components", "aws_service", "gcp_service"} if typ == "container" else set()
         allowed |= {"code", "aws_service", "gcp_service"} if typ == "component" else set()
@@ -290,6 +290,8 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             and all(isinstance(tag, str) and tag.strip() for tag in item["tags"])
         ):
             add("element-tags", "Tags must be a list of non-empty strings", name)
+        if "status" in item and item["status"] not in CLAIM_STATUSES:
+            add("claim-status", "status must be " + ", ".join(CLAIM_STATUSES), name)
         if item.get("aws_service") and (
             not isinstance(item["aws_service"], str)
             or not resolve_service(item["aws_service"])
@@ -340,8 +342,10 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         if not isinstance(flow, dict):
             add("flow-object", "Flow must be a mapping", str(i))
             continue
-        if set(flow) - {"from", "to", "description", "technology", "order", "evidence"}:
+        if set(flow) - {"from", "to", "description", "technology", "order", "evidence", "status"}:
             add("unknown-field", "Unknown flow field", str(i))
+        if "status" in flow and flow["status"] not in CLAIM_STATUSES:
+            add("claim-status", "status must be " + ", ".join(CLAIM_STATUSES), str(i))
         for key in ("from", "to"):
             if not isinstance(flow.get(key), str) or flow[key] not in names:
                 add("unknown-endpoint", f"Unknown flow {key}", str(i))
@@ -515,6 +519,8 @@ def compile_plan(
             element["members"] = [safe_text(m) for m in item["members"]]
         if item.get("tags"):
             element["tags"] = [safe_text(tag) for tag in item["tags"]]
+        if "status" in item:
+            element["status"] = item["status"]
         if item.get("aws_service"):
             element["cloud"] = {
                 "provider": "aws",
@@ -540,6 +546,7 @@ def compile_plan(
                 "description": safe_text(flow["description"]),
                 "technology": safe_text(flow.get("technology", "")),
                 "evidence_ids": evidence_ids(flow.get("evidence")),
+                **({"status": flow["status"]} if "status" in flow else {}),
             }
         )
     for reference in plan.get("evidence", []) or []:

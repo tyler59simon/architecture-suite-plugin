@@ -364,6 +364,7 @@ def topology_plan(topology):
                 "description": r["type"],
                 "technology": r["type"],
                 "evidence": r["evidence"]["reference"],
+                "status": "inferred",
             }
             for r in topology["resources"]
         ],
@@ -373,6 +374,7 @@ def topology_plan(topology):
                 "to": e["destination_id"],
                 "description": e["kind"],
                 "evidence": e["evidence"]["reference"],
+                "status": "inferred",
             }
             for e in topology["relationships"]
         ],

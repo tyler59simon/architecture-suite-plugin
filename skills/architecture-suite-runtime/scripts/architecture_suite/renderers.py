@@ -8,7 +8,7 @@ from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright, Error as BrowserError
 from .c4_layout import build_view_scene_elk
 from .aws import verify_assets
-from .emit import render_scene_drawio, render_scene_svg
+from .emit import _claimed, render_scene_drawio, render_scene_svg
 from .model import VIEW_FOLDERS
 from .overview_layout import (
     build_aws_scene,
@@ -151,8 +151,19 @@ def render_mermaid(model: dict, view: dict) -> str:
         lines.append(
             f"  {ids[edge.source_id]} -->|{_quoted(text)}| {ids[edge.destination_id]}"
         )
+    # Claims that are not observed: dotted outline/arrow plus the «status» text cue.
+    claimed = [ids[b.id] for b in scene.boxes if b.role != "frame" and _claimed(b)]
+    links = [str(i) for i, edge in enumerate(scene.edges) if _claimed(edge)]
+    if claimed:
+        lines.append("  classDef claim stroke-dasharray:3 3")
+        lines.append(f"  class {','.join(claimed)} claim")
+    if links:
+        lines.append(f"  linkStyle {','.join(links)} stroke-dasharray:3 3")
+    claims = bool(claimed or links or any(_claimed(b) for b in scene.boxes))
     lines.append(
-        '  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]'
+        '  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency'
+        + ("#10;Dotted or «inferred/proposed/unknown» = claim not observed" if claims else "")
+        + '"]'
     )
     return "\n".join(lines) + "\n"
 

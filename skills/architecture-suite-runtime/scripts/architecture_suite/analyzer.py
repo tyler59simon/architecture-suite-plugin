@@ -216,6 +216,7 @@ def draft_plan(
             "(no packaging manifest)",
             "technology": stack,
             "evidence": f"{evidence}:1",
+            "status": "inferred",
             "components": [],
         }
         for path, text in sorted(files.items()):
@@ -249,6 +250,7 @@ def draft_plan(
                 "description": f"Source module {path}; responsibility requires review",
                 "technology": stack,
                 "evidence": f"{path}:1",
+                "status": "inferred",
                 "code": [],
             }
             for declaration in _declarations(text, PurePosixPath(path).suffix):
@@ -259,6 +261,8 @@ def draft_plan(
                         "kind": declaration["kind"],
                         "members": declaration["members"],
                         "evidence": f"{path}:{declaration['line']}",
+                        # The declaration itself was read from source.
+                        "status": "observed",
                     }
                 )
             container["components"].append(component)
@@ -294,6 +298,7 @@ def draft_plan(
                         "description": "Imports source module",
                         "technology": "static dependency",
                         "evidence": f"{path}:{line}",
+                        "status": "inferred",
                     }
                 )
     provider = normalize_cloud_profile(cloud_profile)
@@ -316,6 +321,7 @@ def draft_plan(
                         "technology": f"{label} infrastructure",
                         field: signal["service"],
                         "evidence": reference,
+                        "status": "inferred",
                     }
                 )
         plan["gaps"].append(

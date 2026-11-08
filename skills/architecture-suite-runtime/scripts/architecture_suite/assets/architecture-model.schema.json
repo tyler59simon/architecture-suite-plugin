@@ -73,6 +73,14 @@
               "type": "string"
             }
           },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          },
           "cloud": {
             "type": "object",
             "properties": {
@@ -131,6 +139,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
           }
         },
         "required": [

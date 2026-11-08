@@ -95,4 +95,9 @@ def test_tests_under_a_manifest_root_are_not_components(tmp_path):
         for component in container["components"]
     }
     assert evidence == {"app/main.py"}
+    # Drafted boundaries are interpretations; declarations were read from source.
+    assert {c["status"] for c in plan["containers"]} == {"inferred"}
+    components = [x for c in plan["containers"] for x in c["components"]]
+    assert {x["status"] for x in components} == {"inferred"}
+    assert {d["status"] for x in components for d in x["code"]} == {"observed"}
     assert "Test code under app/tests/, tests/ is not modeled as containers." in plan["gaps"]

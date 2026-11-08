@@ -72,6 +72,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
           }
         },
         "required": [
@@ -115,6 +123,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
           }
         },
         "required": [
@@ -159,6 +175,14 @@
               "type": "string"
             }
           },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          },
           "aws_service": {
             "type": "string"
           },
@@ -201,6 +225,14 @@
                     "type": "string"
                   }
                 },
+                "status": {
+                  "enum": [
+                    "observed",
+                    "inferred",
+                    "proposed",
+                    "unknown"
+                  ]
+                },
                 "aws_service": {
                   "type": "string"
                 },
@@ -242,6 +274,14 @@
                         "items": {
                           "type": "string"
                         }
+                      },
+                      "status": {
+                        "enum": [
+                          "observed",
+                          "inferred",
+                          "proposed",
+                          "unknown"
+                        ]
                       },
                       "kind": {
                         "enum": [
@@ -313,6 +353,14 @@
                   "type": "string"
                 }
               }
+            ]
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
             ]
           }
         },

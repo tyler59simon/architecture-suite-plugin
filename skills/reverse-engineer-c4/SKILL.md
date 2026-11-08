@@ -9,7 +9,7 @@ Static analysis gives candidates, not truth. `plan-draft` makes each packaging m
 
 1. `architecture-suite doctor`
 2. `architecture-suite plan-draft --repo <repo> --output <work>/plan.md --dry-run`, then `--confirm-write`. Optional deeper evidence: `architecture-suite inventory --repo <repo> --output <work>/inventory --confirm-write` (Python, C#, Java, Kotlin, Go, JS/TS).
-3. Review `prompt_injection_paths`, truncated and unreadable-file findings. Open the cited sources. Rewrite container boundaries, names and descriptions to match what you verified; replace tool-generated long names; add people and external systems only if evidenced; add flows with evidence.
+3. Review `prompt_injection_paths`, truncated and unreadable-file findings. Open the cited sources. Rewrite container boundaries, names and descriptions to match what you verified; replace tool-generated long names; add people and external systems only if evidenced; add flows with evidence. Drafted containers, components and flows carry `status: inferred` (shown dotted with «inferred»); change it to `observed` only for what you verified, and leave the rest inferred.
 4. `architecture-suite plan-lint --plan plan.md --strict`
 5. Render with the level skills (`c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`) or `plan-render --level all --overview-style progressive --confirm-write`.
 6. Report what was verified versus assumed, and that deployability, ownership and runtime call graphs are not proven by static analysis.

@@ -170,6 +170,8 @@ def test_infra_formats(tmp_path, doc):
     topology = import_infrastructure([path])
     assert topology["resources"] and topology["relationships"]
     plan = topology_plan(topology)
+    assert {c["status"] for c in plan["containers"]} == {"inferred"}
+    assert {f["status"] for f in plan["flows"]} == {"inferred"}
     assert compile_plan(plan)[0]["elements"]
     with pytest.raises(ValueError):
         import_infrastructure([path], {"missing": "api"})

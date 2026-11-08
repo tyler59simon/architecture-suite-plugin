@@ -32,6 +32,8 @@ VIEW_BOUNDARY_TYPES = {
     "code": "component",
 }
 ID_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+# Optional per-claim status, weakest first. Absent means "not stated" and renders as today.
+CLAIM_STATUSES = ("unknown", "proposed", "inferred", "observed")
 
 
 def slugify(value: str, fallback: str = "item") -> str:
@@ -231,6 +233,10 @@ def derive_views(
             )
             if technology:
                 relationship["technology"] = technology
+            # A merged arrow is only as certain as its weakest stated flow.
+            declared = [e["status"] for e in entries if e.get("status") in CLAIM_STATUSES]
+            if declared:
+                relationship["status"] = min(declared, key=CLAIM_STATUSES.index)
             relationships.append(relationship)
             view["relationship_ids"].append(ident)
             used.update((src, dst))

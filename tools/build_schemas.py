@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "skills/architecture-suite-runtime/scripts/architecture_suite/assets"
 STRING = {"type": "string"}
 STRINGS = {"type": "array", "items": STRING}
+STATUS = {"enum": ["observed", "inferred", "proposed", "unknown"]}
 
 
 def obj(properties, required=()):
@@ -40,6 +41,7 @@ def main():
             "evidence_ids": STRINGS,
             "confidence": {"type": "number", "minimum": 0, "maximum": 1},
             "tags": STRINGS,
+            "status": STATUS,
             "cloud": obj(
                 {"provider": STRING, "service": STRING, "icon": {"type": "boolean"}},
                 ("provider", "service"),
@@ -56,6 +58,7 @@ def main():
             "technology": STRING,
             "evidence_ids": STRINGS,
             "flow_ids": STRINGS,
+            "status": STATUS,
         },
         ("id", "source_id", "destination_id", "description"),
     )
@@ -116,6 +119,7 @@ def main():
         "group": STRING,
         "evidence": refs,
         "tags": STRINGS,
+        "status": STATUS,
     }
     code = obj(
         {
@@ -152,6 +156,7 @@ def main():
                         "technology": STRING,
                         "order": {"type": "integer", "minimum": 1},
                         "evidence": refs,
+                        "status": STATUS,
                     },
                     ("from", "to", "description"),
                 )

@@ -43,9 +43,9 @@ architecture-suite diff --before <model.json> --after <model.json> --output <dif
 architecture-suite check --model <model.json> --rules <rules.json> --output <check-dir> --confirm-write
 ```
 
-Differences match element IDs and relationship endpoints; generated relationship ordinals and evidence/confidence changes do not create structural drift. `--identities <mapping.json>` supplies explicit old-to-new identity mappings. No fuzzy rename matching is performed.
+Differences match element IDs and relationship endpoints; generated relationship ordinals and evidence/confidence changes do not create structural drift. A changed claim `status` (for example proposed to observed) is reported as a change. `--identities <mapping.json>` supplies explicit old-to-new identity mappings. No fuzzy rename matching is performed.
 
-Rules use `architecture-rules/v1` and a rules array. Each rule has unique id, effect allow/deny, optional source/destination selectors and severity error/warning. Selectors accept arrays of ids, types and tags; selector fields combine with AND. An empty selector matches all elements. An allow rule constrains destinations for matching sources; a deny rule rejects matching pairs. No rule executes code.
+Rules use `architecture-rules/v1` and a rules array. Each rule has unique id, effect allow/deny, optional source/destination selectors and severity error/warning. Selectors accept arrays of ids, types and tags (plans set `tags` on elements); selector fields combine with AND. An empty selector matches all elements. An allow rule constrains destinations for matching sources; a deny rule rejects matching pairs. No rule executes code.
 
 Checks default to report-only. `--fail-on error` returns 1 for new error findings; `--baseline <previous-baseline.json>` accepts reviewed fingerprints from a prior check. Reports include JSON, Markdown and a candidate baseline; updating the reviewed baseline is an explicit author action. Malformed inputs fail regardless of report-only policy. CI uploads artifacts without comments, pushes or branch-protection changes.
 
