@@ -88,6 +88,18 @@
 <text x="2083.6666666666665" y="1082" text-anchor="middle" font-size="12">«container»</text>
 <text x="2083.6666666666665" y="1100" text-anchor="middle" font-size="12">Spanner</text>
 <text x="2083.6666666666665" y="1119" text-anchor="middle" font-size="13">Transactional trip and account records</text>
+<rect id="box-dispatch-service" x="455.25" y="529" width="430" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="670.25" y="557" text-anchor="middle" font-size="15">Dispatch Service</text>
+<rect id="box-fare-pricer" x="676.25" y="581" width="181" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="766.75" y="615" text-anchor="middle" font-size="15">Fare Pricer</text>
+<text x="766.75" y="633" text-anchor="middle" font-size="12">«component»</text>
+<text x="766.75" y="652" text-anchor="middle" font-size="13">Quotes surge-aware fares</text>
+<text x="766.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
+<rect id="box-matching-engine" x="483.25" y="581" width="173" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="569.75" y="615" text-anchor="middle" font-size="15">Matching Engine</text>
+<text x="569.75" y="633" text-anchor="middle" font-size="12">«component»</text>
+<text x="569.75" y="652" text-anchor="middle" font-size="13">Scores candidate drivers</text>
+<text x="569.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <rect id="box-rider-gateway" x="2037.1" y="529" width="543" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="2308.6" y="557" text-anchor="middle" font-size="15">Rider Gateway</text>
 <rect id="box-auth-middleware" x="2065.1" y="581" width="231" height="129" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
@@ -102,18 +114,6 @@
 <text x="2434.1" y="652" text-anchor="middle" font-size="13">Accepts trip requests and publishes</text>
 <text x="2434.1" y="671" text-anchor="middle" font-size="13">events</text>
 <text x="2434.1" y="690" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-dispatch-service" x="455.25" y="529" width="430" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="670.25" y="557" text-anchor="middle" font-size="15">Dispatch Service</text>
-<rect id="box-fare-pricer" x="676.25" y="581" width="181" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="766.75" y="615" text-anchor="middle" font-size="15">Fare Pricer</text>
-<text x="766.75" y="633" text-anchor="middle" font-size="12">«component»</text>
-<text x="766.75" y="652" text-anchor="middle" font-size="13">Quotes surge-aware fares</text>
-<text x="766.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-matching-engine" x="483.25" y="581" width="173" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="569.75" y="615" text-anchor="middle" font-size="15">Matching Engine</text>
-<text x="569.75" y="633" text-anchor="middle" font-size="12">«component»</text>
-<text x="569.75" y="652" text-anchor="middle" font-size="13">Scores candidate drivers</text>
-<text x="569.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <polyline id="edge-component-dispatch-service-r1" points="2353.366666666667,974 2353.366666666667,920 1912.5,920 1912.5,514 569.75,514 569.75,581" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="1699.5" y="676" width="211" height="26" fill="white" rx="3"/>
 <text x="1805.0" y="693" font-size="11" text-anchor="middle">Delivers trip events [push subscription]</text>

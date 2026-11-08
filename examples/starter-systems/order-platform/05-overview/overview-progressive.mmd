@@ -7,18 +7,18 @@ flowchart LR
     style n3 fill:#fff3e6,stroke:#e65100
     n4[("Order Store#10;«container»#10;DynamoDB#10;Persists request state")]
     style n4 fill:#eaf6ec,stroke:#2e7d32
-    subgraph n5["Worker"]
-      n6["Fulfillment#10;«component»#10;Dispatches fulfillment work#10;Drill-down: 1 code"]
+    subgraph n5["API"]
+      n6["Request Controller#10;«component»#10;Validates and routes requests#10;Drill-down: 2 code"]
+      n7["Payment Adapter#10;«component»#10;Calls payment provider#10;Drill-down: 1 code"]
     end
-    subgraph n7["API"]
-      n8["Request Controller#10;«component»#10;Validates and routes requests#10;Drill-down: 2 code"]
-      n9["Payment Adapter#10;«component»#10;Calls payment provider#10;Drill-down: 1 code"]
+    subgraph n8["Worker"]
+      n9["Fulfillment#10;«component»#10;Dispatches fulfillment work#10;Drill-down: 1 code"]
     end
   end
-  n0 -->|"Submits request #91;HTTPS#93;"| n8
-  n9 -->|"Authorizes payment #91;HTTPS#93;"| n1
-  n8 -->|"Queues accepted work #91;SQS#93;"| n3
-  n3 -->|"Delivers work #91;event#93;"| n6
-  n6 -->|"Stores result #91;DynamoDB#93;"| n4
-  n8 -->|"Requests authorization #91;method#93;"| n9
+  n0 -->|"Submits request #91;HTTPS#93;"| n6
+  n7 -->|"Authorizes payment #91;HTTPS#93;"| n1
+  n6 -->|"Queues accepted work #91;SQS#93;"| n3
+  n3 -->|"Delivers work #91;event#93;"| n9
+  n9 -->|"Stores result #91;DynamoDB#93;"| n4
+  n6 -->|"Requests authorization #91;method#93;"| n7
   notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

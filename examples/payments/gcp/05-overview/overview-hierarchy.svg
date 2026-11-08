@@ -45,14 +45,14 @@
 <text x="288.0" y="1706" text-anchor="middle" font-size="12">TypeScript in the shopper&#x27;s browser</text>
 <text x="288.0" y="1725" text-anchor="middle" font-size="13">Hosted payment fields embedded in</text>
 <text x="288.0" y="1744" text-anchor="middle" font-size="13">merchant checkout pages</text>
-<rect id="box-idempotency-cache" x="176.5" y="3550" width="223" height="188" fill="none" stroke="none"/>
-<path d="M 176.5,3560 L 176.5,3728 A 111.5,10 0 0 0 399.5,3728 L 399.5,3560 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="3560" rx="111.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
-<image x="268.0" y="3576" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMSwuY2xzLTR7ZmlsbDojNjY5ZGY2O30uY2xzLTJ7ZmlsbDojNDI4NWY0O30uY2xzLTIsLmNscy0zLC5jbHMtNHtmaWxsLXJ1bGU6ZXZlbm9kZDt9LmNscy0ze2ZpbGw6I2FlY2JmYTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkljb25fMjRweF9NZW1vcnlTdG9yZV9Db2xvcjwvdGl0bGU+PGcgZGF0YS1uYW1lPSJQcm9kdWN0IEljb25zIj48ZyA+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyIiB5PSIzLjk0IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyIiB5PSI4LjQ1IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyIiB5PSIxMi45NyIgd2lkdGg9IjMuMzMiIGhlaWdodD0iMi41OCIvPjxyZWN0IGNsYXNzPSJjbHMtMSIgeD0iMiIgeT0iMTcuNDgiIHdpZHRoPSIzLjMzIiBoZWlnaHQ9IjIuNTgiLz48cmVjdCBjbGFzcz0iY2xzLTEiIHg9IjE4LjY3IiB5PSIzLjk0IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIxOC42NyIgeT0iOC40NSIgd2lkdGg9IjMuMzMiIGhlaWdodD0iMi41OCIvPjxyZWN0IGNsYXNzPSJjbHMtMSIgeD0iMTguNjciIHk9IjEyLjk3IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIxOC42NyIgeT0iMTcuNDgiIHdpZHRoPSIzLjMzIiBoZWlnaHQ9IjIuNTgiLz48cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMjEuMzMgNi41MiAxOC42NyA2LjUyIDE4LjY3IDMuOTQgMjEuMzMgNi41MiIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIyMS4zMyAxMS4wMyAxOC42NyAxMS4wMyAxOC42NyA4LjQ1IDIxLjMzIDExLjAzIi8+PHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjIxLjMzIDE1LjU1IDE4LjY3IDE1LjU1IDE4LjY3IDEyLjk3IDIxLjMzIDE1LjU1Ii8+PHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjIxLjMzIDIwLjA3IDE4LjY3IDIwLjA3IDE4LjY3IDE3LjQ4IDIxLjMzIDIwLjA3Ii8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNNS4zMywyMkgxOC42N1YySDUuMzNabTYtOUg4bDQuNjctNy43NFYxMUgxNmwtNC42Nyw3Ljc0WiIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtNCIgcG9pbnRzPSIxMS4zMyAyMiAxMS4zMyAxOC43NyAxNiAxMS4wMyAxMi42NyAxMS4wMyAxMi42NyAyIDE4LjY3IDIgMTguNjcgMjIgMTEuMzMgMjIiLz48L2c+PC9nPjwvc3ZnPg=="/>
-<text x="288.0" y="3644" text-anchor="middle" font-size="15">Idempotency Cache</text>
-<text x="288.0" y="3662" text-anchor="middle" font-size="12">«container»</text>
-<text x="288.0" y="3680" text-anchor="middle" font-size="12">Redis</text>
-<text x="288.0" y="3699" text-anchor="middle" font-size="13">Short-lived idempotency keys and</text>
-<text x="288.0" y="3718" text-anchor="middle" font-size="13">responses</text>
+<rect id="box-idempotency-cache" x="176.5" y="3194" width="223" height="188" fill="none" stroke="none"/>
+<path d="M 176.5,3204 L 176.5,3372 A 111.5,10 0 0 0 399.5,3372 L 399.5,3204 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="3204" rx="111.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
+<image x="268.0" y="3220" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMSwuY2xzLTR7ZmlsbDojNjY5ZGY2O30uY2xzLTJ7ZmlsbDojNDI4NWY0O30uY2xzLTIsLmNscy0zLC5jbHMtNHtmaWxsLXJ1bGU6ZXZlbm9kZDt9LmNscy0ze2ZpbGw6I2FlY2JmYTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkljb25fMjRweF9NZW1vcnlTdG9yZV9Db2xvcjwvdGl0bGU+PGcgZGF0YS1uYW1lPSJQcm9kdWN0IEljb25zIj48ZyA+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyIiB5PSIzLjk0IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyIiB5PSI4LjQ1IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIyIiB5PSIxMi45NyIgd2lkdGg9IjMuMzMiIGhlaWdodD0iMi41OCIvPjxyZWN0IGNsYXNzPSJjbHMtMSIgeD0iMiIgeT0iMTcuNDgiIHdpZHRoPSIzLjMzIiBoZWlnaHQ9IjIuNTgiLz48cmVjdCBjbGFzcz0iY2xzLTEiIHg9IjE4LjY3IiB5PSIzLjk0IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIxOC42NyIgeT0iOC40NSIgd2lkdGg9IjMuMzMiIGhlaWdodD0iMi41OCIvPjxyZWN0IGNsYXNzPSJjbHMtMSIgeD0iMTguNjciIHk9IjEyLjk3IiB3aWR0aD0iMy4zMyIgaGVpZ2h0PSIyLjU4Ii8+PHJlY3QgY2xhc3M9ImNscy0xIiB4PSIxOC42NyIgeT0iMTcuNDgiIHdpZHRoPSIzLjMzIiBoZWlnaHQ9IjIuNTgiLz48cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMjEuMzMgNi41MiAxOC42NyA2LjUyIDE4LjY3IDMuOTQgMjEuMzMgNi41MiIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIyMS4zMyAxMS4wMyAxOC42NyAxMS4wMyAxOC42NyA4LjQ1IDIxLjMzIDExLjAzIi8+PHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjIxLjMzIDE1LjU1IDE4LjY3IDE1LjU1IDE4LjY3IDEyLjk3IDIxLjMzIDE1LjU1Ii8+PHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjIxLjMzIDIwLjA3IDE4LjY3IDIwLjA3IDE4LjY3IDE3LjQ4IDIxLjMzIDIwLjA3Ii8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNNS4zMywyMkgxOC42N1YySDUuMzNabTYtOUg4bDQuNjctNy43NFYxMUgxNmwtNC42Nyw3Ljc0WiIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtNCIgcG9pbnRzPSIxMS4zMyAyMiAxMS4zMyAxOC43NyAxNiAxMS4wMyAxMi42NyAxMS4wMyAxMi42NyAyIDE4LjY3IDIgMTguNjcgMjIgMTEuMzMgMjIiLz48L2c+PC9nPjwvc3ZnPg=="/>
+<text x="288.0" y="3288" text-anchor="middle" font-size="15">Idempotency Cache</text>
+<text x="288.0" y="3306" text-anchor="middle" font-size="12">«container»</text>
+<text x="288.0" y="3324" text-anchor="middle" font-size="12">Redis</text>
+<text x="288.0" y="3343" text-anchor="middle" font-size="13">Short-lived idempotency keys and</text>
+<text x="288.0" y="3362" text-anchor="middle" font-size="13">responses</text>
 <rect id="box-ledger-store" x="160.5" y="1428" width="255" height="188" fill="none" stroke="none"/>
 <path d="M 160.5,1438 L 160.5,1606 A 127.5,10 0 0 0 415.5,1606 L 415.5,1438 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="1438" rx="127.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
 <image x="268.0" y="1454" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0zMzEuMiwzMTAuNmwtNTkuNS0zNC45di04My40Yy4xLTguOC03LTE2LTE1LjktMTZoMGMtOC44LDAtMTYsNy4xLTE2LDE2djg0Yy0uMSwwLTU5LjEsMzQuMy01OS4xLDM0LjMtNy42LDQuNS0xMC4yLDE0LjItNS44LDIxLjksMyw1LjEsOC4zLDgsMTMuOCw4czUuNS0uNyw4LTIuMmw1OS40LTM0LjYsNTguNywzNC41YzIuNSwxLjUsNS4zLDIuMiw4LjEsMi4yLDUuNSwwLDEwLjgtMi44LDEzLjgtNy45LDQuNS03LjYsMS45LTE3LjQtNS43LTIxLjloMFoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0yNzEuOSwyMTUuMWwtOTEuOC01Mi45Yy00LjktMi45LTgtOC4xLTgtMTMuOXYtNzguM2MwLTguOCw3LjItMTYsMTYtMTZzMTYsNy4yLDE2LDE2djY5LjFsNTEuOCwyOS45LDUxLjgtMjkuOXYtNjkuMWMwLTguOCw3LjItMTYsMTYtMTZzMTYsNy4yLDE2LDE2djc4LjNjMCw1LjctMywxMS04LDEzLjlsLTU5LjgsMzQuNXYxOC40WiIvPgogICAgPHBhdGggY2xhc3M9InN0MiIgZD0iTTEyMS4zLDQ1OGMtNS41LDAtMTAuOS0yLjktMTMuOS04LTQuNC03LjYtMS44LTE3LjQsNS44LTIxLjlsNTkuNy0zNC42di01OS44Yy0uMSwwLTUyLTI5LjgtNTItMjkuOGwtNTkuNywzNC42Yy03LjYsNC40LTE3LjQsMS44LTIxLjktNS44LTQuNC03LjYtMS44LTE3LjQsNS44LTIxLjlsNjcuNy0zOS4zYzQuOS0yLjksMTEtMi45LDE2LDBsNTkuOSwzNC40LDE2LjEtOS4zdjEwNi4xYy4yLDUuNy0yLjksMTEtNy44LDEzLjlsLTY3LjcsMzkuM2MtMi41LDEuNS01LjMsMi4yLTgsMi4yaDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzkwLjcsNDU4Yy0yLjcsMC01LjUtLjctOC0yLjJsLTY3LjctMzkuM2MtNS0yLjktOC04LjItOC0xMy45di02OS4xYy4xLDAtMTYuMy05LjYtMTYuMy05LjZsOTIuMy01Mi40YzUtMi45LDExLjEtMi44LDE2LDBsNjcuNywzOS4zYzcuNiw0LjQsMTAuMiwxNC4yLDUuOCwyMS45LTQuNCw3LjYtMTQuMiwxMC4yLTIxLjksNS44bC01OS43LTM0LjYtNTEuOSwyOS44djU5LjhjLS4xLDAsNTkuNiwzNC42LDU5LjYsMzQuNiw3LjYsNC40LDEwLjIsMTQuMiw1LjgsMjEuOS0zLDUuMS04LjMsOC0xMy45LDhoMFoiLz4KICA8L2c+Cjwvc3ZnPg=="/>
@@ -61,19 +61,19 @@
 <text x="288.0" y="1558" text-anchor="middle" font-size="12">Distributed SQL</text>
 <text x="288.0" y="1577" text-anchor="middle" font-size="13">Strongly consistent journal and balance</text>
 <text x="288.0" y="1596" text-anchor="middle" font-size="13">records</text>
-<rect id="box-merchant-dashboard" x="154.5" y="5413" width="267" height="176" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
-<image x="268.0" y="5427" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOm5vbmU7fS5jbHMtMntmaWxsOiM2NjlkZjY7fS5jbHMtMiwuY2xzLTMsLmNscy00e2ZpbGwtcnVsZTpldmVub2RkO30uY2xzLTN7ZmlsbDojYWVjYmZhO30uY2xzLTR7ZmlsbDojNDI4NWY0O308L3N0eWxlPjwvZGVmcz48dGl0bGU+SWNvbl8yNHB4X0NETl9Db2xvcjwvdGl0bGU+PGcgZGF0YS1uYW1lPSJQcm9kdWN0IEljb25zIj48cmVjdCBjbGFzcz0iY2xzLTEiIHg9IjIiIHk9IjIiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIvPjxnID48cG9seWdvbiBpZD0iRmlsbC0xIiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMTIgMiAxMiA0LjQxIDE1LjEzIDcuNjMgMTUuMTMgNS4yMSAxMiAyIi8+PHBvbHlnb24gaWQ9IkZpbGwtMS1Db3B5LTIiIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxOS41IDEyIDE2LjM4IDE1LjEzIDE4Ljg4IDE1LjEzIDIyIDEyIDE5LjUgMTIiLz48cG9seWdvbiBpZD0iRmlsbC0xLUNvcHktMyIgY2xhc3M9ImNscy0yIiBwb2ludHM9IjQuNSAxMiA3LjYzIDE1LjEzIDUuMTMgMTUuMTMgMiAxMiA0LjUgMTIiLz48cG9seWdvbiBpZD0iRmlsbC0xLUNvcHkiIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxMiAyMiAxMiAxOS41OSAxNS4xMyAxNi4zOCAxNS4xMyAxOC43OSAxMiAyMiIvPjxwb2x5Z29uIGlkPSJGaWxsLTIiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxMiAyIDguODggNS4yMSA4Ljg4IDcuNjMgMTIgNC40MSAxMiAyIi8+PHBvbHlnb24gaWQ9IkZpbGwtMi1Db3B5LTIiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxOC44OCA4Ljg4IDE2LjM4IDguODggMTkuNSAxMiAyMiAxMiAxOC44OCA4Ljg4Ii8+PHBvbHlnb24gaWQ9IkZpbGwtMi1Db3B5LTMiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSI1LjEzIDguODggNy42MyA4Ljg4IDQuNSAxMiAyIDEyIDUuMTMgOC44OCIvPjxwb2x5Z29uIGlkPSJGaWxsLTItQ29weSIgY2xhc3M9ImNscy0zIiBwb2ludHM9IjEyIDIyIDguODggMTguNzkgOC44OCAxNi4zOCAxMiAxOS41OSAxMiAyMiIvPjxwb2x5Z29uIGlkPSJGaWxsLTkiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxNS4xMyAxNS4xMyA4Ljg4IDE1LjEzIDguODggOC44OCAxNS4xMyA4Ljg4IDE1LjEzIDE1LjEzIi8+PHBvbHlnb24gaWQ9IkZpbGwtMTAiIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxNS4xMyA4Ljg4IDE1LjEzIDE1LjEzIDguODggMTUuMTMgMTUuMTMgOC44OCIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtNCIgcG9pbnRzPSIxNS4xMyA4Ljg4IDE1LjEzIDE1LjEzIDEyIDEyIDE1LjEzIDguODgiLz48L2c+PC9nPjwvc3ZnPg=="/>
-<text x="288.0" y="5495" text-anchor="middle" font-size="15">Merchant Dashboard</text>
-<text x="288.0" y="5513" text-anchor="middle" font-size="12">«container»</text>
-<text x="288.0" y="5531" text-anchor="middle" font-size="12">React single-page app</text>
-<text x="288.0" y="5550" text-anchor="middle" font-size="13">Payments, refunds, disputes and payouts</text>
-<text x="288.0" y="5569" text-anchor="middle" font-size="13">for merchants</text>
-<rect id="box-payment-event-stream" x="177" y="5609" width="222" height="157" rx="28" stroke="#e65100" fill="#fff3e6" stroke-width="1.5"/>
-<image x="268.0" y="5623" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsdGVyOnVybCgjbHVtaW5vc2l0eS1ub2NsaXApO30uY2xzLTJ7ZmlsbDojNjY5ZGY2O30uY2xzLTN7bWFzazp1cmwoI21hc2spO30uY2xzLTR7ZmlsbDojNDI4NWY0O30uY2xzLTV7ZmlsbDojYWVjYmZhO308L3N0eWxlPjxmaWx0ZXIgaWQ9Imx1bWlub3NpdHktbm9jbGlwIiB4PSI0LjY0IiB5PSI0LjE5IiB3aWR0aD0iMTQuNzMiIGhlaWdodD0iMTIuNzYiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJzUkdCIj48ZmVGbG9vZCBmbG9vZC1jb2xvcj0iI2ZmZiIgcmVzdWx0PSJiZyIvPjxmZUJsZW5kIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImJnIi8+PC9maWx0ZXI+PG1hc2sgaWQ9Im1hc2siIHg9IjQuNjQiIHk9IjQuMTkiIHdpZHRoPSIxNC43MyIgaGVpZ2h0PSIxMi43NiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIxMiIgY3k9IjEyLjIzIiByPSIzLjU4Ii8+PC9tYXNrPjwvZGVmcz48dGl0bGU+SWNvbl8yNHB4X1B1Yi1TdWJfQ29sb3I8L3RpdGxlPjxnIGRhdGEtbmFtZT0iUHJvZHVjdCBJY29ucyI+PGNpcmNsZSBjbGFzcz0iY2xzLTIiIGN4PSIxOC45NyIgY3k9IjguMjEiIHI9IjEuNzIiLz48Y2lyY2xlIGNsYXNzPSJjbHMtMiIgY3g9IjUuMDMiIGN5PSI4LjIxIiByPSIxLjcyIi8+PGNpcmNsZSBjbGFzcz0iY2xzLTIiIGN4PSIxMiIgY3k9IjIwLjI4IiByPSIxLjcyIi8+PGcgY2xhc3M9ImNscy0zIj48cmVjdCBjbGFzcz0iY2xzLTQiIHg9IjE0LjY5IiB5PSIxMC4yMiIgd2lkdGg9IjEuNTkiIGhlaWdodD0iOC4wNCIgdHJhbnNmb3JtPSJtYXRyaXgoMC41LCAtMC44NywgMC44NywgMC41LCAtNC41OSwgMjAuNTMpIi8+PHJlY3QgY2xhc3M9ImNscy00IiB4PSI0LjQ5IiB5PSIxMy40NSIgd2lkdGg9IjguMDQiIGhlaWdodD0iMS41OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTUuOTggNi4xNykgcm90YXRlKC0zMCkiLz48cmVjdCBjbGFzcz0iY2xzLTQiIHg9IjExLjIiIHk9IjQuMTkiIHdpZHRoPSIxLjU5IiBoZWlnaHQ9IjguMDQiLz48L2c+PGNpcmNsZSBjbGFzcz0iY2xzLTUiIGN4PSIxMiIgY3k9IjEyLjIzIiByPSIyLjc4Ii8+PGNpcmNsZSBjbGFzcz0iY2xzLTUiIGN4PSI1LjAzIiBjeT0iMTYuMjUiIHI9IjIuMTkiLz48Y2lyY2xlIGNsYXNzPSJjbHMtNSIgY3g9IjE4Ljk3IiBjeT0iMTYuMjUiIHI9IjIuMTkiLz48Y2lyY2xlIGNsYXNzPSJjbHMtNSIgY3g9IjEyIiBjeT0iNC4xOSIgcj0iMi4xOSIvPjwvZz48L3N2Zz4="/>
-<text x="288.0" y="5691" text-anchor="middle" font-size="15">Payment Event Stream</text>
-<text x="288.0" y="5709" text-anchor="middle" font-size="12">«container»</text>
-<text x="288.0" y="5727" text-anchor="middle" font-size="12">Event bus</text>
-<text x="288.0" y="5746" text-anchor="middle" font-size="13">Ordered payment lifecycle events</text>
+<rect id="box-merchant-dashboard" x="154.5" y="5449" width="267" height="176" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
+<image x="268.0" y="5463" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOm5vbmU7fS5jbHMtMntmaWxsOiM2NjlkZjY7fS5jbHMtMiwuY2xzLTMsLmNscy00e2ZpbGwtcnVsZTpldmVub2RkO30uY2xzLTN7ZmlsbDojYWVjYmZhO30uY2xzLTR7ZmlsbDojNDI4NWY0O308L3N0eWxlPjwvZGVmcz48dGl0bGU+SWNvbl8yNHB4X0NETl9Db2xvcjwvdGl0bGU+PGcgZGF0YS1uYW1lPSJQcm9kdWN0IEljb25zIj48cmVjdCBjbGFzcz0iY2xzLTEiIHg9IjIiIHk9IjIiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIvPjxnID48cG9seWdvbiBpZD0iRmlsbC0xIiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMTIgMiAxMiA0LjQxIDE1LjEzIDcuNjMgMTUuMTMgNS4yMSAxMiAyIi8+PHBvbHlnb24gaWQ9IkZpbGwtMS1Db3B5LTIiIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxOS41IDEyIDE2LjM4IDE1LjEzIDE4Ljg4IDE1LjEzIDIyIDEyIDE5LjUgMTIiLz48cG9seWdvbiBpZD0iRmlsbC0xLUNvcHktMyIgY2xhc3M9ImNscy0yIiBwb2ludHM9IjQuNSAxMiA3LjYzIDE1LjEzIDUuMTMgMTUuMTMgMiAxMiA0LjUgMTIiLz48cG9seWdvbiBpZD0iRmlsbC0xLUNvcHkiIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxMiAyMiAxMiAxOS41OSAxNS4xMyAxNi4zOCAxNS4xMyAxOC43OSAxMiAyMiIvPjxwb2x5Z29uIGlkPSJGaWxsLTIiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxMiAyIDguODggNS4yMSA4Ljg4IDcuNjMgMTIgNC40MSAxMiAyIi8+PHBvbHlnb24gaWQ9IkZpbGwtMi1Db3B5LTIiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxOC44OCA4Ljg4IDE2LjM4IDguODggMTkuNSAxMiAyMiAxMiAxOC44OCA4Ljg4Ii8+PHBvbHlnb24gaWQ9IkZpbGwtMi1Db3B5LTMiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSI1LjEzIDguODggNy42MyA4Ljg4IDQuNSAxMiAyIDEyIDUuMTMgOC44OCIvPjxwb2x5Z29uIGlkPSJGaWxsLTItQ29weSIgY2xhc3M9ImNscy0zIiBwb2ludHM9IjEyIDIyIDguODggMTguNzkgOC44OCAxNi4zOCAxMiAxOS41OSAxMiAyMiIvPjxwb2x5Z29uIGlkPSJGaWxsLTkiIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxNS4xMyAxNS4xMyA4Ljg4IDE1LjEzIDguODggOC44OCAxNS4xMyA4Ljg4IDE1LjEzIDE1LjEzIi8+PHBvbHlnb24gaWQ9IkZpbGwtMTAiIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxNS4xMyA4Ljg4IDE1LjEzIDE1LjEzIDguODggMTUuMTMgMTUuMTMgOC44OCIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtNCIgcG9pbnRzPSIxNS4xMyA4Ljg4IDE1LjEzIDE1LjEzIDEyIDEyIDE1LjEzIDguODgiLz48L2c+PC9nPjwvc3ZnPg=="/>
+<text x="288.0" y="5531" text-anchor="middle" font-size="15">Merchant Dashboard</text>
+<text x="288.0" y="5549" text-anchor="middle" font-size="12">«container»</text>
+<text x="288.0" y="5567" text-anchor="middle" font-size="12">React single-page app</text>
+<text x="288.0" y="5586" text-anchor="middle" font-size="13">Payments, refunds, disputes and payouts</text>
+<text x="288.0" y="5605" text-anchor="middle" font-size="13">for merchants</text>
+<rect id="box-payment-event-stream" x="177" y="5645" width="222" height="157" rx="28" stroke="#e65100" fill="#fff3e6" stroke-width="1.5"/>
+<image x="268.0" y="5659" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsdGVyOnVybCgjbHVtaW5vc2l0eS1ub2NsaXApO30uY2xzLTJ7ZmlsbDojNjY5ZGY2O30uY2xzLTN7bWFzazp1cmwoI21hc2spO30uY2xzLTR7ZmlsbDojNDI4NWY0O30uY2xzLTV7ZmlsbDojYWVjYmZhO308L3N0eWxlPjxmaWx0ZXIgaWQ9Imx1bWlub3NpdHktbm9jbGlwIiB4PSI0LjY0IiB5PSI0LjE5IiB3aWR0aD0iMTQuNzMiIGhlaWdodD0iMTIuNzYiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJzUkdCIj48ZmVGbG9vZCBmbG9vZC1jb2xvcj0iI2ZmZiIgcmVzdWx0PSJiZyIvPjxmZUJsZW5kIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImJnIi8+PC9maWx0ZXI+PG1hc2sgaWQ9Im1hc2siIHg9IjQuNjQiIHk9IjQuMTkiIHdpZHRoPSIxNC43MyIgaGVpZ2h0PSIxMi43NiIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIxMiIgY3k9IjEyLjIzIiByPSIzLjU4Ii8+PC9tYXNrPjwvZGVmcz48dGl0bGU+SWNvbl8yNHB4X1B1Yi1TdWJfQ29sb3I8L3RpdGxlPjxnIGRhdGEtbmFtZT0iUHJvZHVjdCBJY29ucyI+PGNpcmNsZSBjbGFzcz0iY2xzLTIiIGN4PSIxOC45NyIgY3k9IjguMjEiIHI9IjEuNzIiLz48Y2lyY2xlIGNsYXNzPSJjbHMtMiIgY3g9IjUuMDMiIGN5PSI4LjIxIiByPSIxLjcyIi8+PGNpcmNsZSBjbGFzcz0iY2xzLTIiIGN4PSIxMiIgY3k9IjIwLjI4IiByPSIxLjcyIi8+PGcgY2xhc3M9ImNscy0zIj48cmVjdCBjbGFzcz0iY2xzLTQiIHg9IjE0LjY5IiB5PSIxMC4yMiIgd2lkdGg9IjEuNTkiIGhlaWdodD0iOC4wNCIgdHJhbnNmb3JtPSJtYXRyaXgoMC41LCAtMC44NywgMC44NywgMC41LCAtNC41OSwgMjAuNTMpIi8+PHJlY3QgY2xhc3M9ImNscy00IiB4PSI0LjQ5IiB5PSIxMy40NSIgd2lkdGg9IjguMDQiIGhlaWdodD0iMS41OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTUuOTggNi4xNykgcm90YXRlKC0zMCkiLz48cmVjdCBjbGFzcz0iY2xzLTQiIHg9IjExLjIiIHk9IjQuMTkiIHdpZHRoPSIxLjU5IiBoZWlnaHQ9IjguMDQiLz48L2c+PGNpcmNsZSBjbGFzcz0iY2xzLTUiIGN4PSIxMiIgY3k9IjEyLjIzIiByPSIyLjc4Ii8+PGNpcmNsZSBjbGFzcz0iY2xzLTUiIGN4PSI1LjAzIiBjeT0iMTYuMjUiIHI9IjIuMTkiLz48Y2lyY2xlIGNsYXNzPSJjbHMtNSIgY3g9IjE4Ljk3IiBjeT0iMTYuMjUiIHI9IjIuMTkiLz48Y2lyY2xlIGNsYXNzPSJjbHMtNSIgY3g9IjEyIiBjeT0iNC4xOSIgcj0iMi4xOSIvPjwvZz48L3N2Zz4="/>
+<text x="288.0" y="5727" text-anchor="middle" font-size="15">Payment Event Stream</text>
+<text x="288.0" y="5745" text-anchor="middle" font-size="12">«container»</text>
+<text x="288.0" y="5763" text-anchor="middle" font-size="12">Event bus</text>
+<text x="288.0" y="5782" text-anchor="middle" font-size="13">Ordered payment lifecycle events</text>
 <rect id="box-payments-database" x="153.5" y="1784" width="269" height="169" fill="none" stroke="none"/>
 <path d="M 153.5,1794 L 153.5,1943 A 134.5,10 0 0 0 422.5,1943 L 422.5,1794 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="1794" rx="134.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
 <image x="268.0" y="1810" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik00NDcuNSwxMjMuN2wtMTg2LTY4LjdjLTMuNi0xLjMtNy41LTEuMy0xMS4xLDBsLTQwLjcsMTUtMTQ1LjIsNTMuNWMtNi4zLDIuMy0xMC41LDguMy0xMC41LDE1czQuMiwxMi43LDEwLjUsMTVsMTQ1LjEsNTMuNHMwLDAsMCwwbDQwLjgsMTVjMS44LjYsMy43LDEsNS41LDFzMy43LS4zLDUuNS0xbDE4NS45LTY4LjJjNi4zLTIuMywxMC41LTguMywxMC41LTE1LDAtNi43LTQuMi0xMi43LTEwLjUtMTVoMFpNMjU2LDE4OS45bC0xMzkuNi01MS40LDEzOS42LTUxLjQsMTM5LjcsNTEuNi0xMzkuNiw1MS4yWiIvPgogICAgPHBhdGggY2xhc3M9InN0MiIgZD0iTTQ0Ny41LDM4OC44bC0xODUuOSw2OC4yYy0xLjguNi0zLjYsMS01LjUsMXMtMy43LS4zLTUuNS0xbC00MC44LTE1aDBsLTE0NS4xLTUzLjRjLTguMy0zLTEyLjUtMTIuMi05LjUtMjAuNSwzLTguMywxMi4yLTEyLjUsMjAuNS05LjVsMTgwLjQsNjYuNCwxODAuNC02Ni4yYzguMy0zLDE3LjUsMS4yLDIwLjUsOS41LDMsOC4zLTEuMiwxNy41LTkuNSwyMC41aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNDQ3LjUsMzEwLjRsLTE4NS45LDY4LjJjLTEuOC42LTMuNiwxLTUuNSwxcy0zLjctLjMtNS41LTFsLTQwLjgtMTVoMGwtMTQ1LjEtNTMuNGMtOC4zLTMtMTIuNS0xMi4yLTkuNS0yMC41LDMtOC4zLDEyLjItMTIuNSwyMC41LTkuNWwxODAuNCw2Ni40LDE4MC40LTY2LjJjOC4zLTMsMTcuNSwxLjIsMjAuNSw5LjUsMyw4LjMtMS4yLDE3LjUtOS41LDIwLjVoMFoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00NDcuNSwyMzIuMWwtMTg1LjksNjguMmMtMS44LjctMy42LDEtNS41LDFzLTMuNy0uMy01LjUtMWwtNDAuOC0xNWgwbC0xNDUuMS01My40Yy04LjMtMy4xLTEyLjUtMTIuMi05LjUtMjAuNSwzLTguMywxMi4yLTEyLjUsMjAuNS05LjVsMTgwLjQsNjYuNCwxODAuNC02Ni4yYzguMy0zLDE3LjUsMS4yLDIwLjUsOS41LDMsOC4zLTEuMiwxNy41LTkuNSwyMC41aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNNDU4LDEzOC43YzAsNi43LTQuMiwxMi43LTEwLjUsMTVsLTE4Niw2OC4yYy0xLjguNy0zLjYsMS01LjUsMXMtMy43LS4zLTUuNS0xbC00MC44LTE1aDBzNDYuNC0xNyw0Ni40LTE3bDEzOS42LTUxLjItMTM5LjctNTEuNi00Ni4yLTE3LjEsNDAuNy0xNWMzLjYtMS4zLDcuNS0xLjMsMTEuMSwwbDE4Niw2OC43YzYuMywyLjMsMTAuNSw4LjMsMTAuNSwxNWgwWiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ0Ny41LDM4OC44bC0xODUuOSw2OC4yYy0xLjguNi0zLjYsMS01LjUsMXMtMy43LS4zLTUuNS0xbC00MC44LTE1LDQ2LjQtMTcsMTgwLjQtNjYuMmM4LjMtMywxNy41LDEuMiwyMC41LDkuNSwzLDguMy0xLjIsMTcuNS05LjUsMjAuNWgwWiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ0Ny41LDMxMC40bC0xODUuOSw2OC4yYy0xLjguNi0zLjYsMS01LjUsMXMtMy43LS4zLTUuNS0xbC00MC44LTE1aDBsNDYuNC0xNywxODAuNC02Ni4yYzguMy0zLDE3LjUsMS4yLDIwLjUsOS41LDMsOC4zLTEuMiwxNy41LTkuNSwyMC41WiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ0Ny41LDIzMi4xbC0xODUuOSw2OC4yYy0xLjguNy0zLjYsMS01LjUsMXMtMy43LS4zLTUuNS0xbC00MC44LTE1aDBsNDYuNC0xNywxODAuNC02Ni4yYzguMy0zLDE3LjUsMS4yLDIwLjUsOS41LDMsOC4zLTEuMiwxNy41LTkuNSwyMC41aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMzAyLjQsMjA2LjlsLTE4Ni02OC41LTUxLjgtMTVjLTYuMywyLjMtMTAuNSw4LjMtMTAuNSwxNXM0LjIsMTIuNywxMC41LDE1bDE0NS4xLDUzLjRzMCwwLDAsMGw0MC44LDE1YzEuOC42LDMuNywxLDUuNSwxczMuNy0uMyw1LjUtMWw0MC45LTE1aDBaIi8+CiAgPC9nPgo8L3N2Zz4="/>
@@ -81,20 +81,20 @@
 <text x="288.0" y="1896" text-anchor="middle" font-size="12">«container»</text>
 <text x="288.0" y="1914" text-anchor="middle" font-size="12">PostgreSQL</text>
 <text x="288.0" y="1933" text-anchor="middle" font-size="13">Payment intents, merchants and API keys</text>
-<rect id="box-reporting-warehouse" x="169.5" y="2471" width="237" height="169" fill="none" stroke="none"/>
-<path d="M 169.5,2481 L 169.5,2630 A 118.5,10 0 0 0 406.5,2630 L 406.5,2481 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="2481" rx="118.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
-<image x="268.0" y="2497" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0zMTEuOSw0MTguOWMtOC44LDAtMTYtNy4yLTE2LTE2di0xNDUuOGMwLTguOCw3LjItMTYsMTYtMTZzMTYsNy4yLDE2LDE2djE0NS44YzAsOC44LTcuMiwxNi0xNiwxNmgwWiIvPgogICAgPHBhdGggY2xhc3M9InN0MiIgZD0iTTE0Ny42LDQxOC45Yy04LjgsMC0xNi03LjItMTYtMTZ2LTIwMC41YzAtOC44LDcuMi0xNiwxNi0xNnMxNiw3LjIsMTYsMTZ2MjAwLjVjMCw4LjgtNy4yLDE2LTE2LDE2WiIvPgogICAgPHBhdGggY2xhc3M9InN0MiIgZD0iTTIyOS44LDQzNy40Yy04LjgsMC0xNi03LjItMTYtMTZWMTQ3LjZjMC04LjgsNy4yLTE2LDE2LTE2czE2LDcuMiwxNiwxNnYyNzMuN2MwLDguOC03LjIsMTYtMTYsMTZoMFoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0yMjkuOCw0MzcuNGMtMTE0LjUsMC0yMDcuNi05My4xLTIwNy42LTIwNy42aDMyYzAsOTYuOCw3OC44LDE3NS42LDE3NS42LDE3NS42czE3NS42LTc4LjgsMTc1LjYtMTc1LjZoMzJjMCwxMTQuNS05My4xLDIwNy42LTIwNy42LDIwNy42aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNNDM3LjQsMjI5LjhoLTMyYzAtOTYuOC03OC44LTE3NS42LTE3NS42LTE3NS42UzU0LjEsMTMyLjksNTQuMSwyMjkuOEgyMi4xYzAtMTE0LjUsOTMuMi0yMDcuNywyMDcuNy0yMDcuN3MyMDcuNiw5My4xLDIwNy42LDIwNy42aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNDg3LjQsNDY0LjhsLTEwMC0xMDBjMzIuMy0zNy42LDQ5LjktODUsNDkuOS0xMzUuMXMtMjEuNi0xMDcuNi02MC44LTE0Ni44bC0yMi42LDIyLjZjMzMuMiwzMy4yLDUxLjQsNzcuMyw1MS40LDEyNC4ycy0xOC4zLDkwLjktNTEuNSwxMjQuMWgwYy01LDUtNy41LDctMTEuOCwxMC44bDEyMi44LDEyMi44YzMuMSwzLjEsNy4yLDQuNywxMS4zLDQuN2gwYzQuMSwwLDguMi0xLjYsMTEuMy00LjcsNi4yLTYuMiw2LjItMTYuNCwwLTIyLjZoMFoiLz4KICA8L2c+Cjwvc3ZnPg=="/>
-<text x="288.0" y="2565" text-anchor="middle" font-size="15">Reporting Warehouse</text>
-<text x="288.0" y="2583" text-anchor="middle" font-size="12">«container»</text>
-<text x="288.0" y="2601" text-anchor="middle" font-size="12">Columnar warehouse</text>
-<text x="288.0" y="2620" text-anchor="middle" font-size="13">Reconciliation and finance analytics</text>
-<rect id="box-settlement-archive" x="188.5" y="4445" width="199" height="169" fill="none" stroke="none"/>
-<path d="M 188.5,4455 L 188.5,4604 A 99.5,10 0 0 0 387.5,4604 L 387.5,4455 Z" fill="#e4f5f7" stroke="#00838f" stroke-width="1.5"/><ellipse cx="288.0" cy="4455" rx="99.5" ry="10" fill="#e4f5f7" stroke="#00838f" stroke-width="1.5"/>
-<image x="268.0" y="4471" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00NDIsMjc3LjlINzBjLTguOCwwLTE2LDcuMi0xNiwxNnYxNDguMWMwLDguOCw3LjIsMTYsMTYsMTZoMTA3LjJjMS41LjUsMy4xLjcsNC44LjdzMy4zLS4zLDQuOC0uN2gyNTUuMmM4LjgsMCwxNi03LjIsMTYtMTZ2LTE0OC4xYzAtOC44LTcuMi0xNi0xNi0xNlpNODYsMzA5LjloODB2MTE2LjFoLTgwdi0xMTYuMVpNNDI2LDQyNS45aC0yMjh2LTExNi4xaDIyOHYxMTYuMVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik00NDIsNTRINzBjLTguOCwwLTE2LDcuMi0xNiwxNnYxNDguOGMwLDguOCw3LjIsMTYsMTYsMTZoMzcyYzguOCwwLDE2LTcuMiwxNi0xNlY3MGMwLTguOC03LjItMTYtMTYtMTZaTTg2LDg2aDgwdjExNi44aC04MHYtMTE2LjhaTTQyNiwyMDIuOGgtMjI4di0xMTYuOGgyMjh2MTE2LjhaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNNDQyLDIzNC44aC0xNlY4Nkg1NHYtMTZjMC04LjgsNy4yLTE2LDE2LTE2aDM3MmM4LjgsMCwxNiw3LjIsMTYsMTZ2MTQ4LjhjMCw4LjgtNy4yLDE2LTE2LDE2WiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ0Miw0NTcuOWgtMTZ2LTE0OC4xSDU0di0xNmMwLTguOCw3LjItMTYsMTYtMTZoMzcyYzguOCwwLDE2LDcuMiwxNiwxNnYxNDguMWMwLDguOC03LjIsMTYtMTYsMTZaIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSIzNDkiIGN5PSIxNDQuNCIgcj0iMzciLz4KICAgIDxjaXJjbGUgY2xhc3M9InN0MSIgY3g9IjM0OSIgY3k9IjM2Ny45IiByPSIzNyIvPgogIDwvZz4KPC9zdmc+"/>
-<text x="288.0" y="4539" text-anchor="middle" font-size="15">Settlement Archive</text>
-<text x="288.0" y="4557" text-anchor="middle" font-size="12">«container»</text>
-<text x="288.0" y="4575" text-anchor="middle" font-size="12">Object storage</text>
-<text x="288.0" y="4594" text-anchor="middle" font-size="13">Raw acquirer settlement files</text>
+<rect id="box-reporting-warehouse" x="169.5" y="2507" width="237" height="169" fill="none" stroke="none"/>
+<path d="M 169.5,2517 L 169.5,2666 A 118.5,10 0 0 0 406.5,2666 L 406.5,2517 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="2517" rx="118.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
+<image x="268.0" y="2533" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0zMTEuOSw0MTguOWMtOC44LDAtMTYtNy4yLTE2LTE2di0xNDUuOGMwLTguOCw3LjItMTYsMTYtMTZzMTYsNy4yLDE2LDE2djE0NS44YzAsOC44LTcuMiwxNi0xNiwxNmgwWiIvPgogICAgPHBhdGggY2xhc3M9InN0MiIgZD0iTTE0Ny42LDQxOC45Yy04LjgsMC0xNi03LjItMTYtMTZ2LTIwMC41YzAtOC44LDcuMi0xNiwxNi0xNnMxNiw3LjIsMTYsMTZ2MjAwLjVjMCw4LjgtNy4yLDE2LTE2LDE2WiIvPgogICAgPHBhdGggY2xhc3M9InN0MiIgZD0iTTIyOS44LDQzNy40Yy04LjgsMC0xNi03LjItMTYtMTZWMTQ3LjZjMC04LjgsNy4yLTE2LDE2LTE2czE2LDcuMiwxNiwxNnYyNzMuN2MwLDguOC03LjIsMTYtMTYsMTZoMFoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0yMjkuOCw0MzcuNGMtMTE0LjUsMC0yMDcuNi05My4xLTIwNy42LTIwNy42aDMyYzAsOTYuOCw3OC44LDE3NS42LDE3NS42LDE3NS42czE3NS42LTc4LjgsMTc1LjYtMTc1LjZoMzJjMCwxMTQuNS05My4xLDIwNy42LTIwNy42LDIwNy42aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNNDM3LjQsMjI5LjhoLTMyYzAtOTYuOC03OC44LTE3NS42LTE3NS42LTE3NS42UzU0LjEsMTMyLjksNTQuMSwyMjkuOEgyMi4xYzAtMTE0LjUsOTMuMi0yMDcuNywyMDcuNy0yMDcuN3MyMDcuNiw5My4xLDIwNy42LDIwNy42aDBaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNDg3LjQsNDY0LjhsLTEwMC0xMDBjMzIuMy0zNy42LDQ5LjktODUsNDkuOS0xMzUuMXMtMjEuNi0xMDcuNi02MC44LTE0Ni44bC0yMi42LDIyLjZjMzMuMiwzMy4yLDUxLjQsNzcuMyw1MS40LDEyNC4ycy0xOC4zLDkwLjktNTEuNSwxMjQuMWgwYy01LDUtNy41LDctMTEuOCwxMC44bDEyMi44LDEyMi44YzMuMSwzLjEsNy4yLDQuNywxMS4zLDQuN2gwYzQuMSwwLDguMi0xLjYsMTEuMy00LjcsNi4yLTYuMiw2LjItMTYuNCwwLTIyLjZoMFoiLz4KICA8L2c+Cjwvc3ZnPg=="/>
+<text x="288.0" y="2601" text-anchor="middle" font-size="15">Reporting Warehouse</text>
+<text x="288.0" y="2619" text-anchor="middle" font-size="12">«container»</text>
+<text x="288.0" y="2637" text-anchor="middle" font-size="12">Columnar warehouse</text>
+<text x="288.0" y="2656" text-anchor="middle" font-size="13">Reconciliation and finance analytics</text>
+<rect id="box-settlement-archive" x="188.5" y="4481" width="199" height="169" fill="none" stroke="none"/>
+<path d="M 188.5,4491 L 188.5,4640 A 99.5,10 0 0 0 387.5,4640 L 387.5,4491 Z" fill="#e4f5f7" stroke="#00838f" stroke-width="1.5"/><ellipse cx="288.0" cy="4491" rx="99.5" ry="10" fill="#e4f5f7" stroke="#00838f" stroke-width="1.5"/>
+<image x="268.0" y="4507" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00NDIsMjc3LjlINzBjLTguOCwwLTE2LDcuMi0xNiwxNnYxNDguMWMwLDguOCw3LjIsMTYsMTYsMTZoMTA3LjJjMS41LjUsMy4xLjcsNC44LjdzMy4zLS4zLDQuOC0uN2gyNTUuMmM4LjgsMCwxNi03LjIsMTYtMTZ2LTE0OC4xYzAtOC44LTcuMi0xNi0xNi0xNlpNODYsMzA5LjloODB2MTE2LjFoLTgwdi0xMTYuMVpNNDI2LDQyNS45aC0yMjh2LTExNi4xaDIyOHYxMTYuMVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik00NDIsNTRINzBjLTguOCwwLTE2LDcuMi0xNiwxNnYxNDguOGMwLDguOCw3LjIsMTYsMTYsMTZoMzcyYzguOCwwLDE2LTcuMiwxNi0xNlY3MGMwLTguOC03LjItMTYtMTYtMTZaTTg2LDg2aDgwdjExNi44aC04MHYtMTE2LjhaTTQyNiwyMDIuOGgtMjI4di0xMTYuOGgyMjh2MTE2LjhaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNNDQyLDIzNC44aC0xNlY4Nkg1NHYtMTZjMC04LjgsNy4yLTE2LDE2LTE2aDM3MmM4LjgsMCwxNiw3LjIsMTYsMTZ2MTQ4LjhjMCw4LjgtNy4yLDE2LTE2LDE2WiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ0Miw0NTcuOWgtMTZ2LTE0OC4xSDU0di0xNmMwLTguOCw3LjItMTYsMTYtMTZoMzcyYzguOCwwLDE2LDcuMiwxNiwxNnYxNDguMWMwLDguOC03LjIsMTYtMTYsMTZaIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSIzNDkiIGN5PSIxNDQuNCIgcj0iMzciLz4KICAgIDxjaXJjbGUgY2xhc3M9InN0MSIgY3g9IjM0OSIgY3k9IjM2Ny45IiByPSIzNyIvPgogIDwvZz4KPC9zdmc+"/>
+<text x="288.0" y="4575" text-anchor="middle" font-size="15">Settlement Archive</text>
+<text x="288.0" y="4593" text-anchor="middle" font-size="12">«container»</text>
+<text x="288.0" y="4611" text-anchor="middle" font-size="12">Object storage</text>
+<text x="288.0" y="4630" text-anchor="middle" font-size="13">Raw acquirer settlement files</text>
 <rect id="box-settlement-worker" x="157.5" y="6320" width="261" height="176" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
 <image x="268.0" y="6334" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNMTUuNjIyNzEsNSBMMjEuNjM4NzQxLDExLjU1OTQzMjEgTDE1LjYyMjcxLDE4LjExODg2NDIgTDEzLjYxMiwxNS45MjYgTDExLjU4NzQ1OTUsMTguMTM0MzI0OSBMOS43OTQsMTYuMTc5IEw4LjAxNjAzMDk2LDE4LjExODg2NDIgTDIsMTEuNTU5NDMyMSBMOC4wMTYwMzA5Niw1IEw5LjgwOCw2Ljk1NCBMOS4xNzksNy42NCBMOC4wMTYwMzA5Niw2LjM3MjQxNDM0IEwzLjI1ODcxOTgxLDExLjU1OTQzMjEgTDguMDE2MDMwOTYsMTYuNzQ2NDQ5OSBMOS4xNjUsMTUuNDkzIEw1LjU3MTQyODU3LDExLjU3NDg5MjggTDExLjU4NzQ1OTUsNS4wMTU0NjA3MyBMMTMuNTk4LDcuMjA3IEwxNS42MjI3MSw1IFogTTExLjU4NzQ1OTUsNi4zODc4NzUwNyBMNi44MzAxNDgzOCwxMS41NzQ4OTI4IEwxMS41ODc0NTk1LDE2Ljc2MTkxMDYgTDEyLjk4MiwxNS4yNCBMOS42MDY2NzkwNCwxMS41NTk0MzIxIEwxMi45NjgsNy44OTMgTDExLjU4NzQ1OTUsNi4zODc4NzUwNyBaIi8+Cjwvc3ZnPgo="/>
 <text x="288.0" y="6402" text-anchor="middle" font-size="15">Settlement Worker</text>
@@ -102,13 +102,13 @@
 <text x="288.0" y="6438" text-anchor="middle" font-size="12">Python batch jobs</text>
 <text x="288.0" y="6457" text-anchor="middle" font-size="13">Reconciles acquirer settlement files and</text>
 <text x="288.0" y="6476" text-anchor="middle" font-size="13">initiates payouts</text>
-<rect id="box-vault-key-store" x="165.5" y="3758" width="245" height="169" fill="none" stroke="none"/>
-<path d="M 165.5,3768 L 165.5,3917 A 122.5,10 0 0 0 410.5,3917 L 410.5,3768 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="3768" rx="122.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
-<image x="268.0" y="3784" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM2NjlkZjY7fS5jbHMtMSwuY2xzLTJ7ZmlsbC1ydWxlOmV2ZW5vZGQ7fS5jbHMtMntmaWxsOiM0Mjg1ZjQ7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5JY29uXzI0cHhfS2V5TWFuYWdlU2VydmljZV9Db2xvcjwvdGl0bGU+PGcgZGF0YS1uYW1lPSJQcm9kdWN0IEljb25zIj48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMS4zMiwxNy4wNkgxMHYxLjRoMS4zN3YuNjNoMS40M1YxMi4xOGEzLjQ3LDMuNDcsMCwwLDAsMi42Ny0zLjM0LDMuNDIsMy40MiwwLDEsMC00LjEsMy4zNnYyLjEySDkuMjZ2MS40aDIuMDZaTTEyLDJsOC4yMSwzLjQydjUuNjNjMCw1LjA2LTMuNSw5LjgtOC4yMSwxMS00LjcxLTEuMTUtOC4yMS01Ljg5LTguMjEtMTAuOTVWNS40MlptMCw1YTEuODgsMS44OCwwLDAsMSwuNzIsMy42MkExLjg4LDEuODgsMCwxLDEsMTIsN1oiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMiwxOS4wOWguNzVWMTIuMThhMy40NywzLjQ3LDAsMCwwLDIuNjctMy4zNEEzLjQyLDMuNDIsMCwwLDAsMTIsNS40MlYybDguMjEsMy40MnY1LjYzYzAsNS4wNi0zLjUsOS44LTguMjEsMTFWMTkuMDlaTTEyLDdhMS44OCwxLjg4LDAsMCwxLC43MiwzLjYyLDEuMDksMS4wOSwwLDAsMS0uNzIuMTVaIi8+PC9nPjwvc3ZnPg=="/>
-<text x="288.0" y="3852" text-anchor="middle" font-size="15">Vault Key Store</text>
-<text x="288.0" y="3870" text-anchor="middle" font-size="12">«container»</text>
-<text x="288.0" y="3888" text-anchor="middle" font-size="12">Managed KMS</text>
-<text x="288.0" y="3907" text-anchor="middle" font-size="13">Key-encryption keys for the card vault</text>
+<rect id="box-vault-key-store" x="165.5" y="3402" width="245" height="169" fill="none" stroke="none"/>
+<path d="M 165.5,3412 L 165.5,3561 A 122.5,10 0 0 0 410.5,3561 L 410.5,3412 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="288.0" cy="3412" rx="122.5" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
+<image x="268.0" y="3428" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM2NjlkZjY7fS5jbHMtMSwuY2xzLTJ7ZmlsbC1ydWxlOmV2ZW5vZGQ7fS5jbHMtMntmaWxsOiM0Mjg1ZjQ7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5JY29uXzI0cHhfS2V5TWFuYWdlU2VydmljZV9Db2xvcjwvdGl0bGU+PGcgZGF0YS1uYW1lPSJQcm9kdWN0IEljb25zIj48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xMS4zMiwxNy4wNkgxMHYxLjRoMS4zN3YuNjNoMS40M1YxMi4xOGEzLjQ3LDMuNDcsMCwwLDAsMi42Ny0zLjM0LDMuNDIsMy40MiwwLDEsMC00LjEsMy4zNnYyLjEySDkuMjZ2MS40aDIuMDZaTTEyLDJsOC4yMSwzLjQydjUuNjNjMCw1LjA2LTMuNSw5LjgtOC4yMSwxMS00LjcxLTEuMTUtOC4yMS01Ljg5LTguMjEtMTAuOTVWNS40MlptMCw1YTEuODgsMS44OCwwLDAsMSwuNzIsMy42MkExLjg4LDEuODgsMCwxLDEsMTIsN1oiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik0xMiwxOS4wOWguNzVWMTIuMThhMy40NywzLjQ3LDAsMCwwLDIuNjctMy4zNEEzLjQyLDMuNDIsMCwwLDAsMTIsNS40MlYybDguMjEsMy40MnY1LjYzYzAsNS4wNi0zLjUsOS44LTguMjEsMTFWMTkuMDlaTTEyLDdhMS44OCwxLjg4LDAsMCwxLC43MiwzLjYyLDEuMDksMS4wOSwwLDAsMS0uNzIuMTVaIi8+PC9nPjwvc3ZnPg=="/>
+<text x="288.0" y="3496" text-anchor="middle" font-size="15">Vault Key Store</text>
+<text x="288.0" y="3514" text-anchor="middle" font-size="12">«container»</text>
+<text x="288.0" y="3532" text-anchor="middle" font-size="12">Managed KMS</text>
+<text x="288.0" y="3551" text-anchor="middle" font-size="13">Key-encryption keys for the card vault</text>
 <rect id="box-webhook-dispatcher" x="166.5" y="6516" width="243" height="176" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
 <image x="268.0" y="6530" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNHB4IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM2NjlkZjY7fS5jbHMtMntmaWxsOiM0Mjg1ZjQ7fS5jbHMtM3tmaWxsOiNhZWNiZmE7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5JY29uXzI0cHhfRnVuY3Rpb25zX0NvbG9yPC90aXRsZT48ZyBkYXRhLW5hbWU9IlByb2R1Y3QgSWNvbnMiPjxnIGRhdGEtbmFtZT0iY29sb3JlZC0zMi9mdW5jdGlvbnMiPjxnID48cG9seWdvbiBjbGFzcz0iY2xzLTEiIHBvaW50cz0iMiAxNS41NiA1IDE4IDUgNiAyIDguNDMgMiAxNS41NiIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIyIDEwIDUgOCA1IDYgMiAxMCIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSI1IDE4IDUgMTYgMiAxNCA1IDE4Ii8+PHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjggMjAgMiAxNCAyIDE4IDYgMjIgOCAyMCIvPjwvZz48L2c+PHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjUuOTkgMi4wMSAyIDYgMi4wMSAxMCA3Ljk5IDQuMDEgNS45OSAyLjAxIi8+PGcgZGF0YS1uYW1lPSJjb2xvcmVkLTMyL2Z1bmN0aW9ucyI+PGcgZGF0YS1uYW1lPSJTaGFwZSI+PHBvbHlnb24gY2xhc3M9ImNscy0xIiBwb2ludHM9IjIyIDguNDUgMTkgNi4wMSAxOSAxOC4wMSAyMiAxNS41OSAyMiA4LjQ1Ii8+PHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjIyIDE0LjAxIDE5IDE2LjAxIDE5IDE4LjAxIDIyIDE0LjAxIi8+PHBvbHlnb24gY2xhc3M9ImNscy0yIiBwb2ludHM9IjE5IDYuMDEgMTkgOC4wMSAyMiAxMC4wMSAxOSA2LjAxIi8+PHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjE2IDQuMDEgMjIgMTAuMDEgMjIgNi4wMSAxOCAyLjAxIDE2IDQuMDEiLz48L2c+PC9nPjxwb2x5Z29uIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxOC4wMSAyMiAyMiAxOC4wMSAyMS45OSAxNC4wMSAxNi4wMSAyMCAxOC4wMSAyMiIvPjxjaXJjbGUgaWQ9Ik92YWwiIGNsYXNzPSJjbHMtMyIgY3g9IjgiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgaWQ9Ik92YWwtMiIgZGF0YS1uYW1lPSJPdmFsIiBjbGFzcz0iY2xzLTMiIGN4PSIxMiIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBpZD0iT3ZhbC0zIiBkYXRhLW5hbWU9Ik92YWwiIGNsYXNzPSJjbHMtMyIgY3g9IjE1Ljk5IiBjeT0iMTIiIHI9IjEiLz48L2c+PC9zdmc+"/>
 <text x="288.0" y="6598" text-anchor="middle" font-size="15">Webhook Dispatcher</text>
@@ -116,114 +116,114 @@
 <text x="288.0" y="6634" text-anchor="middle" font-size="12">Node.js</text>
 <text x="288.0" y="6653" text-anchor="middle" font-size="13">Signs and delivers payment events to</text>
 <text x="288.0" y="6672" text-anchor="middle" font-size="13">merchants, with retries</text>
-<rect id="box-fraud-scoring" x="100" y="1973" width="376" height="478" rx="6" stroke="#7b1fa2" fill="#f5eafa" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2001" text-anchor="middle" font-size="15">Fraud Scoring</text>
-<rect id="box-rules-engine" x="128" y="2025" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2053" text-anchor="middle" font-size="15">Rules Engine</text>
-<rect id="box-ruleset" x="156" y="2077" width="228" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="270.0" y="2111" text-anchor="middle" font-size="15">RuleSet</text>
-<text x="270.0" y="2129" text-anchor="middle" font-size="12">«class»</text>
-<text x="270.0" y="2148" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="270.0" y="2166" text-anchor="middle" font-size="12">+evaluate(payment, score): Decision</text>
-<rect id="box-risk-scorer" x="128" y="2234" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2262" text-anchor="middle" font-size="15">Risk Scorer</text>
-<rect id="box-riskscorer" x="156" y="2286" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="247.5" y="2320" text-anchor="middle" font-size="15">RiskScorer</text>
-<text x="247.5" y="2338" text-anchor="middle" font-size="12">«class»</text>
-<text x="247.5" y="2357" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="247.5" y="2375" text-anchor="middle" font-size="12">+score(payment): RiskScore</text>
-<rect id="box-payment-orchestrator" x="100" y="2660" width="376" height="870" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2688" text-anchor="middle" font-size="15">Payment Orchestrator</text>
-<rect id="box-acquirer-router" x="128" y="3086" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="3114" text-anchor="middle" font-size="15">Acquirer Router</text>
-<rect id="box-acquirerrouter" x="156" y="3138" width="237" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="274.5" y="3172" text-anchor="middle" font-size="15">AcquirerRouter</text>
-<text x="274.5" y="3190" text-anchor="middle" font-size="12">«class»</text>
-<text x="274.5" y="3209" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="274.5" y="3227" text-anchor="middle" font-size="12">+route(payment): AcquirerConnection</text>
-<rect id="box-3ds-handler" x="128" y="3295" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="3323" text-anchor="middle" font-size="15">3DS Handler</text>
-<rect id="box-threedsecureclient" x="156" y="3347" width="183" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="247.5" y="3381" text-anchor="middle" font-size="15">ThreeDSecureClient</text>
-<text x="247.5" y="3399" text-anchor="middle" font-size="12">«class»</text>
-<text x="247.5" y="3418" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="247.5" y="3436" text-anchor="middle" font-size="12">+authenticate(payment):</text>
-<text x="247.5" y="3454" text-anchor="middle" font-size="12">AuthenticationResult</text>
-<rect id="box-payment-state-machine" x="128" y="2712" width="320" height="354" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2740" text-anchor="middle" font-size="15">Payment State Machine</text>
-<rect id="box-paymentstate" x="181.5" y="2764" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="273.0" y="2798" text-anchor="middle" font-size="15">PaymentState</text>
-<text x="273.0" y="2816" text-anchor="middle" font-size="12">«interface»</text>
-<text x="273.0" y="2835" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="273.0" y="2853" text-anchor="middle" font-size="12">+next(event): PaymentState</text>
-<rect id="box-paymentstatemachine" x="156" y="2893" width="234" height="145" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="273.0" y="2927" text-anchor="middle" font-size="15">PaymentStateMachine</text>
-<text x="273.0" y="2945" text-anchor="middle" font-size="12">«class»</text>
-<text x="273.0" y="2964" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="273.0" y="2982" text-anchor="middle" font-size="12">+authorize(payment): Authorization</text>
-<text x="273.0" y="3000" text-anchor="middle" font-size="12">+capture(payment, amount): Capture</text>
-<text x="273.0" y="3018" text-anchor="middle" font-size="12">+refund(payment, amount): Refund</text>
-<rect id="box-card-vault" x="100" y="5786" width="376" height="514" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="5814" text-anchor="middle" font-size="15">Card Vault</text>
-<rect id="box-envelope-encryptor" x="128" y="5838" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="5866" text-anchor="middle" font-size="15">Envelope Encryptor</text>
-<rect id="box-envelopeencryptor" x="156" y="5890" width="229" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="270.5" y="5924" text-anchor="middle" font-size="15">EnvelopeEncryptor</text>
-<text x="270.5" y="5942" text-anchor="middle" font-size="12">«class»</text>
-<text x="270.5" y="5961" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="270.5" y="5979" text-anchor="middle" font-size="12">+encrypt(plaintext, keyId): Ciphertext</text>
-<text x="270.5" y="5997" text-anchor="middle" font-size="12">+decrypt(ciphertext): Bytes</text>
-<rect id="box-card-tokenizer" x="128" y="6065" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="6093" text-anchor="middle" font-size="15">Card Tokenizer</text>
-<rect id="box-cardtokenizer" x="156" y="6117" width="216" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="264.0" y="6151" text-anchor="middle" font-size="15">CardTokenizer</text>
-<text x="264.0" y="6169" text-anchor="middle" font-size="12">«class»</text>
-<text x="264.0" y="6188" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="264.0" y="6206" text-anchor="middle" font-size="12">+tokenize(pan, expiry): CardToken</text>
-<text x="264.0" y="6224" text-anchor="middle" font-size="12">+detokenize(token): CardData</text>
-<rect id="box-ledger-service" x="100" y="3947" width="376" height="478" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="3975" text-anchor="middle" font-size="15">Ledger Service</text>
-<rect id="box-balance-calculator" x="128" y="3999" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4027" text-anchor="middle" font-size="15">Balance Calculator</text>
-<rect id="box-balancecalculator" x="156" y="4051" width="253" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="282.5" y="4085" text-anchor="middle" font-size="15">BalanceCalculator</text>
-<text x="282.5" y="4103" text-anchor="middle" font-size="12">«class»</text>
-<text x="282.5" y="4122" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="282.5" y="4140" text-anchor="middle" font-size="12">+balance(merchantId, currency): Balance</text>
-<rect id="box-journal-writer" x="128" y="4208" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4236" text-anchor="middle" font-size="15">Journal Writer</text>
-<rect id="box-journalwriter" x="156" y="4260" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="247.5" y="4294" text-anchor="middle" font-size="15">JournalWriter</text>
-<text x="247.5" y="4312" text-anchor="middle" font-size="12">«class»</text>
-<text x="247.5" y="4331" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="247.5" y="4349" text-anchor="middle" font-size="12">+post(entries): JournalId</text>
-<rect id="box-payments-api" x="100" y="4634" width="376" height="759" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4662" text-anchor="middle" font-size="15">Payments API</text>
-<rect id="box-idempotency-guard" x="128" y="4931" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4959" text-anchor="middle" font-size="15">Idempotency Guard</text>
-<rect id="box-idempotencyguard" x="156" y="4983" width="247" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="279.5" y="5017" text-anchor="middle" font-size="15">IdempotencyGuard</text>
-<text x="279.5" y="5035" text-anchor="middle" font-size="12">«class»</text>
-<text x="279.5" y="5054" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="279.5" y="5072" text-anchor="middle" font-size="12">+reserve(key, requestHash): Reservation</text>
-<text x="279.5" y="5090" text-anchor="middle" font-size="12">+complete(key, response)</text>
-<rect id="box-merchant-authenticator" x="128" y="5158" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="5186" text-anchor="middle" font-size="15">Merchant Authenticator</text>
-<rect id="box-apikeyauthenticator" x="156" y="5210" width="210" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="261.0" y="5244" text-anchor="middle" font-size="15">ApiKeyAuthenticator</text>
-<text x="261.0" y="5262" text-anchor="middle" font-size="12">«class»</text>
-<text x="261.0" y="5281" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="261.0" y="5299" text-anchor="middle" font-size="12">+authenticate(apiKey): Merchant</text>
-<text x="261.0" y="5317" text-anchor="middle" font-size="12">+requireScope(merchant, scope)</text>
-<rect id="box-payment-intents-controller" x="128" y="4686" width="320" height="225" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4714" text-anchor="middle" font-size="15">Payment Intents Controller</text>
-<rect id="box-paymentintentcontroller" x="156" y="4738" width="248" height="145" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="280.0" y="4772" text-anchor="middle" font-size="15">PaymentIntentController</text>
-<text x="280.0" y="4790" text-anchor="middle" font-size="12">«class»</text>
-<text x="280.0" y="4809" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="280.0" y="4827" text-anchor="middle" font-size="12">+create(request): PaymentIntent</text>
-<text x="280.0" y="4845" text-anchor="middle" font-size="12">+confirm(id, cardToken): PaymentIntent</text>
-<text x="280.0" y="4863" text-anchor="middle" font-size="12">+refund(id, amount): Refund</text>
+<rect id="box-card-vault" x="100" y="1973" width="376" height="514" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="2001" text-anchor="middle" font-size="15">Card Vault</text>
+<rect id="box-card-tokenizer" x="128" y="2025" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="2053" text-anchor="middle" font-size="15">Card Tokenizer</text>
+<rect id="box-cardtokenizer" x="156" y="2077" width="216" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="264.0" y="2111" text-anchor="middle" font-size="15">CardTokenizer</text>
+<text x="264.0" y="2129" text-anchor="middle" font-size="12">«class»</text>
+<text x="264.0" y="2148" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="264.0" y="2166" text-anchor="middle" font-size="12">+tokenize(pan, expiry): CardToken</text>
+<text x="264.0" y="2184" text-anchor="middle" font-size="12">+detokenize(token): CardData</text>
+<rect id="box-envelope-encryptor" x="128" y="2252" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="2280" text-anchor="middle" font-size="15">Envelope Encryptor</text>
+<rect id="box-envelopeencryptor" x="156" y="2304" width="229" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="270.5" y="2338" text-anchor="middle" font-size="15">EnvelopeEncryptor</text>
+<text x="270.5" y="2356" text-anchor="middle" font-size="12">«class»</text>
+<text x="270.5" y="2375" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="270.5" y="2393" text-anchor="middle" font-size="12">+encrypt(plaintext, keyId): Ciphertext</text>
+<text x="270.5" y="2411" text-anchor="middle" font-size="12">+decrypt(ciphertext): Bytes</text>
+<rect id="box-fraud-scoring" x="100" y="2696" width="376" height="478" rx="6" stroke="#7b1fa2" fill="#f5eafa" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="2724" text-anchor="middle" font-size="15">Fraud Scoring</text>
+<rect id="box-risk-scorer" x="128" y="2748" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="2776" text-anchor="middle" font-size="15">Risk Scorer</text>
+<rect id="box-riskscorer" x="156" y="2800" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="247.5" y="2834" text-anchor="middle" font-size="15">RiskScorer</text>
+<text x="247.5" y="2852" text-anchor="middle" font-size="12">«class»</text>
+<text x="247.5" y="2871" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="247.5" y="2889" text-anchor="middle" font-size="12">+score(payment): RiskScore</text>
+<rect id="box-rules-engine" x="128" y="2957" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="2985" text-anchor="middle" font-size="15">Rules Engine</text>
+<rect id="box-ruleset" x="156" y="3009" width="228" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="270.0" y="3043" text-anchor="middle" font-size="15">RuleSet</text>
+<text x="270.0" y="3061" text-anchor="middle" font-size="12">«class»</text>
+<text x="270.0" y="3080" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="270.0" y="3098" text-anchor="middle" font-size="12">+evaluate(payment, score): Decision</text>
+<rect id="box-ledger-service" x="100" y="5822" width="376" height="478" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="5850" text-anchor="middle" font-size="15">Ledger Service</text>
+<rect id="box-balance-calculator" x="128" y="5874" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="5902" text-anchor="middle" font-size="15">Balance Calculator</text>
+<rect id="box-balancecalculator" x="156" y="5926" width="253" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="282.5" y="5960" text-anchor="middle" font-size="15">BalanceCalculator</text>
+<text x="282.5" y="5978" text-anchor="middle" font-size="12">«class»</text>
+<text x="282.5" y="5997" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="282.5" y="6015" text-anchor="middle" font-size="12">+balance(merchantId, currency): Balance</text>
+<rect id="box-journal-writer" x="128" y="6083" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="6111" text-anchor="middle" font-size="15">Journal Writer</text>
+<rect id="box-journalwriter" x="156" y="6135" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="247.5" y="6169" text-anchor="middle" font-size="15">JournalWriter</text>
+<text x="247.5" y="6187" text-anchor="middle" font-size="12">«class»</text>
+<text x="247.5" y="6206" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="247.5" y="6224" text-anchor="middle" font-size="12">+post(entries): JournalId</text>
+<rect id="box-payment-orchestrator" x="100" y="3591" width="376" height="870" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="3619" text-anchor="middle" font-size="15">Payment Orchestrator</text>
+<rect id="box-3ds-handler" x="128" y="4017" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="4045" text-anchor="middle" font-size="15">3DS Handler</text>
+<rect id="box-threedsecureclient" x="156" y="4069" width="183" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="247.5" y="4103" text-anchor="middle" font-size="15">ThreeDSecureClient</text>
+<text x="247.5" y="4121" text-anchor="middle" font-size="12">«class»</text>
+<text x="247.5" y="4140" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="247.5" y="4158" text-anchor="middle" font-size="12">+authenticate(payment):</text>
+<text x="247.5" y="4176" text-anchor="middle" font-size="12">AuthenticationResult</text>
+<rect id="box-acquirer-router" x="128" y="4244" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="4272" text-anchor="middle" font-size="15">Acquirer Router</text>
+<rect id="box-acquirerrouter" x="156" y="4296" width="237" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="274.5" y="4330" text-anchor="middle" font-size="15">AcquirerRouter</text>
+<text x="274.5" y="4348" text-anchor="middle" font-size="12">«class»</text>
+<text x="274.5" y="4367" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="274.5" y="4385" text-anchor="middle" font-size="12">+route(payment): AcquirerConnection</text>
+<rect id="box-payment-state-machine" x="128" y="3643" width="320" height="354" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="3671" text-anchor="middle" font-size="15">Payment State Machine</text>
+<rect id="box-paymentstate" x="181.5" y="3695" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="273.0" y="3729" text-anchor="middle" font-size="15">PaymentState</text>
+<text x="273.0" y="3747" text-anchor="middle" font-size="12">«interface»</text>
+<text x="273.0" y="3766" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="273.0" y="3784" text-anchor="middle" font-size="12">+next(event): PaymentState</text>
+<rect id="box-paymentstatemachine" x="156" y="3824" width="234" height="145" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="273.0" y="3858" text-anchor="middle" font-size="15">PaymentStateMachine</text>
+<text x="273.0" y="3876" text-anchor="middle" font-size="12">«class»</text>
+<text x="273.0" y="3895" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="273.0" y="3913" text-anchor="middle" font-size="12">+authorize(payment): Authorization</text>
+<text x="273.0" y="3931" text-anchor="middle" font-size="12">+capture(payment, amount): Capture</text>
+<text x="273.0" y="3949" text-anchor="middle" font-size="12">+refund(payment, amount): Refund</text>
+<rect id="box-payments-api" x="100" y="4670" width="376" height="759" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="4698" text-anchor="middle" font-size="15">Payments API</text>
+<rect id="box-idempotency-guard" x="128" y="4967" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="4995" text-anchor="middle" font-size="15">Idempotency Guard</text>
+<rect id="box-idempotencyguard" x="156" y="5019" width="247" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="279.5" y="5053" text-anchor="middle" font-size="15">IdempotencyGuard</text>
+<text x="279.5" y="5071" text-anchor="middle" font-size="12">«class»</text>
+<text x="279.5" y="5090" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="279.5" y="5108" text-anchor="middle" font-size="12">+reserve(key, requestHash): Reservation</text>
+<text x="279.5" y="5126" text-anchor="middle" font-size="12">+complete(key, response)</text>
+<rect id="box-merchant-authenticator" x="128" y="5194" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="5222" text-anchor="middle" font-size="15">Merchant Authenticator</text>
+<rect id="box-apikeyauthenticator" x="156" y="5246" width="210" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="261.0" y="5280" text-anchor="middle" font-size="15">ApiKeyAuthenticator</text>
+<text x="261.0" y="5298" text-anchor="middle" font-size="12">«class»</text>
+<text x="261.0" y="5317" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="261.0" y="5335" text-anchor="middle" font-size="12">+authenticate(apiKey): Merchant</text>
+<text x="261.0" y="5353" text-anchor="middle" font-size="12">+requireScope(merchant, scope)</text>
+<rect id="box-payment-intents-controller" x="128" y="4722" width="320" height="225" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="288.0" y="4750" text-anchor="middle" font-size="15">Payment Intents Controller</text>
+<rect id="box-paymentintentcontroller" x="156" y="4774" width="248" height="145" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="280.0" y="4808" text-anchor="middle" font-size="15">PaymentIntentController</text>
+<text x="280.0" y="4826" text-anchor="middle" font-size="12">«class»</text>
+<text x="280.0" y="4845" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="280.0" y="4863" text-anchor="middle" font-size="12">+create(request): PaymentIntent</text>
+<text x="280.0" y="4881" text-anchor="middle" font-size="12">+confirm(id, cardToken): PaymentIntent</text>
+<text x="280.0" y="4899" text-anchor="middle" font-size="12">+refund(id, amount): Refund</text>
 <text x="48" y="6784" font-size="12">Notation key</text>
 <text x="48" y="6806" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="6828" font-size="12">Enclosing frame = named scope or deployment boundary</text>

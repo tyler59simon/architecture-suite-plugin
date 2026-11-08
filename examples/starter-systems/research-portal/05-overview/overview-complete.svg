@@ -26,24 +26,8 @@
 <text x="370.5" y="2256" text-anchor="middle" font-size="12">«container»</text>
 <text x="370.5" y="2274" text-anchor="middle" font-size="12">DynamoDB</text>
 <text x="370.5" y="2293" text-anchor="middle" font-size="13">Persists request state</text>
-<rect id="box-worker" x="223" y="1663" width="295" height="410" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="370.5" y="1691" text-anchor="middle" font-size="15">Worker</text>
-<rect id="box-fulfillment" x="251" y="1720" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="370.5" y="1748" text-anchor="middle" font-size="15">Fulfillment</text>
-<rect id="box-fulfillmentjob" x="279" y="1772" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="370.5" y="1806" text-anchor="middle" font-size="15">FulfillmentJob</text>
-<text x="370.5" y="1824" text-anchor="middle" font-size="12">«class»</text>
-<text x="370.5" y="1843" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="370.5" y="1861" text-anchor="middle" font-size="12">+run(order): Result</text>
 <rect id="box-api" x="100" y="509" width="548.5" height="855" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="374.25" y="537" text-anchor="middle" font-size="15">API</text>
-<rect id="box-payment-adapter" x="381.5" y="1011" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="501.0" y="1039" text-anchor="middle" font-size="15">Payment Adapter</text>
-<rect id="box-paymentclient" x="409.5" y="1063" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="501.0" y="1097" text-anchor="middle" font-size="15">PaymentClient</text>
-<text x="501.0" y="1115" text-anchor="middle" font-size="12">«class»</text>
-<text x="501.0" y="1134" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="501.0" y="1152" text-anchor="middle" font-size="12">+authorize(order): Result</text>
 <rect id="box-request-controller" x="128" y="566" width="334.25" height="374" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="295.125" y="594" text-anchor="middle" font-size="15">Request Controller</text>
 <rect id="box-requesthandler" x="251.25" y="618" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
@@ -56,6 +40,22 @@
 <text x="297.0" y="855" text-anchor="middle" font-size="12">«class»</text>
 <text x="297.0" y="874" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="297.0" y="892" text-anchor="middle" font-size="12">+validate(request): bool</text>
+<rect id="box-payment-adapter" x="381.5" y="1011" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="501.0" y="1039" text-anchor="middle" font-size="15">Payment Adapter</text>
+<rect id="box-paymentclient" x="409.5" y="1063" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="501.0" y="1097" text-anchor="middle" font-size="15">PaymentClient</text>
+<text x="501.0" y="1115" text-anchor="middle" font-size="12">«class»</text>
+<text x="501.0" y="1134" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="501.0" y="1152" text-anchor="middle" font-size="12">+authorize(order): Result</text>
+<rect id="box-worker" x="223" y="1663" width="295" height="410" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="370.5" y="1691" text-anchor="middle" font-size="15">Worker</text>
+<rect id="box-fulfillment" x="251" y="1720" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="370.5" y="1748" text-anchor="middle" font-size="15">Fulfillment</text>
+<rect id="box-fulfillmentjob" x="279" y="1772" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="370.5" y="1806" text-anchor="middle" font-size="15">FulfillmentJob</text>
+<text x="370.5" y="1824" text-anchor="middle" font-size="12">«class»</text>
+<text x="370.5" y="1843" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="370.5" y="1861" text-anchor="middle" font-size="12">+run(order): Result</text>
 <polyline id="edge-code-request-controller-r1" points="342.75,221 342.75,618" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="195.75" y="321" width="145" height="26" fill="white" rx="3"/>
 <text x="268.25" y="338" font-size="11" text-anchor="middle">Submits request [HTTPS]</text>

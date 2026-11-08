@@ -27,22 +27,22 @@ flowchart LR
     n18[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
     style n18 fill:#eaf6ec,stroke:#2e7d32
     n19["Webhook Dispatcher#10;«container»#10;Node.js#10;Signs and delivers payment events to#10;merchants, with retries"]
-    subgraph n20["Ledger Service"]
-      n21["Balance Calculator#10;«component»#10;Kotlin#10;Computes available and pending#10;merchant balances#10;Drill-down: 1 code"]
-      n22["Journal Writer#10;«component»#10;Kotlin#10;Posts balanced journal entries for money#10;movements#10;Drill-down: 1 code"]
+    subgraph n20["Card Vault"]
+      n21["Card Tokenizer#10;«component»#10;Rust#10;Swaps card numbers for single-purpose#10;tokens#10;Drill-down: 1 code"]
+      n22["Envelope Encryptor#10;«component»#10;Rust#10;Encrypts card data with per-record data#10;keys#10;Drill-down: 1 code"]
     end
-    subgraph n23["Card Vault"]
-      n24["Card Tokenizer#10;«component»#10;Rust#10;Swaps card numbers for single-purpose#10;tokens#10;Drill-down: 1 code"]
-      n25["Envelope Encryptor#10;«component»#10;Rust#10;Encrypts card data with per-record data#10;keys#10;Drill-down: 1 code"]
+    subgraph n23["Fraud Scoring"]
+      n24["Risk Scorer#10;«component»#10;Python#10;Returns a risk score from the hosted#10;model#10;Drill-down: 1 code"]
+      n25["Rules Engine#10;«component»#10;Python#10;Applies merchant and platform block rules#10;Drill-down: 1 code"]
     end
-    subgraph n26["Payment Orchestrator"]
-      n27["3DS Handler#10;«component»#10;Java#10;Runs 3-D Secure cardholder#10;authentication#10;Drill-down: 1 code"]
-      n28["Acquirer Router#10;«component»#10;Java#10;Chooses the acquiring connection by card#10;and region#10;Drill-down: 1 code"]
-      n29["Payment State Machine#10;«component»#10;Java#10;Owns payment state transitions and#10;retries#10;Drill-down: 2 code"]
+    subgraph n26["Ledger Service"]
+      n27["Balance Calculator#10;«component»#10;Kotlin#10;Computes available and pending#10;merchant balances#10;Drill-down: 1 code"]
+      n28["Journal Writer#10;«component»#10;Kotlin#10;Posts balanced journal entries for money#10;movements#10;Drill-down: 1 code"]
     end
-    subgraph n30["Fraud Scoring"]
-      n31["Risk Scorer#10;«component»#10;Python#10;Returns a risk score from the hosted#10;model#10;Drill-down: 1 code"]
-      n32["Rules Engine#10;«component»#10;Python#10;Applies merchant and platform block rules#10;Drill-down: 1 code"]
+    subgraph n29["Payment Orchestrator"]
+      n30["3DS Handler#10;«component»#10;Java#10;Runs 3-D Secure cardholder#10;authentication#10;Drill-down: 1 code"]
+      n31["Acquirer Router#10;«component»#10;Java#10;Chooses the acquiring connection by card#10;and region#10;Drill-down: 1 code"]
+      n32["Payment State Machine#10;«component»#10;Java#10;Owns payment state transitions and#10;retries#10;Drill-down: 2 code"]
     end
     subgraph n33["Payments API"]
       n34["Idempotency Guard#10;«component»#10;Go#10;Makes retried requests return the original#10;result#10;Drill-down: 1 code"]
@@ -50,23 +50,23 @@ flowchart LR
       n36["Payment Intents Controller#10;«component»#10;Go#10;Creates and confirms payment intents#10;Drill-down: 1 code"]
     end
   end
-  n9 -->|"Submits card data for a token #91;HTTPS#93;"| n24
-  n26 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n24
-  n24 -->|"Encrypts card records #91;in-process#93;"| n25
-  n25 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n18
-  n26 -->|"Requests a fraud score #91;gRPC#93;"| n31
-  n31 -->|"Applies block and review rules #91;in-process#93;"| n32
-  n6 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n32
-  n13 -->|"Delivers captured, refunded and fee events #91;events#93;"| n22
-  n22 -->|"Posts double-entry journal entries #91;SQL#93;"| n11
-  n22 -->|"Streams journal entries #91;batch export#93;"| n15
-  n17 -->|"Reconciles merchant balances #91;gRPC#93;"| n21
-  n33 -->|"Starts authorization #91;gRPC#93;"| n29
-  n29 -->|"Requests cardholder authentication #91;in-process#93;"| n27
-  n27 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n0
-  n29 -->|"Sends authorization and capture #91;in-process#93;"| n28
-  n28 -->|"Authorizes, captures and refunds #91;ISO 8583 over TLS#93;"| n1
-  n29 -->|"Publishes payment lifecycle events #91;events#93;"| n13
+  n9 -->|"Submits card data for a token #91;HTTPS#93;"| n21
+  n29 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n21
+  n21 -->|"Encrypts card records #91;in-process#93;"| n22
+  n22 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n18
+  n29 -->|"Requests a fraud score #91;gRPC#93;"| n24
+  n24 -->|"Applies block and review rules #91;in-process#93;"| n25
+  n6 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n25
+  n13 -->|"Delivers captured, refunded and fee events #91;events#93;"| n28
+  n28 -->|"Posts double-entry journal entries #91;SQL#93;"| n11
+  n28 -->|"Streams journal entries #91;batch export#93;"| n15
+  n17 -->|"Reconciles merchant balances #91;gRPC#93;"| n27
+  n33 -->|"Starts authorization #91;gRPC#93;"| n32
+  n32 -->|"Requests cardholder authentication #91;in-process#93;"| n30
+  n30 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n0
+  n32 -->|"Sends authorization and capture #91;in-process#93;"| n31
+  n31 -->|"Authorizes, captures and refunds #91;ISO 8583 over TLS#93;"| n1
+  n32 -->|"Publishes payment lifecycle events #91;events#93;"| n13
   n9 -->|"Confirms the payment with the card token #91;HTTPS#93;"| n36
   n12 -->|"Lists payments and issues refunds #91;HTTPS#93;"| n36
   n5 -->|"Calls the API server-side with a secret key #91;HTTPS#93;"| n35

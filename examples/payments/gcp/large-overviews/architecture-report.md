@@ -43,10 +43,10 @@ Illustrative owned services running on Google Cloud
     },
     "05-overview/overview-complete": {
       "findings": [],
-      "crossings": 2,
-      "bends": 56,
-      "aspect_ratio": 3.627,
-      "score": 371.62684778266083,
+      "crossings": 3,
+      "bends": 52,
+      "aspect_ratio": 3.608,
+      "score": 459.60800190521553,
       "advisories": [
         "Dense view; split by scope or use small-multiples"
       ]

@@ -44,9 +44,9 @@ Illustrative owned services running on AWS
     "05-overview/overview-complete": {
       "findings": [],
       "crossings": 3,
-      "bends": 50,
-      "aspect_ratio": 3.603,
-      "score": 453.60323886639674,
+      "bends": 52,
+      "aspect_ratio": 3.608,
+      "score": 459.60800190521553,
       "advisories": [
         "Dense view; split by scope or use small-multiples"
       ]

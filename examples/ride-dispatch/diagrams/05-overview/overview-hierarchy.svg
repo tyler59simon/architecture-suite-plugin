@@ -90,36 +90,36 @@
 <text x="3951.5" y="446.5" text-anchor="middle" font-size="13">Transactional trip and account records</text>
 <rect id="box-dispatch-service" x="2692" y="182" width="554" height="400" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="2969.0" y="210" text-anchor="middle" font-size="15">Dispatch Service</text>
-<rect id="box-matching-engine" x="2720" y="234" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="2839.5" y="262" text-anchor="middle" font-size="15">Matching Engine</text>
-<rect id="box-matchingengine" x="2748" y="286" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="2839.5" y="320" text-anchor="middle" font-size="15">MatchingEngine</text>
+<rect id="box-fare-pricer" x="2720" y="234" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="2839.5" y="262" text-anchor="middle" font-size="15">Fare Pricer</text>
+<rect id="box-farepricer" x="2748" y="286" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="2839.5" y="320" text-anchor="middle" font-size="15">FarePricer</text>
 <text x="2839.5" y="338" text-anchor="middle" font-size="12">«class»</text>
 <text x="2839.5" y="357" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="2839.5" y="375" text-anchor="middle" font-size="12">+match(trip): Assignment</text>
-<rect id="box-fare-pricer" x="2979" y="234" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="3098.5" y="262" text-anchor="middle" font-size="15">Fare Pricer</text>
-<rect id="box-farepricer" x="3007" y="286" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="3098.5" y="320" text-anchor="middle" font-size="15">FarePricer</text>
+<text x="2839.5" y="375" text-anchor="middle" font-size="12">+quote(trip): Fare</text>
+<rect id="box-matching-engine" x="2979" y="234" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="3098.5" y="262" text-anchor="middle" font-size="15">Matching Engine</text>
+<rect id="box-matchingengine" x="3007" y="286" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="3098.5" y="320" text-anchor="middle" font-size="15">MatchingEngine</text>
 <text x="3098.5" y="338" text-anchor="middle" font-size="12">«class»</text>
 <text x="3098.5" y="357" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="3098.5" y="375" text-anchor="middle" font-size="12">+quote(trip): Fare</text>
+<text x="3098.5" y="375" text-anchor="middle" font-size="12">+match(trip): Assignment</text>
 <rect id="box-rider-gateway" x="4097" y="182" width="574" height="400" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="4384.0" y="210" text-anchor="middle" font-size="15">Rider Gateway</text>
-<rect id="box-trip-controller" x="4125" y="234" width="242" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="4246.0" y="262" text-anchor="middle" font-size="15">Trip Controller</text>
-<rect id="box-tripcontroller" x="4153" y="286" width="186" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="4246.0" y="320" text-anchor="middle" font-size="15">TripController</text>
-<text x="4246.0" y="338" text-anchor="middle" font-size="12">«class»</text>
-<text x="4246.0" y="357" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="4246.0" y="375" text-anchor="middle" font-size="12">+requestTrip(request): TripId</text>
-<rect id="box-auth-middleware" x="4387" y="234" width="256" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="4515.0" y="262" text-anchor="middle" font-size="15">Auth Middleware</text>
-<rect id="box-authmiddleware" x="4415" y="286" width="200" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="4515.0" y="320" text-anchor="middle" font-size="15">AuthMiddleware</text>
-<text x="4515.0" y="338" text-anchor="middle" font-size="12">«class»</text>
-<text x="4515.0" y="357" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="4515.0" y="375" text-anchor="middle" font-size="12">+authenticate(token): Principal</text>
+<rect id="box-auth-middleware" x="4125" y="234" width="256" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="4253.0" y="262" text-anchor="middle" font-size="15">Auth Middleware</text>
+<rect id="box-authmiddleware" x="4153" y="286" width="200" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="4253.0" y="320" text-anchor="middle" font-size="15">AuthMiddleware</text>
+<text x="4253.0" y="338" text-anchor="middle" font-size="12">«class»</text>
+<text x="4253.0" y="357" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="4253.0" y="375" text-anchor="middle" font-size="12">+authenticate(token): Principal</text>
+<rect id="box-trip-controller" x="4401" y="234" width="242" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="4522.0" y="262" text-anchor="middle" font-size="15">Trip Controller</text>
+<rect id="box-tripcontroller" x="4429" y="286" width="186" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="4522.0" y="320" text-anchor="middle" font-size="15">TripController</text>
+<text x="4522.0" y="338" text-anchor="middle" font-size="12">«class»</text>
+<text x="4522.0" y="357" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="4522.0" y="375" text-anchor="middle" font-size="12">+requestTrip(request): TripId</text>
 <text x="48" y="674" font-size="12">Notation key</text>
 <text x="48" y="696" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="718" font-size="12">Enclosing frame = named scope or deployment boundary</text>

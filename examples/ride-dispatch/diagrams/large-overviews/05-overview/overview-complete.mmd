@@ -23,40 +23,40 @@ flowchart LR
     style n14 fill:#eaf6ec,stroke:#2e7d32
     n15[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
     style n15 fill:#eaf6ec,stroke:#2e7d32
-    subgraph n16["Rider Gateway"]
-      subgraph n17["Trip Controller"]
-        n18["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
+    subgraph n16["Dispatch Service"]
+      subgraph n17["Fare Pricer"]
+        n18["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
       end
-      subgraph n19["Auth Middleware"]
-        n20["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
+      subgraph n19["Matching Engine"]
+        n20["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
       end
     end
-    subgraph n21["Dispatch Service"]
-      subgraph n22["Matching Engine"]
-        n23["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
+    subgraph n21["Rider Gateway"]
+      subgraph n22["Auth Middleware"]
+        n23["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
       end
-      subgraph n24["Fare Pricer"]
-        n25["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
+      subgraph n24["Trip Controller"]
+        n25["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
       end
     end
   end
-  n20 -->|"Verifies rider accounts #91;Spanner API#93;"| n15
-  n25 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n15
-  n8 -->|"Delivers trip events #91;push subscription#93;"| n23
-  n23 -->|"Finds nearby drivers #91;Redis#93;"| n11
-  n23 -->|"Requests arrival estimates #91;HTTPS#93;"| n7
-  n23 -->|"Fetches road routes #91;HTTPS#93;"| n1
-  n18 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n8
-  n18 -->|"Charges completed trips #91;HTTPS#93;"| n3
-  n4 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n16
-  n21 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n8
+  n23 -->|"Verifies rider accounts #91;Spanner API#93;"| n15
+  n18 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n15
+  n8 -->|"Delivers trip events #91;push subscription#93;"| n20
+  n20 -->|"Finds nearby drivers #91;Redis#93;"| n11
+  n20 -->|"Requests arrival estimates #91;HTTPS#93;"| n7
+  n20 -->|"Fetches road routes #91;HTTPS#93;"| n1
+  n25 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n8
+  n25 -->|"Charges completed trips #91;HTTPS#93;"| n3
+  n4 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n21
+  n16 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n8
   n12 -->|"Updates driver position #91;Redis#93;"| n11
   n12 -->|"Appends telemetry samples #91;Bigtable API#93;"| n9
   n12 -->|"Publishes location samples #91;Pub/Sub#93;"| n8
   n8 -->|"Delivers assignment events #91;event#93;"| n13
   n13 -->|"Sends rider and driver alerts #91;HTTPS#93;"| n5
   n8 -->|"Streams events for analytics #91;BigQuery subscription#93;"| n14
-  n0 -->|"Accepts offers and reports trip status #91;gRPC#93;"| n16
+  n0 -->|"Accepts offers and reports trip status #91;gRPC#93;"| n21
   n9 -->|"Exports daily snapshots #91;Dataflow template#93;"| n10
   n0 -->|"Streams GPS pings #91;HTTPS#93;"| n12
   n2 -->|"Runs fleet reports #91;SQL#93;"| n14

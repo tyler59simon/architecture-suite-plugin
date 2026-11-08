@@ -9,16 +9,17 @@
 <text x="1077.875" y="210" text-anchor="middle" font-size="15">Example Organization</text>
 <rect id="box-ridepulse-prod" x="128" y="234" width="1899.75" height="1397" rx="6" stroke="#4285f4" fill="#f3f7fe" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="1077.875" y="262" text-anchor="middle" font-size="15">ridepulse-prod</text>
-<rect id="box-event-bus" x="1120.1666666666665" y="1209" width="207" height="109" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
+<rect id="box-event-bus" x="1120.1666666666665" y="1209" width="207" height="109" rx="28" stroke="#e65100" fill="#fff3e6" stroke-width="1.5"/>
 <text x="1223.6666666666665" y="1243" text-anchor="middle" font-size="15">Event Bus</text>
 <text x="1223.6666666666665" y="1261" text-anchor="middle" font-size="12">«container»</text>
 <text x="1223.6666666666665" y="1279" text-anchor="middle" font-size="12">Pub/Sub</text>
 <text x="1223.6666666666665" y="1298" text-anchor="middle" font-size="13">Carries trip and location events</text>
-<rect id="box-fleet-time-series" x="1602.6666666666665" y="1229" width="182" height="109" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
-<text x="1693.6666666666665" y="1263" text-anchor="middle" font-size="15">Fleet Time Series</text>
-<text x="1693.6666666666665" y="1281" text-anchor="middle" font-size="12">«container»</text>
-<text x="1693.6666666666665" y="1299" text-anchor="middle" font-size="12">Bigtable</text>
-<text x="1693.6666666666665" y="1318" text-anchor="middle" font-size="13">High-rate telemetry history</text>
+<rect id="box-fleet-time-series" x="1602.6666666666665" y="1223" width="182" height="121" fill="none" stroke="none"/>
+<path d="M 1602.6666666666665,1233 L 1602.6666666666665,1334 A 91.0,10 0 0 0 1784.6666666666665,1334 L 1784.6666666666665,1233 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="1693.6666666666665" cy="1233" rx="91.0" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="1693.6666666666665" y="1269" text-anchor="middle" font-size="15">Fleet Time Series</text>
+<text x="1693.6666666666665" y="1287" text-anchor="middle" font-size="12">«container»</text>
+<text x="1693.6666666666665" y="1305" text-anchor="middle" font-size="12">Bigtable</text>
+<text x="1693.6666666666665" y="1324" text-anchor="middle" font-size="13">High-rate telemetry history</text>
 <rect id="box-location-archive" x="1603.6666666666665" y="1434" width="180" height="169" fill="none" stroke="none"/>
 <path d="M 1603.6666666666665,1444 L 1603.6666666666665,1593 A 90.0,10 0 0 0 1783.6666666666665,1593 L 1783.6666666666665,1444 Z" fill="#e4f5f7" stroke="#00838f" stroke-width="1.5"/><ellipse cx="1693.6666666666665" cy="1444" rx="90.0" ry="10" fill="#e4f5f7" stroke="#00838f" stroke-width="1.5"/>
 <image x="1673.6666666666665" y="1460" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00NDIsMjc3LjlINzBjLTguOCwwLTE2LDcuMi0xNiwxNnYxNDguMWMwLDguOCw3LjIsMTYsMTYsMTZoMTA3LjJjMS41LjUsMy4xLjcsNC44LjdzMy4zLS4zLDQuOC0uN2gyNTUuMmM4LjgsMCwxNi03LjIsMTYtMTZ2LTE0OC4xYzAtOC44LTcuMi0xNi0xNi0xNlpNODYsMzA5LjloODB2MTE2LjFoLTgwdi0xMTYuMVpNNDI2LDQyNS45aC0yMjh2LTExNi4xaDIyOHYxMTYuMVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik00NDIsNTRINzBjLTguOCwwLTE2LDcuMi0xNiwxNnYxNDguOGMwLDguOCw3LjIsMTYsMTYsMTZoMzcyYzguOCwwLDE2LTcuMiwxNi0xNlY3MGMwLTguOC03LjItMTYtMTYtMTZaTTg2LDg2aDgwdjExNi44aC04MHYtMTE2LjhaTTQyNiwyMDIuOGgtMjI4di0xMTYuOGgyMjh2MTE2LjhaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNNDQyLDIzNC44aC0xNlY4Nkg1NHYtMTZjMC04LjgsNy4yLTE2LDE2LTE2aDM3MmM4LjgsMCwxNiw3LjIsMTYsMTZ2MTQ4LjhjMCw4LjgtNy4yLDE2LTE2LDE2WiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQ0Miw0NTcuOWgtMTZ2LTE0OC4xSDU0di0xNmMwLTguOCw3LjItMTYsMTYtMTZoMzcyYzguOCwwLDE2LDcuMiwxNiwxNnYxNDguMWMwLDguOC03LjIsMTYtMTYsMTZaIi8+CiAgICA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSIzNDkiIGN5PSIxNDQuNCIgcj0iMzciLz4KICAgIDxjaXJjbGUgY2xhc3M9InN0MSIgY3g9IjM0OSIgY3k9IjM2Ny45IiByPSIzNyIvPgogIDwvZz4KPC9zdmc+"/>
@@ -78,11 +79,12 @@
 <text x="1485.1666666666665" y="851" text-anchor="middle" font-size="13">Terminates rider and driver mobile traffic</text>
 <rect id="box-data-subnet" x="1089.6666666666665" y="667" width="216" height="320" rx="6" stroke="#1a73e8" fill="#eef4fe" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="1197.6666666666665" y="695" text-anchor="middle" font-size="15">data-subnet</text>
-<rect id="box-location-cache" x="1117.6666666666665" y="719" width="160" height="109" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
-<text x="1197.6666666666665" y="753" text-anchor="middle" font-size="15">Location Cache</text>
-<text x="1197.6666666666665" y="771" text-anchor="middle" font-size="12">«container»</text>
-<text x="1197.6666666666665" y="789" text-anchor="middle" font-size="12">Redis</text>
-<text x="1197.6666666666665" y="808" text-anchor="middle" font-size="13">Latest driver positions</text>
+<rect id="box-location-cache" x="1117.6666666666665" y="719" width="160" height="121" fill="none" stroke="none"/>
+<path d="M 1117.6666666666665,729 L 1117.6666666666665,830 A 80.0,10 0 0 0 1277.6666666666665,830 L 1277.6666666666665,729 Z" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/><ellipse cx="1197.6666666666665" cy="729" rx="80.0" ry="10" fill="#eaf6ec" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="1197.6666666666665" y="765" text-anchor="middle" font-size="15">Location Cache</text>
+<text x="1197.6666666666665" y="783" text-anchor="middle" font-size="12">«container»</text>
+<text x="1197.6666666666665" y="801" text-anchor="middle" font-size="12">Redis</text>
+<text x="1197.6666666666665" y="820" text-anchor="middle" font-size="13">Latest driver positions</text>
 <polyline id="edge-containers-r10" points="902,529 902,610" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="703" y="559" width="197" height="26" fill="white" rx="3"/>
 <text x="801.5" y="576" font-size="11" text-anchor="middle">Requests arrival estimates [HTTPS]</text>
@@ -95,7 +97,7 @@
 <polyline id="edge-containers-r14" points="1353,529 1353,595 1224.3333333333333,595 1224.333333333333,719" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="1182" y="559" width="169" height="26" fill="white" rx="3"/>
 <text x="1266.5" y="576" font-size="11" text-anchor="middle">Updates driver position [Redis]</text>
-<polyline id="edge-containers-r15" points="1483.5,529 1483.5,539 1693.6666666666665,539 1693.6666666666665,1229" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
+<polyline id="edge-containers-r15" points="1483.5,529 1483.5,539 1693.6666666666665,539 1693.6666666666665,1223" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="1464.6666666666665" y="1143" width="227" height="26" fill="white" rx="3"/>
 <text x="1578.1666666666665" y="1160" font-size="11" text-anchor="middle">Appends telemetry samples [Bigtable API]</text>
 <polyline id="edge-containers-r16" points="1418.25,529 1418.25,549 1682.6666666666665,549 1682.6666666666665,1123 1443.6666666666665,1123 1443.6666666666665,1179 1258.1666666666665,1179 1258.1666666666665,1209" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
@@ -107,7 +109,7 @@
 <polyline id="edge-containers-r19" points="1223.6666666666665,1318 1223.6666666666665,1434" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="941.6666666666666" y="1388" width="280" height="26" fill="white" rx="3"/>
 <text x="1081.6666666666665" y="1405" font-size="11" text-anchor="middle">Streams events for analytics [BigQuery subscription]</text>
-<polyline id="edge-containers-r20" points="1693.6666666666665,1338 1693.6666666666665,1434" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
+<polyline id="edge-containers-r20" points="1693.6666666666665,1344 1693.6666666666665,1434" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="1696.6666666666665" y="1388" width="236" height="26" fill="white" rx="3"/>
 <text x="1814.6666666666665" y="1405" font-size="11" text-anchor="middle">Exports daily snapshots [Dataflow template]</text>
 <polyline id="edge-containers-r5" points="1441.3333333333333,871 1441.3333333333335,1093 440,1093 440,1199" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>

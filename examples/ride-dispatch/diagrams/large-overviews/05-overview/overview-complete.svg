@@ -88,31 +88,8 @@
 <text x="2083.6666666666665" y="1172" text-anchor="middle" font-size="12">«container»</text>
 <text x="2083.6666666666665" y="1190" text-anchor="middle" font-size="12">Spanner</text>
 <text x="2083.6666666666665" y="1209" text-anchor="middle" font-size="13">Transactional trip and account records</text>
-<rect id="box-rider-gateway" x="2000.7666666666664" y="532" width="574" height="405" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="2287.7666666666664" y="560" text-anchor="middle" font-size="15">Rider Gateway</text>
-<rect id="box-trip-controller" x="2304.7666666666664" y="584" width="242" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="2425.7666666666664" y="612" text-anchor="middle" font-size="15">Trip Controller</text>
-<rect id="box-tripcontroller" x="2332.7666666666664" y="636" width="186" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="2425.7666666666664" y="670" text-anchor="middle" font-size="15">TripController</text>
-<text x="2425.7666666666664" y="688" text-anchor="middle" font-size="12">«class»</text>
-<text x="2425.7666666666664" y="707" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="2425.7666666666664" y="725" text-anchor="middle" font-size="12">+requestTrip(request): TripId</text>
-<rect id="box-auth-middleware" x="2028.7666666666664" y="584" width="256" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="2156.7666666666664" y="612" text-anchor="middle" font-size="15">Auth Middleware</text>
-<rect id="box-authmiddleware" x="2056.7666666666664" y="636" width="200" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="2156.7666666666664" y="670" text-anchor="middle" font-size="15">AuthMiddleware</text>
-<text x="2156.7666666666664" y="688" text-anchor="middle" font-size="12">«class»</text>
-<text x="2156.7666666666664" y="707" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="2156.7666666666664" y="725" text-anchor="middle" font-size="12">+authenticate(token): Principal</text>
 <rect id="box-dispatch-service" x="419.75" y="529" width="554" height="410" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="696.75" y="557" text-anchor="middle" font-size="15">Dispatch Service</text>
-<rect id="box-matching-engine" x="447.75" y="586" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="567.25" y="614" text-anchor="middle" font-size="15">Matching Engine</text>
-<rect id="box-matchingengine" x="475.75" y="638" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="567.25" y="672" text-anchor="middle" font-size="15">MatchingEngine</text>
-<text x="567.25" y="690" text-anchor="middle" font-size="12">«class»</text>
-<text x="567.25" y="709" text-anchor="middle" font-size="13">Illustrative implementation</text>
-<text x="567.25" y="727" text-anchor="middle" font-size="12">+match(trip): Assignment</text>
 <rect id="box-fare-pricer" x="706.75" y="586" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="826.25" y="614" text-anchor="middle" font-size="15">Fare Pricer</text>
 <rect id="box-farepricer" x="734.75" y="638" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
@@ -120,6 +97,29 @@
 <text x="826.25" y="690" text-anchor="middle" font-size="12">«class»</text>
 <text x="826.25" y="709" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="826.25" y="727" text-anchor="middle" font-size="12">+quote(trip): Fare</text>
+<rect id="box-matching-engine" x="447.75" y="586" width="239" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="567.25" y="614" text-anchor="middle" font-size="15">Matching Engine</text>
+<rect id="box-matchingengine" x="475.75" y="638" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="567.25" y="672" text-anchor="middle" font-size="15">MatchingEngine</text>
+<text x="567.25" y="690" text-anchor="middle" font-size="12">«class»</text>
+<text x="567.25" y="709" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="567.25" y="727" text-anchor="middle" font-size="12">+match(trip): Assignment</text>
+<rect id="box-rider-gateway" x="2000.7666666666664" y="532" width="574" height="405" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="2287.7666666666664" y="560" text-anchor="middle" font-size="15">Rider Gateway</text>
+<rect id="box-auth-middleware" x="2028.7666666666664" y="584" width="256" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="2156.7666666666664" y="612" text-anchor="middle" font-size="15">Auth Middleware</text>
+<rect id="box-authmiddleware" x="2056.7666666666664" y="636" width="200" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="2156.7666666666664" y="670" text-anchor="middle" font-size="15">AuthMiddleware</text>
+<text x="2156.7666666666664" y="688" text-anchor="middle" font-size="12">«class»</text>
+<text x="2156.7666666666664" y="707" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="2156.7666666666664" y="725" text-anchor="middle" font-size="12">+authenticate(token): Principal</text>
+<rect id="box-trip-controller" x="2304.7666666666664" y="584" width="242" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="2425.7666666666664" y="612" text-anchor="middle" font-size="15">Trip Controller</text>
+<rect id="box-tripcontroller" x="2332.7666666666664" y="636" width="186" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="2425.7666666666664" y="670" text-anchor="middle" font-size="15">TripController</text>
+<text x="2425.7666666666664" y="688" text-anchor="middle" font-size="12">«class»</text>
+<text x="2425.7666666666664" y="707" text-anchor="middle" font-size="13">Illustrative implementation</text>
+<text x="2425.7666666666664" y="725" text-anchor="middle" font-size="12">+requestTrip(request): TripId</text>
 <polyline id="edge-code-auth-middleware-r1" points="2156.7666666666664,745 2156.7666666666664,954 2125.5,954 2125.5,1060" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="1922.5" y="974" width="201" height="26" fill="white" rx="3"/>
 <text x="2023.0" y="991" font-size="11" text-anchor="middle">Verifies rider accounts [Spanner API]</text>

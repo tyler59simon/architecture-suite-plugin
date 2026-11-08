@@ -40,6 +40,12 @@ Repository boundary; runtime ownership unconfirmed
 - dispatch/dispatch/pricing.py:2: SDK usage of GCP-Cloud-Spanner; deployment and call semantics unconfirmed.
 - ingest/handler.js:2: SDK usage of GCP-Legacy-bigtable; deployment and call semantics unconfirmed.
 
+## Claim status
+
+- observed: 3 elements, 0 relationships
+- inferred: 17 elements, 1 relationships
+- not stated: 1 elements, 0 relationships
+
 ## Layout verification
 
 ```json
@@ -82,8 +88,8 @@ Repository boundary; runtime ownership unconfirmed
       "findings": [],
       "crossings": 0,
       "bends": 0,
-      "aspect_ratio": 1.01,
-      "score": 1.010498687664042,
+      "aspect_ratio": 1.034,
+      "score": 1.0341207349081365,
       "advisories": []
     },
     "04-code/code-ridepulse-repo-go-notifier-notifier-main-go": {
@@ -114,8 +120,8 @@ Repository boundary; runtime ownership unconfirmed
       "findings": [],
       "crossings": 0,
       "bends": 0,
-      "aspect_ratio": 3.141,
-      "score": 3.1409897292250233,
+      "aspect_ratio": 3.044,
+      "score": 3.043633125556545,
       "advisories": []
     }
   }

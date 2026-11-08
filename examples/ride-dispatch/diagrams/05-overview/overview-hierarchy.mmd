@@ -24,19 +24,19 @@ flowchart LR
     n15[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
     style n15 fill:#eaf6ec,stroke:#2e7d32
     subgraph n16["Dispatch Service"]
-      subgraph n17["Matching Engine"]
-        n18["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
+      subgraph n17["Fare Pricer"]
+        n18["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
       end
-      subgraph n19["Fare Pricer"]
-        n20["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
+      subgraph n19["Matching Engine"]
+        n20["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
       end
     end
     subgraph n21["Rider Gateway"]
-      subgraph n22["Trip Controller"]
-        n23["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
+      subgraph n22["Auth Middleware"]
+        n23["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
       end
-      subgraph n24["Auth Middleware"]
-        n25["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
+      subgraph n24["Trip Controller"]
+        n25["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
       end
     end
   end

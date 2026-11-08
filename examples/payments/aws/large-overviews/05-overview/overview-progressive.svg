@@ -132,6 +132,21 @@
 <text x="4427.666666666666" y="1326" text-anchor="middle" font-size="13">Encrypts card data with per-record data</text>
 <text x="4427.666666666666" y="1345" text-anchor="middle" font-size="13">keys</text>
 <text x="4427.666666666666" y="1364" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
+<rect id="box-fraud-scoring" x="3775" y="1456.4999999999998" width="836" height="238.83333333333334" rx="6" stroke="#7b1fa2" fill="#f5eafa" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="4193.0" y="1484.4999999999998" text-anchor="middle" font-size="15">Fraud Scoring</text>
+<rect id="box-risk-scorer" x="3803" y="1508.4999999999998" width="239" height="147" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="3922.5" y="1542.4999999999998" text-anchor="middle" font-size="15">Risk Scorer</text>
+<text x="3922.5" y="1560.4999999999998" text-anchor="middle" font-size="12">«component»</text>
+<text x="3922.5" y="1578.4999999999998" text-anchor="middle" font-size="12">Python</text>
+<text x="3922.5" y="1597.4999999999998" text-anchor="middle" font-size="13">Returns a risk score from the hosted</text>
+<text x="3922.5" y="1616.4999999999998" text-anchor="middle" font-size="13">model</text>
+<text x="3922.5" y="1635.4999999999998" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
+<rect id="box-rules-engine" x="4311" y="1539.333333333333" width="272" height="128" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="4447.0" y="1573.333333333333" text-anchor="middle" font-size="15">Rules Engine</text>
+<text x="4447.0" y="1591.333333333333" text-anchor="middle" font-size="12">«component»</text>
+<text x="4447.0" y="1609.333333333333" text-anchor="middle" font-size="12">Python</text>
+<text x="4447.0" y="1628.333333333333" text-anchor="middle" font-size="13">Applies merchant and platform block rules</text>
+<text x="4447.0" y="1647.333333333333" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <rect id="box-ledger-service" x="4937" y="559" width="320" height="394" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="5097.0" y="587" text-anchor="middle" font-size="15">Ledger Service</text>
 <rect id="box-balance-calculator" x="4965" y="778" width="216" height="147" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
@@ -148,42 +163,6 @@
 <text x="5097.0" y="700" text-anchor="middle" font-size="13">Posts balanced journal entries for money</text>
 <text x="5097.0" y="719" text-anchor="middle" font-size="13">movements</text>
 <text x="5097.0" y="738" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-payments-api" x="1426" y="339.33333333333337" width="840" height="386.8333333333333" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="1846.0" y="367.33333333333337" text-anchor="middle" font-size="15">Payments API</text>
-<rect id="box-idempotency-guard" x="1973" y="551.1666666666667" width="265" height="147" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="2105.5" y="585.1666666666667" text-anchor="middle" font-size="15">Idempotency Guard</text>
-<text x="2105.5" y="603.1666666666667" text-anchor="middle" font-size="12">«component»</text>
-<text x="2105.5" y="621.1666666666667" text-anchor="middle" font-size="12">Go</text>
-<text x="2105.5" y="640.1666666666667" text-anchor="middle" font-size="13">Makes retried requests return the original</text>
-<text x="2105.5" y="659.1666666666667" text-anchor="middle" font-size="13">result</text>
-<text x="2105.5" y="678.1666666666667" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-merchant-authenticator" x="1455" y="391.33333333333337" width="247" height="128" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="1578.5" y="425.33333333333337" text-anchor="middle" font-size="15">Merchant Authenticator</text>
-<text x="1578.5" y="443.33333333333337" text-anchor="middle" font-size="12">«component»</text>
-<text x="1578.5" y="461.33333333333337" text-anchor="middle" font-size="12">Go</text>
-<text x="1578.5" y="480.33333333333337" text-anchor="middle" font-size="13">Validates secret API keys and scopes</text>
-<text x="1578.5" y="499.33333333333337" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-payment-intents-controller" x="1454" y="539.3333333333334" width="249" height="128" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="1578.5" y="573.3333333333334" text-anchor="middle" font-size="15">Payment Intents Controller</text>
-<text x="1578.5" y="591.3333333333334" text-anchor="middle" font-size="12">«component»</text>
-<text x="1578.5" y="609.3333333333334" text-anchor="middle" font-size="12">Go</text>
-<text x="1578.5" y="628.3333333333334" text-anchor="middle" font-size="13">Creates and confirms payment intents</text>
-<text x="1578.5" y="647.3333333333334" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-fraud-scoring" x="3775" y="1456.4999999999998" width="836" height="238.83333333333334" rx="6" stroke="#7b1fa2" fill="#f5eafa" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="4193.0" y="1484.4999999999998" text-anchor="middle" font-size="15">Fraud Scoring</text>
-<rect id="box-risk-scorer" x="3803" y="1508.4999999999998" width="239" height="147" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="3922.5" y="1542.4999999999998" text-anchor="middle" font-size="15">Risk Scorer</text>
-<text x="3922.5" y="1560.4999999999998" text-anchor="middle" font-size="12">«component»</text>
-<text x="3922.5" y="1578.4999999999998" text-anchor="middle" font-size="12">Python</text>
-<text x="3922.5" y="1597.4999999999998" text-anchor="middle" font-size="13">Returns a risk score from the hosted</text>
-<text x="3922.5" y="1616.4999999999998" text-anchor="middle" font-size="13">model</text>
-<text x="3922.5" y="1635.4999999999998" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-rules-engine" x="4311" y="1539.333333333333" width="272" height="128" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="4447.0" y="1573.333333333333" text-anchor="middle" font-size="15">Rules Engine</text>
-<text x="4447.0" y="1591.333333333333" text-anchor="middle" font-size="12">«component»</text>
-<text x="4447.0" y="1609.333333333333" text-anchor="middle" font-size="12">Python</text>
-<text x="4447.0" y="1628.333333333333" text-anchor="middle" font-size="13">Applies merchant and platform block rules</text>
-<text x="4447.0" y="1647.333333333333" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <rect id="box-payment-orchestrator" x="2556" y="1002.5" width="868" height="405" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="2990.0" y="1030.5" text-anchor="middle" font-size="15">Payment Orchestrator</text>
 <rect id="box-3ds-handler" x="3166" y="1232.5" width="191" height="147" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
@@ -207,6 +186,27 @@
 <text x="2702.5" y="1284.75" text-anchor="middle" font-size="13">Owns payment state transitions and</text>
 <text x="2702.5" y="1303.75" text-anchor="middle" font-size="13">retries</text>
 <text x="2702.5" y="1322.75" text-anchor="middle" font-size="13">Drill-down: 2 code</text>
+<rect id="box-payments-api" x="1426" y="339.33333333333337" width="840" height="386.8333333333333" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1846.0" y="367.33333333333337" text-anchor="middle" font-size="15">Payments API</text>
+<rect id="box-idempotency-guard" x="1973" y="551.1666666666667" width="265" height="147" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="2105.5" y="585.1666666666667" text-anchor="middle" font-size="15">Idempotency Guard</text>
+<text x="2105.5" y="603.1666666666667" text-anchor="middle" font-size="12">«component»</text>
+<text x="2105.5" y="621.1666666666667" text-anchor="middle" font-size="12">Go</text>
+<text x="2105.5" y="640.1666666666667" text-anchor="middle" font-size="13">Makes retried requests return the original</text>
+<text x="2105.5" y="659.1666666666667" text-anchor="middle" font-size="13">result</text>
+<text x="2105.5" y="678.1666666666667" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
+<rect id="box-merchant-authenticator" x="1455" y="391.33333333333337" width="247" height="128" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="1578.5" y="425.33333333333337" text-anchor="middle" font-size="15">Merchant Authenticator</text>
+<text x="1578.5" y="443.33333333333337" text-anchor="middle" font-size="12">«component»</text>
+<text x="1578.5" y="461.33333333333337" text-anchor="middle" font-size="12">Go</text>
+<text x="1578.5" y="480.33333333333337" text-anchor="middle" font-size="13">Validates secret API keys and scopes</text>
+<text x="1578.5" y="499.33333333333337" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
+<rect id="box-payment-intents-controller" x="1454" y="539.3333333333334" width="249" height="128" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="1578.5" y="573.3333333333334" text-anchor="middle" font-size="15">Payment Intents Controller</text>
+<text x="1578.5" y="591.3333333333334" text-anchor="middle" font-size="12">«component»</text>
+<text x="1578.5" y="609.3333333333334" text-anchor="middle" font-size="12">Go</text>
+<text x="1578.5" y="628.3333333333334" text-anchor="middle" font-size="13">Creates and confirms payment intents</text>
+<text x="1578.5" y="647.3333333333334" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <polyline id="edge-component-card-vault-r1" points="1099,775.3333333333333 1119,775.3333333333333 1119,1625.4999999999998 3750,1625.4999999999998 3750,1335 3814.6666666666665,1335" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="2310.5" y="1628.4999999999998" width="211" height="26" fill="white" rx="3"/>
 <text x="2416.0" y="1645.4999999999998" font-size="11" text-anchor="middle">Submits card data for a token [HTTPS]</text>

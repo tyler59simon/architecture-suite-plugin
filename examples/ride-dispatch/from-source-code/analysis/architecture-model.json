@@ -14,6 +14,7 @@
       "id": "gcp-resource-infra-main-tf-line-12-gcp-cloud-run",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Cloud-Run"
@@ -29,6 +30,7 @@
       "id": "gcp-resource-infra-main-tf-line-17-gcp-legacy-pubsub",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Legacy-pubsub"
@@ -44,6 +46,7 @@
       "id": "gcp-resource-infra-main-tf-line-2-gcp-google-kubernetes-engine",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Google-Kubernetes-Engine"
@@ -59,6 +62,7 @@
       "id": "gcp-resource-infra-main-tf-line-21-gcp-cloud-spanner",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Cloud-Spanner"
@@ -74,6 +78,7 @@
       "id": "gcp-resource-infra-main-tf-line-26-gcp-legacy-memorystore",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Legacy-memorystore"
@@ -89,6 +94,7 @@
       "id": "gcp-resource-infra-main-tf-line-31-gcp-legacy-bigtable",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Legacy-bigtable"
@@ -104,6 +110,7 @@
       "id": "gcp-resource-infra-main-tf-line-35-gcp-bigquery",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-BigQuery"
@@ -119,6 +126,7 @@
       "id": "gcp-resource-infra-main-tf-line-39-gcp-cloud-storage",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Cloud-Storage"
@@ -134,6 +142,7 @@
       "id": "gcp-resource-infra-main-tf-line-7-gcp-cloud-run",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "cloud": {
         "provider": "gcp",
         "service": "GCP-Cloud-Run"
@@ -156,6 +165,7 @@
       "id": "ridepulse-repo-go-notifier",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-9"
       ]
@@ -167,6 +177,7 @@
       "id": "ridepulse-repo-go-notifier-notifier-main-go",
       "type": "component",
       "parent_id": "ridepulse-repo-go-notifier",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-10"
       ]
@@ -181,6 +192,7 @@
       "members": [
         "+main()"
       ],
+      "status": "observed",
       "evidence_ids": [
         "evidence-11"
       ]
@@ -192,6 +204,7 @@
       "id": "ridepulse-repo-node-ingest",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-7"
       ]
@@ -203,6 +216,7 @@
       "id": "ridepulse-repo-node-ingest-ingest-handler-js",
       "type": "component",
       "parent_id": "ridepulse-repo-node-ingest",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-8"
       ]
@@ -214,6 +228,7 @@
       "id": "ridepulse-repo-python-dispatch",
       "type": "container",
       "parent_id": "ridepulse-repo",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-1"
       ]
@@ -225,6 +240,7 @@
       "id": "ridepulse-repo-python-dispatch-dispatch-dispatch-init-py",
       "type": "component",
       "parent_id": "ridepulse-repo-python-dispatch",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-2"
       ]
@@ -236,6 +252,7 @@
       "id": "ridepulse-repo-python-dispatch-dispatch-dispatch-matching-py",
       "type": "component",
       "parent_id": "ridepulse-repo-python-dispatch",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-3"
       ]
@@ -250,6 +267,7 @@
       "members": [
         "+match(self, trip): unspecified"
       ],
+      "status": "observed",
       "evidence_ids": [
         "evidence-4"
       ]
@@ -261,6 +279,7 @@
       "id": "ridepulse-repo-python-dispatch-dispatch-dispatch-pricing-py",
       "type": "component",
       "parent_id": "ridepulse-repo-python-dispatch",
+      "status": "inferred",
       "evidence_ids": [
         "evidence-5"
       ]
@@ -275,6 +294,7 @@
       "members": [
         "+quote(self, trip): unspecified"
       ],
+      "status": "observed",
       "evidence_ids": [
         "evidence-6"
       ]
@@ -292,7 +312,8 @@
       "flow_ids": [
         "flow-1"
       ],
-      "technology": "static dependency"
+      "technology": "static dependency",
+      "status": "inferred"
     }
   ],
   "views": [
