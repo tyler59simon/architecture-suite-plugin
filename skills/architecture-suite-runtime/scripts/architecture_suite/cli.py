@@ -38,6 +38,7 @@ from .safety import (
 )
 
 DEFAULT_FORMATS = {"mermaid", "drawio", "png"}
+ALL_FORMATS = DEFAULT_FORMATS | {"svg"}
 
 
 def _json_print(value):
@@ -46,11 +47,11 @@ def _json_print(value):
 
 def _parse_formats(value):
     formats = (
-        DEFAULT_FORMATS.copy()
+        ALL_FORMATS.copy()
         if value == "all"
         else {x.strip() for x in value.split(",") if x.strip()}
     )
-    if not formats or formats - DEFAULT_FORMATS - {"svg"}:
+    if not formats or formats - ALL_FORMATS:
         raise argparse.ArgumentTypeError("format must be all or mermaid,drawio,png,svg")
     return formats
 
