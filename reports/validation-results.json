@@ -3,7 +3,7 @@
   "failures": 0,
   "errors": 0,
   "skipped": 0,
-  "seconds": 362.908,
+  "seconds": 261.479,
   "line_coverage_percent": 98.3,
   "branch_coverage_percent": 96.28,
   "covered_lines": 2998,
