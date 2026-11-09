@@ -27,40 +27,40 @@ flowchart LR
     n18[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
     style n18 fill:#eaf6ec,stroke:#2e7d32
     n19["Webhook Dispatcher#10;«container»#10;Node.js#10;Signs and delivers payment events to#10;merchants, with retries"]
-    subgraph n20["Ledger Service"]
-      subgraph n21["Balance Calculator"]
-        n22["BalanceCalculator#10;«class»#10;Illustrative implementation#10;+balance(merchantId, currency): Balance"]
+    subgraph n20["Card Vault"]
+      subgraph n21["Card Tokenizer"]
+        n22["CardTokenizer#10;«class»#10;Illustrative implementation#10;+tokenize(pan, expiry): CardToken#10;+detokenize(token): CardData"]
       end
-      subgraph n23["Journal Writer"]
-        n24["JournalWriter#10;«class»#10;Illustrative implementation#10;+post(entries): JournalId"]
-      end
-    end
-    subgraph n25["Card Vault"]
-      subgraph n26["Envelope Encryptor"]
-        n27["EnvelopeEncryptor#10;«class»#10;Illustrative implementation#10;+encrypt(plaintext, keyId): Ciphertext#10;+decrypt(ciphertext): Bytes"]
-      end
-      subgraph n28["Card Tokenizer"]
-        n29["CardTokenizer#10;«class»#10;Illustrative implementation#10;+tokenize(pan, expiry): CardToken#10;+detokenize(token): CardData"]
+      subgraph n23["Envelope Encryptor"]
+        n24["EnvelopeEncryptor#10;«class»#10;Illustrative implementation#10;+encrypt(plaintext, keyId): Ciphertext#10;+decrypt(ciphertext): Bytes"]
       end
     end
-    subgraph n30["Payment Orchestrator"]
-      subgraph n31["3DS Handler"]
-        n32["ThreeDSecureClient#10;«class»#10;Illustrative implementation#10;+authenticate(payment):#10;AuthenticationResult"]
+    subgraph n25["Fraud Scoring"]
+      subgraph n26["Risk Scorer"]
+        n27["RiskScorer#10;«class»#10;Illustrative implementation#10;+score(payment): RiskScore"]
       end
-      subgraph n33["Payment State Machine"]
-        n34["PaymentState#10;«interface»#10;Illustrative implementation#10;+next(event): PaymentState"]
-        n35["PaymentStateMachine#10;«class»#10;Illustrative implementation#10;+authorize(payment): Authorization#10;+capture(payment, amount): Capture#10;+refund(payment, amount): Refund"]
-      end
-      subgraph n36["Acquirer Router"]
-        n37["AcquirerRouter#10;«class»#10;Illustrative implementation#10;+route(payment): AcquirerConnection"]
+      subgraph n28["Rules Engine"]
+        n29["RuleSet#10;«class»#10;Illustrative implementation#10;+evaluate(payment, score): Decision"]
       end
     end
-    subgraph n38["Fraud Scoring"]
-      subgraph n39["Rules Engine"]
-        n40["RuleSet#10;«class»#10;Illustrative implementation#10;+evaluate(payment, score): Decision"]
+    subgraph n30["Ledger Service"]
+      subgraph n31["Balance Calculator"]
+        n32["BalanceCalculator#10;«class»#10;Illustrative implementation#10;+balance(merchantId, currency): Balance"]
       end
-      subgraph n41["Risk Scorer"]
-        n42["RiskScorer#10;«class»#10;Illustrative implementation#10;+score(payment): RiskScore"]
+      subgraph n33["Journal Writer"]
+        n34["JournalWriter#10;«class»#10;Illustrative implementation#10;+post(entries): JournalId"]
+      end
+    end
+    subgraph n35["Payment Orchestrator"]
+      subgraph n36["3DS Handler"]
+        n37["ThreeDSecureClient#10;«class»#10;Illustrative implementation#10;+authenticate(payment):#10;AuthenticationResult"]
+      end
+      subgraph n38["Acquirer Router"]
+        n39["AcquirerRouter#10;«class»#10;Illustrative implementation#10;+route(payment): AcquirerConnection"]
+      end
+      subgraph n40["Payment State Machine"]
+        n41["PaymentState#10;«interface»#10;Illustrative implementation#10;+next(event): PaymentState"]
+        n42["PaymentStateMachine#10;«class»#10;Illustrative implementation#10;+authorize(payment): Authorization#10;+capture(payment, amount): Capture#10;+refund(payment, amount): Refund"]
       end
     end
     subgraph n43["Payments API"]
@@ -75,24 +75,24 @@ flowchart LR
       end
     end
   end
-  n35 -->|"Delegates each transition to the current state #91;in-process#93;"| n34
-  n9 -->|"Submits card data for a token #91;HTTPS#93;"| n28
-  n30 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n28
-  n28 -->|"Encrypts card records #91;in-process#93;"| n26
-  n26 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n18
-  n30 -->|"Requests a fraud score #91;gRPC#93;"| n41
-  n41 -->|"Applies block and review rules #91;in-process#93;"| n39
-  n6 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n39
-  n13 -->|"Delivers captured, refunded and fee events #91;events#93;"| n23
-  n23 -->|"Posts double-entry journal entries #91;SQL#93;"| n11
-  n23 -->|"Streams journal entries #91;batch export#93;"| n15
-  n17 -->|"Reconciles merchant balances #91;gRPC#93;"| n21
-  n43 -->|"Starts authorization #91;gRPC#93;"| n33
-  n33 -->|"Requests cardholder authentication #91;in-process#93;"| n31
-  n31 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n0
-  n33 -->|"Sends authorization and capture #91;in-process#93;"| n36
-  n36 -->|"Authorizes, captures and refunds #91;ISO 8583 over TLS#93;"| n1
-  n33 -->|"Publishes payment lifecycle events #91;events#93;"| n13
+  n42 -->|"Delegates each transition to the current state #91;in-process#93;"| n41
+  n9 -->|"Submits card data for a token #91;HTTPS#93;"| n21
+  n35 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n21
+  n21 -->|"Encrypts card records #91;in-process#93;"| n23
+  n23 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n18
+  n35 -->|"Requests a fraud score #91;gRPC#93;"| n26
+  n26 -->|"Applies block and review rules #91;in-process#93;"| n28
+  n6 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n28
+  n13 -->|"Delivers captured, refunded and fee events #91;events#93;"| n33
+  n33 -->|"Posts double-entry journal entries #91;SQL#93;"| n11
+  n33 -->|"Streams journal entries #91;batch export#93;"| n15
+  n17 -->|"Reconciles merchant balances #91;gRPC#93;"| n31
+  n43 -->|"Starts authorization #91;gRPC#93;"| n40
+  n40 -->|"Requests cardholder authentication #91;in-process#93;"| n36
+  n36 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n0
+  n40 -->|"Sends authorization and capture #91;in-process#93;"| n38
+  n38 -->|"Authorizes, captures and refunds #91;ISO 8583 over TLS#93;"| n1
+  n40 -->|"Publishes payment lifecycle events #91;events#93;"| n13
   n9 -->|"Confirms the payment with the card token #91;HTTPS#93;"| n48
   n12 -->|"Lists payments and issues refunds #91;HTTPS#93;"| n48
   n5 -->|"Calls the API server-side with a secret key #91;HTTPS#93;"| n46

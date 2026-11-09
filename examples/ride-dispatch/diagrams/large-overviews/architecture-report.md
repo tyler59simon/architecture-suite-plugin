@@ -6,7 +6,7 @@ Illustrative owned services running on Google Cloud
 
 ## Evidence
 
-- evidence-1: fictional brief: — 
+- evidence-1: fictional brief
 
 ## Assumptions
 
@@ -25,8 +25,8 @@ Illustrative owned services running on Google Cloud
       "findings": [],
       "crossings": 3,
       "bends": 52,
-      "aspect_ratio": 1.222,
-      "score": 457.2215071871053,
+      "aspect_ratio": 1.549,
+      "score": 457.5493570173004,
       "advisories": [
         "Dense view; split by scope or use small-multiples"
       ]

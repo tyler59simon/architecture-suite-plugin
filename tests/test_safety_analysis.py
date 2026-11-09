@@ -296,3 +296,119 @@ def test_aws_assets_and_rejection(tmp_path, monkeypatch):
     (tmp_path / "manifest.json").write_text(json.dumps({"aws/icon.svg": "wrong"}))
     with pytest.raises(SafetyError, match="checksum"):
         aws.icon_bytes("icon")
+
+
+def _publish(output, owner, files, *, extra=None, fail=False):
+    """Write `files` (name -> text) as `owner` through the transactional publisher."""
+    from architecture_suite.safety import ownership_changes
+
+    changes = ownership_changes(output, owner, list(files))
+    with atomic_output_directory(output, owner=owner, command=owner, files=list(files)) as stage:
+        for name, text in files.items():
+            path = stage / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        if extra:
+            extra(stage)
+        if fail:
+            raise RuntimeError("export failed")
+    return changes
+
+
+def test_output_manifest_removes_stale_keeps_edited_and_unlisted(tmp_path):
+    from architecture_suite.safety import OUTPUT_MANIFEST, ownership_changes
+
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "legacy.txt").write_text("user file")
+    old = {"02-containers/a.svg": "a", "02-containers/b.svg": "b", "03-components/c.svg": "c"}
+    # First run: nothing is adopted or deleted; the manifest records what was written.
+    assert _publish(output, "c4", old) == {"remove": [], "conflicts": []}
+    manifest = json.loads((output / OUTPUT_MANIFEST).read_text())
+    assert sorted(manifest["owners"]["c4"]["files"]) == sorted(old)
+    assert "legacy.txt" not in json.dumps(manifest)
+    (output / "02-containers/b.svg").write_text("edited by hand")
+    new = {"02-containers/a.svg": "a2"}
+    preview = ownership_changes(output, "c4", list(new))
+    assert preview == {"remove": ["03-components/c.svg"], "conflicts": ["02-containers/b.svg"]}
+    assert _publish(output, "c4", new) == preview
+    assert not (output / "03-components").exists()  # stale file and its empty folder
+    assert (output / "02-containers/b.svg").read_text() == "edited by hand"
+    assert (output / "legacy.txt").read_text() == "user file"
+    files = json.loads((output / OUTPUT_MANIFEST).read_text())["owners"]["c4"]["files"]
+    assert sorted(files) == ["02-containers/a.svg"]  # the edited file was released
+    assert ownership_changes(output, "c4", []) == {"remove": ["02-containers/a.svg"], "conflicts": []}
+    assert ownership_changes(tmp_path / "missing", "c4", []) == {"remove": [], "conflicts": []}
+
+
+def test_output_manifest_owners_are_isolated(tmp_path):
+    from architecture_suite.safety import OUTPUT_MANIFEST
+
+    output = tmp_path / "out"
+    _publish(output, "c4", {"02-containers/a.svg": "a", "shared.md": "c4"})
+    _publish(output, "scenario-render", {"scenario.svg": "s"})
+    _publish(output, "scenario-render", {"scenario.mmd": "s"})
+    assert (output / "02-containers/a.svg").is_file()  # another owner's files survive
+    assert not (output / "scenario.svg").exists()
+    _publish(output, "scenario-render", {"scenario.mmd": "s", "shared.md": "scenario"})
+    owners = json.loads((output / OUTPUT_MANIFEST).read_text())["owners"]
+    assert "shared.md" in owners["scenario-render"]["files"]
+    assert "shared.md" not in owners["c4"]["files"]  # ownership moved with the write
+    _publish(output, "c4", {"02-containers/a.svg": "a"})
+    assert (output / "shared.md").read_text() == "scenario"
+
+
+@pytest.mark.parametrize(
+    "files",
+    [
+        {"../escape.txt": "0" * 64},
+        {"C:/absolute.txt" if os.name == "nt" else "/absolute.txt": "0" * 64},
+        {"a.txt": "not-a-hash"},
+        {".architecture-suite-manifest.json": "0" * 64},
+        "bad json",
+    ],
+)
+def test_output_manifest_rejects_unsafe_or_malformed_entries(tmp_path, files):
+    from architecture_suite.safety import OUTPUT_MANIFEST, ownership_changes
+
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "a.txt").write_text("keep")
+    text = (
+        files
+        if isinstance(files, str)
+        else json.dumps(
+            {"schema_version": "architecture-output-manifest/v1", "owners": {"c4": {"files": files}}}
+        )
+    )
+    (output / OUTPUT_MANIFEST).write_text(text)
+    with pytest.raises(SafetyError):
+        ownership_changes(output, "c4", [])
+    with pytest.raises(SafetyError):
+        _publish(output, "c4", {"b.txt": "b"})
+    assert (output / "a.txt").read_text() == "keep" and not (output / "b.txt").exists()
+
+
+def test_output_manifest_rollback_and_missing_outputs(tmp_path, monkeypatch):
+    from architecture_suite.safety import OUTPUT_MANIFEST
+
+    output = tmp_path / "out"
+    _publish(output, "c4", {"old.svg": "old"})
+    before = (output / OUTPUT_MANIFEST).read_bytes()
+    with pytest.raises(RuntimeError):
+        _publish(output, "c4", {"new.svg": "new"}, fail=True)
+    assert (output / "old.svg").is_file() and (output / OUTPUT_MANIFEST).read_bytes() == before
+    with pytest.raises(SafetyError, match="not written"):
+        _publish(output, "c4", {"new.svg": "new"}, extra=lambda stage: (stage / "new.svg").unlink())
+    assert (output / "old.svg").is_file()
+    original = Path.rename
+
+    def fail_promotion(self, target):
+        if self.name.startswith(".architecture-stage-") and not self.name.endswith("-backup"):
+            raise OSError("simulated promotion failure")
+        return original(self, target)
+
+    monkeypatch.setattr(Path, "rename", fail_promotion)
+    with pytest.raises(OSError):
+        _publish(output, "c4", {"new.svg": "new"})
+    assert (output / "old.svg").is_file() and (output / OUTPUT_MANIFEST).read_bytes() == before

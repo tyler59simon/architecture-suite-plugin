@@ -170,6 +170,8 @@ def test_infra_formats(tmp_path, doc):
     topology = import_infrastructure([path])
     assert topology["resources"] and topology["relationships"]
     plan = topology_plan(topology)
+    assert {c["status"] for c in plan["containers"]} == {"inferred"}
+    assert {f["status"] for f in plan["flows"]} == {"inferred"}
     assert compile_plan(plan)[0]["elements"]
     with pytest.raises(ValueError):
         import_infrastructure([path], {"missing": "api"})
@@ -179,6 +181,89 @@ def test_infra_formats(tmp_path, doc):
     path.write_text("[]")
     with pytest.raises(ValueError):
         import_infrastructure([path])
+
+
+def test_terraform_sensitivity_and_unknown_masks(tmp_path):
+    marker = "AUDIT-SYNTHETIC-PRIVATE-VALUE"
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    {
+                        "address": "random_password.db",
+                        "type": "random_password",
+                        "values": {
+                            "result": marker,
+                            "length": 24,
+                            "nested": {"note": marker, "keep": "visible"},
+                            "items": [marker, "plain"],
+                        },
+                        "sensitive_values": {
+                            "result": True,
+                            "nested": {"note": True},
+                            "items": [True, False],
+                        },
+                    }
+                ]
+            }
+        },
+        "resource_changes": [
+            {
+                "address": "random_password.db",
+                "change": {"after_unknown": {"id": True}, "after_sensitive": {}},
+            }
+        ],
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    topology = import_infrastructure([path])
+    payload = json.dumps(topology) + json.dumps(topology_plan(topology))
+    assert marker not in payload
+    props = topology["resources"][0]["properties"]
+    assert props["result"] == "[SENSITIVE]" and props["length"] == 24
+    assert props["nested"] == {"note": "[SENSITIVE]", "keep": "visible"}
+    assert props["items"] == ["[SENSITIVE]", "plain"]
+    assert props["id"] == "[UNKNOWN AFTER APPLY]"
+    messages = [f["message"] for f in topology["findings"]]
+    assert "Sensitive values masked: items[0], nested.note, result" in messages
+    assert "Values unknown until apply: id" in messages
+
+
+def test_infrastructure_references_are_exact(tmp_path):
+    def resource(address, kind, values):
+        return {"address": address, "type": kind, "values": values}
+
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    resource("aws_vpc.a", "aws_vpc", {"id": "vpc-1"}),
+                    resource("aws_vpc.b", "aws_vpc", {"id": "vpc-123", "note": "not vpc-1"}),
+                    resource("aws_subnet.s", "aws_subnet", {"id": "subnet-9", "vpc_id": "vpc-123"}),
+                ]
+            }
+        }
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    topology = import_infrastructure([path])
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-aws-subnet-s", "input-0-aws-vpc-b")}
+    subnet = next(r for r in topology["resources"] if r["type"] == "aws_subnet")
+    assert subnet["parent_id"] == "input-0-aws-vpc-b"
+    template = {
+        "Resources": {
+            "Bucket": {"Type": "AWS::S3::Bucket", "Properties": {}},
+            "Fn": {"Type": "AWS::Lambda::Function", "DependsOn": "Bucket", "Properties": {}},
+            "Fn2": {"Type": "AWS::Lambda::Function", "DependsOn": ["Bucket", "Missing"]},
+        }
+    }
+    path.write_text(json.dumps(template))
+    relations = import_infrastructure([path])["relationships"]
+    assert sorted((e["source_id"], e["kind"]) for e in relations) == [
+        ("input-0-fn", "depends-on"),
+        ("input-0-fn2", "depends-on"),
+    ]
 
 
 def test_tree_inventory():
@@ -194,7 +279,13 @@ def test_tree_inventory():
         "ignore.txt": "none",
     }
     report = dependency_inventory(files)
-    assert len(report["declarations"]) >= 7 and report["routes"]
+    assert len(report["declarations"]) >= 7
+    assert [r["path"] for r in report["routes"]] == ["/items"]
+    client = dependency_inventory(
+        {"c.py": 'client.get("https://example.com/health")\nsettings.get("key")\n'}
+    )
+    assert not client["routes"]
+    assert [c["target"] for c in client["connections"]] == ["https://example.com/health"]
     assert report["findings"]
     assert any(r.get("resolved_file") == "worker.py" for r in report["references"])
 
@@ -227,11 +318,23 @@ def test_new_cli(inputs, tmp_path, scenario, model):
     scenario_file = tmp_path / "scenario.json"
     scenario_file.write_text(json.dumps(scenario))
     rules = tmp_path / "rules.json"
-    rules.write_text(json.dumps({"rules": [{"id": "deny", "effect": "deny"}]}))
+    rules.write_text(
+        json.dumps(
+            {
+                "schema_version": "architecture-rules/v1",
+                "rules": [{"id": "deny", "effect": "deny"}],
+            }
+        )
+    )
     infra = tmp_path / "compose.yaml"
     infra.write_text("services:\n  api: {}\n")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "main.py").write_text("def main():\n    return 1\n")
+    inside = ["inventory", "--repo", str(repo), "--output", str(repo / "inventory")]
+    assert main(inside + ["--dry-run"]) == 3  # never inside the analyzed repository
     commands = [
-        ["inventory", "--repo", str(tmp_path)],
+        ["inventory", "--repo", str(repo)],
         ["import-infra", "--input", str(infra)],
         ["diff", "--before", str(inputs[0]), "--after", str(inputs[0])],
         ["check", "--model", str(inputs[0]), "--rules", str(rules)],
@@ -262,6 +365,18 @@ def test_new_cli(inputs, tmp_path, scenario, model):
         assert not out.exists()
         assert main(command + ["--output", str(out), "--confirm-write"]) == 0
     assert validate_png(tmp_path / "out-4/scenario.png")
+    # A scenario rendered into a C4 output folder never retires the C4 files.
+    shared = tmp_path / "shared"
+    c4 = ["render", "--model", str(inputs[0]), "--output", str(shared), "--format", "mermaid"]
+    assert main(c4 + ["--level", "system", "--confirm-write"]) == 0
+    assert (
+        main(commands[4] + ["--output", str(shared), "--format", "mermaid", "--confirm-write",
+                            "--confirm-overwrite"])
+        == 0
+    )
+    assert (shared / "01-system-context/system-context.mmd").is_file()
+    owners = json.loads((shared / ".architecture-suite-manifest.json").read_text())["owners"]
+    assert set(owners) == {"c4", "scenario-render"}
     assert (
         main(
             commands[3]
@@ -313,6 +428,9 @@ def test_packages_and_install(tmp_path):
         )
     (skills / "architecture-suite-runtime/scripts").mkdir(parents=True)
     (skills / "architecture-suite-runtime/scripts/tool.py").write_text("x=1")
+    # Legal files beside skills/ are packaged too; they must not leak into VALIDATION.json.
+    (tmp_path / "LICENSE").write_text("license")
+    (tmp_path / "NOTICE").write_text("notice")
     out = tmp_path / "packages"
     out.mkdir()
     package_hosts(skills, out)

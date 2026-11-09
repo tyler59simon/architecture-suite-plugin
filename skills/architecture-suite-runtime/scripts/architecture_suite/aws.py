@@ -158,6 +158,13 @@ def resolve_service(
         "sns": "simplenotificationservice",
         "ec2": "elasticcomputecloud",
         "rds": "relationaldatabaseservice",
+        "msk": "managedstreamingforapachekafka",
+        "kms": "keymanagementservice",
+        "iam": "identityandaccessmanagement",
+        "ses": "simpleemailservice",
+        "ecr": "elasticcontainerregistry",
+        "elb": "elasticloadbalancing",
+        "vpc": "virtualprivatecloud",
     }
     wanted = key(value)
     wanted = aliases.get(wanted, wanted)

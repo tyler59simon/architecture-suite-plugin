@@ -14,45 +14,45 @@
   "runtime": "architecture-suite-runtime",
   "files": {
     "c4-aws": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "ebf91df7f3c51abcd67467da8c425d849743c0e18e73025a0349cbe399579f95"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "435fba87a0df2b0870f386b3e6a1fd1e23c01f1bf76d9e9170163d39024856f6"
     },
     "c4-code": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "af8e6946396d895f64cacd499c454fe7cc1e7296f13ac1976bcf4dd4c46ef290"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "8ffec073ed2ab61fe09713b5d5c395199f8e1f62476210deb3ba2bb05f79105b"
     },
     "c4-component": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "3b435b2a75e1770b31435929315632632d4f598ee5d04ea6a5e8b8358be92961"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "666677c8c45ef617cf244977f3985e9db1de7154be4a1d3ba1fc03203be3cd98"
     },
     "c4-container": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "042a6c6209d9fcfe4165f18972202d7160c5ef7d55a1addb55381c85e90ad6a1"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "30a52e885dad6b9bd2463d6341e478ef86f4fdd3a25b3ef2148b2d16aa8129d2"
     },
     "c4-diagrams": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "f71d9c85da8ff4ffc357b3e765203f1c0579321b6892dd5de8b6127f1d0bbffe"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "d3ce83da927ee61569be74894dde453397f32b8cc3f5dac057f91606fe016197"
     },
     "c4-gcp": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "060acf0718bd5dd1542aa845081c2c6e231cb867c0d3a21b82e88a91cf890c77"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "23b62addc5b7e0dd4aece02c9fbd219eb6c0f1321c2141f16b47311ff24b033d"
     },
     "c4-overview": {
-      "SKILL.md": "cad9a5a07b333a4dd8fc3282ea8dc6a1fb0b4f365a735fd1322fab76a720f141"
+      "SKILL.md": "bf8a37cf828f1e15bc63df458ae874930eb2053f3cc65e5b13d55e3120fd3fb0"
     },
     "c4-system": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "a6630684c8a9cec5b4d94b41a1ea765caaef4196c89d81fed9b65cd5b2a8a32b"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "02f392eab4e66a2fcde0ec689fabd2851400e7531a7ea1156404795ca5a8a7c0"
     },
     "reverse-engineer-c4": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "SKILL.md": "1d2bb9e5f4d9ee0421ede893a435375b943cdc360497d3b1fb1d828fb090d883"
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "SKILL.md": "9b7fecd37272bb1f807553463f146f00e08f94d87c0a10424975557a5a86a533"
     },
     "architecture-suite-runtime": {
-      "assets/architecture-plan-template.md": "3d129970fa4439feab8a8a11cce05ddd4ffca1cfc0f6e9cecc967712577e58c9",
-      "references/compatibility.md": "ab9baf9be1f3790f34de2a19f281b42d816b3a5145f1459fc9a4304f8b5e299a",
-      "references/extensions.md": "27564c60b505610fa218de6cecd10f2222653d84ae987e8db7e72e971edddd0a",
-      "references/runtime.md": "ac6da3d82194faaf5f5fcb343e295642462492b50a78676dc3926868ff147266",
+      "assets/architecture-plan-template.md": "8c1481a68a4333051f8cd91afc5beaf73ac01f345272087fd0d109bab1391d6b",
+      "references/compatibility.md": "fb6c217196722e90eadd74a62f95c28cb6a98a30259bc945679a5972679ddf8e",
+      "references/extensions.md": "58386e93bb47858b5d3ef69a7e38003e93cf443355b6d1555919b31580b01f1c",
+      "references/runtime.md": "8ba9f0b66cd2bbe9985d01dd5799576b5600a412ba73b517f698460926c14b2e",
       "samples/extensions/checks/baseline.json": "ea3908abc2da2f53280cd538bf82b8a3e1e431c6a04dfedc612a81f17061b36e",
       "samples/extensions/compose.json": "7744f66e5d9243103e4c6f3930887c5b9435416b050ef95156c3c7ace4aab440",
       "samples/extensions/model.json": "bdbe6a5ea68eb1fde908a6033aaadbf7890e0b2fef39eb802e97b8d1e03e0ae7",
@@ -61,13 +61,13 @@
       "scripts/architecture-suite.py": "ef8aad7cb105f2ba1125e8107b78e4f82f4de04a59317aaa1ddf76c1249f7d26",
       "scripts/architecture_suite/__init__.py": "681d345cb27552234194aebe0bc2684f81cca5b7f68a7f037670e51b14159f94",
       "scripts/architecture_suite/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
-      "scripts/architecture_suite/analyzer.py": "ecacbf5ae213c3e10876767c6d2092ddb453ca44885ea71e3c747e6ec7e83d97",
+      "scripts/architecture_suite/analyzer.py": "5e0e801aac894247c045aa98d5c889c31bbda45b925d3ad6ebee32066f95f765",
       "scripts/architecture_suite/assets/architecture-baseline.schema.json": "2a3f7b1c9ef0aaf4e4e910244b526acab9d7471e6690b76753ba94905d8f29dd",
       "scripts/architecture_suite/assets/architecture-check.schema.json": "9127525638aabe56c5f5e3a0b258734213fba1919505f3f172440bf2d9359ec9",
       "scripts/architecture_suite/assets/architecture-diff.schema.json": "d50b73a5ef0dc501ff9aea14d9f49980ba88bb2bd4921a2dced220df57a79a13",
       "scripts/architecture_suite/assets/architecture-inventory.schema.json": "74b76bda19f78dc4126be536f8503848dc6fc5ef409edaab3a6607d3ac3ec7a3",
-      "scripts/architecture_suite/assets/architecture-model.schema.json": "635978f7c1952d9d7f2e00ab4355486eda88e8341138f43195e5b6401036585f",
-      "scripts/architecture_suite/assets/architecture-plan.schema.json": "c178003c251042f07e4598ba5e85a9375aeeec1455210024f4ee383857d7a0fd",
+      "scripts/architecture_suite/assets/architecture-model.schema.json": "5dc24382b065e5e69c0d31f1a3699096f0048850e6134b538ce4ab38eb68ea97",
+      "scripts/architecture_suite/assets/architecture-plan.schema.json": "82744fbe908c2b007ee48566685e4ffa5ca257060cf69083376a6ace21101d70",
       "scripts/architecture_suite/assets/architecture-rules.schema.json": "c14f67b57d3ffc861047bec95ccd1e36c322d51df51b4f8a14ef6f223e8fefca",
       "scripts/architecture_suite/assets/architecture-scenario.schema.json": "019205ba178fffd731c0bfa10acd156a7d28870d9c39a39eeec743f5e9888a90",
       "scripts/architecture_suite/assets/architecture-topology.schema.json": "c85507cc9ba1cca741c526e018b5fabeabc03b8c18687fa403985e244d78f690",
@@ -2193,36 +2193,36 @@
       "scripts/architecture_suite/assets/licenses/FONT-LICENSE.txt": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
       "scripts/architecture_suite/assets/licenses/GCP-USAGE.md": "4acecd59e520c4747fe2f7bf20f354fd32ad0e636faed9b377c6804fd2613b5a",
       "scripts/architecture_suite/assets/manifest-gcp.json": "d1e2362b3a943373fc9024076c231f004292654597e9d1f7673edb1bca022cfa",
-      "scripts/architecture_suite/assets/manifest.json": "87be7bd740f8e3a51e9ce70ea71fc242159b107294ccf6fa690f57c68541ae11",
+      "scripts/architecture_suite/assets/manifest.json": "ac545f9c1a2431c18362b302769de52fb1ce31b216830ec804da03521f2e8081",
       "scripts/architecture_suite/assets/provenance.json": "a0ce19b7b20cb7392f59726eee01432d2bf54726318db93b003c43a3b93ec6ba",
       "scripts/architecture_suite/aws.py": "de82a93f4054730ba93af56556f31be994b40e79516bdd3790a226ec2a6d56d6",
       "scripts/architecture_suite/aws_analyzer.py": "e4753e970c804f81319e02429a65bc7656d9ead5dce2cd39a432dfa3792af62c",
       "scripts/architecture_suite/c4_layout.py": "40915aa4adc5aa2d3ee9cde54d3c72d21987c537441d6ff68537db4a3cb188c0",
       "scripts/architecture_suite/changes.py": "4651f348b149a57dda7cbf91069ae7289cbcffcee7b479a64a11d548684f978c",
-      "scripts/architecture_suite/cli.py": "3be5a6905a2af9fc2dbe56934062f384b6ff2b86df67bbec1ac4c1818dfce080",
-      "scripts/architecture_suite/distribution.py": "bd7c5402f2d10f0793d9a2c0fb33496b7cae650894c3f2495ba2b3c609fe0591",
+      "scripts/architecture_suite/cli.py": "14f2da9c3b87f188092e3b1b040e8a3fe3e58815703c8f0c6fe0cca6c8f5999e",
+      "scripts/architecture_suite/distribution.py": "8d26f6444d2b150bfb71faef87cbcc22cfab0fbde05b80eb76d17c369f710cba",
       "scripts/architecture_suite/draft.py": "a57c2f93ac6fcbf39794667ea7d26a0c84cc073ef382066941092480bf505ca3",
       "scripts/architecture_suite/elk-runner.js": "752e3232934e3c0f71683999ad8e8b385bfc4d7eecea049f61ade1954ba91119",
-      "scripts/architecture_suite/emit.py": "7d4bd3088b41763f54582f3f4fab8e629712f5803a1d0a05b704a58d7365bcda",
+      "scripts/architecture_suite/emit.py": "a1c0f32623712585fc6385e53c96de1d75ed597a97556f171e22495360b04684",
       "scripts/architecture_suite/examples.py": "996ffecec13bb015356a825aaee834df14e22388f5360c3c34f407c0ad92d478",
       "scripts/architecture_suite/examples_gcp.py": "f2d04010970b2856dec4f6aca74de6cd467f9bbe5677e53b044ac6e053fb83c4",
       "scripts/architecture_suite/explorer.py": "263c10ccf2bbac10d4d6843456903705a6272dd3a39fab30b1166681ab45865c",
-      "scripts/architecture_suite/extensions.py": "f17eeaf24fd334ce4e22ede62ed36ce44c2de4ce4c01dd655f334b618147a5b3",
+      "scripts/architecture_suite/extensions.py": "ce3f4a4ac638d3d4d734d45b6eef7e327806b0734a424bf052acbc052632d05a",
       "scripts/architecture_suite/gcp_analyzer.py": "365dae46991367e6e7441c32c71288a2ce0bc40f80eb5e1a9902f7639779f90a",
-      "scripts/architecture_suite/infrastructure.py": "8cb3d64fb67359a977809148a9b89f75ae5abc144b3e4a9b8360487dacf87110",
-      "scripts/architecture_suite/inventory.py": "51944d56ebe977d4e356338d5549de56d13921d4d13c237ece1ed76cfdb9cfbe",
+      "scripts/architecture_suite/infrastructure.py": "aa6ed9297689b38dd42e71727d3b701dfd5491780de751944d9015798b7e5b66",
+      "scripts/architecture_suite/inventory.py": "21cad1429cc30f0ed36aba1cd3a94bf6e49c041550db4cec1326a5ac3c1e6f81",
       "scripts/architecture_suite/layout_host.py": "1ae516c9f2680d42c0709fcd424fd964b94c03602366c3326feeb0e06b1d12b3",
-      "scripts/architecture_suite/model.py": "c08f5ff4832e1095cfb84c3e5c893b60977deaeddaf8e2fca96ab7fcc89f0831",
-      "scripts/architecture_suite/overview_layout.py": "fc1bb892cdeb47ab7c3d8cfa5bb572108e783d4ebc98f4933fe3f842c1313a92",
-      "scripts/architecture_suite/plan.py": "a089197696263f3637747afa2c6c61bbeda7c0ba857c0bbbfeab67e1463f0193",
+      "scripts/architecture_suite/model.py": "fcee2eda385bfe9262e9b82f64c62467f29e5ae215d69a563074a83628fb0d40",
+      "scripts/architecture_suite/overview_layout.py": "3c91d162fc66241ce9a4ec249042e845ac8cb11f870b6e43b4396cb473b98af2",
+      "scripts/architecture_suite/plan.py": "c008d3bf3aeb5ac4e453b1d05021d7ad9f5236c14fd25355d764d266c6efd507",
       "scripts/architecture_suite/readability.py": "cee13a1ef8f1900a459f133d97b7c72daef8f1b528e0bb79c8a55755a8e1553b",
-      "scripts/architecture_suite/renderers.py": "2f962faab6ba17abae1ed075e9d1c06b3e074f9cdcbb59036545d0e1521bfc24",
-      "scripts/architecture_suite/report.py": "73e9d1c9ea752de435a390e0b408f2d4e535fc34791dd69259effdde1e5d1788",
+      "scripts/architecture_suite/renderers.py": "77a7837f34f0d6a6989f8ff28d358520268431fa193aa2bd0ed3c065fe8f5cb5",
+      "scripts/architecture_suite/report.py": "5c73bd1fdb5f8c7ae003f86a050478192321ea33676c1be05cccdf965add5a1f",
       "scripts/architecture_suite/runtime_env.py": "c71cf53b01fef5726f38f43fca38bfe0dd5924c48bbedd8c7ad6137b415febb0",
-      "scripts/architecture_suite/safety.py": "b76c53b821229a51a57ed116c467db58c9f9256e49f64ead219ec10e468431b5",
+      "scripts/architecture_suite/safety.py": "de58d9a502fbcd209d80026ef8169e8222852964378cc1e926c01e1b2cec296d",
       "scripts/architecture_suite/scenarios.py": "302ed4c933c281c3ef63ecd8c6937c6aa7ed4d69f51b27b33a4e044135a4c5ef",
-      "scripts/architecture_suite/scene.py": "1a303b9bcbae538dfb6f2d1e0e9aa8f32617d8859a882e13ffd6ab96d90f34c7",
-      "scripts/architecture_suite/style.py": "f80f46ed78d9f115fc689716fc55d61832f89298f80636664146520ba9a0b021",
+      "scripts/architecture_suite/scene.py": "f251ccdc435cd92188f5f457086b0dcecd8ebef8ceb30342a6a3beb55c4fa97f",
+      "scripts/architecture_suite/style.py": "0f8b4cc79f6cf31e4f7a480d32827b4987e47c96a2762997e18b97e1f8ef8ccb",
       "scripts/bootstrap.py": "419a374e243ebc62df62e39b0ffd46137c925a586753f4aea89a087ca77e65b0",
       "scripts/pyproject.toml": "27dc334bb0358be519c79be862ebc9a268e17c2edd32294eb577f3a92bcba42f",
       "scripts/requirements-runtime.lock": "042b77c765c4e5f8bc56f082edc7793653068b6ad0e8c5e5cdd4b398f27833ee"

@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 from dataclasses import asdict, dataclass, field
+import difflib
 import json
 import re
 from typing import Any
 import yaml
 from .aws import PROVIDERS, normalize_gcp_icon_style, resolve_service
-from .model import derive_views, slugify, validate_model
+from .model import CLAIM_STATUSES, derive_views, slugify, validate_model
 from .safety import SECRET, safe_text
 
 PLAN_SCHEMA_VERSION = "architecture-plan/v1"
@@ -211,7 +212,8 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
     if not isinstance(plan, dict):
         return [Finding("plan-object", "Plan must be a mapping")]
     if set(plan) - set(SECTION_KEYS) - META_KEYS:
-        add("unknown-section", "Unknown plan section")
+        unknown = ", ".join(sorted(map(str, set(plan) - set(SECTION_KEYS) - META_KEYS)))
+        add("unknown-section", "Unknown plan section: " + unknown, unknown)
     try:
         style = normalize_gcp_icon_style(gcp_icon_style or plan.get("gcp_icon_style"))
     except (ValueError, AttributeError):
@@ -244,7 +246,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         if not isinstance(item, dict):
             add("element-object", "Element must be a mapping", typ)
             continue
-        allowed = {"name", "description", "technology", "group", "evidence"}
+        allowed = {"name", "description", "technology", "group", "evidence", "tags", "status"}
         allowed |= {"classification", "scope"} if typ == "system" else set()
         allowed |= {"components", "aws_service", "gcp_service"} if typ == "container" else set()
         allowed |= {"code", "aws_service", "gcp_service"} if typ == "component" else set()
@@ -261,7 +263,11 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             continue
         ident = slugify(name)
         if ident in ids:
-            add("duplicate-name", "Names must slugify to unique IDs", name)
+            add(
+                "duplicate-name",
+                f"Names must slugify to unique IDs ({ident!r} is already used)",
+                name,
+            )
         ids.add(ident)
         names[name] = ident
         if typ != "code" and (
@@ -285,6 +291,13 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         for text_key in ("technology", "group"):
             if text_key in item and not isinstance(item[text_key], str):
                 add("element-field", f"{text_key} must be a string", name)
+        if "tags" in item and not (
+            isinstance(item["tags"], list)
+            and all(isinstance(tag, str) and tag.strip() for tag in item["tags"])
+        ):
+            add("element-tags", "Tags must be a list of non-empty strings", name)
+        if "status" in item and item["status"] not in CLAIM_STATUSES:
+            add("claim-status", "status must be " + ", ".join(CLAIM_STATUSES), name)
         if item.get("aws_service") and (
             not isinstance(item["aws_service"], str)
             or not resolve_service(item["aws_service"])
@@ -298,7 +311,8 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             elif not resolve_service(item["gcp_service"], "gcp", style):
                 add(
                     "gcp-icon-unavailable",
-                    f"No {style} icon for this service; it renders without an icon",
+                    f"No {style} icon for this service; it renders without an icon "
+                    "(the service is kept)",
                     name,
                     ADVISORY,
                 )
@@ -334,11 +348,24 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         if not isinstance(flow, dict):
             add("flow-object", "Flow must be a mapping", str(i))
             continue
-        if set(flow) - {"from", "to", "description", "technology", "order", "evidence"}:
-            add("unknown-field", "Unknown flow field", str(i))
+        extra = set(flow) - {"from", "to", "description", "technology", "order", "evidence", "status"}
+        if extra:
+            add("unknown-field", "Unknown flow field: " + ", ".join(sorted(map(str, extra))), str(i))
+        if "status" in flow and flow["status"] not in CLAIM_STATUSES:
+            add("claim-status", "status must be " + ", ".join(CLAIM_STATUSES), str(i))
         for key in ("from", "to"):
             if not isinstance(flow.get(key), str) or flow[key] not in names:
-                add("unknown-endpoint", f"Unknown flow {key}", str(i))
+                close = (
+                    difflib.get_close_matches(flow[key], list(names), n=1)
+                    if isinstance(flow.get(key), str)
+                    else []
+                )
+                add(
+                    "unknown-endpoint",
+                    f"Unknown flow {key}: {flow.get(key)!r}"
+                    + (f" (did you mean {close[0]!r}?)" if close else ""),
+                    str(i),
+                )
         if flow.get("from") == flow.get("to"):
             add("self-flow", "Flow endpoints must differ", str(i))
         if (
@@ -391,13 +418,38 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         or layout.get("direction", "auto") not in {"auto", "down", "right"}
         or not isinstance(layout.get("views", {}), dict)
     ):
-        add("layout", "Invalid layout mapping")
+        add(
+            "layout",
+            "Invalid layout mapping: use direction (auto, down or right) and views",
+            "layout",
+        )
     else:
         for v, direction in layout.get("views", {}).items():
             if v not in valid_views:
                 add("unknown-view", "Layout names an absent view", v)
             if direction not in {"auto", "down", "right"}:
                 add("layout-direction", "Unknown layout direction", v)
+    if (
+        isinstance(plan.get("deployment"), dict)
+        and "provider" in plan["deployment"]
+        and plan["deployment"]["provider"] not in PROVIDERS
+    ):
+        add(
+            "unknown-provider",
+            "deployment.provider must be " + " or ".join(PROVIDERS),
+            "deployment",
+        )
+    if isinstance(plan.get("deployment"), dict) and plan["deployment"].get("provider") in PROVIDERS:
+        other = "gcp_service" if plan["deployment"]["provider"] == "aws" else "aws_service"
+        for item, _, _ in entries:
+            if isinstance(item, dict) and item.get(other):
+                add(
+                    "provider-service",
+                    f"{other} does not apply to a {plan['deployment']['provider']} "
+                    "deployment; its icon would be drawn in the wrong cloud",
+                    str(item.get("name", "")),
+                    ADVISORY,
+                )
     if "deployment" in plan:
         try:
             deployment = _deployment(plan["deployment"], names, plan_provider(plan))
@@ -497,18 +549,24 @@ def compile_plan(
         if typ == "code":
             element["kind"] = item.get("kind", "class")
             element["members"] = [safe_text(m) for m in item["members"]]
+        if item.get("tags"):
+            element["tags"] = [safe_text(tag) for tag in item["tags"]]
+        if "status" in item:
+            element["status"] = item["status"]
         if item.get("aws_service"):
             element["cloud"] = {
                 "provider": "aws",
                 "service": resolve_service(item["aws_service"]),
             }
-        elif item.get("gcp_service") and resolve_service(
-            item["gcp_service"], "gcp", style
-        ):
+        elif item.get("gcp_service"):
+            # Icon style is presentation only: a style without artwork keeps the service.
+            service = resolve_service(item["gcp_service"], "gcp", style)
             element["cloud"] = {
                 "provider": "gcp",
-                "service": resolve_service(item["gcp_service"], "gcp", style),
+                "service": service or resolve_service(item["gcp_service"], "gcp"),
             }
+            if not service:
+                element["cloud"]["icon"] = False
         element["evidence_ids"] = evidence_ids(item.get("evidence"))
         elements.append(element)
     for i, flow in enumerate(plan["flows"]):
@@ -517,9 +575,15 @@ def compile_plan(
                 "id": f"flow-{i + 1}",
                 "source_id": slugify(flow["from"]),
                 "destination_id": slugify(flow["to"]),
-                "description": safe_text(flow["description"]),
+                # `order` numbers the step on the arrow, as in a C4 dynamic diagram.
+                "description": safe_text(
+                    f"{flow['order']}. {flow['description']}"
+                    if "order" in flow
+                    else flow["description"]
+                ),
                 "technology": safe_text(flow.get("technology", "")),
                 "evidence_ids": evidence_ids(flow.get("evidence")),
+                **({"status": flow["status"]} if "status" in flow else {}),
             }
         )
     for reference in plan.get("evidence", []) or []:

@@ -25,6 +25,8 @@ def test_defaults_and_invalid_arguments():
         and args.max_total_bytes == 50000000
         and args.timeout == 45.0
     )
+    args = parser.parse_args(["render", "--model", "x", "--output", "y", "--format", "all"])
+    assert args.format == DEFAULT_FORMATS | {"svg"}  # "all" means every format
     args = parser.parse_args(["plan-draft", "--repo", "x", "--output", "y"])
     assert args.classification == "Internal" and args.max_file_bytes == 400000
     assert parse_overview_styles(None) == ("progressive",)
@@ -41,6 +43,53 @@ def test_defaults_and_invalid_arguments():
     ):
         with pytest.raises(SystemExit):
             parser.parse_args(argv)
+
+
+def test_deployment_level_needs_no_component_or_code_views(tmp_path, capsys):
+    plan = {
+        "system": {
+            "name": "Shop",
+            "description": "Online shop",
+            "classification": "Internal",
+            "scope": "Checkout",
+        },
+        "containers": [
+            {
+                "name": "Orders API",
+                "description": "Takes orders",
+                "technology": "Python",
+                "aws_service": "AWS Lambda",
+                "evidence": "brief:1",
+            }
+        ],
+        "flows": [],
+        "deployment": {
+            "nodes": [{"name": "Production account", "type": "account"}],
+            "placements": [{"element": "Orders API", "node": "Production account"}],
+        },
+    }
+    source = tmp_path / "plans" / "plan.md"
+    source.parent.mkdir()
+    source.write_text(render_plan(plan), encoding="utf-8")
+    output = tmp_path / "out"
+    base = ["plan-render", "--plan", str(source), "--output", str(output)]
+    base += ["--format", "mermaid,drawio,svg"]
+    assert main(["plan-lint", "--plan", str(source), "--strict"]) == 0
+    assert main(base + ["--level", "all", "--dry-run"]) == 3  # still needs L1-L4 evidence
+    assert main(base + ["--level", "deployment", "--confirm-write"]) == 0
+    capsys.readouterr()
+    diagrams = sorted(
+        p.relative_to(output).as_posix() for p in output.glob("0*/*") if p.is_file()
+    )
+    assert diagrams == [
+        "06-aws-deployment/aws-deployment.drawio",
+        "06-aws-deployment/aws-deployment.mmd",
+        "06-aws-deployment/aws-deployment.svg",
+    ]
+    plan.pop("deployment")
+    source.write_text(render_plan(plan), encoding="utf-8")
+    assert main(base + ["--level", "deployment", "--dry-run"]) == 3
+    assert "no deployment section" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize(
@@ -91,6 +140,22 @@ def test_publish_dry_write_overwrite(inputs, tmp_path, capsys, command, input_fl
         )
         assert (output / "architecture-model.json").is_file()
         assert json.loads((output / "plan-fidelity.json").read_text())["augmented"]
+    # Re-rendering another level retires unchanged container files; edits are kept.
+    capsys.readouterr()
+    system = [arg if arg != "container" else "system" for arg in argv]
+    edited = output / "02-containers/containers.mmd"
+    edited.write_text("hand edit", encoding="utf-8")
+    (output / "notes.md").write_text("mine", encoding="utf-8")
+    assert main(system + ["--dry-run"]) == 0
+    preview = json.loads(capsys.readouterr().out)
+    assert preview["conflicts"] == ["02-containers/containers.mmd"]
+    assert "02-containers/containers.svg" in preview["would_remove"]
+    assert main(system + ["--confirm-write", "--confirm-overwrite"]) == 0
+    assert json.loads(capsys.readouterr().out)["removed"] == preview["would_remove"]
+    assert edited.read_text(encoding="utf-8") == "hand edit"
+    assert (output / "notes.md").read_text(encoding="utf-8") == "mine"
+    assert not (output / "02-containers/containers.svg").exists()
+    assert (output / "01-system-context/system-context.svg").is_file()
 
 
 def test_plan_draft_lint_and_analyze(tmp_path, capsys):
@@ -107,6 +172,9 @@ def test_plan_draft_lint_and_analyze(tmp_path, capsys):
     assert main(base + ["--confirm-write"]) == 3
     assert main(base + ["--confirm-write", "--confirm-overwrite"]) == 0
     assert main(["plan-lint", "--plan", str(plan)]) == 0
+    inside = ["plan-draft", "--repo", str(repo), "--output", str(repo / "docs/plan.md")]
+    assert main(inside + ["--confirm-write"]) == 3  # never inside the analyzed repository
+    assert not (repo / "docs").exists()
     out = tmp_path / "analysis"
     base = [
         "analyze",
@@ -197,7 +265,7 @@ def test_verify_and_style_constraints(inputs, tmp_path, model, capsys, monkeypat
                 "executive",
             ]
         )
-        == 3
+        == 2
     )
     assert (
         main(

@@ -1,23 +1,25 @@
 %% Architecture Suite schema 2.0; portable layout is independent of ELK
 flowchart LR
   subgraph n0["Ridepulse Repo"]
-    n1["Ridepulse Repo Python dispatch#10;«container»#10;Python#10;Candidate Python application from#10;dispatch/pyproject.toml"]
-    n2["Ridepulse Repo Node ingest#10;«container»#10;Node#10;Candidate Node application from ingest/#10;package.json"]
-    n3["Ridepulse Repo Go notifier#10;«container»#10;Go#10;Candidate Go application from notifier/go.#10;mod"]
-    n4[("GCP resource infra/main.tf line 39#10;GCP-Cloud-Storage#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
+    n1["Ridepulse Repo Python dispatch#10;«container» «inferred»#10;Python#10;Candidate Python application from#10;dispatch/pyproject.toml"]
+    n2["Ridepulse Repo Node ingest#10;«container» «inferred»#10;Node#10;Candidate Node application from ingest/#10;package.json"]
+    n3["Ridepulse Repo Go notifier#10;«container» «inferred»#10;Go#10;Candidate Go application from notifier/go.#10;mod"]
+    n4[("GCP resource infra/main.tf line 39#10;GCP-Cloud-Storage#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
     style n4 fill:#e4f5f7,stroke:#00838f
-    n5["GCP resource infra/main.tf line 7#10;GCP-Cloud-Run#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
-    n6["GCP resource infra/main.tf line 12#10;GCP-Cloud-Run#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
-    n7(["GCP resource infra/main.tf line 17#10;GCP-Legacy-pubsub#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"])
+    n5["GCP resource infra/main.tf line 7#10;GCP-Cloud-Run#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
+    n6["GCP resource infra/main.tf line 12#10;GCP-Cloud-Run#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
+    n7(["GCP resource infra/main.tf line 17#10;GCP-Legacy-pubsub#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"])
     style n7 fill:#fff3e6,stroke:#e65100
-    n8[("GCP resource infra/main.tf line 21#10;GCP-Cloud-Spanner#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
+    n8[("GCP resource infra/main.tf line 21#10;GCP-Cloud-Spanner#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
     style n8 fill:#eaf6ec,stroke:#2e7d32
-    n9[("GCP resource infra/main.tf line 35#10;GCP-BigQuery#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
+    n9[("GCP resource infra/main.tf line 35#10;GCP-BigQuery#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
     style n9 fill:#eaf6ec,stroke:#2e7d32
-    n10[("GCP resource infra/main.tf line 31#10;GCP-Legacy-bigtable#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
+    n10[("GCP resource infra/main.tf line 31#10;GCP-Legacy-bigtable#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
     style n10 fill:#eaf6ec,stroke:#2e7d32
-    n11["GCP resource infra/main.tf line 2#10;GCP-Google-Kubernetes-Engine#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
-    n12[("GCP resource infra/main.tf line 26#10;GCP-Legacy-memorystore#10;«container»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
+    n11["GCP resource infra/main.tf line 2#10;GCP-Google-Kubernetes-Engine#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review"]
+    n12[("GCP resource infra/main.tf line 26#10;GCP-Legacy-memorystore#10;«container» «inferred»#10;GCP infrastructure#10;Infrastructure resource declaration;#10;runtime ownership requires review")]
     style n12 fill:#eaf6ec,stroke:#2e7d32
   end
-  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]
+  classDef claim stroke-dasharray:3 3
+  class n1,n2,n3,n4,n5,n6,n7,n8,n9,n10,n11,n12 claim
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency#10;Dotted or «inferred/proposed/unknown» = claim not observed"]

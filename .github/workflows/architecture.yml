@@ -11,7 +11,7 @@ on:
       os:
         description: JSON list of runner images for the test and bootstrap matrices
         type: string
-        default: '["ubuntu-latest", "windows-latest", "macos-latest"]'
+        default: '["ubuntu-24.04", "windows-latest", "macos-latest"]'
       skip-os-independent:
         description: Skip the OS-independent lint and dependency jobs
         type: boolean
@@ -26,7 +26,7 @@ concurrency:
 jobs:
   lint:
     if: ${{ !inputs.skip-os-independent }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.os || '["ubuntu-latest", "windows-latest", "macos-latest"]') }}
+        os: ${{ fromJSON(inputs.os || '["ubuntu-24.04", "windows-latest", "macos-latest"]') }}
         python: ['3.11', '3.13', '3.14']
         # Hosted macOS runners are scarce (jobs have gone unassigned) and bill at 10x on
         # private repositories: test one Python there; Linux and Windows cover the range.
@@ -80,7 +80,7 @@ jobs:
 
   dependencies:
     if: ${{ !inputs.skip-os-independent }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -101,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.os || '["ubuntu-latest", "windows-latest", "macos-latest"]') }}
+        os: ${{ fromJSON(inputs.os || '["ubuntu-24.04", "windows-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

@@ -622,6 +622,11 @@
     },
     {
       "module": "safety.py",
+      "function": "ownership_changes",
+      "executed": true
+    },
+    {
+      "module": "safety.py",
       "function": "atomic_output_directory",
       "executed": true
     },
@@ -722,31 +727,35 @@
     },
     {
       "module": "style.py",
+      "function": "claim_cue",
+      "executed": true
+    },
+    {
+      "module": "style.py",
       "function": "element_label",
       "executed": true
     }
   ],
   "uncovered_lines": {
     "analyzer.py": [
-      120,
-      142
+      118,
+      131
     ],
     "changes.py": [
-      56,
-      135
+      171
     ],
     "cli.py": [
-      74,
-      98,
-      102,
-      201,
-      261
+      80,
+      81,
+      94,
+      118,
+      122,
+      218,
+      279
     ],
     "infrastructure.py": [
-      26
-    ],
-    "inventory.py": [
-      154
+      34,
+      44
     ],
     "layout_host.py": [
       38,
@@ -755,47 +764,52 @@
       41
     ],
     "model.py": [
-      283,
-      286,
-      295,
-      296,
-      301,
-      302,
-      335,
-      346,
-      479
+      309,
+      312,
+      321,
+      322,
+      327,
+      328,
+      361,
+      372,
+      505
     ],
     "plan.py": [
-      76,
-      284,
-      287,
-      356,
-      362,
-      526
+      77,
+      290,
+      293,
+      383,
+      389,
+      590
     ],
     "renderers.py": [
-      121,
-      245,
-      253,
-      254,
-      255,
-      267,
-      268,
-      310,
-      317,
-      320,
-      324,
-      361
+      130,
+      265,
+      273,
+      274,
+      275,
+      287,
+      288,
+      332,
+      339,
+      342,
+      346,
+      383
     ],
     "safety.py": [
-      226
+      176,
+      183,
+      187,
+      235,
+      329
     ],
     "scenarios.py": [
-      28
+      30,
+      147
     ],
     "scene.py": [
-      116,
-      270
+      119,
+      276
     ]
   }
 }

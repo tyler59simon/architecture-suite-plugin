@@ -28,7 +28,9 @@ def test_model_roundtrip_profiles(model, inputs):
             for e in projection["elements"]
         )
     assert models.slugify(" A/B : _C ") == "a-b-c"
-    assert models.slugify("☃", "fallback") == "fallback"
+    # Symbol-only names keep the fallback as a prefix and stay distinct.
+    assert models.slugify("☃", "fallback").startswith("fallback-")
+    assert models.slugify("", "fallback") == "fallback"
     assert models.view_id_for("code", "scope") == "code-scope"
     assert models.normalize_validation_profile() == "code"
     with pytest.raises(ValueError):
@@ -201,6 +203,10 @@ def test_plan_merging_and_limits():
         lambda p: p["people"][0].update(evidence=2),
         lambda p: p["containers"][0].update(aws_service="made up service"),
         lambda p: p["containers"][0].update(components={}),
+        lambda p: p["containers"][0].update(status="maybe"),
+        lambda p: p["flows"][0].update(status="maybe"),
+        lambda p: p["containers"][0].update(tags="pci"),
+        lambda p: p["containers"][0].update(tags=[""]),
         lambda p: p["containers"][0]["components"][0]["code"][0].update(kind="enum"),
         lambda p: p["containers"][0]["components"][0]["code"][0].update(members=[]),
         lambda p: p["flows"].append(2),
@@ -223,6 +229,47 @@ def test_lint_rejects_lossy_inputs(plan, mutate):
     assert errors(lint_plan(plan))
     with pytest.raises(PlanError):
         compile_plan(plan)
+
+
+def test_claim_status_lint_compile_and_conservative_merge(plan):
+    # A second customer flow projects onto the same container-level arrow as flow 1.
+    plan["flows"].append(
+        {"from": "Customer", "to": "RequestValidator", "description": "Validates", "evidence": "x"}
+    )
+    model, _ = compile_plan(plan)
+    assert not any("status" in item for item in model["elements"] + model["relationships"])
+    merged = next(r for r in model["relationships"] if len(r["flow_ids"]) > 1)
+    first, second = (int(f.split("-")[1]) - 1 for f in merged["flow_ids"][:2])
+    plan["flows"][first]["status"] = "observed"
+    plan["flows"][second]["status"] = "proposed"
+    plan["containers"][0]["status"] = "inferred"
+    assert not errors(lint_plan(plan))
+    model, _ = compile_plan(plan)
+    assert not models.validate_model(model)
+    by_flows = {tuple(r["flow_ids"]): r for r in model["relationships"]}
+    assert by_flows[tuple(merged["flow_ids"])]["status"] == "proposed"  # weakest wins
+    element = next(e for e in model["elements"] if e["name"] == plan["containers"][0]["name"])
+    assert element["status"] == "inferred"
+    projected = models.project_model(model, "container")
+    assert any(r.get("status") == "proposed" for r in projected["relationships"])
+    broken = deepcopy(model)
+    broken["elements"][0]["status"] = "maybe"
+    assert models.validate_model(broken)
+
+
+def test_plan_tags_reach_rule_selectors(plan):
+    from architecture_suite.changes import check_rules
+
+    plan["containers"][0]["tags"] = ["pci"]
+    assert not errors(lint_plan(plan))
+    model, _ = compile_plan(plan)
+    tagged = [e for e in model["elements"] if e.get("tags")]
+    assert [e["tags"] for e in tagged] == [["pci"]]
+    assert not models.validate_model(model)
+    rules = {
+        "rules": [{"id": "no-pci-calls", "effect": "deny", "source": {"tags": ["pci"]}}]
+    }
+    assert check_rules(model, rules)["new_errors"] >= 1
 
 
 def test_advisories_groups_and_explicit_deployment(plan):

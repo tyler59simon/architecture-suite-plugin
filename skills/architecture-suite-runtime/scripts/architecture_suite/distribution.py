@@ -130,10 +130,10 @@ def package_hosts(skills, output, hosts=None):
                     bundle.writestr(info, path.read_bytes())
             for legal in legal_files(skills):
                 # In the runtime folder for every layout; also at the root of plugin layouts.
-                names = [f"{prefix}/{RUNTIME_NAME}/{legal.name}"]
+                legal_paths = [f"{prefix}/{RUNTIME_NAME}/{legal.name}"]
                 if host in {"claude", "factory"}:
-                    names.append(legal.name)
-                for name in names:
+                    legal_paths.append(legal.name)
+                for name in legal_paths:
                     info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
                     info.compress_type = zipfile.ZIP_DEFLATED
                     bundle.writestr(info, legal.read_bytes())

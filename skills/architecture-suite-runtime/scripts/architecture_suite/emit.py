@@ -7,7 +7,7 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 from .aws import ASSETS, icon_bytes
 from .scene import Scene
-from .style import CYLINDER_CAP, box_style
+from .style import CYLINDER_CAP, box_style, claim_cue
 
 KEY = (
     "Notation key",
@@ -15,6 +15,19 @@ KEY = (
     "Enclosing frame = named scope or deployment boundary",
     "Arrow = directed dependency; label states its purpose",
 )
+CLAIM_KEY = "Dotted outline or arrow, «inferred»/«proposed»/«unknown» = claim not observed"
+
+
+def _claimed(item) -> bool:
+    """A box or edge whose stated status is inferred, proposed or unknown."""
+    element = getattr(item, "element", None)
+    status = element.get("status") if isinstance(element, dict) else getattr(item, "status", None)
+    return bool(claim_cue(status))
+
+
+def _key(scene) -> tuple:
+    claims = any(_claimed(b) for b in scene.boxes) or any(_claimed(e) for e in scene.edges)
+    return KEY + ((CLAIM_KEY,) if claims else ())
 
 
 def _placements(box):
@@ -26,7 +39,7 @@ def _placements(box):
         yield box.x + box.width / 2, y - 4, line
 
 
-def _cylinder(box, stroke, fill) -> str:
+def _cylinder(box, stroke, fill, dash="") -> str:
     x, y, w, h, ry = box.x, box.y, box.width, box.height, CYLINDER_CAP
     rx = w / 2
     body = (
@@ -34,8 +47,8 @@ def _cylinder(box, stroke, fill) -> str:
         f"L {x + w},{y + ry} Z"
     )
     return (
-        f'<path d="{body}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>'
-        f'<ellipse cx="{x + rx}" cy="{y + ry}" rx="{rx}" ry="{ry}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>'
+        f'<path d="{body}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"{dash}/>'
+        f'<ellipse cx="{x + rx}" cy="{y + ry}" rx="{rx}" ry="{ry}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"{dash}/>'
     )
 
 
@@ -51,17 +64,24 @@ def render_scene_svg(scene: Scene) -> str:
         parts.append(
             f'<text x="48" y="{65 + i * 33}" font-size="22">{html.escape(line)}</text>'
         )
+    titles = []
     # Parent frames precede children in the scene's preorder.
     for box in scene.boxes:
         shape, stroke, fill = box_style(box)
         if box.role != "panel-title":
-            dash = ' stroke-dasharray="6 4"' if box.role == "frame" else ""
+            dash = (
+                ' stroke-dasharray="6 4"'
+                if box.role == "frame"
+                else ' stroke-dasharray="2 3"'
+                if _claimed(box)
+                else ""
+            )
             if shape == "cylinder":
                 # Invisible bounding rect keeps a stable id and exact geometry hook.
                 parts.append(
                     f'<rect id="box-{box.id}" x="{box.x}" y="{box.y}" width="{box.width}" height="{box.height}" fill="none" stroke="none"/>'
                 )
-                parts.append(_cylinder(box, stroke, fill))
+                parts.append(_cylinder(box, stroke, fill, dash))
             else:
                 radius = 28 if shape == "pill" else 6
                 parts.append(
@@ -73,16 +93,30 @@ def render_scene_svg(scene: Scene) -> str:
                 f'<image x="{box.x + (box.width - box.label.icon_size) / 2}" y="{box.y + 14 + box.label.top_pad}" width="{box.label.icon_size}" height="{box.label.icon_size}" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,{uri}"/>'
             )
         for x, y, line in _placements(box):
-            parts.append(
-                f'<text x="{x}" y="{y}" text-anchor="middle" font-size="{line.font}">{html.escape(line.text)}</text>'
-            )
+            text = f'<text x="{x}" y="{y}" text-anchor="middle" font-size="{line.font}">{html.escape(line.text)}</text>'
+            if box.role == "frame":
+                # Edges enter frames across their titles: draw titles last, with a halo.
+                titles.append(
+                    text.replace(
+                        "<text ",
+                        '<text stroke="white" stroke-width="4" stroke-linejoin="round" '
+                        'paint-order="stroke" ',
+                        1,
+                    )
+                )
+            else:
+                parts.append(text)
     for edge in scene.edges:
         points = " ".join(f"{x},{y}" for x, y in edge.points)
         marker = (
             ' marker-end="url(#__suite_arrow__)"' if edge.kind != "lifeline" else ""
         )
         dashed = (
-            ' stroke-dasharray="5 4"' if edge.kind in {"lifeline", "response"} else ""
+            ' stroke-dasharray="5 4"'
+            if edge.kind in {"lifeline", "response"}
+            else ' stroke-dasharray="2 3"'
+            if _claimed(edge)
+            else ""
         )
         parts.append(
             f'<polyline id="edge-{edge.id}" points="{points}" fill="none" stroke="#526580" stroke-width="1.5"{marker}{dashed}/>'
@@ -99,7 +133,8 @@ def render_scene_svg(scene: Scene) -> str:
                 parts.append(
                     f'<text x="{b.x + b.width / 2}" y="{y - 4}" font-size="{line.font}" text-anchor="middle">{html.escape(line.text)}</text>'
                 )
-    for i, line in enumerate(KEY):
+    parts.extend(titles)
+    for i, line in enumerate(_key(scene)):
         parts.append(
             f'<text x="48" y="{scene.key_y + i * 22}" font-size="12">{html.escape(line)}</text>'
         )
@@ -167,7 +202,12 @@ def render_scene_drawio(scene: Scene) -> str:
             y,
             box.width,
             box.height,
-            f"{geometry_style}fillColor={fill};strokeColor={stroke};dashed={int(box.role == 'frame')};",
+            f"{geometry_style}fillColor={fill};strokeColor={stroke};"
+            + (
+                "dashed=1;dashPattern=2 3;"
+                if box.role != "frame" and _claimed(box)
+                else f"dashed={int(box.role == 'frame')};"
+            ),
             cell_ids.get(box.parent_id, "1"),
         )
         for index, (tx, ty, line) in enumerate(_placements(box)):
@@ -214,7 +254,13 @@ def render_scene_drawio(scene: Scene) -> str:
             parent="1",
             source=cell_ids[edge.source_id],
             target=cell_ids[edge.destination_id],
-            style=f"endArrow={'none' if edge.kind == 'lifeline' else 'block'};dashed={int(edge.kind in {'lifeline', 'response'})};rounded=0;strokeColor=#526580;"
+            style=f"endArrow={'none' if edge.kind == 'lifeline' else 'block'};"
+            + (
+                "dashed=1;dashPattern=2 3;"
+                if _claimed(edge) and edge.kind not in {"lifeline", "response"}
+                else f"dashed={int(edge.kind in {'lifeline', 'response'})};"
+            )
+            + "rounded=0;strokeColor=#526580;"
             + connection_style,
         )
         geometry = ET.SubElement(
@@ -244,7 +290,7 @@ def render_scene_drawio(scene: Scene) -> str:
             )
     vertex(
         "key",
-        "<br>".join(html.escape(ln) for ln in KEY),
+        "<br>".join(html.escape(ln) for ln in _key(scene)),
         48,
         scene.key_y - 15,
         560,

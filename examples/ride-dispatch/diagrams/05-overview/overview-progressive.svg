@@ -28,7 +28,6 @@
 <text x="2074.1666666666665" y="1685" text-anchor="middle" font-size="12">«software_system»</text>
 <text x="2074.1666666666665" y="1704" text-anchor="middle" font-size="13">Text message delivery</text>
 <rect id="box-ridepulse" x="208" y="452" width="2411.1" height="950" rx="6" stroke="#1168bd" fill="#e4f1ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="1413.55" y="480" text-anchor="middle" font-size="15">RidePulse</text>
 <rect id="box-eta-model" x="365" y="970" width="162" height="157" rx="6" stroke="#7b1fa2" fill="#f5eafa" stroke-width="1.5"/>
 <image x="426.0" y="984" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZyBpZD0iYm91bmRpbmdfYm94Ij4KICAgIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJub25lIi8+CiAgPC9nPgogIDxnIGlkPSJhcnQiPgogICAgPHBhdGggZD0iTTEyOCwyNDQuOTljLTguODQsMC0xNi03LjE2LTE2LTE2di05NS45N2MwLTguODQsNy4xNi0xNiwxNi0xNnMxNiw3LjE2LDE2LDE2djk1Ljk3YzAsOC44NC03LjE2LDE2LTE2LDE2WiIgZmlsbD0iI2VhNDMzNSIvPgogICAgPHBhdGggZD0iTTI1Niw0NThjLTIuOTgsMC01Ljk3LS44My04LjU5LTIuNWwtMTg2LTEyMmMtNy40Ni00Ljc0LTkuNjUtMTQuNjMtNC45MS0yMi4wOSw0Ljc1LTcuNDYsMTQuNjQtOS42NSwyMi4wOS00LjkxbDE3Ny40MSwxMTYuNTMsMTc3LjQxLTExNi41M2M3LjQ1LTQuNzQsMTcuMzQtMi41NSwyMi4wOSw0LjkxLDQuNzQsNy40NiwyLjU1LDE3LjM0LTQuOTEsMjIuMDlsLTE4NiwxMjJjLTIuNjIsMS42Ny01LjYxLDIuNS04LjU5LDIuNVoiIGZpbGw9IiNmYmJjMDQiLz4KICAgIDxwYXRoIGQ9Ik0yNTYsMzg4LjAzYy04Ljg0LDAtMTYtNy4xNi0xNi0xNnYtNzMuMDZjMC04Ljg0LDcuMTYtMTYsMTYtMTZzMTYsNy4xNiwxNiwxNnY3My4wNmMwLDguODQtNy4xNiwxNi0xNiwxNloiIGZpbGw9IiMzNGE4NTMiLz4KICAgIDxjaXJjbGUgY3g9IjEyOCIgY3k9IjcwIiByPSIxNiIgZmlsbD0iI2VhNDMzNSIvPgogICAgPGNpcmNsZSBjeD0iMTI4IiBjeT0iMjkyIiByPSIxNiIgZmlsbD0iI2VhNDMzNSIvPgogICAgPHBhdGggZD0iTTM4NC4yMywzMDguMDFjLTguODIsMC0xNS45OC03LjE0LTE2LTE1Ljk3bC0uMjMtOTQuMDFjLS4wMi04Ljg0LDcuMTMtMTYuMDIsMTUuOTctMTYuMDNoLjA0YzguODIsMCwxNS45OCw3LjE0LDE2LDE1Ljk3bC4yMyw5NC4wMWMuMDIsOC44NC03LjEzLDE2LjAyLTE1Ljk3LDE2LjAzaC0uMDRaIiBmaWxsPSIjNDI4NWY0Ii8+CiAgICA8Y2lyY2xlIGN4PSIzODQiIGN5PSI3MCIgcj0iMTYiIGZpbGw9IiM0Mjg1ZjQiLz4KICAgIDxjaXJjbGUgY3g9IjM4NCIgY3k9IjEzNCIgcj0iMTYiIGZpbGw9IiM0Mjg1ZjQiLz4KICAgIDxwYXRoIGQ9Ik0zMjAsMjIwLjM2Yy04Ljg0LDAtMTYtNy4xNi0xNi0xNnYtMTAzLjAyYzAtOC44NCw3LjE2LTE2LDE2LTE2czE2LDcuMTYsMTYsMTZ2MTAzLjAyYzAsOC44NC03LjE2LDE2LTE2LDE2WiIgZmlsbD0iI2ZiYmMwNCIvPgogICAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMTcxIiByPSIxNiIgZmlsbD0iIzM0YTg1MyIvPgogICAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjM1IiByPSIxNiIgZmlsbD0iIzM0YTg1MyIvPgogICAgPGNpcmNsZSBjeD0iMzIwIiBjeT0iMjY1IiByPSIxNiIgZmlsbD0iI2ZiYmMwNCIvPgogICAgPGNpcmNsZSBjeD0iMzIwIiBjeT0iMzI5IiByPSIxNiIgZmlsbD0iI2ZiYmMwNCIvPgogICAgPHBhdGggZD0iTTE5MiwyMTcuMzZjLTguODQsMC0xNi03LjE2LTE2LTE2di0xMDAuMDJjMC04Ljg0LDcuMTYtMTYsMTYtMTZzMTYsNy4xNiwxNiwxNnYxMDAuMDJjMCw4Ljg0LTcuMTYsMTYtMTYsMTZaIiBmaWxsPSIjZmJiYzA0Ii8+CiAgICA8Y2lyY2xlIGN4PSIxOTIiIGN5PSIyNjUiIHI9IjE2IiBmaWxsPSIjZmJiYzA0Ii8+CiAgICA8Y2lyY2xlIGN4PSIxOTIiIGN5PSIzMjkiIHI9IjE2IiBmaWxsPSIjZmJiYzA0Ii8+CiAgPC9nPgo8L3N2Zz4="/>
 <text x="446.0" y="1052" text-anchor="middle" font-size="15">ETA Model</text>
@@ -88,8 +87,18 @@
 <text x="2083.6666666666665" y="1082" text-anchor="middle" font-size="12">«container»</text>
 <text x="2083.6666666666665" y="1100" text-anchor="middle" font-size="12">Spanner</text>
 <text x="2083.6666666666665" y="1119" text-anchor="middle" font-size="13">Transactional trip and account records</text>
+<rect id="box-dispatch-service" x="455.25" y="529" width="430" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
+<rect id="box-fare-pricer" x="676.25" y="581" width="181" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="766.75" y="615" text-anchor="middle" font-size="15">Fare Pricer</text>
+<text x="766.75" y="633" text-anchor="middle" font-size="12">«component»</text>
+<text x="766.75" y="652" text-anchor="middle" font-size="13">Quotes surge-aware fares</text>
+<text x="766.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
+<rect id="box-matching-engine" x="483.25" y="581" width="173" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
+<text x="569.75" y="615" text-anchor="middle" font-size="15">Matching Engine</text>
+<text x="569.75" y="633" text-anchor="middle" font-size="12">«component»</text>
+<text x="569.75" y="652" text-anchor="middle" font-size="13">Scores candidate drivers</text>
+<text x="569.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <rect id="box-rider-gateway" x="2037.1" y="529" width="543" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="2308.6" y="557" text-anchor="middle" font-size="15">Rider Gateway</text>
 <rect id="box-auth-middleware" x="2065.1" y="581" width="231" height="129" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
 <text x="2180.6" y="615" text-anchor="middle" font-size="15">Auth Middleware</text>
 <text x="2180.6" y="633" text-anchor="middle" font-size="12">«component»</text>
@@ -102,18 +111,6 @@
 <text x="2434.1" y="652" text-anchor="middle" font-size="13">Accepts trip requests and publishes</text>
 <text x="2434.1" y="671" text-anchor="middle" font-size="13">events</text>
 <text x="2434.1" y="690" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-dispatch-service" x="455.25" y="529" width="430" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="670.25" y="557" text-anchor="middle" font-size="15">Dispatch Service</text>
-<rect id="box-fare-pricer" x="676.25" y="581" width="181" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="766.75" y="615" text-anchor="middle" font-size="15">Fare Pricer</text>
-<text x="766.75" y="633" text-anchor="middle" font-size="12">«component»</text>
-<text x="766.75" y="652" text-anchor="middle" font-size="13">Quotes surge-aware fares</text>
-<text x="766.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
-<rect id="box-matching-engine" x="483.25" y="581" width="173" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="569.75" y="615" text-anchor="middle" font-size="15">Matching Engine</text>
-<text x="569.75" y="633" text-anchor="middle" font-size="12">«component»</text>
-<text x="569.75" y="652" text-anchor="middle" font-size="13">Scores candidate drivers</text>
-<text x="569.75" y="671" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <polyline id="edge-component-dispatch-service-r1" points="2353.366666666667,974 2353.366666666667,920 1912.5,920 1912.5,514 569.75,514 569.75,581" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="1699.5" y="676" width="211" height="26" fill="white" rx="3"/>
 <text x="1805.0" y="693" font-size="11" text-anchor="middle">Delivers trip events [push subscription]</text>
@@ -174,6 +171,9 @@
 <polyline id="edge-containers-r4" points="2590.1,221 2590.1,1195 2420.5,1195 2420.5,1205" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="2451.1" y="321" width="137" height="26" fill="white" rx="3"/>
 <text x="2519.6" y="338" font-size="11" text-anchor="middle">Runs fleet reports [SQL]</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="1413.55" y="480" text-anchor="middle" font-size="15">RidePulse</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="670.25" y="557" text-anchor="middle" font-size="15">Dispatch Service</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="2308.6" y="557" text-anchor="middle" font-size="15">Rider Gateway</text>
 <text x="48" y="1788" font-size="12">Notation key</text>
 <text x="48" y="1810" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="1832" font-size="12">Enclosing frame = named scope or deployment boundary</text>

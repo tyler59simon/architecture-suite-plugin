@@ -42,9 +42,9 @@
       "02-containers/containers": {
         "findings": [],
         "crossings": 3,
-        "bends": 32,
-        "aspect_ratio": 1.183,
-        "score": 397.1828804830403,
+        "bends": 30,
+        "aspect_ratio": 2.6,
+        "score": 392.6002826673519,
         "advisories": []
       },
       "03-components/component-dispatch-service": {
@@ -99,8 +99,8 @@
         "findings": [],
         "crossings": 3,
         "bends": 28,
-        "aspect_ratio": 1.116,
-        "score": 385.11585726718886,
+        "aspect_ratio": 1.109,
+        "score": 385.10890849334027,
         "advisories": []
       },
       "06-gcp-deployment/gcp-deployment": {
@@ -116,25 +116,25 @@
   "advisories": [
     {
       "code": "gcp-icon-unavailable",
-      "message": "No modern icon for this service; it renders without an icon",
+      "message": "No modern icon for this service; it renders without an icon (the service is kept)",
       "where": "Notification Worker",
       "severity": "advisory"
     },
     {
       "code": "gcp-icon-unavailable",
-      "message": "No modern icon for this service; it renders without an icon",
+      "message": "No modern icon for this service; it renders without an icon (the service is kept)",
       "where": "Event Bus",
       "severity": "advisory"
     },
     {
       "code": "gcp-icon-unavailable",
-      "message": "No modern icon for this service; it renders without an icon",
+      "message": "No modern icon for this service; it renders without an icon (the service is kept)",
       "where": "Location Cache",
       "severity": "advisory"
     },
     {
       "code": "gcp-icon-unavailable",
-      "message": "No modern icon for this service; it renders without an icon",
+      "message": "No modern icon for this service; it renders without an icon (the service is kept)",
       "where": "Fleet Time Series",
       "severity": "advisory"
     }

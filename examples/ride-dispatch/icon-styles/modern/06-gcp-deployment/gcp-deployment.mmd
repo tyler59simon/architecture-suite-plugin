@@ -3,8 +3,10 @@ flowchart LR
   subgraph n0["Google Cloud"]
     subgraph n1["Example Organization"]
       subgraph n2["ridepulse-prod"]
-        n3["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"]
-        n4["Fleet Time Series#10;«container»#10;Bigtable#10;High-rate telemetry history"]
+        n3(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+        style n3 fill:#fff3e6,stroke:#e65100
+        n4[("Fleet Time Series#10;«container»#10;Bigtable#10;High-rate telemetry history")]
+        style n4 fill:#eaf6ec,stroke:#2e7d32
         n5[("Location Archive#10;«container»#10;Object storage#10;Daily telemetry snapshots")]
         style n5 fill:#e4f5f7,stroke:#00838f
         n6[("Telemetry Lake#10;«container»#10;BigQuery#10;Analytics warehouse")]
@@ -22,7 +24,8 @@ flowchart LR
               n15["Rider Gateway#10;«container»#10;Go gRPC and HTTPS#10;Terminates rider and driver mobile traffic"]
             end
             subgraph n16["data-subnet"]
-              n17["Location Cache#10;«container»#10;Redis#10;Latest driver positions"]
+              n17[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+              style n17 fill:#eaf6ec,stroke:#2e7d32
             end
           end
         end

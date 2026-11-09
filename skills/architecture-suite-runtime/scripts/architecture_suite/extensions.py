@@ -4,11 +4,15 @@ import json
 from pathlib import Path
 from .model import load_model, validate_model
 from .safety import (
+    OUTPUT_MANIFEST,
+    SafetyError,
+    canonical_existing_directory,
     canonical_existing_file,
     canonical_output_directory,
     atomic_output_directory,
     require_write_authorization,
     contained_path,
+    ownership_changes,
 )
 from .plan import parse_yaml
 from .changes import diff_models, check_rules, markdown_report
@@ -25,6 +29,20 @@ from .safety import scan_repository
 def _read(path):
     p = canonical_existing_file(Path(path))
     return parse_yaml(p.read_text(encoding="utf-8"))
+
+
+def _document(path, version, fields):
+    # Companion documents follow their JSON schemas: the version and field types are required.
+    doc = _read(path)
+    if (
+        not isinstance(doc, dict)
+        or doc.get("schema_version") != version
+        or not all(isinstance(doc.get(k), t) for k, t in fields.items())
+    ):
+        raise ValueError(
+            f"Expected {version} with " + ", ".join(sorted(fields)) + ": " + str(path)
+        )
+    return doc
 
 
 def _model(path):
@@ -54,7 +72,11 @@ def _cmd_extension(args):
     files = {}
     binary = None
     if args.command == "inventory":
-        scan = scan_repository(Path(args.repo))
+        repo = canonical_existing_directory(Path(args.repo))
+        target = canonical_output_directory(Path(args.output))
+        if target.is_relative_to(repo) or repo.is_relative_to(target):
+            raise SafetyError("Inventory output must be outside the analyzed repository")
+        scan = scan_repository(repo)
         report = dependency_inventory(scan.texts)
         report["scan"] = {"truncated": scan.truncated, "gaps": scan.skipped}
         files["dependency-inventory.json"] = report
@@ -89,8 +111,12 @@ def _cmd_extension(args):
     elif args.command == "check":
         report = check_rules(
             _model(args.model),
-            _read(args.rules),
-            _read(args.baseline) if args.baseline else None,
+            _document(args.rules, "architecture-rules/v1", {"rules": list}),
+            _document(
+                args.baseline, "architecture-baseline/v1", {"fingerprints": list}
+            )
+            if args.baseline
+            else None,
         )
         files = {
             "architecture-check.json": report,
@@ -138,20 +164,31 @@ def _cmd_extension(args):
             "explorer.html": explorer_html(
                 model,
                 [_read(p) for p in args.scenario],
-                _read(args.diff) if args.diff else None,
+                _document(
+                    args.diff,
+                    "architecture-diff/v1",
+                    {"changes": list, "changed": bool},
+                )
+                if args.diff
+                else None,
             )
         }
     output = canonical_output_directory(Path(args.output))
+    changes = ownership_changes(output, args.command, list(files))
     summary = {
         "operation": args.command,
-        "files": sorted(files),
+        "files": sorted([*files, OUTPUT_MANIFEST]),
         "status": "findings" if status else "ok",
+        "conflicts": changes["conflicts"],
     }
     if args.dry_run:
-        print(json.dumps(summary))
+        print(json.dumps({**summary, "would_remove": changes["remove"]}))
         return status
     require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(output) as stage:
+    summary["removed"] = changes["remove"]
+    with atomic_output_directory(
+        output, owner=args.command, command=args.command, files=list(files)
+    ) as stage:
         for name, value in files.items():
             path = contained_path(stage, name)
             if value is None:

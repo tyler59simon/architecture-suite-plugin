@@ -5,17 +5,19 @@
 <text x="48" y="65" font-size="22">Ridepulse Repo Python dispatch</text>
 <text x="48" y="98" font-size="22">dispatch/dispatch/matching.py — Code</text>
 <rect id="box-ridepulse-repo-python-dispatch-dispatch-dispatch-matching-py" x="72" y="163" width="303" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="223.5" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
-<text x="223.5" y="213" text-anchor="middle" font-size="15">dispatch/dispatch/matching.py</text>
-<rect id="box-ridepulse-repo-python-dispatch-dispatch-dispatch-matching-py-matchingengine" x="100" y="237" width="247" height="153" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
-<text x="223.5" y="271" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
-<text x="223.5" y="293" text-anchor="middle" font-size="15">dispatch/dispatch/matching.py</text>
-<text x="223.5" y="315" text-anchor="middle" font-size="15">MatchingEngine</text>
-<text x="223.5" y="333" text-anchor="middle" font-size="12">«class»</text>
-<text x="223.5" y="352" text-anchor="middle" font-size="13">Declared class MatchingEngine</text>
-<text x="223.5" y="370" text-anchor="middle" font-size="12">+match(self, trip): unspecified</text>
+<rect id="box-ridepulse-repo-python-dispatch-dispatch-dispatch-matching-py-matchingengine" x="100" y="255" width="247" height="153" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
+<text x="223.5" y="289" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
+<text x="223.5" y="311" text-anchor="middle" font-size="15">dispatch/dispatch/matching.py</text>
+<text x="223.5" y="333" text-anchor="middle" font-size="15">MatchingEngine</text>
+<text x="223.5" y="351" text-anchor="middle" font-size="12">«class»</text>
+<text x="223.5" y="370" text-anchor="middle" font-size="13">Declared class MatchingEngine</text>
+<text x="223.5" y="388" text-anchor="middle" font-size="12">+match(self, trip): unspecified</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="223.5" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="223.5" y="213" text-anchor="middle" font-size="15">dispatch/dispatch/matching.py</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="223.5" y="231" text-anchor="middle" font-size="12">«inferred»</text>
 <text x="48" y="547" font-size="12">Notation key</text>
 <text x="48" y="569" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="591" font-size="12">Enclosing frame = named scope or deployment boundary</text>
 <text x="48" y="613" font-size="12">Arrow = directed dependency; label states its purpose</text>
+<text x="48" y="635" font-size="12">Dotted outline or arrow, «inferred»/«proposed»/«unknown» = claim not observed</text>
 </svg>

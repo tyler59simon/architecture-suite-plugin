@@ -27,6 +27,7 @@ from architecture_suite.plan import (
     plan_provider,
 )
 from architecture_suite.safety import SafetyError
+from architecture_suite.style import element_label
 
 
 def codes(findings):
@@ -95,12 +96,24 @@ def test_ridepulse_plan_compiles_and_validates():
         )
     )
     modern = ridepulse_model("modern")
-    assert all(
-        "GCP-Legacy-" not in e["cloud"]["service"]
-        for e in modern["elements"]
-        if e.get("cloud")
-    )
-    assert sum(1 for e in modern["elements"] if e.get("cloud")) < len(services)
+    # A modern style without artwork keeps the service and only drops the icon.
+    clouds = [e for e in modern["elements"] if e.get("cloud")]
+    assert {e["name"] for e in clouds} == set(services)
+    for e in clouds:
+        assert e["cloud"]["provider"] == "gcp"
+        legacy = e["cloud"]["service"].startswith("GCP-Legacy-")
+        assert e["cloud"].get("icon", True) is not legacy
+    iconless = [e for e in clouds if e["cloud"].get("icon") is False]
+    assert iconless and all(element_label(e).icon is None for e in iconless)
+    assert not validate_model(modern)
+
+
+def test_unknown_explicit_provider_is_rejected():
+    plan = ridepulse_plan()
+    plan["deployment"]["provider"] = "azure"
+    assert "unknown-provider" in codes(errors(lint_plan(plan)))
+    with pytest.raises(PlanError):
+        compile_plan(plan)
 
 
 def test_provider_inference_and_aws_default():

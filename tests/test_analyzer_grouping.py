@@ -76,3 +76,28 @@ def test_uncovered_source_beside_a_manifest_is_kept(tmp_path):
     assert "hooks/" in gap and "repository root" in gap
     model, _ = analyze_repository(repo, profile="container")
     assert len([e for e in model["elements"] if e["type"] == "container"]) == 4
+
+
+def test_tests_under_a_manifest_root_are_not_components(tmp_path):
+    repo = tmp_path / "shop"
+    for path, text in {
+        "pyproject.toml": "[project]\nname = 'shop'\n",
+        "app/main.py": "def main():\n    return 1\n",
+        "tests/test_app.py": "def test_app():\n    assert True\n",
+        "app/tests/test_unit.py": "def test_unit():\n    assert True\n",
+    }.items():
+        (repo / path).parent.mkdir(parents=True, exist_ok=True)
+        (repo / path).write_text(text, encoding="utf-8")
+    plan = draft_plan(repo, scan_repository(repo), "Internal")
+    evidence = {
+        component["evidence"].split(":")[0]
+        for container in plan["containers"]
+        for component in container["components"]
+    }
+    assert evidence == {"app/main.py"}
+    # Drafted boundaries are interpretations; declarations were read from source.
+    assert {c["status"] for c in plan["containers"]} == {"inferred"}
+    components = [x for c in plan["containers"] for x in c["components"]]
+    assert {x["status"] for x in components} == {"inferred"}
+    assert {d["status"] for x in components for d in x["code"]} == {"observed"}
+    assert "Test code under app/tests/, tests/ is not modeled as containers." in plan["gaps"]

@@ -5,16 +5,18 @@
 <text x="48" y="65" font-size="22">Ridepulse Repo Go notifier —</text>
 <text x="48" y="98" font-size="22">Component</text>
 <rect id="box-ridepulse-repo-go-notifier" x="72" y="163" width="325" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="234.5" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier</text>
-<rect id="box-ridepulse-repo-go-notifier-notifier-main-go" x="100" y="215" width="269" height="150" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
-<text x="234.5" y="249" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier notifier/</text>
-<text x="234.5" y="271" text-anchor="middle" font-size="15">main.go</text>
-<text x="234.5" y="289" text-anchor="middle" font-size="12">«component»</text>
-<text x="234.5" y="307" text-anchor="middle" font-size="12">Go</text>
-<text x="234.5" y="326" text-anchor="middle" font-size="13">Source module notifier/main.go;</text>
-<text x="234.5" y="345" text-anchor="middle" font-size="13">responsibility requires review</text>
+<rect id="box-ridepulse-repo-go-notifier-notifier-main-go" x="100" y="233" width="269" height="150" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="2 3"/>
+<text x="234.5" y="267" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier notifier/</text>
+<text x="234.5" y="289" text-anchor="middle" font-size="15">main.go</text>
+<text x="234.5" y="307" text-anchor="middle" font-size="12">«component» «inferred»</text>
+<text x="234.5" y="325" text-anchor="middle" font-size="12">Go</text>
+<text x="234.5" y="344" text-anchor="middle" font-size="13">Source module notifier/main.go;</text>
+<text x="234.5" y="363" text-anchor="middle" font-size="13">responsibility requires review</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="234.5" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="234.5" y="209" text-anchor="middle" font-size="12">«inferred»</text>
 <text x="48" y="547" font-size="12">Notation key</text>
 <text x="48" y="569" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="591" font-size="12">Enclosing frame = named scope or deployment boundary</text>
 <text x="48" y="613" font-size="12">Arrow = directed dependency; label states its purpose</text>
+<text x="48" y="635" font-size="12">Dotted outline or arrow, «inferred»/«proposed»/«unknown» = claim not observed</text>
 </svg>

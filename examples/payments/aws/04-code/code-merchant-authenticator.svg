@@ -4,13 +4,13 @@
 <rect width="660" height="644" fill="white"/>
 <text x="48" y="65" font-size="22">Merchant Authenticator — Code</text>
 <rect id="box-merchant-authenticator" x="72" y="130" width="266" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="205.0" y="158" text-anchor="middle" font-size="15">Merchant Authenticator</text>
 <rect id="box-apikeyauthenticator" x="100" y="182" width="210" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="205.0" y="216" text-anchor="middle" font-size="15">ApiKeyAuthenticator</text>
 <text x="205.0" y="234" text-anchor="middle" font-size="12">«class»</text>
 <text x="205.0" y="253" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="205.0" y="271" text-anchor="middle" font-size="12">+authenticate(apiKey): Merchant</text>
 <text x="205.0" y="289" text-anchor="middle" font-size="12">+requireScope(merchant, scope)</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="205.0" y="158" text-anchor="middle" font-size="15">Merchant Authenticator</text>
 <text x="48" y="514" font-size="12">Notation key</text>
 <text x="48" y="536" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="558" font-size="12">Enclosing frame = named scope or deployment boundary</text>

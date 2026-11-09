@@ -27,51 +27,51 @@ flowchart LR
     n18[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
     style n18 fill:#eaf6ec,stroke:#2e7d32
     n19["Webhook Dispatcher#10;«container»#10;Node.js#10;Signs and delivers payment events to#10;merchants, with retries"]
-    subgraph n20["Payment Orchestrator"]
-      subgraph n21["Acquirer Router"]
-        n22["AcquirerRouter#10;«class»#10;Illustrative implementation#10;+route(payment): AcquirerConnection"]
+    subgraph n20["Card Vault"]
+      subgraph n21["Card Tokenizer"]
+        n22["CardTokenizer#10;«class»#10;Illustrative implementation#10;+tokenize(pan, expiry): CardToken#10;+detokenize(token): CardData"]
       end
-      subgraph n23["Payment State Machine"]
-        n24["PaymentState#10;«interface»#10;Illustrative implementation#10;+next(event): PaymentState"]
-        n25["PaymentStateMachine#10;«class»#10;Illustrative implementation#10;+authorize(payment): Authorization#10;+capture(payment, amount): Capture#10;+refund(payment, amount): Refund"]
-      end
-      subgraph n26["3DS Handler"]
-        n27["ThreeDSecureClient#10;«class»#10;Illustrative implementation#10;+authenticate(payment):#10;AuthenticationResult"]
+      subgraph n23["Envelope Encryptor"]
+        n24["EnvelopeEncryptor#10;«class»#10;Illustrative implementation#10;+encrypt(plaintext, keyId): Ciphertext#10;+decrypt(ciphertext): Bytes"]
       end
     end
-    subgraph n28["Fraud Scoring"]
-      subgraph n29["Risk Scorer"]
-        n30["RiskScorer#10;«class»#10;Illustrative implementation#10;+score(payment): RiskScore"]
+    subgraph n25["Fraud Scoring"]
+      subgraph n26["Risk Scorer"]
+        n27["RiskScorer#10;«class»#10;Illustrative implementation#10;+score(payment): RiskScore"]
       end
-      subgraph n31["Rules Engine"]
-        n32["RuleSet#10;«class»#10;Illustrative implementation#10;+evaluate(payment, score): Decision"]
-      end
-    end
-    subgraph n33["Payments API"]
-      subgraph n34["Payment Intents Controller"]
-        n35["PaymentIntentController#10;«class»#10;Illustrative implementation#10;+create(request): PaymentIntent#10;+confirm(id, cardToken): PaymentIntent#10;+refund(id, amount): Refund"]
-      end
-      subgraph n36["Merchant Authenticator"]
-        n37["ApiKeyAuthenticator#10;«class»#10;Illustrative implementation#10;+authenticate(apiKey): Merchant#10;+requireScope(merchant, scope)"]
-      end
-      subgraph n38["Idempotency Guard"]
-        n39["IdempotencyGuard#10;«class»#10;Illustrative implementation#10;+reserve(key, requestHash): Reservation#10;+complete(key, response)"]
+      subgraph n28["Rules Engine"]
+        n29["RuleSet#10;«class»#10;Illustrative implementation#10;+evaluate(payment, score): Decision"]
       end
     end
-    subgraph n40["Card Vault"]
-      subgraph n41["Envelope Encryptor"]
-        n42["EnvelopeEncryptor#10;«class»#10;Illustrative implementation#10;+encrypt(plaintext, keyId): Ciphertext#10;+decrypt(ciphertext): Bytes"]
+    subgraph n30["Ledger Service"]
+      subgraph n31["Balance Calculator"]
+        n32["BalanceCalculator#10;«class»#10;Illustrative implementation#10;+balance(merchantId, currency): Balance"]
       end
-      subgraph n43["Card Tokenizer"]
-        n44["CardTokenizer#10;«class»#10;Illustrative implementation#10;+tokenize(pan, expiry): CardToken#10;+detokenize(token): CardData"]
+      subgraph n33["Journal Writer"]
+        n34["JournalWriter#10;«class»#10;Illustrative implementation#10;+post(entries): JournalId"]
       end
     end
-    subgraph n45["Ledger Service"]
-      subgraph n46["Balance Calculator"]
-        n47["BalanceCalculator#10;«class»#10;Illustrative implementation#10;+balance(merchantId, currency): Balance"]
+    subgraph n35["Payment Orchestrator"]
+      subgraph n36["3DS Handler"]
+        n37["ThreeDSecureClient#10;«class»#10;Illustrative implementation#10;+authenticate(payment):#10;AuthenticationResult"]
       end
-      subgraph n48["Journal Writer"]
-        n49["JournalWriter#10;«class»#10;Illustrative implementation#10;+post(entries): JournalId"]
+      subgraph n38["Acquirer Router"]
+        n39["AcquirerRouter#10;«class»#10;Illustrative implementation#10;+route(payment): AcquirerConnection"]
+      end
+      subgraph n40["Payment State Machine"]
+        n41["PaymentState#10;«interface»#10;Illustrative implementation#10;+next(event): PaymentState"]
+        n42["PaymentStateMachine#10;«class»#10;Illustrative implementation#10;+authorize(payment): Authorization#10;+capture(payment, amount): Capture#10;+refund(payment, amount): Refund"]
+      end
+    end
+    subgraph n43["Payments API"]
+      subgraph n44["Idempotency Guard"]
+        n45["IdempotencyGuard#10;«class»#10;Illustrative implementation#10;+reserve(key, requestHash): Reservation#10;+complete(key, response)"]
+      end
+      subgraph n46["Merchant Authenticator"]
+        n47["ApiKeyAuthenticator#10;«class»#10;Illustrative implementation#10;+authenticate(apiKey): Merchant#10;+requireScope(merchant, scope)"]
+      end
+      subgraph n48["Payment Intents Controller"]
+        n49["PaymentIntentController#10;«class»#10;Illustrative implementation#10;+create(request): PaymentIntent#10;+confirm(id, cardToken): PaymentIntent#10;+refund(id, amount): Refund"]
       end
     end
   end

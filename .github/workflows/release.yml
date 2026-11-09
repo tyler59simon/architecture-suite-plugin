@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: read
     with:
-      os: '["ubuntu-latest", "windows-latest"]'
+      os: '["ubuntu-24.04", "windows-latest"]'
 
   # Hosted macOS arm64 runners are capacity-constrained and have gone unassigned for whole
   # runs ("The job was not acquired by Runner"), which blocked the first v1.0.0 release.
@@ -26,7 +26,7 @@ jobs:
 
   publish:
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write

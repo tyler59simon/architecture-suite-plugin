@@ -1,6 +1,8 @@
 %% Architecture Suite schema 2.0; portable layout is independent of ELK
 flowchart LR
-  subgraph n0["Ridepulse Repo Go notifier"]
-    n1["Ridepulse Repo Go notifier notifier/#10;main.go#10;«component»#10;Go#10;Source module notifier/main.go;#10;responsibility requires review"]
+  subgraph n0["Ridepulse Repo Go notifier#10;«inferred»"]
+    n1["Ridepulse Repo Go notifier notifier/#10;main.go#10;«component» «inferred»#10;Go#10;Source module notifier/main.go;#10;responsibility requires review"]
   end
-  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]
+  classDef claim stroke-dasharray:3 3
+  class n1 claim
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency#10;Dotted or «inferred/proposed/unknown» = claim not observed"]

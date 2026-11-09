@@ -14,19 +14,18 @@ containers:
   description: compose/service
   technology: compose/service
   evidence: examples/cli-features/compose.json
+  status: inferred
 - name: input-0-database
   description: compose/service
   technology: compose/service
   evidence: examples/cli-features/compose.json
+  status: inferred
 flows:
-- from: input-0-api
-  to: input-0-database
-  description: explicit-reference
-  evidence: examples/cli-features/compose.json
 - from: input-0-api
   to: input-0-database
   description: depends-on
   evidence: examples/cli-features/compose.json
+  status: inferred
 assumptions: []
 gaps: []
 ```

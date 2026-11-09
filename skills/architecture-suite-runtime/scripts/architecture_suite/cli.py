@@ -28,29 +28,37 @@ from .renderers import (
 from .report import render_architecture_report
 from .runtime_env import check_stamp
 from .safety import (
+    OUTPUT_MANIFEST,
     SafetyError,
     atomic_output_directory,
     canonical_existing_directory,
     canonical_existing_file,
     canonical_output_directory,
+    ownership_changes,
     require_write_authorization,
     scan_repository,
 )
 
 DEFAULT_FORMATS = {"mermaid", "drawio", "png"}
+ALL_FORMATS = DEFAULT_FORMATS | {"svg"}
 
 
 def _json_print(value):
-    print(json.dumps(value, indent=2, ensure_ascii=False, default=str))
+    text = json.dumps(value, indent=2, ensure_ascii=False, default=str)
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # A non-UTF-8 console or pipe (cp1252 on Windows) must not lose the result.
+        print(json.dumps(value, indent=2, default=str))
 
 
 def _parse_formats(value):
     formats = (
-        DEFAULT_FORMATS.copy()
+        ALL_FORMATS.copy()
         if value == "all"
         else {x.strip() for x in value.split(",") if x.strip()}
     )
-    if not formats or formats - DEFAULT_FORMATS - {"svg"}:
+    if not formats or formats - ALL_FORMATS:
         raise argparse.ArgumentTypeError("format must be all or mermaid,drawio,png,svg")
     return formats
 
@@ -63,6 +71,18 @@ def _selected_model(model, level, styles):
     if level == "all":
         selected = model
         profile = "code"
+    elif level == "deployment":
+        # Deployment needs only the placed containers/components, never code-level detail.
+        has_components = any(v.get("type") == "component" for v in model.get("views", []))
+        profile = "component" if has_components else "container"
+        try:
+            selected = project_model(model, profile)
+        except (KeyError, TypeError, AttributeError) as exc:
+            raise SafetyError("Malformed architecture model cannot be projected") from exc
+        if not selected.get("deployment"):
+            raise SafetyError(
+                "Plan has no deployment section; add deployment nodes and placements"
+            )
     else:
         profile = {
             "system": "context",
@@ -164,11 +184,8 @@ def cmd_plan_draft(args) -> int:
     _no_links(output)
     if output.exists() and not output.is_file():
         raise SafetyError("Plan output must be a file")
-    if output.resolve().is_relative_to(root) and output.suffix.lower() not in {
-        ".md",
-        ".markdown",
-    }:
-        raise SafetyError("A plan inside the repository must use a Markdown filename")
+    if output.resolve().is_relative_to(root):
+        raise SafetyError("Plan output must be outside the analyzed repository")
     scan = scan_repository(
         root,
         max_files=args.max_files,
@@ -224,7 +241,8 @@ def _check_styles(args):
         "all",
         "overview",
     }:
-        raise SafetyError(
+        # A malformed argument combination: exit 2, as documented.
+        raise ValueError(
             "--overview-style can be used only with --level all or overview"
         )
 
@@ -267,21 +285,26 @@ def cmd_publish(args) -> int:
         paths.extend(["plan-fidelity.md", "plan-fidelity.json"])
     if args.command != "plan-render" or args.emit_model:
         paths.append("architecture-model.json")
+    changes = ownership_changes(output, "c4", paths)
     summary = {
         "operation": args.command,
         "output_root": str(output),
-        "files": paths,
-        "expected_file_count": len(paths),
+        "files": paths + [OUTPUT_MANIFEST],
+        "expected_file_count": len(paths) + 1,
         "formats": sorted(formats),
         "overview_styles": list(styles),
         "write_confirmation_required": True,
         "overwrite_confirmation_required": output.exists() and any(output.iterdir()),
+        "conflicts": changes["conflicts"],
     }
     if args.dry_run:
-        _json_print(summary)
+        _json_print({**summary, "would_remove": changes["remove"]})
         return 0
     require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(output) as stage:
+    summary["removed"] = changes["remove"]
+    with atomic_output_directory(
+        output, owner="c4", command=args.command, files=paths
+    ) as stage:
         write_rendered_artifacts(
             model,
             stage,
@@ -336,13 +359,22 @@ def cmd_examples(args) -> int:
         )
     paths.append("index.md")
     paths.append("README.md")
+    changes = ownership_changes(output, "examples", paths)
     if args.dry_run:
         _json_print(
-            {"operation": "examples", "files": paths, "systems": len(SCENARIOS)}
+            {
+                "operation": "examples",
+                "files": paths + [OUTPUT_MANIFEST],
+                "systems": len(SCENARIOS),
+                "would_remove": changes["remove"],
+                "conflicts": changes["conflicts"],
+            }
         )
         return 0
     require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    with atomic_output_directory(output) as stage:
+    with atomic_output_directory(
+        output, owner="examples", command="examples", files=paths
+    ) as stage:
         for index, scenario in enumerate(SCENARIOS):
             folder = stage / scenario["id"]
             folder.mkdir(exist_ok=True)
@@ -366,7 +398,14 @@ def cmd_examples(args) -> int:
             + "\n",
             encoding="utf-8",
         )
-    _json_print({"operation": "examples", "files": paths})
+    _json_print(
+        {
+            "operation": "examples",
+            "files": paths + [OUTPUT_MANIFEST],
+            "removed": changes["remove"],
+            "conflicts": changes["conflicts"],
+        }
+    )
     return 0
 
 
