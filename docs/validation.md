@@ -6,7 +6,7 @@ The suite covers models, plans, scope projection, source parsers, `plan-draft` c
 
 **Platforms.** Local verification uses Windows and Python 3.13. CI (`.github/workflows/architecture.yml`) runs the suite on Windows and Linux with Python 3.11, 3.13 and 3.14 and on macOS with Python 3.13, smoke-tests the portable bootstrap on each OS, audits dependencies and proves the runtime lock installs from wheels on every supported Python and OS. Tag pushes run CI only through `release.yml`, where macOS is reported but does not block publishing. A platform counts as verified once its CI job has passed.
 
-**Agent behaviour.** `evals/` is a `claude plugin eval` suite for Claude Code: skill triggering, prompts that must not trigger a skill, prompt injection, and an end-to-end render. On 2026-11-03 (Claude Code 2.1.317, one run per case) all 9 trigger cases, both negative cases and the injection case passed. The end-to-end case needs a shell sandbox, which eval runs on Windows lack; run it on Linux with `.github/workflows/evals.yml`. Codex, Copilot and Factory packages are package-validated only.
+**Agent behaviour.** `evals/` is a `claude plugin eval` suite for Claude Code: skill triggering, prompts that must not trigger a skill, prompt injection, and an end-to-end render. On 2026-11-09 (Claude Code 2.1.319, one run per case) all 10 trigger cases, both negative cases and the injection case passed. The end-to-end case needs a shell sandbox, which eval runs on Windows lack; run it on Linux with `.github/workflows/evals.yml`. Codex, Copilot and Factory packages are package-validated only.
 
 Coverage measures executable code, not the accuracy of architectural judgments for arbitrary systems. `plan-draft` output is a reviewable candidate.
 

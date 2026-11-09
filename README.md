@@ -14,7 +14,7 @@ The `latest` branch always holds the newest release and only the plugin (skills,
 To stay on one version instead, add its own branch, for example:
 
 ```text
-/plugin marketplace add tyler59simon/architecture-suite-plugin#architecture-suite-1.0.1
+/plugin marketplace add tyler59simon/architecture-suite-plugin#architecture-suite-1.1.0
 ```
 
 The skills share one Python runtime. The first time a skill runs, it asks before running the one-time setup:

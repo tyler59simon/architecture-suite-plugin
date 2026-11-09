@@ -122,6 +122,11 @@
     },
     {
       "module": "cli.py",
+      "function": "cmd_plan_review",
+      "executed": true
+    },
+    {
+      "module": "cli.py",
       "function": "cmd_plan_draft",
       "executed": true
     },
@@ -198,6 +203,11 @@
     {
       "module": "emit.py",
       "function": "render_scene_drawio",
+      "executed": true
+    },
+    {
+      "module": "emit.py",
+      "function": "render_scene_vsdx",
       "executed": true
     },
     {
@@ -457,6 +467,11 @@
     },
     {
       "module": "renderers.py",
+      "function": "render_vsdx",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
       "function": "layout_measurements",
       "executed": true
     },
@@ -492,6 +507,11 @@
     },
     {
       "module": "renderers.py",
+      "function": "render_overview_vsdx",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
       "function": "render_aws_deployment_mermaid",
       "executed": true
     },
@@ -507,6 +527,11 @@
     },
     {
       "module": "renderers.py",
+      "function": "render_aws_deployment_vsdx",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
       "function": "render_gcp_deployment_mermaid",
       "executed": true
     },
@@ -518,6 +543,11 @@
     {
       "module": "renderers.py",
       "function": "render_gcp_deployment_svg",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "render_gcp_deployment_vsdx",
       "executed": true
     },
     {
@@ -542,12 +572,37 @@
     },
     {
       "module": "renderers.py",
+      "function": "rasterize_icons",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "scene_vsdx",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
       "function": "write_rendered_artifacts",
       "executed": true
     },
     {
       "module": "report.py",
       "function": "render_architecture_report",
+      "executed": true
+    },
+    {
+      "module": "review.py",
+      "function": "review_plan",
+      "executed": true
+    },
+    {
+      "module": "review.py",
+      "function": "review_exit_code",
+      "executed": true
+    },
+    {
+      "module": "review.py",
+      "function": "render_review_markdown",
       "executed": true
     },
     {
@@ -745,13 +800,17 @@
       171
     ],
     "cli.py": [
-      80,
-      81,
-      94,
-      118,
-      122,
-      218,
-      279
+      82,
+      83,
+      96,
+      120,
+      124,
+      205,
+      309
+    ],
+    "emit.py": [
+      361,
+      642
     ],
     "infrastructure.py": [
       34,
@@ -783,25 +842,34 @@
       590
     ],
     "renderers.py": [
-      130,
-      265,
-      273,
-      274,
-      275,
-      287,
-      288,
-      332,
-      339,
-      342,
-      346,
-      383
+      131,
+      282,
+      290,
+      291,
+      292,
+      304,
+      305,
+      349,
+      356,
+      359,
+      363,
+      380,
+      388,
+      392,
+      395,
+      404,
+      432,
+      434
+    ],
+    "review.py": [
+      108
     ],
     "safety.py": [
       176,
       183,
       187,
       235,
-      329
+      316
     ],
     "scenarios.py": [
       30,

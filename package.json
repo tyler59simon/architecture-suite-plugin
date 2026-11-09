@@ -1,6 +1,6 @@
 {
   "name": "architecture-suite-verification",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "description": "Setup and syntax validation only; runtime vendors ELK",
   "devDependencies": {

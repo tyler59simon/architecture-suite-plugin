@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 - planning workflow, Visio export and new default formats
+
+A planning workflow that checks a plan before anything is drawn, editable Visio output, and Mermaid and PNG as the default formats.
 
 ### Added
 
