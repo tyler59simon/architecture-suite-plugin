@@ -125,7 +125,8 @@ def test_vsdx_claim_cues(plan):
     model, _ = compile_plan(claimed)
     ident = next(e["id"] for e in model["elements"] if e["name"] == target)
     scene = _container_scene(model)
-    page = _page(renderers.scene_vsdx(scene))
+    view = next(v for v in model["views"] if v["type"] == "container")
+    page = _page(renderers.render_vsdx(model, view))
     boxes = _shapes(page, "box-")
     claimed_box = next(b for b in scene.boxes if (b.element or {}).get("id") == ident)
     assert _cells(boxes[claimed_box.id])["LinePattern"] == "3"
