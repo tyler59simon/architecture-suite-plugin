@@ -3,7 +3,7 @@
     python tools/generate_samples.py
 
 Uses the runtime's `examples` command (C4 levels 1-4, all five overview styles and the AWS
-deployment) and adds SVG for every view.
+deployment) in Mermaid, Draw.io and PNG, and adds SVG for every view.
 """
 
 from pathlib import Path
@@ -25,6 +25,8 @@ def main():
             str(samples / "starter-systems"),
             "--overview-style",
             "all",
+            "--format",
+            "mermaid,drawio,png",
             "--confirm-write",
             "--confirm-overwrite",
         ]

@@ -1,4 +1,4 @@
-"""Generate the nine SKILL.md files from one shared preamble (keeps them consistent).
+"""Generate the ten SKILL.md files from one shared preamble (keeps them consistent).
 
 Run: python tools/generate_skills.py
 """
@@ -27,12 +27,12 @@ Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` 
 - Cite file/line or document references. Separate assumptions from facts; record unknowns under `gaps`. Never invent users, classes, calls, or cloud placements.
 - Lint, then dry-run, then publish with `--confirm-write` (`--confirm-overwrite` only for existing output). Write to a dedicated directory outside the analyzed repository. On a re-render, the dry run lists `would_remove` (stale diagrams from an earlier run) and `conflicts` (generated files someone edited, which are kept); mention both to the user.
 - Do not use `--allow-layout-findings` as an automatic retry. Report fidelity, layout and scan-limit findings to the user.
-- Deliver links to diagrams (`.mmd`, `.drawio`, `.png`; `--format mermaid,drawio,png,svg` adds SVG; `visio` or `all` adds Visio `.vsdx`), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
+- Deliver links to diagrams (`.mmd` and `.png` by default; add `drawio`, `svg` or `visio` to `--format` for editable Draw.io, SVG or Visio `.vsdx`, e.g. `--format mermaid,png,drawio`; `all` writes every format), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
 """
 
 LEVEL = """## Steps
 
-1. Obtain `plan.md`. From a brief, copy `assets/architecture-plan-template.md` in this skill; from a repository, follow the `reverse-engineer-c4` skill first. The plan must contain evidence down to this skill's level (shallower levels are the contiguous prefix).
+1. Obtain `plan.md`. From a brief, copy `assets/architecture-plan-template.md` in this skill; from a repository, follow the `reverse-engineer-c4` skill first; to build or improve a plan, use the `architecture-plan` skill. The plan must contain evidence down to this skill's level (shallower levels are the contiguous prefix).
 2. `architecture-suite plan-lint --plan plan.md --strict`
 3. `architecture-suite plan-render --plan plan.md --output <out> --level {level} --dry-run`
 4. `architecture-suite plan-render --plan plan.md --output <out> --level {level} --confirm-write`
@@ -41,15 +41,31 @@ LEVEL = """## Steps
 """
 
 SKILL_DEFS = {
+    "architecture-plan": {
+        "description": "Build and review a sound architecture plan (plan.md) before drawing: scope, interview, evidence and claim status, then a per-level readiness review. Use when the user wants to plan, design or validate an architecture, check whether a plan is complete, or make diagrams more accurate, before rendering any C4 or cloud diagram.",
+        "body": """# Architecture planning
+
+Diagrams are only as accurate as `plan.md`. This workflow builds the plan from the people and sources that know the system and checks it before anything is rendered. The rendering skills (`c4-diagrams`, `c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`, `c4-aws`, `c4-gcp`) take the finished plan. Questions, evidence rules and the quality checklist: `../architecture-suite-runtime/references/planning.md`.
+
+1. **Scope.** Establish the purpose, the audience, the decision the diagrams support and the ownership boundary (what is the system, what is outside it). Choose target levels from the audience: executives L1 or an executive overview, architects L2, delivery teams L3, detailed design L4 for a few components, operations a deployment view. Do not plan deeper than the audience needs.
+2. **Sources.** Collect the brief, documents and this conversation. For an existing repository run `architecture-suite plan-draft --repo <repo> --output <work>/plan.md --dry-run`, then `--confirm-write` (see `reverse-engineer-c4`); for Terraform, CloudFormation/CDK, Kubernetes or Compose run `architecture-suite import-infra` (see `c4-aws` or `c4-gcp`). Drafted and imported elements are candidates marked `inferred`: verify them against the sources before trusting them.
+3. **Interview.** Work level by level through the question bank in `planning.md`, starting at L1. Ask a few questions at a time and only what blocks the target levels; record everything else under `gaps`. Never fill a gap with a guess.
+4. **Write `plan.md`** from `assets/architecture-plan-template.md` in this skill (or edit the draft). Declare each fact once by nesting (containers > components > code), give flows at the most specific known level, cite a source for every element and flow, put judgment under `assumptions`, and mark anything not yet true or not verified with `status: proposed`, `inferred` or `unknown`.
+5. **Review.** `architecture-suite plan-review --plan plan.md`. It reports, per level, `ready` or `blocked` (with the reason), evidence and technology coverage, the claim-status mix and findings. Each finding has a `level` and usually a `question`. Fix the plan, ask the user the question, or record a gap or assumption. Repeat until every target level is `ready`. Add `--output <work>/plan-review.md --dry-run`, then `--confirm-write`, for a Markdown copy to share.
+6. **Lint.** `architecture-suite plan-lint --plan plan.md --strict`, then hand the plan to the rendering skill for the target levels, or render directly with `architecture-suite plan-render --plan plan.md --output <out> --level <deepest ready level> --dry-run`, then `--confirm-write`.
+7. **Report.** Tell the user which levels are ready, the evidence coverage, how many claims are not yet observed, and the open gaps, so they know how far to trust the diagrams.
+""",
+        "template": True,
+    },
     "c4-diagrams": {
-        "description": "Generate a complete C4 diagram package (L1 context, L2 container, L3 component, L4 code, overview) from requirements, documents or the current agent chat. Use when the user describes a system, not a repository, and wants Mermaid, editable Draw.io and PNG diagrams.",
+        "description": "Generate a complete C4 diagram package (L1 context, L2 container, L3 component, L4 code, overview) from requirements, documents or the current agent chat. Use when the user describes a system, not a repository, and wants Mermaid and PNG diagrams (editable Draw.io, SVG or Visio on request).",
         "body": """# C4 diagrams from requirements
 
 Use when the source is a brief, spec, document set, or this conversation (for code in a repo use `reverse-engineer-c4`). Produces L1-L4 plus an overview, and optionally cloud deployment (`c4-aws` for AWS, `c4-gcp` for Google Cloud).
 
-1. Gather purpose, audience, ownership boundary, people, external systems, containers, key flows. Ask only for what blocks the plan; otherwise record gaps.
+1. Gather purpose, audience, ownership boundary, people, external systems, containers, key flows. Ask only for what blocks the plan; otherwise record gaps. For a thorough interview and readiness review, follow the `architecture-plan` skill first.
 2. Write `plan.md` from `assets/architecture-plan-template.md` in this skill. Declare each fact once by nesting (containers > components > code) and give flows at the most specific known level; the compiler derives coarser arrows. Cite the source for each element; put judgment under `assumptions` and render with `--augmented`. Mark individual elements or flows that are not yet true with `status: proposed` (or `inferred`/`unknown`); diagrams then show them dotted with a «status» tag, so a forwarded image keeps the distinction.
-3. `architecture-suite plan-lint --plan plan.md --strict`, fix findings.
+3. `architecture-suite plan-review --plan plan.md` shows which levels are ready and what is missing; resolve or report its findings. Then `architecture-suite plan-lint --plan plan.md --strict`, fix findings.
 4. `architecture-suite plan-render --plan plan.md --output <out> --level all --overview-style progressive --dry-run`, then `--confirm-write`.
 5. Use `--level all` only if L1-L4 all have evidence; otherwise render the evidenced prefix (see `c4-system`, `c4-container`, `c4-component`, `c4-code`).
 6. For request flows, author an `architecture-scenario/v1` file and run `scenario-lint` / `scenario-render` (see `../architecture-suite-runtime/references/extensions.md`).
@@ -65,7 +81,7 @@ Static analysis gives candidates, not truth. `plan-draft` makes each packaging m
 1. `architecture-suite doctor`
 2. `architecture-suite plan-draft --repo <repo> --output <work>/plan.md --dry-run`, then `--confirm-write`. Optional deeper evidence: `architecture-suite inventory --repo <repo> --output <work>/inventory --confirm-write` (Python, C#, Java, Kotlin, Go, JS/TS).
 3. Review `prompt_injection_paths`, truncated and unreadable-file findings. Open the cited sources. Rewrite container boundaries, names and descriptions to match what you verified; replace tool-generated long names; add people and external systems only if evidenced; add flows with evidence. Drafted containers, components and flows carry `status: inferred` (shown dotted with «inferred»); change it to `observed` only for what you verified, and leave the rest inferred.
-4. `architecture-suite plan-lint --plan plan.md --strict`
+4. `architecture-suite plan-review --plan plan.md` (per-level readiness and gaps; resolve or report its findings), then `architecture-suite plan-lint --plan plan.md --strict`
 5. Render with the level skills (`c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`) or `plan-render --level all --overview-style progressive --confirm-write`.
 6. Report what was verified versus assumed, and that deployability, ownership and runtime call graphs are not proven by static analysis.
 
@@ -119,7 +135,7 @@ Styles (`--overview-style`, repeat or comma-separate, or `all`):
 - `progressive`: L1-L3 with code counts (CLI default).
 - `hierarchy`: containment tree.
 - `small-multiples`: coordinated scoped panels, best for large models.
-- `complete`: every element and member; can exceed PNG limits (6,000 px wide) on big models, then use SVG/Draw.io or another style.
+- `complete`: every element and member; can exceed PNG limits (6,000 px wide) on big models, then use `--format mermaid,drawio,svg` or another style.
 
 ```
 architecture-suite plan-render --plan plan.md --output <out> --level overview --overview-style executive,hierarchy --confirm-write

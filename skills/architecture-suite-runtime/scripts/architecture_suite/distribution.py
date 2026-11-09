@@ -15,7 +15,7 @@ RUNTIME_NAME = "architecture-suite-runtime"
 VERSION = "1.0.1"
 PLUGIN_NAME = "architecture-suite"
 DESCRIPTION = (
-    "Offline evidence-backed C4 architecture diagrams: c4-diagrams, "
+    "Offline evidence-backed C4 architecture diagrams: architecture-plan, c4-diagrams, "
     "reverse-engineer-c4, c4-system, c4-container, c4-component, c4-code, "
     "c4-overview, c4-aws and c4-gcp"
 )
@@ -24,7 +24,7 @@ AUTHOR = {"name": "Tyler Simon"}
 # Public GitHub repository URL, e.g. "https://github.com/<owner>/architecture-suite".
 # homepage/repository are omitted from manifests while this is empty.
 REPOSITORY = "https://github.com/tyler59simon/architecture-suite-plugin"
-KEYWORDS = ["c4", "architecture", "diagrams", "drawio", "visio", "mermaid", "aws", "gcp", "offline"]
+KEYWORDS = ["c4", "architecture", "diagrams", "planning", "drawio", "visio", "mermaid", "aws", "gcp", "offline"]
 # Repository-root legal files shipped with every package and install.
 LEGAL_FILES = ("LICENSE", "NOTICE")
 NEWLINE = chr(10)

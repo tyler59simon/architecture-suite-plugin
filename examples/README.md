@@ -1,7 +1,8 @@
 # Examples
 
-Rendered output from Architecture Suite for fictional systems. Every diagram comes in Mermaid
-(`.mmd`), editable Draw.io (`.drawio`), PNG and SVG, and every package has the same layout:
+Rendered output from Architecture Suite for fictional systems. Every diagram here comes in Mermaid
+(`.mmd`), editable Draw.io (`.drawio`), PNG and SVG; the runtime writes only Mermaid and PNG unless
+`--format` asks for more. Every package has the same layout:
 
 ```text
 01-system-context/   C4 level 1
@@ -28,6 +29,7 @@ None of this ships in the plugin. All systems and facts are invented.
 
 | Skill | Look at |
 | --- | --- |
+| `architecture-plan` | [payments/plans](payments/plans), [ride-dispatch/plans](ride-dispatch/plans) (complete plans; `plan-review` reports every level ready) |
 | `c4-diagrams` | [payments/aws](payments/aws), [ride-dispatch/diagrams](ride-dispatch/diagrams) |
 | `c4-system` | [payments/aws/01-system-context](payments/aws/01-system-context) |
 | `c4-container` | [payments/aws/02-containers](payments/aws/02-containers) |

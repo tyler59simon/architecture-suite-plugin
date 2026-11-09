@@ -26,8 +26,8 @@ def test_defaults_and_invalid_arguments():
         and args.timeout == 45.0
     )
     args = parser.parse_args(["render", "--model", "x", "--output", "y", "--format", "all"])
-    assert args.format == DEFAULT_FORMATS | {"svg", "visio"}  # "all" means every format
-    assert "visio" not in DEFAULT_FORMATS  # Visio is opt-in
+    assert args.format == {"mermaid", "drawio", "png", "svg", "visio"}  # "all" means every format
+    assert DEFAULT_FORMATS == {"mermaid", "png"}  # Draw.io, SVG and Visio are opt-in
     args = parser.parse_args(["plan-draft", "--repo", "x", "--output", "y"])
     assert args.classification == "Internal" and args.max_file_bytes == 400000
     assert parse_overview_styles(None) == ("progressive",)
@@ -311,17 +311,19 @@ def test_doctor_ready_and_missing(monkeypatch, capsys):
     assert "missing browser" in capsys.readouterr().out
 
 
-def test_examples_dry_and_write(tmp_path, capsys, monkeypatch):
+def test_examples_dry_and_write(tmp_path, capsys):
     output = tmp_path / "examples"
     argv = ["examples", "--output", str(output), "--overview-style", "executive"]
     assert main(argv + ["--dry-run"]) == 0
     preview = json.loads(capsys.readouterr().out)
     assert preview["systems"] == 3
+    assert {Path(f).suffix for f in preview["files"] if "/0" in f} == {".mmd", ".png"}
     assert not output.exists()
-    # Use the real exporter but SVG instead of PNG for this CLI transaction test.
-    # PNG, offline browser and the unchanged default-format examples are exercised by export tests.
-    monkeypatch.setattr(cli, "DEFAULT_FORMATS", {"mermaid", "drawio"})
-    assert main(argv + ["--confirm-write"]) == 0
+    assert main(argv + ["--format", "visio", "--dry-run"]) == 0
+    assert any(f.endswith(".vsdx") for f in json.loads(capsys.readouterr().out)["files"])
+    # Use the real exporter without PNG for this CLI transaction test.
+    # PNG and the offline browser are exercised by export tests.
+    assert main(argv + ["--format", "mermaid,drawio", "--confirm-write"]) == 0
     assert len(list(output.glob("*/architecture-model.json"))) == 3
 
 
