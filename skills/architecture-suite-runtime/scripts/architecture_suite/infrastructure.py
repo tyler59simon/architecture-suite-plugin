@@ -3,7 +3,8 @@
 from pathlib import Path
 import json
 import re
-from .plan import parse_yaml
+import yaml
+from .plan import _Loader
 from .safety import canonical_existing_file, redact
 from .model import slugify
 
@@ -18,6 +19,37 @@ def evidence_reference(path) -> str:
         return str(path)
 
 SENSITIVE, UNKNOWN = "[SENSITIVE]", "[UNKNOWN AFTER APPLY]"
+
+
+class _InfraLoader(_Loader):
+    """Safe loader where CloudFormation short tags (!Ref, !Sub, ...) become inert data."""
+
+
+def _intrinsic(loader, suffix, node):
+    if isinstance(node, yaml.ScalarNode):
+        expression = loader.construct_scalar(node)
+    elif isinstance(node, yaml.SequenceNode):
+        expression = loader.construct_sequence(node, deep=True)
+    else:
+        expression = loader.construct_mapping(node, deep=True)
+    return {"intrinsic": suffix, "expression": expression}
+
+
+_InfraLoader.add_multi_constructor("!", _intrinsic)
+
+
+def _documents(text: str) -> list:
+    """Every non-empty YAML/JSON document; anchors and aliases stay unsupported."""
+    if len(text) > 2_000_000:
+        raise ValueError("Infrastructure document exceeds 2 MB")
+    try:
+        for token in yaml.scan(text):
+            if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken)):
+                raise ValueError("YAML anchors and aliases are unsupported")
+        # Empty documents (a Helm template that rendered nothing) are skipped.
+        return [doc for doc in yaml.load_all(text, Loader=_InfraLoader) if doc is not None]
+    except (yaml.YAMLError, RecursionError) as exc:
+        raise ValueError(str(exc)[:200]) from exc
 
 
 def _apply_mask(value, mask, marker, path, hits):
@@ -77,18 +109,15 @@ def import_infrastructure(paths, bindings=None):
         path = canonical_existing_file(Path(path))
         text = path.read_text(encoding="utf-8")
         prefix = f"input-{file_index}-"
-        # CloudFormation short tags are converted to data, never evaluated.
-        text = re.sub(
-            r"!(Ref|Sub|GetAtt|Join|If|FindInMap|ImportValue|Select|Split)\s+([^\n]+)",
-            lambda m: json.dumps({"intrinsic": m[1], "expression": m[2]}),
-            text,
-        )
+        declared = {}  # name -> id across this file's documents
 
         def scrub(value):
             if isinstance(value, dict):
                 return {
+                    # Booleans are kept: they carry Terraform sensitivity masks, not secrets.
                     k: "[REDACTED]"
                     if re.search(r"password|secret|token|api.?key", str(k), re.I)
+                    and not isinstance(v, bool)
                     else scrub(v)
                     for k, v in value.items()
                 }
@@ -97,11 +126,8 @@ def import_infrastructure(paths, bindings=None):
             return redact(value) if isinstance(value, str) else value
 
         try:
-            docs = [
-                scrub(parse_yaml(part))
-                for part in re.split(r"(?m)^---\s*$", text)
-                if part.strip()
-            ]
+            # CloudFormation short tags are converted to data, never evaluated.
+            docs = [scrub(doc) for doc in _documents(text)]
         except ValueError as exc:
             raise ValueError("Malformed infrastructure document") from exc
         for doc_index, doc in enumerate(docs):
@@ -202,7 +228,20 @@ def import_infrastructure(paths, bindings=None):
                 raise ValueError(
                     "Expected Terraform plan, CloudFormation/CDK template, Kubernetes/rendered Helm or Compose"
                 )
-            names = {name: prefix + slugify(name) for name, _, _, _ in entries}
+            names = {}
+            taken = {r["id"] for r in resources}
+            for name, _, _, _ in entries:
+                if name in names or name in declared:
+                    # A repeated declaration keeps its ID and fails as a duplicate below.
+                    names.setdefault(name, declared.get(name))
+                    continue
+                # Distinct names may share a slug (app.config, app-config): number them.
+                ident = base = prefix + slugify(name)
+                suffix = 2
+                while ident in taken:
+                    ident, suffix = f"{base}-{suffix}", suffix + 1
+                names[name] = declared[name] = ident
+                taken.add(ident)
             for name, kind, props, parent in entries:
                 ident = names[name]
                 add(ident, kind, props, source, parent)
@@ -222,13 +261,16 @@ def import_infrastructure(paths, bindings=None):
 
                 def refs(value):
                     if isinstance(value, dict):
+                        # YAML short form `!Ref Name`, as data from _InfraLoader.
+                        target = value.get("expression")
+                        if (
+                            value.get("intrinsic") == "Ref"
+                            and isinstance(target, str)
+                            and target in names
+                        ):
+                            yield names[target]
                         for k, v in value.items():
-                            if k in {
-                                "Ref",
-                                "DependsOn",
-                                "depends_on",
-                                "depends_on_resource",
-                            }:
+                            if k in ref_keys:
                                 for item in v if isinstance(v, list) else [v]:
                                     if isinstance(item, str) and item in names:
                                         yield names[item]
@@ -237,7 +279,11 @@ def import_infrastructure(paths, bindings=None):
                         for item in value:
                             yield from refs(item)
 
-                for target in set(refs(props)):
+                # Compose depends_on is a depends-on relationship below, not a reference.
+                ref_keys = {"Ref", "DependsOn", "depends_on", "depends_on_resource"} - (
+                    {"depends_on"} if kind == "compose/service" else set()
+                )
+                for target in sorted(set(refs(props))):
                     edges.append(
                         {
                             "source_id": ident,
@@ -258,6 +304,21 @@ def import_infrastructure(paths, bindings=None):
                         )
                 if kind == "compose/service":
                     dependencies = props.get("depends_on", [])
+                    missing = [
+                        d for d in dependencies if d not in names
+                    ] + [
+                        "networks/" + n
+                        for n in props.get("networks", [])
+                        if n != "default" and "networks/" + n not in names
+                    ]
+                    if missing:
+                        findings.append(
+                            {
+                                "resource": ident,
+                                "message": "Refers to undeclared services or networks: "
+                                + ", ".join(sorted(map(str, missing))),
+                            }
+                        )
                     for dep in dependencies:
                         if dep in names:
                             edges.append(
@@ -296,7 +357,14 @@ def import_infrastructure(paths, bindings=None):
             if resource["type"].startswith(("aws_", "google_")):
                 # Terraform resolved IDs are matched only against declared resource IDs.
                 value = target["properties"].get("id")
-                if isinstance(value, str) and value and value in scalars:
+                # A masked or unknown ID is a shared placeholder, not an identity.
+                if (
+                    isinstance(value, str)
+                    and value
+                    and value not in {SENSITIVE, UNKNOWN}
+                    and "[REDACTED]" not in value
+                    and value in scalars
+                ):
                     edges.append(
                         {
                             "source_id": resource["id"],
