@@ -1,0 +1,12 @@
+# Keep every checkout byte-identical to the repository, whatever core.autocrlf says.
+# Bundled assets are verified against SHA-256 manifests, and generated samples are
+# compared in tests, so line-ending conversion would break integrity checks.
+* text=auto eol=lf
+
+# Checksummed runtime assets: never convert.
+skills/architecture-suite-runtime/scripts/architecture_suite/assets/** -text
+
+# Binary formats.
+*.png binary
+*.ttf binary
+*.zip binary

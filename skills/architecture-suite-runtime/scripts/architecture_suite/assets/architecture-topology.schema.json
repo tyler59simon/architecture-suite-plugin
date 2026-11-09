@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "architecture-topology/v1"
+    },
+    "resources": {
+      "type": "array"
+    },
+    "relationships": {
+      "type": "array"
+    },
+    "bindings": {
+      "type": "object"
+    },
+    "findings": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "resources",
+    "relationships",
+    "bindings",
+    "findings"
+  ]
+}
