@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 - audit fixes
 
 Fixes from an external audit of 1.0.0, plus two additions.
 

@@ -12,7 +12,7 @@ from .safety import (
 )
 
 RUNTIME_NAME = "architecture-suite-runtime"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 PLUGIN_NAME = "architecture-suite"
 DESCRIPTION = (
     "Offline evidence-backed C4 architecture diagrams: c4-diagrams, "

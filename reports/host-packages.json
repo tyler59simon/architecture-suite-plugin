@@ -14,7 +14,7 @@
     ],
     "plugin_manifest": null,
     "status": "package-validated; agent behaviour not separately evaluated",
-    "sha256": "4e7e0d560a6771bb9d054f9afdffd6ae028ed72275c72a7434cf8a678e79efc6"
+    "sha256": "d6aa68517e4fa2f15aae21d597bffbf0c927ff642c7930eb9520a9824c926d1b"
   },
   "claude.zip": {
     "files": 2200,
@@ -31,7 +31,7 @@
     ],
     "plugin_manifest": ".claude-plugin/plugin.json",
     "status": "package-validated; agent behaviour evaluated with claude plugin eval (evals/)",
-    "sha256": "35170c9499aa7cb77f6c9e48e76beecef09e8ba1e76c680e17ffca7bea1b9dc2"
+    "sha256": "8a593a7f75c75e8bb18183f9c02c8366752d3e7c5926d20d0eafc7c10fda88df"
   },
   "copilot.zip": {
     "files": 2197,
@@ -48,7 +48,7 @@
     ],
     "plugin_manifest": null,
     "status": "package-validated; agent behaviour not separately evaluated",
-    "sha256": "b0c41f06f22a351b5fce94def2faf04b27841706908bef895fe8290d80291593"
+    "sha256": "e8b854a9a71e32cbb9272823a5a42a534a82a0785a11b17a72dfd3fb6cc8d2b5"
   },
   "factory.zip": {
     "files": 2200,
@@ -65,6 +65,6 @@
     ],
     "plugin_manifest": ".factory-plugin/plugin.json",
     "status": "package-validated; agent behaviour not separately evaluated",
-    "sha256": "9a1a27817bbb1b9df254ae61c11d4f20c28e1510c1905d8c1e0b9857578645ae"
+    "sha256": "a0cae0e931d4be1a39ab7c98e82b6fead2095f9cb8e05a402dfa54687c492c6f"
   }
 }
