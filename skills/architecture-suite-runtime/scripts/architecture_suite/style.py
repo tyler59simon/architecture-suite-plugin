@@ -95,7 +95,11 @@ def box_style(box) -> tuple[str, str, str]:
 
 @lru_cache(maxsize=16)
 def _font(size: int):
-    return ImageFont.truetype(str(ASSETS / "font.ttf"), size)
+    # Pin the basic engine: Pillow picks Raqm when libraqm/fribidi is present (common on
+    # Linux), which measures differently and would make wrapping depend on the host.
+    return ImageFont.truetype(
+        str(ASSETS / "font.ttf"), size, layout_engine=ImageFont.Layout.BASIC
+    )
 
 
 def text_width(text: str, font_px: int = 13, *, bold: bool = False) -> int:
@@ -205,14 +209,23 @@ class Label:
         return "\n".join(ln.text for ln in self.lines)
 
 
+CLAIM_CUES = {"inferred": "«inferred»", "proposed": "«proposed»", "unknown": "«unknown»"}
+
+
+def claim_cue(status: str | None) -> str:
+    """Text cue for a claim that is not observed; empty when observed or not stated."""
+    return CLAIM_CUES.get(status, "")
+
+
 def element_label(
     element: dict, *, compact: bool = False, code_icons: bool = False
 ) -> Label:
+    cue = claim_cue(element.get("status"))
     lines = [
         TextLine(t, size)
         for text, size in (
             (element["name"], 15),
-            (f"«{element.get('kind', element['type'])}»", 12),
+            (f"«{element.get('kind', element['type'])}»" + (" " + cue if cue else ""), 12),
             (element.get("technology", ""), 12),
             (element.get("description", ""), 13),
         )
@@ -230,8 +243,10 @@ def element_label(
         if element.get("type") != "code" or code_icons
         else None
     )
-    # Optional GCP icons may not be installed; the element then renders without one.
-    icon = service if icon_available(service) else None
+    # Optional GCP icons may not be installed, and a forced icon style may lack artwork
+    # ("icon": false); the element then renders without one but keeps its service.
+    show = element.get("cloud", {}).get("icon", True)
+    icon = service if show and icon_available(service) else None
     visual = element_visual(element)
     pad = CAP_PAD if visual and visual.shape == "cylinder" else 0
     return Label(lines, icon=icon, top_pad=pad)

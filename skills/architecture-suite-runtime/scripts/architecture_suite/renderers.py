@@ -8,7 +8,7 @@ from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright, Error as BrowserError
 from .c4_layout import build_view_scene_elk
 from .aws import verify_assets
-from .emit import render_scene_drawio, render_scene_svg
+from .emit import _claimed, render_scene_drawio, render_scene_svg
 from .model import VIEW_FOLDERS
 from .overview_layout import (
     build_aws_scene,
@@ -22,7 +22,15 @@ from .safety import SafetyError, contained_path
 from .style import box_style, element_visual
 from .scene import scene_collisions
 
-ARTIFACT_LEVELS = ("all", "system", "container", "component", "code", "overview")
+ARTIFACT_LEVELS = (
+    "all",
+    "system",
+    "container",
+    "component",
+    "code",
+    "overview",
+    "deployment",
+)
 ARTIFACT_VIEW_TYPES = {
     "system": "context",
     "container": "container",
@@ -56,7 +64,7 @@ def diagram_specs(
             )
             for s in normalize_overview_styles(overview_styles)
         )
-    if level == "all" and model.get("deployment"):
+    if level in {"all", "deployment"} and model.get("deployment"):
         provider = model["deployment"].get("provider", "aws")
         specs.append(
             (
@@ -92,7 +100,7 @@ def _quoted(value):
     # Mermaid entity codes prevent labels from becoming syntax, directives, or HTML.
     return (
         '"'
-        + "".join(f"#{ord(c)};" if c in '"<>&{}[]|`\\\n\r' else c for c in str(value))
+        + "".join(f"#{ord(c)};" if c in '"<>&{}[]|`\\\n\r#' else c for c in str(value))
         + '"'
     )
 
@@ -106,7 +114,8 @@ def render_mermaid(model: dict, view: dict) -> str:
         children.setdefault(b.parent_id, []).append(b)
     lines = [
         "%% Architecture Suite schema 2.0; portable layout is independent of ELK",
-        "flowchart LR",
+        # An explicit layout direction carries over; auto keeps the portable default.
+        "flowchart TB" if view.get("direction") == "down" else "flowchart LR",
     ]
 
     def emit(parent, indent):
@@ -143,8 +152,19 @@ def render_mermaid(model: dict, view: dict) -> str:
         lines.append(
             f"  {ids[edge.source_id]} -->|{_quoted(text)}| {ids[edge.destination_id]}"
         )
+    # Claims that are not observed: dotted outline/arrow plus the «status» text cue.
+    claimed = [ids[b.id] for b in scene.boxes if b.role != "frame" and _claimed(b)]
+    links = [str(i) for i, edge in enumerate(scene.edges) if _claimed(edge)]
+    if claimed:
+        lines.append("  classDef claim stroke-dasharray:3 3")
+        lines.append(f"  class {','.join(claimed)} claim")
+    if links:
+        lines.append(f"  linkStyle {','.join(links)} stroke-dasharray:3 3")
+    claims = bool(claimed or links or any(_claimed(b) for b in scene.boxes))
     lines.append(
-        '  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]'
+        '  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency'
+        + ("#10;Dotted or «inferred/proposed/unknown» = claim not observed" if claims else "")
+        + '"]'
     )
     return "\n".join(lines) + "\n"
 
@@ -302,7 +322,9 @@ def render_svg_png(
         or min(width, height) <= 0
     ):
         raise SafetyError(
-            "PNG exceeds browser size limits; choose narrower scopes or another format"
+            f"{Path(png_file).name} ({width}x{height}) exceeds PNG size limits "
+            f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP); "
+            "choose narrower scopes or another format"
         )
 
     def capture(active):

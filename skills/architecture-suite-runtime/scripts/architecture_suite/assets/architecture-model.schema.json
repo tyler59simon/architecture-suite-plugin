@@ -67,6 +67,20 @@
             "minimum": 0,
             "maximum": 1
           },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          },
           "cloud": {
             "type": "object",
             "properties": {
@@ -75,6 +89,9 @@
               },
               "service": {
                 "type": "string"
+              },
+              "icon": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -122,6 +139,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
           }
         },
         "required": [

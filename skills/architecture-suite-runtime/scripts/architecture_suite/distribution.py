@@ -12,7 +12,7 @@ from .safety import (
 )
 
 RUNTIME_NAME = "architecture-suite-runtime"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 PLUGIN_NAME = "architecture-suite"
 DESCRIPTION = (
     "Offline evidence-backed C4 architecture diagrams: c4-diagrams, "
@@ -130,10 +130,10 @@ def package_hosts(skills, output, hosts=None):
                     bundle.writestr(info, path.read_bytes())
             for legal in legal_files(skills):
                 # In the runtime folder for every layout; also at the root of plugin layouts.
-                names = [f"{prefix}/{RUNTIME_NAME}/{legal.name}"]
+                legal_paths = [f"{prefix}/{RUNTIME_NAME}/{legal.name}"]
                 if host in {"claude", "factory"}:
-                    names.append(legal.name)
-                for name in names:
+                    legal_paths.append(legal.name)
+                for name in legal_paths:
                     info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
                     info.compress_type = zipfile.ZIP_DEFLATED
                     bundle.writestr(info, legal.read_bytes())
@@ -162,8 +162,8 @@ def package_hosts(skills, output, hosts=None):
 def write_plugin_tree(skills, target):
     """Write the slim, self-contained marketplace + plugin published on the architecture-suite-<version> and latest branches.
 
-    Holds only what a user needs: the skills, the shared runtime, LICENSE/NOTICE, README and
-    the Claude/Factory manifests. Users add it with `/plugin marketplace add <owner>/<repo>#latest` (or a version branch).
+    Holds only what a user needs: the skills, the shared runtime, LICENSE/NOTICE, README,
+    CHANGELOG and the Claude/Factory manifests. Users add it with `/plugin marketplace add <owner>/<repo>#latest` (or a version branch).
     """
     skills = Path(skills)
     target = Path(target)
@@ -181,9 +181,9 @@ def write_plugin_tree(skills, target):
                 shutil.copyfile(path, destination)
     for legal in legal_files(skills):
         shutil.copyfile(legal, target / legal.name)
-    # README for users; .gitattributes keeps checksummed assets byte-exact when the release
+    # README and CHANGELOG for users; .gitattributes keeps checksummed assets byte-exact when the release
     # branch is cloned on Windows with core.autocrlf=true (as Claude Code's installer does).
-    for name in ("README.md", ".gitattributes"):
+    for name in ("README.md", "CHANGELOG.md", ".gitattributes"):
         source = skills.resolve().parent / name
         if source.is_file():
             shutil.copyfile(source, target / name)

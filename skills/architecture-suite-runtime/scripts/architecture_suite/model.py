@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 from copy import deepcopy
+import hashlib
 import json
 from pathlib import Path
 import re
 from typing import Any
+import unicodedata
 from .safety import SECRET
 
 SCHEMA_VERSION = "2.0"
@@ -32,10 +34,30 @@ VIEW_BOUNDARY_TYPES = {
     "code": "component",
 }
 ID_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+# Optional per-claim status, weakest first. Absent means "not stated" and renders as today.
+CLAIM_STATUSES = ("unknown", "proposed", "inferred", "observed")
+
+
+SLUG_MAX = 80
 
 
 def slugify(value: str, fallback: str = "item") -> str:
-    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or fallback
+    """ASCII ID; Latin text (accents included) maps as before.
+
+    Characters with no ASCII form (CJK, Arabic, emoji) and over-long names add a short
+    stable hash, so distinct names keep distinct IDs and IDs stay usable as file names.
+    """
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    lost = any(
+        ord(c) > 127
+        and unicodedata.category(c)[0] in "LNS"
+        and not re.search(r"[A-Za-z0-9]", unicodedata.normalize("NFKD", c))
+        for c in value
+    )
+    if not lost and len(slug) <= SLUG_MAX:
+        return slug or fallback
+    digest = hashlib.sha256(value.strip().lower().encode("utf-8")).hexdigest()[:8]
+    return "-".join((slug[:SLUG_MAX].strip("-") or fallback, digest))
 
 
 def view_id_for(view_type: str, boundary_id: str) -> str:
@@ -231,6 +253,10 @@ def derive_views(
             )
             if technology:
                 relationship["technology"] = technology
+            # A merged arrow is only as certain as its weakest stated flow.
+            declared = [e["status"] for e in entries if e.get("status") in CLAIM_STATUSES]
+            if declared:
+                relationship["status"] = min(declared, key=CLAIM_STATUSES.index)
             relationships.append(relationship)
             view["relationship_ids"].append(ident)
             used.update((src, dst))
@@ -484,7 +510,19 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                 if isinstance(n, dict) and isinstance(n.get("id"), str)
             }
             if len(nodes) != len(deployment["nodes"]):
-                add("deployment-id", "Invalid or duplicate deployment id")
+                ids = [n.get("id") if isinstance(n, dict) else None for n in deployment["nodes"]]
+                repeated = sorted({str(i) for i in ids if ids.count(i) > 1})
+                add(
+                    "deployment-id",
+                    "Invalid or duplicate deployment id"
+                    + (": " + ", ".join(repeated) if repeated else ""),
+                    ", ".join(repeated),
+                )
+            # Boundaries that belong to the other provider's hierarchy.
+            foreign = {
+                "aws": {"organization", "folder", "project", "zone"},
+                "gcp": {"account", "availability-zone"},
+            }.get(deployment.get("provider"), set())
             for nid, node in nodes.items():
                 if not ID_PATTERN.fullmatch(nid) or node.get("type") not in {
                     "cloud",
@@ -504,6 +542,13 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                     "deployment-group",
                 }:
                     add("deployment-node", "Unsupported deployment node", nid)
+                elif node.get("type") in foreign:
+                    add(
+                        "deployment-node",
+                        f"{node['type']} nodes are not part of a "
+                        f"{deployment['provider']} deployment",
+                        nid,
+                    )
                 parent_types = {
                     "account": {"cloud"},
                     "region": {"account"},
@@ -549,14 +594,20 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                     or elements.get(p.get("element_id"), {}).get("type") != "container"
                     or p.get("node_id") not in nodes
                 ):
+                    where = (
+                        f"{p.get('element_id')} -> {p.get('node_id')}"
+                        if isinstance(p, dict)
+                        else ""
+                    )
                     add(
                         "deployment-placement",
                         "Placements require a container and existing node",
+                        where,
                     )
                     continue
                 pair = p["element_id"]
                 if pair in placements:
-                    add("deployment-placement", "Duplicate placement")
+                    add("deployment-placement", "Duplicate placement", pair)
                 placements.add(pair)
     if SECRET.search(json.dumps(model, ensure_ascii=False)):
         add("credential", "Credential-like value must be redacted")
