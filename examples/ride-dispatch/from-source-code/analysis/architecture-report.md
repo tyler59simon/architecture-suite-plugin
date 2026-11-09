@@ -17,7 +17,7 @@ Repository boundary; runtime ownership unconfirmed
 - evidence-17: infra/main.tf:35 — resource "google_bigquery_dataset" "lake" {
 - evidence-18: infra/main.tf:31 — resource "google_bigtable_instance" "telemetry" {
 - evidence-19: infra/main.tf:2 — resource "google_container_cluster" "gateway" {
-- evidence-2: dispatch/dispatch/__init__.py:1 — 
+- evidence-2: dispatch/dispatch/__init__.py:1
 - evidence-20: infra/main.tf:26 — resource "google_redis_instance" "locations" {
 - evidence-21: dispatch/dispatch/matching.py:4 — from dispatch import pricing
 - evidence-3: dispatch/dispatch/matching.py:1 — """Scores candidate drivers for a trip."""
@@ -42,9 +42,9 @@ Repository boundary; runtime ownership unconfirmed
 
 ## Claim status
 
-- observed: 3 elements, 0 relationships
-- inferred: 17 elements, 1 relationships
-- not stated: 1 elements, 0 relationships
+- observed: 3 elements, 0 relationships (counted per view; a flow can appear at several levels)
+- inferred: 17 elements, 1 relationships (counted per view; a flow can appear at several levels)
+- not stated: 1 elements, 0 relationships (counted per view; a flow can appear at several levels)
 
 ## Layout verification
 

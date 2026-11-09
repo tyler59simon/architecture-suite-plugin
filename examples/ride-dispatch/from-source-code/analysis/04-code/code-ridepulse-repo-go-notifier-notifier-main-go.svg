@@ -5,15 +5,15 @@
 <text x="48" y="65" font-size="22">Ridepulse Repo Go notifier notifier/main.</text>
 <text x="48" y="98" font-size="22">go — Code</text>
 <rect id="box-ridepulse-repo-go-notifier-notifier-main-go" x="72" y="163" width="325" height="320" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="234.5" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier notifier/</text>
-<text x="234.5" y="213" text-anchor="middle" font-size="15">main.go</text>
-<text x="234.5" y="231" text-anchor="middle" font-size="12">«inferred»</text>
 <rect id="box-ridepulse-repo-go-notifier-notifier-main-go-main" x="100" y="255" width="269" height="131" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="234.5" y="289" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier notifier/</text>
 <text x="234.5" y="311" text-anchor="middle" font-size="15">main.go main</text>
 <text x="234.5" y="329" text-anchor="middle" font-size="12">«function»</text>
 <text x="234.5" y="348" text-anchor="middle" font-size="13">Declared function main</text>
 <text x="234.5" y="366" text-anchor="middle" font-size="12">+main()</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="234.5" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier notifier/</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="234.5" y="213" text-anchor="middle" font-size="15">main.go</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="234.5" y="231" text-anchor="middle" font-size="12">«inferred»</text>
 <text x="48" y="547" font-size="12">Notation key</text>
 <text x="48" y="569" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="591" font-size="12">Enclosing frame = named scope or deployment boundary</text>

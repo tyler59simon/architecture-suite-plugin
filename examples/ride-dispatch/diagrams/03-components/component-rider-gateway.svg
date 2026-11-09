@@ -21,7 +21,6 @@
 <text x="275.0" y="811" text-anchor="middle" font-size="12">Spanner</text>
 <text x="275.0" y="830" text-anchor="middle" font-size="13">Transactional trip and account records</text>
 <rect id="box-rider-gateway" x="131.5" y="130" width="543" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="403.0" y="158" text-anchor="middle" font-size="15">Rider Gateway</text>
 <rect id="box-auth-middleware" x="159.5" y="182" width="231" height="110" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5"/>
 <text x="275.0" y="216" text-anchor="middle" font-size="15">Auth Middleware</text>
 <text x="275.0" y="234" text-anchor="middle" font-size="12">«component»</text>
@@ -41,6 +40,7 @@
 <polyline id="edge-component-rider-gateway-r3" points="567.8333333333334,292 567.8333333333334,465 830,465 830,681" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="643" y="555" width="185" height="26" fill="white" rx="3"/>
 <text x="735.5" y="572" font-size="11" text-anchor="middle">Charges completed trips [HTTPS]</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="403.0" y="158" text-anchor="middle" font-size="15">Rider Gateway</text>
 <text x="48" y="914" font-size="12">Notation key</text>
 <text x="48" y="936" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="958" font-size="12">Enclosing frame = named scope or deployment boundary</text>

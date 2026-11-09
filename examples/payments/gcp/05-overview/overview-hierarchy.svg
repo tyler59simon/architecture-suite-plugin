@@ -38,7 +38,6 @@
 <text x="288.0" y="1277" text-anchor="middle" font-size="12">«person»</text>
 <text x="288.0" y="1296" text-anchor="middle" font-size="13">Pays for orders at merchant checkouts</text>
 <rect id="box-paystream" x="72" y="1376" width="432" height="5344" rx="6" stroke="#1168bd" fill="#e4f1ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="1404" text-anchor="middle" font-size="15">PayStream</text>
 <rect id="box-checkout-web-sdk" x="169.5" y="1636" width="237" height="128" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5"/>
 <text x="288.0" y="1670" text-anchor="middle" font-size="15">Checkout Web SDK</text>
 <text x="288.0" y="1688" text-anchor="middle" font-size="12">«container»</text>
@@ -117,9 +116,7 @@
 <text x="288.0" y="6653" text-anchor="middle" font-size="13">Signs and delivers payment events to</text>
 <text x="288.0" y="6672" text-anchor="middle" font-size="13">merchants, with retries</text>
 <rect id="box-card-vault" x="100" y="1973" width="376" height="514" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2001" text-anchor="middle" font-size="15">Card Vault</text>
 <rect id="box-card-tokenizer" x="128" y="2025" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2053" text-anchor="middle" font-size="15">Card Tokenizer</text>
 <rect id="box-cardtokenizer" x="156" y="2077" width="216" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="264.0" y="2111" text-anchor="middle" font-size="15">CardTokenizer</text>
 <text x="264.0" y="2129" text-anchor="middle" font-size="12">«class»</text>
@@ -127,7 +124,6 @@
 <text x="264.0" y="2166" text-anchor="middle" font-size="12">+tokenize(pan, expiry): CardToken</text>
 <text x="264.0" y="2184" text-anchor="middle" font-size="12">+detokenize(token): CardData</text>
 <rect id="box-envelope-encryptor" x="128" y="2252" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2280" text-anchor="middle" font-size="15">Envelope Encryptor</text>
 <rect id="box-envelopeencryptor" x="156" y="2304" width="229" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="270.5" y="2338" text-anchor="middle" font-size="15">EnvelopeEncryptor</text>
 <text x="270.5" y="2356" text-anchor="middle" font-size="12">«class»</text>
@@ -135,41 +131,33 @@
 <text x="270.5" y="2393" text-anchor="middle" font-size="12">+encrypt(plaintext, keyId): Ciphertext</text>
 <text x="270.5" y="2411" text-anchor="middle" font-size="12">+decrypt(ciphertext): Bytes</text>
 <rect id="box-fraud-scoring" x="100" y="2696" width="376" height="478" rx="6" stroke="#7b1fa2" fill="#f5eafa" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2724" text-anchor="middle" font-size="15">Fraud Scoring</text>
 <rect id="box-risk-scorer" x="128" y="2748" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2776" text-anchor="middle" font-size="15">Risk Scorer</text>
 <rect id="box-riskscorer" x="156" y="2800" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="247.5" y="2834" text-anchor="middle" font-size="15">RiskScorer</text>
 <text x="247.5" y="2852" text-anchor="middle" font-size="12">«class»</text>
 <text x="247.5" y="2871" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="247.5" y="2889" text-anchor="middle" font-size="12">+score(payment): RiskScore</text>
 <rect id="box-rules-engine" x="128" y="2957" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="2985" text-anchor="middle" font-size="15">Rules Engine</text>
 <rect id="box-ruleset" x="156" y="3009" width="228" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="270.0" y="3043" text-anchor="middle" font-size="15">RuleSet</text>
 <text x="270.0" y="3061" text-anchor="middle" font-size="12">«class»</text>
 <text x="270.0" y="3080" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="270.0" y="3098" text-anchor="middle" font-size="12">+evaluate(payment, score): Decision</text>
 <rect id="box-ledger-service" x="100" y="5822" width="376" height="478" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="5850" text-anchor="middle" font-size="15">Ledger Service</text>
 <rect id="box-balance-calculator" x="128" y="5874" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="5902" text-anchor="middle" font-size="15">Balance Calculator</text>
 <rect id="box-balancecalculator" x="156" y="5926" width="253" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="282.5" y="5960" text-anchor="middle" font-size="15">BalanceCalculator</text>
 <text x="282.5" y="5978" text-anchor="middle" font-size="12">«class»</text>
 <text x="282.5" y="5997" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="282.5" y="6015" text-anchor="middle" font-size="12">+balance(merchantId, currency): Balance</text>
 <rect id="box-journal-writer" x="128" y="6083" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="6111" text-anchor="middle" font-size="15">Journal Writer</text>
 <rect id="box-journalwriter" x="156" y="6135" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="247.5" y="6169" text-anchor="middle" font-size="15">JournalWriter</text>
 <text x="247.5" y="6187" text-anchor="middle" font-size="12">«class»</text>
 <text x="247.5" y="6206" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="247.5" y="6224" text-anchor="middle" font-size="12">+post(entries): JournalId</text>
 <rect id="box-payment-orchestrator" x="100" y="3591" width="376" height="870" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="3619" text-anchor="middle" font-size="15">Payment Orchestrator</text>
 <rect id="box-3ds-handler" x="128" y="4017" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4045" text-anchor="middle" font-size="15">3DS Handler</text>
 <rect id="box-threedsecureclient" x="156" y="4069" width="183" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="247.5" y="4103" text-anchor="middle" font-size="15">ThreeDSecureClient</text>
 <text x="247.5" y="4121" text-anchor="middle" font-size="12">«class»</text>
@@ -177,14 +165,12 @@
 <text x="247.5" y="4158" text-anchor="middle" font-size="12">+authenticate(payment):</text>
 <text x="247.5" y="4176" text-anchor="middle" font-size="12">AuthenticationResult</text>
 <rect id="box-acquirer-router" x="128" y="4244" width="320" height="189" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4272" text-anchor="middle" font-size="15">Acquirer Router</text>
 <rect id="box-acquirerrouter" x="156" y="4296" width="237" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="274.5" y="4330" text-anchor="middle" font-size="15">AcquirerRouter</text>
 <text x="274.5" y="4348" text-anchor="middle" font-size="12">«class»</text>
 <text x="274.5" y="4367" text-anchor="middle" font-size="13">Illustrative implementation</text>
 <text x="274.5" y="4385" text-anchor="middle" font-size="12">+route(payment): AcquirerConnection</text>
 <rect id="box-payment-state-machine" x="128" y="3643" width="320" height="354" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="3671" text-anchor="middle" font-size="15">Payment State Machine</text>
 <rect id="box-paymentstate" x="181.5" y="3695" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="273.0" y="3729" text-anchor="middle" font-size="15">PaymentState</text>
 <text x="273.0" y="3747" text-anchor="middle" font-size="12">«interface»</text>
@@ -198,9 +184,7 @@
 <text x="273.0" y="3931" text-anchor="middle" font-size="12">+capture(payment, amount): Capture</text>
 <text x="273.0" y="3949" text-anchor="middle" font-size="12">+refund(payment, amount): Refund</text>
 <rect id="box-payments-api" x="100" y="4670" width="376" height="759" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4698" text-anchor="middle" font-size="15">Payments API</text>
 <rect id="box-idempotency-guard" x="128" y="4967" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4995" text-anchor="middle" font-size="15">Idempotency Guard</text>
 <rect id="box-idempotencyguard" x="156" y="5019" width="247" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="279.5" y="5053" text-anchor="middle" font-size="15">IdempotencyGuard</text>
 <text x="279.5" y="5071" text-anchor="middle" font-size="12">«class»</text>
@@ -208,7 +192,6 @@
 <text x="279.5" y="5108" text-anchor="middle" font-size="12">+reserve(key, requestHash): Reservation</text>
 <text x="279.5" y="5126" text-anchor="middle" font-size="12">+complete(key, response)</text>
 <rect id="box-merchant-authenticator" x="128" y="5194" width="320" height="207" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="5222" text-anchor="middle" font-size="15">Merchant Authenticator</text>
 <rect id="box-apikeyauthenticator" x="156" y="5246" width="210" height="127" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="261.0" y="5280" text-anchor="middle" font-size="15">ApiKeyAuthenticator</text>
 <text x="261.0" y="5298" text-anchor="middle" font-size="12">«class»</text>
@@ -216,7 +199,6 @@
 <text x="261.0" y="5335" text-anchor="middle" font-size="12">+authenticate(apiKey): Merchant</text>
 <text x="261.0" y="5353" text-anchor="middle" font-size="12">+requireScope(merchant, scope)</text>
 <rect id="box-payment-intents-controller" x="128" y="4722" width="320" height="225" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="288.0" y="4750" text-anchor="middle" font-size="15">Payment Intents Controller</text>
 <rect id="box-paymentintentcontroller" x="156" y="4774" width="248" height="145" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="280.0" y="4808" text-anchor="middle" font-size="15">PaymentIntentController</text>
 <text x="280.0" y="4826" text-anchor="middle" font-size="12">«class»</text>
@@ -224,6 +206,24 @@
 <text x="280.0" y="4863" text-anchor="middle" font-size="12">+create(request): PaymentIntent</text>
 <text x="280.0" y="4881" text-anchor="middle" font-size="12">+confirm(id, cardToken): PaymentIntent</text>
 <text x="280.0" y="4899" text-anchor="middle" font-size="12">+refund(id, amount): Refund</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="1404" text-anchor="middle" font-size="15">PayStream</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="2001" text-anchor="middle" font-size="15">Card Vault</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="2053" text-anchor="middle" font-size="15">Card Tokenizer</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="2280" text-anchor="middle" font-size="15">Envelope Encryptor</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="2724" text-anchor="middle" font-size="15">Fraud Scoring</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="2776" text-anchor="middle" font-size="15">Risk Scorer</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="2985" text-anchor="middle" font-size="15">Rules Engine</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="5850" text-anchor="middle" font-size="15">Ledger Service</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="5902" text-anchor="middle" font-size="15">Balance Calculator</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="6111" text-anchor="middle" font-size="15">Journal Writer</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="3619" text-anchor="middle" font-size="15">Payment Orchestrator</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="4045" text-anchor="middle" font-size="15">3DS Handler</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="4272" text-anchor="middle" font-size="15">Acquirer Router</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="3671" text-anchor="middle" font-size="15">Payment State Machine</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="4698" text-anchor="middle" font-size="15">Payments API</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="4995" text-anchor="middle" font-size="15">Idempotency Guard</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="5222" text-anchor="middle" font-size="15">Merchant Authenticator</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="288.0" y="4750" text-anchor="middle" font-size="15">Payment Intents Controller</text>
 <text x="48" y="6784" font-size="12">Notation key</text>
 <text x="48" y="6806" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="6828" font-size="12">Enclosing frame = named scope or deployment boundary</text>

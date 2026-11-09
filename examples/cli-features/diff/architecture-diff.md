@@ -35,7 +35,7 @@
     },
     {
       "section": "relationships",
-      "id": "('fulfillmentjob', 'order-store')",
+      "id": "fulfillmentjob->order-store",
       "kind": "removed",
       "before": {
         "source_id": "fulfillmentjob",

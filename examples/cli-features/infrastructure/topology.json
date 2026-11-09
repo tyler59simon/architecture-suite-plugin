@@ -32,15 +32,6 @@
     {
       "source_id": "input-0-api",
       "destination_id": "input-0-database",
-      "kind": "explicit-reference",
-      "evidence": {
-        "reference": "examples/cli-features/compose.json",
-        "document": 1
-      }
-    },
-    {
-      "source_id": "input-0-api",
-      "destination_id": "input-0-database",
       "kind": "depends-on",
       "evidence": {
         "reference": "examples/cli-features/compose.json",

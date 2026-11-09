@@ -23,11 +23,6 @@ containers:
 flows:
 - from: input-0-api
   to: input-0-database
-  description: explicit-reference
-  evidence: examples/cli-features/compose.json
-  status: inferred
-- from: input-0-api
-  to: input-0-database
   description: depends-on
   evidence: examples/cli-features/compose.json
   status: inferred

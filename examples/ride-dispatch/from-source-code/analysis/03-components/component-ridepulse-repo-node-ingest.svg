@@ -5,8 +5,6 @@
 <text x="48" y="65" font-size="22">Ridepulse Repo Node ingest —</text>
 <text x="48" y="98" font-size="22">Component</text>
 <rect id="box-ridepulse-repo-node-ingest" x="72" y="163" width="328" height="320" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="236.0" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Node ingest</text>
-<text x="236.0" y="209" text-anchor="middle" font-size="12">«inferred»</text>
 <rect id="box-ridepulse-repo-node-ingest-ingest-handler-js" x="100" y="233" width="272" height="150" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="2 3"/>
 <text x="236.0" y="267" text-anchor="middle" font-size="15">Ridepulse Repo Node ingest ingest/</text>
 <text x="236.0" y="289" text-anchor="middle" font-size="15">handler.js</text>
@@ -14,6 +12,8 @@
 <text x="236.0" y="325" text-anchor="middle" font-size="12">Node</text>
 <text x="236.0" y="344" text-anchor="middle" font-size="13">Source module ingest/handler.js;</text>
 <text x="236.0" y="363" text-anchor="middle" font-size="13">responsibility requires review</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="236.0" y="191" text-anchor="middle" font-size="15">Ridepulse Repo Node ingest</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="236.0" y="209" text-anchor="middle" font-size="12">«inferred»</text>
 <text x="48" y="547" font-size="12">Notation key</text>
 <text x="48" y="569" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="591" font-size="12">Enclosing frame = named scope or deployment boundary</text>

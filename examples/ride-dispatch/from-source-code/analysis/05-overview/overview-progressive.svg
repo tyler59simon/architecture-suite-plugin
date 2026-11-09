@@ -4,7 +4,6 @@
 <rect width="1123" height="3418" fill="white"/>
 <text x="48" y="65" font-size="22">Ridepulse Repo — Progressive overview</text>
 <rect id="box-ridepulse-repo" x="72" y="130" width="979" height="3094" rx="6" stroke="#1168bd" fill="#e4f1ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="561.5" y="158" text-anchor="middle" font-size="15">Ridepulse Repo</text>
 <rect id="box-gcp-resource-infra-main-tf-line-12-gcp-cloud-run" x="431.5" y="400" width="260" height="198" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="2 3"/>
 <image x="541.5" y="414" width="40" height="40" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0ic3RhbmRhcmRfcHJvZHVjdF9pY29uIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiPgogIDwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiAyLjEuMCBCdWlsZCAxNDIpICAtLT4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzQyODVmNDsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsbDogIzM0YTg1MzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgZmlsbDogI2ZiYmMwNDsKICAgICAgfQoKICAgICAgLnN0NCB7CiAgICAgICAgZmlsbDogI2VhNDMzNTsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9ImJvdW5kaW5nX2JveCI+CiAgICA8cmVjdCBjbGFzcz0ic3QwIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIvPgogIDwvZz4KICA8ZyBpZD0iYXJ0Ij4KICAgIDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0xNDQuNCwyNzJjLTYuNCwwLTEyLjQtMy44LTE0LjktMTAuMUw1NS40LDc1LjljLTMuMy04LjIuNy0xNy41LDguOS0yMC44LDguMi0zLjMsMTcuNS43LDIwLjgsOC45bDc0LjIsMTg2YzMuMyw4LjItLjcsMTcuNS04LjksMjAuOC0xLjkuOC0zLjksMS4xLTUuOSwxLjFoLS4xWiIvPgogICAgPGcgaWQ9ImIiPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjU2LDI3MmMtNi40LDAtMTIuNC0zLjgtMTQuOS0xMC4xbC03NC4xLTE4NmMtMi42LTYuNi0uNi0xNC4xLDUtMTguNXMxMy40LTQuNSwxOS4yLS40bDI2MC4xLDE4NmM3LjIsNS4xLDguOSwxNS4xLDMuNywyMi4zcy0xNS4xLDguOS0yMi4zLDMuN0wyMTYuOSwxMTQuN2w1NCwxMzUuM2MzLjMsOC4yLS43LDE3LjUtOC45LDIwLjgtMS45LjgtNCwxLjEtNS45LDEuMWgtLjFaIi8+CiAgICA8L2c+CiAgICA8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTI3LjIsMjU2bC03MiwxODBjLTMuMyw4LjIuNywxNy41LDguOSwyMC44LDMuMSwxLjIsNCwxLjEsNS45LDEuMSw2LjMsMCwxMi40LTMuOCwxNC45LTEwLjFsNzQuNC0xODZjLjgtMiwxLjEtNCwxLjEtNS45aC0zMy4yWiIvPgogICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQxNC41LDI1NmwtMTk3LjcsMTQxLjIsNTQuMS0xMzUuM2MuOC0yLDEuMS00LDEuMS01LjloLTMzLjJsLTcyLDE4MGMtMi42LDYuNi0uNiwxNC4xLDUsMTguNSwyLjksMi4zLDYuNCwzLjQsOS45LDMuNHM2LjUtMSw5LjMtM2wyNjAuNC0xODZjNC40LTMuMSw2LjctOCw2LjctMTNoLTQzLjZaIi8+CiAgPC9nPgo8L3N2Zz4="/>
 <text x="561.5" y="482" text-anchor="middle" font-size="15">GCP resource infra/main.tf line 12</text>
@@ -83,8 +82,6 @@
 <text x="561.5" y="2889" text-anchor="middle" font-size="13">Infrastructure resource declaration;</text>
 <text x="561.5" y="2908" text-anchor="middle" font-size="13">runtime ownership requires review</text>
 <rect id="box-ridepulse-repo-go-notifier" x="399" y="1753" width="325" height="267" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="561.5" y="1781" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier</text>
-<text x="561.5" y="1799" text-anchor="middle" font-size="12">«inferred»</text>
 <rect id="box-ridepulse-repo-go-notifier-notifier-main-go" x="427" y="1823" width="269" height="169" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="2 3"/>
 <text x="561.5" y="1857" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier notifier/</text>
 <text x="561.5" y="1879" text-anchor="middle" font-size="15">main.go</text>
@@ -94,8 +91,6 @@
 <text x="561.5" y="1953" text-anchor="middle" font-size="13">responsibility requires review</text>
 <text x="561.5" y="1972" text-anchor="middle" font-size="13">Drill-down: 1 code</text>
 <rect id="box-ridepulse-repo-node-ingest" x="397.5" y="2948" width="328" height="248" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="561.5" y="2976" text-anchor="middle" font-size="15">Ridepulse Repo Node ingest</text>
-<text x="561.5" y="2994" text-anchor="middle" font-size="12">«inferred»</text>
 <rect id="box-ridepulse-repo-node-ingest-ingest-handler-js" x="425.5" y="3018" width="272" height="150" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="2 3"/>
 <text x="561.5" y="3052" text-anchor="middle" font-size="15">Ridepulse Repo Node ingest ingest/</text>
 <text x="561.5" y="3074" text-anchor="middle" font-size="15">handler.js</text>
@@ -104,8 +99,6 @@
 <text x="561.5" y="3129" text-anchor="middle" font-size="13">Source module ingest/handler.js;</text>
 <text x="561.5" y="3148" text-anchor="middle" font-size="13">responsibility requires review</text>
 <rect id="box-ridepulse-repo-python-dispatch" x="100" y="848" width="923" height="437" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="561.5" y="876" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
-<text x="561.5" y="894" text-anchor="middle" font-size="12">«inferred»</text>
 <rect id="box-ridepulse-repo-python-dispatch-dispatch-dispatch-init-py" x="129" y="918" width="270" height="150" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="2 3"/>
 <text x="264.0" y="952" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
 <text x="264.0" y="974" text-anchor="middle" font-size="15">dispatch/dispatch/__init__.py</text>
@@ -132,6 +125,13 @@
 <polyline id="edge-component-ridepulse-repo-python-dispatch-r1" points="400,1172.5 725,1172.5" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)" stroke-dasharray="2 3"/>
 <rect x="420" y="1175.5" width="285" height="26" fill="white" rx="3"/>
 <text x="562.5" y="1192.5" font-size="11" text-anchor="middle">Imports source module [static dependency] «inferred»</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="158" text-anchor="middle" font-size="15">Ridepulse Repo</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="1781" text-anchor="middle" font-size="15">Ridepulse Repo Go notifier</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="1799" text-anchor="middle" font-size="12">«inferred»</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="2976" text-anchor="middle" font-size="15">Ridepulse Repo Node ingest</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="2994" text-anchor="middle" font-size="12">«inferred»</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="876" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="561.5" y="894" text-anchor="middle" font-size="12">«inferred»</text>
 <text x="48" y="3288" font-size="12">Notation key</text>
 <text x="48" y="3310" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="3332" font-size="12">Enclosing frame = named scope or deployment boundary</text>

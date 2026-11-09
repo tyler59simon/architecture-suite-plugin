@@ -18,7 +18,6 @@
 <text x="475.0" y="1175" text-anchor="middle" font-size="12">SQS</text>
 <text x="475.0" y="1194" text-anchor="middle" font-size="13">Buffers accepted work</text>
 <rect id="box-request-controller" x="201.25" y="452" width="335.25" height="374" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="368.875" y="480" text-anchor="middle" font-size="15">Request Controller</text>
 <rect id="box-requesthandler" x="229.25" y="504" width="183" height="109" rx="6" stroke="#94a3b8" fill="#ffffff" stroke-width="1.5"/>
 <text x="320.75" y="538" text-anchor="middle" font-size="15">RequestHandler</text>
 <text x="320.75" y="556" text-anchor="middle" font-size="12">«class»</text>
@@ -41,6 +40,7 @@
 <polyline id="edge-code-request-controller-r4" points="320.75,613 320.75,633 264,633 264,841 475,841 475,1057" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)"/>
 <rect x="478" y="931" width="162" height="26" fill="white" rx="3"/>
 <text x="559.0" y="948" font-size="11" text-anchor="middle">Queues accepted work [SQS]</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="368.875" y="480" text-anchor="middle" font-size="15">Request Controller</text>
 <text x="48" y="1278" font-size="12">Notation key</text>
 <text x="48" y="1300" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="1322" font-size="12">Enclosing frame = named scope or deployment boundary</text>

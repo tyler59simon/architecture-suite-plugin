@@ -6,7 +6,7 @@ Illustrative owned services running on AWS
 
 ## Evidence
 
-- evidence-1: fictional brief: — 
+- evidence-1: fictional brief
 
 ## Assumptions
 

@@ -22,6 +22,43 @@ Fixes from an external audit of 1.0.0, plus two additions.
 - `--format all` includes SVG.
 - `VALIDATION.json` in host packages lists the skills again instead of NOTICE/LICENSE paths.
 - Overview diagrams no longer change between runs (frame order depended on Python hash seeds).
+- Text is measured the same way on every host, so Linux no longer wraps labels differently (Pillow picked Raqm when libraqm was installed).
+- Infrastructure import:
+  - CloudFormation YAML short tags (`!Ref`, `!Sub |`, `!Base64`, `!Equals`, tags in flow sequences, trailing comments) are parsed as data, and `!Ref` creates a reference like the JSON `Ref`.
+  - Empty and comment-only YAML documents (a Helm template that renders nothing, `--- # note`) are skipped.
+  - Terraform IDs that are unknown until apply or masked no longer match each other as false relationships.
+  - Sensitive masks on secret-named attributes are reported again.
+  - Relationship order no longer depends on hash seeds.
+  - Compose `depends_on` gives one relationship; undeclared services and networks are reported.
+  - Distinct Kubernetes names that share a slug get numbered IDs.
+- Names in non-Latin scripts or emoji, and names longer than 80 characters, get a short stable hash in their ID, so they no longer collide or produce file names too long to write. Latin names keep their IDs.
+- Mermaid escapes `#`, and scenario Mermaid escapes `;`, so user text can no longer break or change the source.
+- JSON output falls back to ASCII escapes on a console that cannot encode the text instead of failing.
+- Scenario sequence diagrams:
+  - Messages after a group no longer sit on its border, and consecutive groups no longer share a border.
+  - Nested groups are inset.
+  - `else` and `and` branches get divider lines.
+- Frame titles in SVG and PNG are drawn over the edges that enter the frame.
+- small-multiples packs panels into rows by their own widths, so moderate models fit PNG limits; the PNG size error names the diagram and the limits.
+- Source inventory:
+  - Files are parsed before secrets are redacted (redaction could break the syntax and lose every declaration); recorded names, routes and members are still redacted.
+  - Python syntax errors become plan gaps.
+  - Kotlin classes, objects, interfaces and functions get names, class scope and parameters.
+- Diff, check and explore inputs:
+  - `check` rejects rules and baselines without the right `schema_version` or types.
+  - `diff --identities` rejects ids missing from either model.
+  - `explore --diff` rejects documents that are not diffs.
+  - Diff relationship ids read `source->destination` instead of a Python tuple.
+- Plan lint:
+  - Messages name the unknown section or flow field and the unknown endpoint, with a close match.
+  - Placement and duplicate-ID errors say where they are.
+  - Deployment node types of the other provider (for example `project` in an AWS deployment) are errors.
+  - A service field of the other provider is an advisory.
+- Flow `order` numbers the arrow label (`1. Requests trips`); it was validated and then discarded.
+- An explicit `layout` direction of `down` carries over to Mermaid (`flowchart TB`).
+- `--overview-style` with a level other than all or overview exits 2 (malformed arguments), as documented.
+- AWS service acronyms MSK, KMS, IAM, SES, ECR, ELB and VPC resolve.
+- Report evidence lines omit an empty line number or excerpt, and relationship status counts say they are per view.
 
 ## 1.0.0 - first public release
 

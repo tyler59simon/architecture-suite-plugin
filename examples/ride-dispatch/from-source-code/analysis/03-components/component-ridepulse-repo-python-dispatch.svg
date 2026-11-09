@@ -4,8 +4,6 @@
 <rect width="762" height="788" fill="white"/>
 <text x="48" y="65" font-size="22">Ridepulse Repo Python dispatch — Component</text>
 <rect id="box-ridepulse-repo-python-dispatch" x="72" y="130" width="618" height="464" rx="6" stroke="#438dd5" fill="#edf6ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="381.0" y="158" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
-<text x="381.0" y="176" text-anchor="middle" font-size="12">«inferred»</text>
 <rect id="box-ridepulse-repo-python-dispatch-dispatch-dispatch-init-py" x="100" y="200" width="270" height="150" rx="6" stroke="#65a6df" fill="#f2f8ff" stroke-width="1.5" stroke-dasharray="2 3"/>
 <text x="235.0" y="234" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
 <text x="235.0" y="256" text-anchor="middle" font-size="15">dispatch/dispatch/__init__.py</text>
@@ -30,6 +28,8 @@
 <polyline id="edge-component-ridepulse-repo-python-dispatch-r1" points="526,350 526,416" fill="none" stroke="#526580" stroke-width="1.5" marker-end="url(#__suite_arrow__)" stroke-dasharray="2 3"/>
 <rect x="239" y="370" width="285" height="26" fill="white" rx="3"/>
 <text x="381.5" y="387" font-size="11" text-anchor="middle">Imports source module [static dependency] «inferred»</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="381.0" y="158" text-anchor="middle" font-size="15">Ridepulse Repo Python dispatch</text>
+<text stroke="white" stroke-width="4" stroke-linejoin="round" paint-order="stroke" x="381.0" y="176" text-anchor="middle" font-size="12">«inferred»</text>
 <text x="48" y="658" font-size="12">Notation key</text>
 <text x="48" y="680" font-size="12">Name · «type» · technology · responsibility</text>
 <text x="48" y="702" font-size="12">Enclosing frame = named scope or deployment boundary</text>

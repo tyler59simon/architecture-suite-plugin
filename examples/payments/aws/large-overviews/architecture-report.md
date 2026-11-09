@@ -6,7 +6,7 @@ Illustrative owned services running on AWS
 
 ## Evidence
 
-- evidence-1: fictional brief: — 
+- evidence-1: fictional brief
 
 ## Assumptions
 
@@ -35,8 +35,8 @@ Illustrative owned services running on AWS
       "findings": [],
       "crossings": 8,
       "bends": 104,
-      "aspect_ratio": 1.719,
-      "score": 1113.7186398872445,
+      "aspect_ratio": 1.127,
+      "score": 1113.1270343857072,
       "advisories": [
         "Dense view; split by scope or use small-multiples"
       ]
