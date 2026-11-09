@@ -11,7 +11,7 @@ Styles (`--overview-style`, repeat or comma-separate, or `all`):
 - `progressive`: L1-L3 with code counts (CLI default).
 - `hierarchy`: containment tree.
 - `small-multiples`: coordinated scoped panels, best for large models.
-- `complete`: every element and member; can exceed PNG limits (6,000 px wide) on big models, then use SVG/Draw.io or another style.
+- `complete`: every element and member; can exceed PNG limits (6,000 px wide) on big models, then use `--format mermaid,drawio,svg` or another style.
 
 ```
 architecture-suite plan-render --plan plan.md --output <out> --level overview --overview-style executive,hierarchy --confirm-write
@@ -42,4 +42,4 @@ Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` 
 - Cite file/line or document references. Separate assumptions from facts; record unknowns under `gaps`. Never invent users, classes, calls, or cloud placements.
 - Lint, then dry-run, then publish with `--confirm-write` (`--confirm-overwrite` only for existing output). Write to a dedicated directory outside the analyzed repository. On a re-render, the dry run lists `would_remove` (stale diagrams from an earlier run) and `conflicts` (generated files someone edited, which are kept); mention both to the user.
 - Do not use `--allow-layout-findings` as an automatic retry. Report fidelity, layout and scan-limit findings to the user.
-- Deliver links to diagrams (`.mmd`, `.drawio`, `.png`; `--format mermaid,drawio,png,svg` adds SVG), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
+- Deliver links to diagrams (`.mmd` and `.png` by default; add `drawio`, `svg` or `visio` to `--format` for editable Draw.io, SVG or Visio `.vsdx`, e.g. `--format mermaid,png,drawio`; `all` writes every format), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.

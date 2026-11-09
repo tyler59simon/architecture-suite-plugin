@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0 - planning workflow, Visio export and new default formats
+
+A planning workflow that checks a plan before anything is drawn, editable Visio output, and Mermaid and PNG as the default formats.
+
+### Added
+
+- **Visio output:** `--format visio` (also part of `--format all`) writes editable `.vsdx` drawings for every diagram and scenario. Boxes keep their role shapes and colours, connectors are glued to the boxes they join, claim status stays dotted, and cloud icons are embedded as PNG.
+- **`architecture-plan` skill:** a planning workflow that runs before any diagram is drawn. It covers scope and target levels, sources (brief, documents, `plan-draft` or `import-infra` drafts), a level-by-level interview, evidence and claim status, then a readiness review. The plugin now has ten skills. The question bank, evidence rules, common mistakes and a ready-to-render checklist are in `references/planning.md`.
+- **`plan-review` command:** reports for each level (system, container, component, code, deployment) whether it would render, the deepest ready C4 level, evidence and technology coverage, the claim-status mix, and findings with a level and a question for the user. Review findings are `no-people`, `no-external-systems`, `isolated-element`, `missing-technology`, `observed-without-evidence`, `thin-description`, `placeholder`, `unplaced-container`, `crowded-view` and `dropped-flow`, plus the plan-lint findings. `--output` also writes `plan-review.md`, and `--strict` fails on any finding. `c4-diagrams` and `reverse-engineer-c4` now run it before `plan-lint`.
+- **`examples --format`:** the starter systems can be written in any format, including `visio` and `all`.
+
+### Changed
+
+- **Default formats are now Mermaid and PNG.** Draw.io joins SVG and Visio as opt-in: pass `--format mermaid,png,drawio` (or `all`) to `render`, `analyze`, `plan-render` and `examples`. `scenario-render` still defaults to every format. Re-rendering with defaults into a folder from an earlier run lists its unedited `.drawio` files under `would_remove` and retires them; add `drawio` to `--format` to keep them.
+
 ## 1.0.1 - audit fixes
 
 Fixes from an external audit of 1.0.0, plus two additions.
