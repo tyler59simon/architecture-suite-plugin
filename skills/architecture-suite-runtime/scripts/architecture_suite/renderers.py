@@ -100,7 +100,7 @@ def _quoted(value):
     # Mermaid entity codes prevent labels from becoming syntax, directives, or HTML.
     return (
         '"'
-        + "".join(f"#{ord(c)};" if c in '"<>&{}[]|`\\\n\r' else c for c in str(value))
+        + "".join(f"#{ord(c)};" if c in '"<>&{}[]|`\\\n\r#' else c for c in str(value))
         + '"'
     )
 
@@ -114,7 +114,8 @@ def render_mermaid(model: dict, view: dict) -> str:
         children.setdefault(b.parent_id, []).append(b)
     lines = [
         "%% Architecture Suite schema 2.0; portable layout is independent of ELK",
-        "flowchart LR",
+        # An explicit layout direction carries over; auto keeps the portable default.
+        "flowchart TB" if view.get("direction") == "down" else "flowchart LR",
     ]
 
     def emit(parent, indent):
@@ -321,7 +322,9 @@ def render_svg_png(
         or min(width, height) <= 0
     ):
         raise SafetyError(
-            "PNG exceeds browser size limits; choose narrower scopes or another format"
+            f"{Path(png_file).name} ({width}x{height}) exceeds PNG size limits "
+            f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP); "
+            "choose narrower scopes or another format"
         )
 
     def capture(active):

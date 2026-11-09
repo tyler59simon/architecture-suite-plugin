@@ -265,7 +265,7 @@ def test_verify_and_style_constraints(inputs, tmp_path, model, capsys, monkeypat
                 "executive",
             ]
         )
-        == 3
+        == 2
     )
     assert (
         main(

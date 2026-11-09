@@ -28,7 +28,9 @@ def test_model_roundtrip_profiles(model, inputs):
             for e in projection["elements"]
         )
     assert models.slugify(" A/B : _C ") == "a-b-c"
-    assert models.slugify("☃", "fallback") == "fallback"
+    # Symbol-only names keep the fallback as a prefix and stay distinct.
+    assert models.slugify("☃", "fallback").startswith("fallback-")
+    assert models.slugify("", "fallback") == "fallback"
     assert models.view_id_for("code", "scope") == "code-scope"
     assert models.normalize_validation_profile() == "code"
     with pytest.raises(ValueError):

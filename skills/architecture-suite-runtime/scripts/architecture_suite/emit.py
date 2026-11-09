@@ -64,6 +64,7 @@ def render_scene_svg(scene: Scene) -> str:
         parts.append(
             f'<text x="48" y="{65 + i * 33}" font-size="22">{html.escape(line)}</text>'
         )
+    titles = []
     # Parent frames precede children in the scene's preorder.
     for box in scene.boxes:
         shape, stroke, fill = box_style(box)
@@ -92,9 +93,19 @@ def render_scene_svg(scene: Scene) -> str:
                 f'<image x="{box.x + (box.width - box.label.icon_size) / 2}" y="{box.y + 14 + box.label.top_pad}" width="{box.label.icon_size}" height="{box.label.icon_size}" preserveAspectRatio="xMidYMid meet" href="data:image/svg+xml;base64,{uri}"/>'
             )
         for x, y, line in _placements(box):
-            parts.append(
-                f'<text x="{x}" y="{y}" text-anchor="middle" font-size="{line.font}">{html.escape(line.text)}</text>'
-            )
+            text = f'<text x="{x}" y="{y}" text-anchor="middle" font-size="{line.font}">{html.escape(line.text)}</text>'
+            if box.role == "frame":
+                # Edges enter frames across their titles: draw titles last, with a halo.
+                titles.append(
+                    text.replace(
+                        "<text ",
+                        '<text stroke="white" stroke-width="4" stroke-linejoin="round" '
+                        'paint-order="stroke" ',
+                        1,
+                    )
+                )
+            else:
+                parts.append(text)
     for edge in scene.edges:
         points = " ".join(f"{x},{y}" for x, y in edge.points)
         marker = (
@@ -122,6 +133,7 @@ def render_scene_svg(scene: Scene) -> str:
                 parts.append(
                     f'<text x="{b.x + b.width / 2}" y="{y - 4}" font-size="{line.font}" text-anchor="middle">{html.escape(line.text)}</text>'
                 )
+    parts.extend(titles)
     for i, line in enumerate(_key(scene)):
         parts.append(
             f'<text x="48" y="{scene.key_y + i * 22}" font-size="12">{html.escape(line)}</text>'

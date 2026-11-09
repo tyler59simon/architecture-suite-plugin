@@ -44,7 +44,12 @@ ALL_FORMATS = DEFAULT_FORMATS | {"svg"}
 
 
 def _json_print(value):
-    print(json.dumps(value, indent=2, ensure_ascii=False, default=str))
+    text = json.dumps(value, indent=2, ensure_ascii=False, default=str)
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # A non-UTF-8 console or pipe (cp1252 on Windows) must not lose the result.
+        print(json.dumps(value, indent=2, default=str))
 
 
 def _parse_formats(value):
@@ -236,7 +241,8 @@ def _check_styles(args):
         "all",
         "overview",
     }:
-        raise SafetyError(
+        # A malformed argument combination: exit 2, as documented.
+        raise ValueError(
             "--overview-style can be used only with --level all or overview"
         )
 
