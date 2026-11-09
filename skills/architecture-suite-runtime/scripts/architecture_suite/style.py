@@ -95,7 +95,11 @@ def box_style(box) -> tuple[str, str, str]:
 
 @lru_cache(maxsize=16)
 def _font(size: int):
-    return ImageFont.truetype(str(ASSETS / "font.ttf"), size)
+    # Pin the basic engine: Pillow picks Raqm when libraqm/fribidi is present (common on
+    # Linux), which measures differently and would make wrapping depend on the host.
+    return ImageFont.truetype(
+        str(ASSETS / "font.ttf"), size, layout_engine=ImageFont.Layout.BASIC
+    )
 
 
 def text_width(text: str, font_px: int = 13, *, bold: bool = False) -> int:
