@@ -1,45 +1,45 @@
 {
-  "timestamp_utc": "2026-11-09T01:50:55.521986+00:00",
-  "version": "1.0.1",
+  "timestamp_utc": "2026-11-09T12:59:44.782538+00:00",
+  "version": "1.1.0",
   "method": "tools/record_packages.py: install into temporary directories; no live agent session",
   "installs": {
     "codex/project": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".agents/skills"
     },
     "codex/user": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".codex/skills"
     },
     "claude/project": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".claude/skills"
     },
     "claude/user": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".claude/skills"
     },
     "copilot/project": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".github/skills"
     },
     "copilot/user": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".copilot/skills"
     },
     "factory/project": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".factory/skills"
     },
     "factory/user": {
-      "skills": 9,
+      "skills": 10,
       "runtime_matches_source": true,
       "relative_folder": ".factory/skills"
     }

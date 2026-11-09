@@ -1,7 +1,8 @@
 {
   "codex.zip": {
-    "files": 2197,
+    "files": 2201,
     "skills": [
+      "architecture-plan",
       "c4-aws",
       "c4-code",
       "c4-component",
@@ -14,11 +15,12 @@
     ],
     "plugin_manifest": null,
     "status": "package-validated; agent behaviour not separately evaluated",
-    "sha256": "d6aa68517e4fa2f15aae21d597bffbf0c927ff642c7930eb9520a9824c926d1b"
+    "sha256": "6376b3068517a0ab02f94953c0c747b207a1eea5e1c6b46dc746b781038e3860"
   },
   "claude.zip": {
-    "files": 2200,
+    "files": 2204,
     "skills": [
+      "architecture-plan",
       "c4-aws",
       "c4-code",
       "c4-component",
@@ -31,11 +33,12 @@
     ],
     "plugin_manifest": ".claude-plugin/plugin.json",
     "status": "package-validated; agent behaviour evaluated with claude plugin eval (evals/)",
-    "sha256": "8a593a7f75c75e8bb18183f9c02c8366752d3e7c5926d20d0eafc7c10fda88df"
+    "sha256": "ac6269b887f240697e303adf81b1248843043c9a033044aac7e14a5548d02609"
   },
   "copilot.zip": {
-    "files": 2197,
+    "files": 2201,
     "skills": [
+      "architecture-plan",
       "c4-aws",
       "c4-code",
       "c4-component",
@@ -48,11 +51,12 @@
     ],
     "plugin_manifest": null,
     "status": "package-validated; agent behaviour not separately evaluated",
-    "sha256": "e8b854a9a71e32cbb9272823a5a42a534a82a0785a11b17a72dfd3fb6cc8d2b5"
+    "sha256": "ee5eaa01093b20a8dd7bd58ccf8d05d31b96f213a5e9c0e9d4dace05b34a700c"
   },
   "factory.zip": {
-    "files": 2200,
+    "files": 2204,
     "skills": [
+      "architecture-plan",
       "c4-aws",
       "c4-code",
       "c4-component",
@@ -65,6 +69,6 @@
     ],
     "plugin_manifest": ".factory-plugin/plugin.json",
     "status": "package-validated; agent behaviour not separately evaluated",
-    "sha256": "a0cae0e931d4be1a39ab7c98e82b6fead2095f9cb8e05a402dfa54687c492c6f"
+    "sha256": "c37936f8b403b903de6efdac488bc639017a92f8bdac831a278d1793677d6b9d"
   }
 }
