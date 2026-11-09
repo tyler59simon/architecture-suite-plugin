@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools==75.8.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "architecture-suite"
+version = "1.0.1"
+description = "Offline C4 architecture analysis and diagram exports"
+requires-python = ">=3.11,<3.15"
+license = {text = "Apache-2.0"}
+dependencies = ["PyYAML==6.0.3", "Pillow==13.0.0", "playwright==1.51.0", "jsonschema==4.23.0", "tree-sitter-language-pack==0.10.0", "tree-sitter==0.26.0"]
+
+[project.scripts]
+architecture-suite = "architecture_suite.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["architecture_suite*"]
+
+[tool.setuptools.package-data]
+architecture_suite = ["assets/*", "assets/aws/*", "assets/gcp/*/*", "assets/licenses/*", "*.js"]

@@ -1,0 +1,21 @@
+{
+  "name": "architecture-suite",
+  "version": "1.0.1",
+  "description": "Offline evidence-backed C4 architecture diagrams: c4-diagrams, reverse-engineer-c4, c4-system, c4-container, c4-component, c4-code, c4-overview, c4-aws and c4-gcp",
+  "author": {
+    "name": "Tyler Simon"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "c4",
+    "architecture",
+    "diagrams",
+    "drawio",
+    "mermaid",
+    "aws",
+    "gcp",
+    "offline"
+  ],
+  "homepage": "https://github.com/tyler59simon/architecture-suite-plugin",
+  "repository": "https://github.com/tyler59simon/architecture-suite-plugin"
+}

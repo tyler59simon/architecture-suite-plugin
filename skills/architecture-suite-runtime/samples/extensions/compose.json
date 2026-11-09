@@ -1,0 +1,12 @@
+{
+  "services": {
+    "api": {
+      "depends_on": [
+        "database"
+      ]
+    },
+    "database": {
+      "image": "postgres:16"
+    }
+  }
+}
