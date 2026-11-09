@@ -1,4 +1,4 @@
-"""Install all nine C4 skills plus the shared runtime into one or more agent hosts.
+"""Install all ten skills plus the shared runtime into one or more agent hosts.
 
     python tools/install_skill.py --host codex|claude|copilot|factory|all --scope user|project [--project DIR] [--confirm-overwrite]
 

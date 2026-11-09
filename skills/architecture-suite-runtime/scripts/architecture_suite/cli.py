@@ -26,6 +26,7 @@ from .renderers import (
     write_rendered_artifacts,
 )
 from .report import render_architecture_report
+from .review import render_review_markdown, review_exit_code, review_plan
 from .runtime_env import check_stamp
 from .safety import (
     OUTPUT_MANIFEST,
@@ -39,8 +40,9 @@ from .safety import (
     scan_repository,
 )
 
-DEFAULT_FORMATS = {"mermaid", "drawio", "png"}
-ALL_FORMATS = DEFAULT_FORMATS | {"svg", "visio"}
+# Draw.io, SVG and Visio are opt-in; `--format all` writes every format.
+DEFAULT_FORMATS = {"mermaid", "png"}
+ALL_FORMATS = {"mermaid", "drawio", "png", "svg", "visio"}
 
 
 def _json_print(value):
@@ -175,15 +177,53 @@ def cmd_plan_lint(args) -> int:
     return 1 if errors(findings) or (args.strict and findings) else 0
 
 
-def cmd_plan_draft(args) -> int:
-    root = canonical_existing_directory(Path(args.repo))
-    output = Path(args.output).absolute()
-    # The output itself can be a file, but never a link or an input source file.
+def _checked_text_output(path: str, label: str) -> Path:
+    # The output itself can be a file, but never a link or a directory.
     from .safety import _no_links
 
+    output = Path(path).absolute()
     _no_links(output)
     if output.exists() and not output.is_file():
-        raise SafetyError("Plan output must be a file")
+        raise SafetyError(f"{label} output must be a file")
+    return output
+
+
+def _write_text_output(output: Path, text: str, args) -> None:
+    """Atomically write one text file after the shared write-authorization checks."""
+    from .safety import _no_links
+
+    require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp = tempfile.mkstemp(prefix=".architecture-plan-", dir=output.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(text)
+        _no_links(output)
+        os.replace(temp, output)
+    finally:
+        if Path(temp).exists():
+            Path(temp).unlink()
+
+
+def cmd_plan_review(args) -> int:
+    source = canonical_existing_file(Path(args.plan))
+    plan = parse_plan_document(source.read_text(encoding="utf-8"))
+    review = review_plan(plan, args.gcp_icon_style)
+    review["strict"] = args.strict
+    if args.output:
+        output = _checked_text_output(args.output, "Review")
+        if output.resolve() == source:
+            raise SafetyError("Review output must not overwrite the plan")
+        review["output"] = str(output)
+        if not args.dry_run:
+            _write_text_output(output, render_review_markdown(review), args)
+    _json_print(review)
+    return review_exit_code(review, args.strict)
+
+
+def cmd_plan_draft(args) -> int:
+    root = canonical_existing_directory(Path(args.repo))
+    output = _checked_text_output(args.output, "Plan")
     if output.resolve().is_relative_to(root):
         raise SafetyError("Plan output must be outside the analyzed repository")
     scan = scan_repository(
@@ -205,17 +245,7 @@ def cmd_plan_draft(args) -> int:
     if args.dry_run:
         _json_print(summary)
         return 0
-    require_write_authorization(output, args.confirm_write, args.confirm_overwrite)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    fd, temp = tempfile.mkstemp(prefix=".architecture-plan-", dir=output.parent)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
-            stream.write(render_plan(plan))
-        _no_links(output)
-        os.replace(temp, output)
-    finally:
-        if Path(temp).exists():
-            Path(temp).unlink()
+    _write_text_output(output, render_plan(plan), args)
     _json_print(summary)
     return 0
 
@@ -350,7 +380,7 @@ def cmd_examples(args) -> int:
         paths.extend(
             scenario["id"] + "/" + p
             for p in expected_artifact_paths(
-                example_model(index), DEFAULT_FORMATS, styles
+                example_model(index), args.format, styles
             )
         )
         paths.extend(
@@ -379,7 +409,7 @@ def cmd_examples(args) -> int:
             folder = stage / scenario["id"]
             folder.mkdir(exist_ok=True)
             model = example_model(index)
-            write_rendered_artifacts(model, folder, DEFAULT_FORMATS, styles)
+            write_rendered_artifacts(model, folder, args.format, styles)
             (folder / "architecture-model.json").write_text(
                 json.dumps(model, indent=2), encoding="utf-8"
             )
@@ -424,6 +454,7 @@ def build_parser() -> argparse.ArgumentParser:
         "render",
         "plan-draft",
         "plan-lint",
+        "plan-review",
         "plan-render",
         "verify",
         "examples",
@@ -449,7 +480,7 @@ def build_parser() -> argparse.ArgumentParser:
             p.add_argument("--timeout", type=float, default=45.0)
         if name in {"render", "verify"}:
             p.add_argument("--model", required=True)
-        if name in {"plan-lint", "plan-render"}:
+        if name in {"plan-lint", "plan-review", "plan-render"}:
             p.add_argument("--plan", required=True)
             p.add_argument(
                 "--gcp-icon-style",
@@ -461,6 +492,13 @@ def build_parser() -> argparse.ArgumentParser:
             p.add_argument("--strict", action="store_true")
             p.set_defaults(func=cmd_plan_lint)
             continue
+        if name == "plan-review":
+            p.add_argument("--strict", action="store_true")
+            p.add_argument("--output", help="Also write the review as Markdown to this file")
+            for flag in ("dry-run", "confirm-write", "confirm-overwrite"):
+                p.add_argument("--" + flag, action="store_true")
+            p.set_defaults(func=cmd_plan_review)
+            continue
         if name != "plan-draft":
             p.add_argument(
                 "--overview-style", action="append", metavar="STYLE[,STYLE...]"
@@ -471,7 +509,7 @@ def build_parser() -> argparse.ArgumentParser:
             p.set_defaults(func=cmd_verify)
             continue
         p.add_argument("--output", required=True)
-        if name in {"render", "analyze", "plan-render"}:
+        if name in {"render", "analyze", "plan-render", "examples"}:
             p.add_argument(
                 "--format", type=_parse_formats, default=DEFAULT_FORMATS.copy()
             )

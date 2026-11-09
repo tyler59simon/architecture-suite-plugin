@@ -158,7 +158,8 @@ def test_cli_publishes_visio_on_request(inputs, tmp_path, capsys):
     assert "visio/pages/page1.xml" in _package(drawing)
     default = ["render", "--model", str(inputs[0]), "--output", str(tmp_path / "default")]
     assert main(default + ["--level", "container", "--dry-run"]) == 0
-    assert not any(f.endswith(".vsdx") for f in json.loads(capsys.readouterr().out)["files"])
+    files = json.loads(capsys.readouterr().out)["files"]
+    assert not any(f.endswith((".vsdx", ".drawio")) for f in files)
 
 
 def test_scenario_render_visio(inputs, tmp_path, capsys):

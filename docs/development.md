@@ -67,7 +67,7 @@ It writes `assets/gcp/modern/` and `assets/gcp/legacy/` (SVG only, unmodified), 
 ## Distribution and release
 
 ```text
-python tools/generate_skills.py        # regenerate the nine SKILL.md files
+python tools/generate_skills.py        # regenerate the ten SKILL.md files
 python tools/sync_manifests.py         # plugin and marketplace manifests from distribution.py
 python tools/package_hosts.py          # dist/hosts/<host>.zip and dist/plugin/ (the versioned plugin branch tree)
 python tools/install_skill.py --host claude --scope project --project <repository>

@@ -1,7 +1,7 @@
 """Record skill/package/install evidence in reports/ from checks actually executed here.
 
 Builds the host archives, installs every host (project and user scope) into a temporary
-directory, verifies the nine skills and runtime are present, and writes
+directory, verifies the ten skills and runtime are present, and writes
 reports/skill-manifest.json, host-packages.json and installation.json.
 """
 

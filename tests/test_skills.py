@@ -1,4 +1,4 @@
-"""The plugin ships nine skills sharing one runtime; every host layout must expose all of them."""
+"""The plugin ships ten skills sharing one runtime; every host layout must expose all of them."""
 
 import json
 import re
@@ -10,12 +10,12 @@ from architecture_suite.distribution import RUNTIME_NAME, VERSION, skill_names
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 EXPECTED = {
-    "c4-diagrams", "reverse-engineer-c4", "c4-system", "c4-container",
+    "architecture-plan", "c4-diagrams", "reverse-engineer-c4", "c4-system", "c4-container",
     "c4-component", "c4-code", "c4-overview", "c4-aws", "c4-gcp",
 }
 
 
-def test_exactly_the_nine_skills():
+def test_exactly_the_ten_skills():
     assert set(skill_names(SKILLS)) == EXPECTED
     assert not (SKILLS / RUNTIME_NAME / "SKILL.md").exists()
 
