@@ -30,6 +30,7 @@ architecture-suite doctor
 architecture-suite plan-draft --repo <repo> --output <plan.md> --dry-run
 architecture-suite plan-draft --repo <repo> --output <plan.md> --confirm-write
 architecture-suite plan-lint --plan <plan.md> [--strict]
+architecture-suite plan-review --plan <plan.md> [--strict] [--output <plan-review.md> --dry-run|--confirm-write]
 architecture-suite plan-render --plan <plan.md> --output <out> --overview-style progressive --dry-run
 architecture-suite plan-render --plan <plan.md> --output <out> --overview-style progressive --confirm-write
 architecture-suite analyze --repo <repo> --output <out> --cloud-profile aws --level container --confirm-write
@@ -40,7 +41,9 @@ architecture-suite examples --output <out> --overview-style all --confirm-write
 
 `analyze`, `render`, `plan-render`, and `verify` accept `--level all|system|container|component|code|overview|deployment` (default all). Scoped requests validate the required contiguous prefix but publish only the selected level. `deployment` publishes only the `06-<provider>-deployment` diagram and needs evidence only down to containers (components when the plan has them); it fails when the plan has no deployment section. `--overview-style` is repeatable and comma-separated; allowed styles are executive, progressive, hierarchy, small-multiples, complete, or all. CLI default: progressive. Styles apply only to all/overview.
 
-Without `--format`, publication writes mermaid,drawio,png; `--format all` adds SVG (as `scenario-render` does). Examples always publish default formats. `plan-render --emit-model` emits internal JSON; otherwise the editable plan is the source of truth. `--augmented` records architectural judgment. `--allow-layout-findings` records accepted defects in fidelity reports.
+Without `--format`, publication writes mermaid,png. Add `drawio`, `svg` or `visio` for editable Draw.io, SVG or Visio (`.vsdx`); `--format all` writes all five, as `scenario-render` does by default. `--format visio` writes editable Visio drawings: shapes, connectors glued to their boxes, and cloud icons embedded as PNG. `examples` takes the same `--format` (default mermaid,png). `plan-render --emit-model` emits internal JSON; otherwise the editable plan is the source of truth. `--augmented` records architectural judgment. `--allow-layout-findings` records accepted defects in fidelity reports.
+
+`plan-review` reports whether each level (system, container, component, code and, with a deployment section, deployment) would render, the deepest ready C4 level, evidence and technology coverage, the claim-status mix, and findings. Findings are the plan-lint findings plus review advisories (`no-people`, `no-external-systems`, `isolated-element`, `missing-technology`, `observed-without-evidence`, `thin-description`, `placeholder`, `unplaced-container`, `crowded-view`, `dropped-flow`); each has a `level` and, where a person can answer it, a `question`. It never edits the plan. `--output` also writes the review as Markdown (dry run, then `--confirm-write`). Exit code 1 means lint errors, or any finding under `--strict`. Planning guide: `planning.md`.
 
 Scan defaults: 2,000 files, 1,000,000 bytes per file, 50,000,000 total bytes, 45 seconds. `plan-draft` uses 400,000 bytes per file. Override with `--max-files`, `--max-file-bytes`, `--max-total-bytes`, `--timeout`. Symlinks/reparse points, vendor/build directories, `.env` and unsupported files are excluded. Invalid UTF-8 and oversized files become gaps. Credential-like values are redacted before evidence is saved. Draft classification defaults to Internal; analyze uses Inherited from source repository.
 

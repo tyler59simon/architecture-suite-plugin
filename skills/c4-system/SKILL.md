@@ -9,7 +9,7 @@ Shows actors, the owned system and external dependencies. No internals.
 
 ## Steps
 
-1. Obtain `plan.md`. From a brief, copy `assets/architecture-plan-template.md` in this skill; from a repository, follow the `reverse-engineer-c4` skill first. The plan must contain evidence down to this skill's level (shallower levels are the contiguous prefix).
+1. Obtain `plan.md`. From a brief, copy `assets/architecture-plan-template.md` in this skill; from a repository, follow the `reverse-engineer-c4` skill first; to build or improve a plan, use the `architecture-plan` skill. The plan must contain evidence down to this skill's level (shallower levels are the contiguous prefix).
 2. `architecture-suite plan-lint --plan plan.md --strict`
 3. `architecture-suite plan-render --plan plan.md --output <out> --level system --dry-run`
 4. `architecture-suite plan-render --plan plan.md --output <out> --level system --confirm-write`
@@ -33,4 +33,4 @@ Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` 
 - Cite file/line or document references. Separate assumptions from facts; record unknowns under `gaps`. Never invent users, classes, calls, or cloud placements.
 - Lint, then dry-run, then publish with `--confirm-write` (`--confirm-overwrite` only for existing output). Write to a dedicated directory outside the analyzed repository. On a re-render, the dry run lists `would_remove` (stale diagrams from an earlier run) and `conflicts` (generated files someone edited, which are kept); mention both to the user.
 - Do not use `--allow-layout-findings` as an automatic retry. Report fidelity, layout and scan-limit findings to the user.
-- Deliver links to diagrams (`.mmd`, `.drawio`, `.png`; `--format mermaid,drawio,png,svg` adds SVG), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
+- Deliver links to diagrams (`.mmd` and `.png` by default; add `drawio`, `svg` or `visio` to `--format` for editable Draw.io, SVG or Visio `.vsdx`, e.g. `--format mermaid,png,drawio`; `all` writes every format), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.

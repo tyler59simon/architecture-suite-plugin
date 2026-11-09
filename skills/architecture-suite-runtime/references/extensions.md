@@ -6,7 +6,7 @@ The canonical C4 model remains schema 2.0. Opt-in companion documents use indepe
 
 Run `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py` once to set up the dependency environment at `~/.architecture-suite/runtime`. It installs hash-pinned dependencies and Chromium, then runs doctor. Run commands with that environment's Python and the skill's launcher, `scripts/architecture-suite.py` (see [runtime.md](runtime.md)).
 
-The nine skills (`c4-diagrams`, `reverse-engineer-c4`, `c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`, `c4-aws`, `c4-gcp`) and the shared `architecture-suite-runtime` folder are installed as sibling folders. `python tools/package_hosts.py` produces deterministic ZIP archives in `dist/hosts`. Claude Code and Factory packages include a `plugin.json`; Codex and Copilot packages contain repository skill layouts. Extract project packages into the repository. Claude Code users normally install from the marketplace on the `latest` branch instead (see the README).
+The ten skills (`architecture-plan`, `c4-diagrams`, `reverse-engineer-c4`, `c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`, `c4-aws`, `c4-gcp`) and the shared `architecture-suite-runtime` folder are installed as sibling folders. `python tools/package_hosts.py` produces deterministic ZIP archives in `dist/hosts`. Claude Code and Factory packages include a `plugin.json`; Codex and Copilot packages contain repository skill layouts. Extract project packages into the repository. Claude Code users normally install from the marketplace on the `latest` branch instead (see the README).
 
 `python tools/install_skill.py --host codex|claude|copilot|factory|all --scope user|project [--project <directory>] [--confirm-overwrite]` installs all skills and the runtime without editing agent configuration. Project scope requires `--project`. Backups remain outside skill discovery folders. CLI dependencies are installed separately through bootstrap.
 
@@ -32,9 +32,9 @@ Optional `--bindings <mapping.json> --model <model.json>` maps topology resource
 
 ## Structured scenarios
 
-`scenario-lint --model <model.json> --scenario <scenario.json>` checks a scenario. `scenario-render` accepts the same inputs plus `--output` and `--format all|mermaid,svg,drawio,png`.
+`scenario-lint --model <model.json> --scenario <scenario.json>` checks a scenario. `scenario-render` accepts the same inputs plus `--output` and `--format all|mermaid,svg,drawio,png,visio`.
 
-`architecture-scenario/v1` requires name, a unique participants array of canonical element IDs, and steps. Message/response steps have `from`, `to`, `description`, and optional `type`. Groups have type alt/opt/loop/par, condition and steps. Alt/par groups may include branches, each with condition and steps. Nesting is limited to 12. SVG, PNG and editable Draw.io share sequence geometry; Mermaid uses sequenceDiagram. See the generated [scenario example](../samples/extensions/scenario.json).
+`architecture-scenario/v1` requires name, a unique participants array of canonical element IDs, and steps. Message/response steps have `from`, `to`, `description`, and optional `type`. Groups have type alt/opt/loop/par, condition and steps. Alt/par groups may include branches, each with condition and steps. Nesting is limited to 12. SVG, PNG, editable Draw.io and Visio share sequence geometry; Mermaid uses sequenceDiagram. See the generated [scenario example](../samples/extensions/scenario.json).
 
 ## Differences and rules
 

@@ -20,7 +20,7 @@ from .infrastructure import import_infrastructure, topology_plan
 from .draft import render_plan
 from .scenarios import validate_scenario, scenario_scene, scenario_mermaid
 from .emit import render_scene_svg, render_scene_drawio
-from .renderers import render_svg_png
+from .renderers import EXTENSIONS, render_svg_png, scene_vsdx
 from .explorer import explorer_html
 from .inventory import dependency_inventory
 from .safety import scan_repository
@@ -134,20 +134,11 @@ def _cmd_extension(args):
             print(json.dumps({"ok": True, "name": scenario["name"]}))
             return 0
         scene = scenario_scene(scenario, model)
-        formats = (
-            set(args.format.split(","))
-            if args.format != "all"
-            else {"mermaid", "svg", "drawio", "png"}
-        )
-        if not formats or formats - {"mermaid", "svg", "drawio", "png"}:
+        formats = set(args.format.split(",")) if args.format != "all" else set(EXTENSIONS)
+        if not formats or formats - set(EXTENSIONS):
             raise ValueError("Invalid scenario format")
         for fmt in formats:
-            name = (
-                "scenario."
-                + {"mermaid": "mmd", "svg": "svg", "drawio": "drawio", "png": "png"}[
-                    fmt
-                ]
-            )
+            name = "scenario." + EXTENSIONS[fmt]
             files[name] = (
                 scenario_mermaid(scenario, model)
                 if fmt == "mermaid"
@@ -155,6 +146,8 @@ def _cmd_extension(args):
                 if fmt == "svg"
                 else render_scene_drawio(scene)
                 if fmt == "drawio"
+                else scene_vsdx(scene)
+                if fmt == "visio"
                 else None
             )
         binary = scene
@@ -195,6 +188,8 @@ def _cmd_extension(args):
                 render_svg_png(
                     render_scene_svg(binary), path, binary.width, binary.height
                 )
+            elif isinstance(value, bytes):
+                path.write_bytes(value)
             else:
                 path.write_text(
                     value

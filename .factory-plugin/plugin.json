@@ -1,7 +1,7 @@
 {
   "name": "architecture-suite",
-  "version": "1.0.1",
-  "description": "Offline evidence-backed C4 architecture diagrams: c4-diagrams, reverse-engineer-c4, c4-system, c4-container, c4-component, c4-code, c4-overview, c4-aws and c4-gcp",
+  "version": "1.1.0",
+  "description": "Offline evidence-backed C4 architecture diagrams: architecture-plan, c4-diagrams, reverse-engineer-c4, c4-system, c4-container, c4-component, c4-code, c4-overview, c4-aws and c4-gcp",
   "author": {
     "name": "Tyler Simon"
   },
@@ -10,7 +10,9 @@
     "c4",
     "architecture",
     "diagrams",
+    "planning",
     "drawio",
+    "visio",
     "mermaid",
     "aws",
     "gcp",

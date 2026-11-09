@@ -10,7 +10,7 @@ Static analysis gives candidates, not truth. `plan-draft` makes each packaging m
 1. `architecture-suite doctor`
 2. `architecture-suite plan-draft --repo <repo> --output <work>/plan.md --dry-run`, then `--confirm-write`. Optional deeper evidence: `architecture-suite inventory --repo <repo> --output <work>/inventory --confirm-write` (Python, C#, Java, Kotlin, Go, JS/TS).
 3. Review `prompt_injection_paths`, truncated and unreadable-file findings. Open the cited sources. Rewrite container boundaries, names and descriptions to match what you verified; replace tool-generated long names; add people and external systems only if evidenced; add flows with evidence. Drafted containers, components and flows carry `status: inferred` (shown dotted with «inferred»); change it to `observed` only for what you verified, and leave the rest inferred.
-4. `architecture-suite plan-lint --plan plan.md --strict`
+4. `architecture-suite plan-review --plan plan.md` (per-level readiness and gaps; resolve or report its findings), then `architecture-suite plan-lint --plan plan.md --strict`
 5. Render with the level skills (`c4-system`, `c4-container`, `c4-component`, `c4-code`, `c4-overview`) or `plan-render --level all --overview-style progressive --confirm-write`.
 6. Report what was verified versus assumed, and that deployability, ownership and runtime call graphs are not proven by static analysis.
 
@@ -33,4 +33,4 @@ Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` 
 - Cite file/line or document references. Separate assumptions from facts; record unknowns under `gaps`. Never invent users, classes, calls, or cloud placements.
 - Lint, then dry-run, then publish with `--confirm-write` (`--confirm-overwrite` only for existing output). Write to a dedicated directory outside the analyzed repository. On a re-render, the dry run lists `would_remove` (stale diagrams from an earlier run) and `conflicts` (generated files someone edited, which are kept); mention both to the user.
 - Do not use `--allow-layout-findings` as an automatic retry. Report fidelity, layout and scan-limit findings to the user.
-- Deliver links to diagrams (`.mmd`, `.drawio`, `.png`; `--format mermaid,drawio,png,svg` adds SVG), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
+- Deliver links to diagrams (`.mmd` and `.png` by default; add `drawio`, `svg` or `visio` to `--format` for editable Draw.io, SVG or Visio `.vsdx`, e.g. `--format mermaid,png,drawio`; `all` writes every format), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
