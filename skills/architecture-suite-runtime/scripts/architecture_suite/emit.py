@@ -3,11 +3,14 @@
 from __future__ import annotations
 import base64
 import html
+import io
+import math
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
+import zipfile
 from .aws import ASSETS, icon_bytes
 from .scene import Scene
-from .style import CYLINDER_CAP, box_style, claim_cue
+from .style import CYLINDER_CAP, INK, box_style, claim_cue
 
 KEY = (
     "Notation key",
@@ -298,3 +301,424 @@ def render_scene_drawio(scene: Scene) -> str:
         "text;html=1;align=left;fontSize=12;fontFamily=Roboto;",
     )
     return ET.tostring(mxfile, encoding="unicode")
+
+
+# Visio (.vsdx): an OPC package of Visio 2013+ XML parts. Scene pixels are 1/96 inch.
+VISIO_NS = "http://schemas.microsoft.com/office/visio/2012/main"
+OFFICE_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+VISIO_REL = "http://schemas.microsoft.com/visio/2010/relationships"
+PACKAGE_REL = "http://schemas.openxmlformats.org/package/2006/relationships"
+EDGE_COLOR = "#526580"
+VISIO_FONT = "Roboto"
+LINE = 1.5 / 96
+SOLID, DASHED, DOTTED, NO_LINE = 1, 2, 3, 0
+FILLED_ARROW = 13
+
+
+def _n(value: float) -> str:
+    return f"{round(value, 6) + 0.0:.10g}"
+
+
+def _xml(root: ET.Element) -> bytes:
+    return b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + ET.tostring(
+        root, encoding="utf-8", xml_declaration=False
+    )
+
+
+def _rels(*items: tuple[str, str, str]) -> bytes:
+    root = ET.Element("Relationships", xmlns=PACKAGE_REL)
+    for ident, kind, target in items:
+        ET.SubElement(root, "Relationship", Id=ident, Type=kind, Target=target)
+    return _xml(root)
+
+
+def _cell(parent, name: str, value, unit: str | None = None) -> None:
+    attrs = {"N": name, "V": value if isinstance(value, str) else _n(value)}
+    if unit:
+        attrs["U"] = unit
+    ET.SubElement(parent, "Cell", attrs)
+
+
+def _row(section, kind: str, index: int, **cells) -> None:
+    row = ET.SubElement(section, "Row", T=kind, IX=str(index))
+    for name, value in cells.items():
+        _cell(row, name, value)
+
+
+def _rectangle(geometry) -> None:
+    for index, (x, y) in enumerate(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0))):
+        _row(geometry, "RelMoveTo" if index == 0 else "RelLineTo", index + 1, X=x, Y=y)
+
+
+def _cells(parent, values) -> None:
+    for name, value in values:
+        _cell(parent, name, value)
+
+
+def _text(shape, lines, width: float, height: float, *, top: float, align: int = 1) -> None:
+    """One editable text block; each pre-wrapped (text, font, height) line is a paragraph."""
+    if not lines:
+        return
+    # Lines are already wrapped to the scene's font metrics. A wider text block keeps a
+    # substituted font (Roboto not installed) from wrapping them again.
+    w, h = width / 96, height / 96
+    block = w * 1.25 + 0.5
+    _cells(
+        shape,
+        (
+            ("TxtPinX", w / 2),
+            ("TxtPinY", h / 2),
+            ("TxtWidth", block),
+            ("TxtHeight", h),
+            ("TxtLocPinX", w / 2 if align == 0 else block / 2),
+            ("TxtLocPinY", h / 2),
+            ("TxtAngle", 0),
+            ("TopMargin", top / 96),
+            ("BottomMargin", 0),
+            ("LeftMargin", 0),
+            ("RightMargin", 0),
+            ("VerticalAlign", 0),
+        ),
+    )
+    # One character and one paragraph row per line, in text order, as Visio writes them.
+    character = ET.SubElement(shape, "Section", N="Character")
+    paragraph = ET.SubElement(shape, "Section", N="Paragraph")
+    for index, (_, font, height) in enumerate(lines):
+        row = ET.SubElement(character, "Row", IX=str(index))
+        _cells(row, (("Font", VISIO_FONT), ("Color", INK)))
+        _cell(row, "Size", font / 96, "PT")
+        row = ET.SubElement(paragraph, "Row", IX=str(index))
+        _cells(row, (("HorzAlign", align), ("SpBefore", 0), ("SpAfter", 0)))
+        _cell(row, "SpLine", height / 96, "PT")
+    text = ET.SubElement(shape, "Text")
+    for index, (value, _, _) in enumerate(lines):
+        ET.SubElement(text, "cp", IX=str(index))
+        ET.SubElement(text, "pp", IX=str(index)).tail = value + (
+            "\n" if index < len(lines) - 1 else ""
+        )
+
+
+def _vsdx_document() -> ET.Element:
+    document = ET.Element("VisioDocument", {"xmlns": VISIO_NS, "xmlns:r": OFFICE_REL})
+    faces = ET.SubElement(document, "FaceNames")
+    ET.SubElement(faces, "FaceName", NameU=VISIO_FONT, Name=VISIO_FONT)
+    sheets = ET.SubElement(document, "StyleSheets")
+    style = ET.SubElement(sheets, "StyleSheet", ID="0", NameU="No Style", Name="No Style")
+    _cells(
+        style,
+        (
+            ("EnableLineProps", 1),
+            ("EnableFillProps", 1),
+            ("EnableTextProps", 1),
+            ("HideForApply", 0),
+            ("LineWeight", LINE),
+            ("LineColor", INK),
+            ("LinePattern", SOLID),
+            ("Rounding", 0),
+            ("BeginArrow", 0),
+            ("EndArrow", 0),
+            ("BeginArrowSize", 1),
+            ("EndArrowSize", 1),
+            ("LineCap", 0),
+            ("FillForegnd", "#ffffff"),
+            ("FillBkgnd", "#ffffff"),
+            ("FillPattern", 1),
+            ("ShdwPattern", 0),
+            ("LeftMargin", 0),
+            ("RightMargin", 0),
+            ("TopMargin", 0),
+            ("BottomMargin", 0),
+            ("VerticalAlign", 1),
+            ("TextBkgnd", 0),
+        ),
+    )
+    return document
+
+
+def _vsdx_package(scene: Scene, page_xml: ET.Element, media: dict, icons: dict) -> bytes:
+    pages = ET.Element("Pages", {"xmlns": VISIO_NS, "xmlns:r": OFFICE_REL})
+    page = ET.SubElement(pages, "Page", ID="0", NameU="Page-1", Name=scene.title[:31] or "Page-1")
+    sheet = ET.SubElement(page, "PageSheet")
+    _cell(sheet, "PageWidth", scene.width / 96, "IN")
+    _cell(sheet, "PageHeight", scene.height / 96, "IN")
+    _cell(sheet, "PageScale", 1, "IN")
+    _cell(sheet, "DrawingScale", 1, "IN")
+    _cells(sheet, (("DrawingSizeType", 3), ("DrawingScaleType", 0)))
+    ET.SubElement(page, "Rel", {"r:id": "rId1"})
+
+    core = ET.Element(
+        "cp:coreProperties",
+        {
+            "xmlns:cp": "http://schemas.openxmlformats.org/package/2006/metadata/core-properties",
+            "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+        },
+    )
+    ET.SubElement(core, "dc:title").text = scene.title
+    ET.SubElement(core, "dc:creator").text = "Architecture Suite"
+    app = ET.Element(
+        "Properties",
+        xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties",
+    )
+    ET.SubElement(app, "Application").text = "Architecture Suite"
+
+    types = ET.Element(
+        "Types", xmlns="http://schemas.openxmlformats.org/package/2006/content-types"
+    )
+    for extension, kind in (
+        ("rels", "application/vnd.openxmlformats-package.relationships+xml"),
+        ("xml", "application/xml"),
+        ("png", "image/png"),
+    ):
+        ET.SubElement(types, "Default", Extension=extension, ContentType=kind)
+    for part, kind in (
+        ("/visio/document.xml", "application/vnd.ms-visio.drawing.main+xml"),
+        ("/visio/pages/pages.xml", "application/vnd.ms-visio.pages+xml"),
+        ("/visio/pages/page1.xml", "application/vnd.ms-visio.page+xml"),
+        ("/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml"),
+        (
+            "/docProps/app.xml",
+            "application/vnd.openxmlformats-officedocument.extended-properties+xml",
+        ),
+    ):
+        ET.SubElement(types, "Override", PartName=part, ContentType=kind)
+
+    parts = [
+        ("[Content_Types].xml", _xml(types)),
+        (
+            "_rels/.rels",
+            _rels(
+                ("rId1", f"{VISIO_REL}/document", "visio/document.xml"),
+                ("rId2", f"{PACKAGE_REL}/metadata/core-properties", "docProps/core.xml"),
+                ("rId3", f"{OFFICE_REL}/extended-properties", "docProps/app.xml"),
+            ),
+        ),
+        ("docProps/app.xml", _xml(app)),
+        ("docProps/core.xml", _xml(core)),
+        ("visio/document.xml", _xml(_vsdx_document())),
+        (
+            "visio/_rels/document.xml.rels",
+            _rels(("rId1", f"{VISIO_REL}/pages", "pages/pages.xml")),
+        ),
+        ("visio/pages/pages.xml", _xml(pages)),
+        ("visio/pages/_rels/pages.xml.rels", _rels(("rId1", f"{VISIO_REL}/page", "page1.xml"))),
+        ("visio/pages/page1.xml", _xml(page_xml)),
+    ]
+    if media:
+        parts.append(
+            (
+                "visio/pages/_rels/page1.xml.rels",
+                _rels(
+                    *((rid, f"{OFFICE_REL}/image", f"../media/{rid}.png") for rid in media.values())
+                ),
+            )
+        )
+        parts.extend((f"visio/media/{rid}.png", icons[name]) for name, rid in media.items())
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as package:
+        for name, data in parts:
+            # Fixed metadata keeps packages byte-identical across runs and hosts.
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 0
+            package.writestr(info, data)
+    return buffer.getvalue()
+
+
+def render_scene_vsdx(scene: Scene, icons: dict[str, bytes] | None = None) -> bytes:
+    """Editable Visio drawing: shapes, glued connectors, text and PNG icons (name -> PNG)."""
+    icons = icons or {}
+    page_height = scene.height
+    page_xml = ET.Element("PageContents", {"xmlns": VISIO_NS, "xmlns:r": OFFICE_REL})
+    shapes = ET.SubElement(page_xml, "Shapes")
+    connects = []
+    used = sorted({b.label.icon for b in scene.boxes if b.label.icon in icons})
+    media = {name: f"rId{i + 1}" for i, name in enumerate(used)}
+    ids = iter(range(1, 10**9))
+
+    def new_shape(kind="Shape", name=None):
+        ident = next(ids)
+        attrs = {"ID": str(ident), "Type": kind}
+        attrs.update(LineStyle="0", FillStyle="0", TextStyle="0")
+        if name:
+            attrs.update(NameU=name, Name=name)
+        return ident, ET.SubElement(shapes, "Shape", attrs)
+
+    def shape2d(x, y, w, h, *, kind="Shape", name=None):
+        ident, shape = new_shape(kind, name)
+        _cells(
+            shape,
+            (
+                ("PinX", (x + w / 2) / 96),
+                ("PinY", (page_height - y - h / 2) / 96),
+                ("Width", w / 96),
+                ("Height", h / 96),
+                ("LocPinX", w / 192),
+                ("LocPinY", h / 192),
+                ("Angle", 0),
+            ),
+        )
+        return ident, shape
+
+    def stroke(shape, color, pattern, fill=None):
+        _cell(shape, "LineWeight", LINE, "PT")
+        _cells(
+            shape,
+            (
+                ("LineColor", color),
+                ("LinePattern", pattern),
+                ("FillForegnd", fill or "#ffffff"),
+                ("FillPattern", 1 if fill else 0),
+            ),
+        )
+
+    def text_only(shape):
+        _cells(shape, (("LinePattern", NO_LINE), ("FillPattern", 0)))
+
+    title_lines = scene.title_lines or [scene.title]
+    title_size = (scene.width - 96, 33 * len(title_lines))
+    _, title = shape2d(48, 39, *title_size, name="Title")
+    text_only(title)
+    _text(title, [(ln, 22, 33) for ln in title_lines], *title_size, top=0, align=0)
+
+    box_ids = {}
+    # Scene preorder puts frames before their children, so they stay underneath.
+    for box in scene.boxes:
+        shape_kind, line_color, fill = box_style(box)
+        ident, shape = shape2d(box.x, box.y, box.width, box.height, name=f"box-{box.id}")
+        box_ids[box.id] = ident
+        if box.role == "panel-title":
+            text_only(shape)
+        else:
+            pattern = DASHED if box.role == "frame" else DOTTED if _claimed(box) else SOLID
+            stroke(shape, line_color, pattern, fill)
+            _cell(shape, "ObjType", 1)
+            geometry = ET.SubElement(shape, "Section", N="Geometry", IX="0")
+            _cells(geometry, (("NoFill", 0), ("NoLine", 0)))
+            if shape_kind == "cylinder":
+                w, h, cap = box.width / 96, box.height / 96, CYLINDER_CAP / 96
+                _row(geometry, "MoveTo", 1, X=0, Y=h - cap)
+                _row(geometry, "LineTo", 2, X=0, Y=cap)
+                _row(geometry, "EllipticalArcTo", 3, X=w, Y=cap, A=w / 2, B=0, C=0, D=w / 2 / cap)
+                _row(geometry, "LineTo", 4, X=w, Y=h - cap)
+                _row(geometry, "LineTo", 5, X=0, Y=h - cap)
+                rim = ET.SubElement(shape, "Section", N="Geometry", IX="1")
+                _cells(rim, (("NoFill", 0), ("NoLine", 0)))
+                _row(rim, "Ellipse", 1, X=w / 2, Y=h - cap, A=w, B=h - cap, C=w / 2, D=h)
+            else:
+                _cell(shape, "Rounding", (28 if shape_kind == "pill" else 6) / 96)
+                _rectangle(geometry)
+        # Same top inset as _placements(), so text lands where the SVG puts it.
+        top = (10 if box.role == "frame" else 16) + box.label.top_pad
+        if box.label.icon:
+            top += box.label.icon_size + 8
+        _text(
+            shape,
+            [(ln.text, ln.font, ln.height) for ln in box.label.lines],
+            box.width,
+            box.height,
+            top=top,
+        )
+        if box.label.icon in media:
+            size = box.label.icon_size
+            x = box.x + (box.width - size) / 2
+            _, image = shape2d(x, box.y + 14 + box.label.top_pad, size, size, kind="Foreign")
+            _cells(
+                image,
+                (
+                    ("ImgOffsetX", 0),
+                    ("ImgOffsetY", 0),
+                    ("ImgWidth", size / 96),
+                    ("ImgHeight", size / 96),
+                ),
+            )
+            text_only(image)
+            foreign = ET.SubElement(
+                image, "ForeignData", ForeignType="Bitmap", CompressionType="PNG"
+            )
+            ET.SubElement(foreign, "Rel", {"r:id": media[box.label.icon]})
+
+    for edge in scene.edges:
+        if not edge.points:
+            continue
+        points = [(x / 96, (page_height - y) / 96) for x, y in edge.points]
+        (bx, by), (ex, ey) = points[0], points[-1]
+        # A 1-D shape's local x axis runs from its begin point to its end point.
+        length = math.hypot(ex - bx, ey - by)
+        angle = math.atan2(ey - by, ex - bx) if length else 0.0
+        cos, sin = math.cos(angle), math.sin(angle)
+        ident, shape = new_shape(name=f"edge-{edge.id}")
+        _cells(
+            shape,
+            (
+                ("PinX", (bx + ex) / 2),
+                ("PinY", (by + ey) / 2),
+                ("Width", length),
+                ("Height", 0),
+                ("LocPinX", length / 2),
+                ("LocPinY", 0),
+                ("Angle", angle),
+                ("BeginX", bx),
+                ("BeginY", by),
+                ("EndX", ex),
+                ("EndY", ey),
+                ("ObjType", 2),
+                ("ConFixedCode", 1),
+            ),
+        )
+        dashed = edge.kind in {"lifeline", "response"}
+        stroke(shape, EDGE_COLOR, DASHED if dashed else DOTTED if _claimed(edge) else SOLID)
+        _cells(
+            shape,
+            (
+                ("BeginArrow", 0),
+                ("EndArrow", 0 if edge.kind == "lifeline" else FILLED_ARROW),
+                ("EndArrowSize", 1),
+            ),
+        )
+        geometry = ET.SubElement(shape, "Section", N="Geometry", IX="0")
+        _cells(geometry, (("NoFill", 1), ("NoLine", 0)))
+        for index, (px, py) in enumerate(points):
+            dx, dy = px - bx, py - by
+            kind = "MoveTo" if index == 0 else "LineTo"
+            _row(geometry, kind, index + 1, X=dx * cos + dy * sin, Y=dy * cos - dx * sin)
+        for cell_name, part, target in (
+            ("BeginX", "9", edge.source_id),
+            ("EndX", "12", edge.destination_id),
+        ):
+            if target in box_ids:
+                connects.append(
+                    {
+                        "FromSheet": str(ident),
+                        "FromCell": cell_name,
+                        "FromPart": part,
+                        "ToSheet": str(box_ids[target]),
+                        "ToCell": "PinX",
+                        "ToPart": "3",
+                    }
+                )
+        if edge.label:
+            b = edge.label
+            _, label = shape2d(b.x, b.y, b.width, b.height)
+            stroke(label, "#ffffff", NO_LINE, "#ffffff")
+            _cell(label, "Rounding", 3 / 96)
+            backing = ET.SubElement(label, "Section", N="Geometry", IX="0")
+            _cells(backing, (("NoFill", 0), ("NoLine", 1)))
+            _rectangle(backing)
+            # Edge labels use the same top inset as the SVG exporter.
+            _text(
+                label,
+                [(ln.text, ln.font, ln.height) for ln in b.label.lines],
+                b.width,
+                b.height,
+                top=5,
+            )
+
+    key_lines = _key(scene)
+    _, key = shape2d(48, scene.key_y - 16, 560, 22 * len(key_lines) + 8, name="Notation key")
+    text_only(key)
+    _text(key, [(ln, 12, 22) for ln in key_lines], 560, 22 * len(key_lines) + 8, top=0, align=0)
+    if connects:
+        section = ET.SubElement(page_xml, "Connects")
+        for attrs in connects:
+            ET.SubElement(section, "Connect", attrs)
+    return _vsdx_package(scene, page_xml, media, icons)
