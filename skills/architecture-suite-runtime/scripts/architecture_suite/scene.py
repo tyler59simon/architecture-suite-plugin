@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from dataclasses import asdict, dataclass, field
-from .style import Label, TextLine, element_label, wrap_to_width
+from .style import Label, TextLine, claim_cue, element_label, wrap_to_width
 from .layout_host import layout_graph
 
 PAGE_MARGIN = 48
@@ -31,6 +31,7 @@ class Edge:
     points: list[tuple[float, float]]
     label: Box | None = None
     kind: str = "dependency"
+    status: str | None = None
 
 
 @dataclass
@@ -64,6 +65,7 @@ def build_scene(
         {
             ident: Label(
                 [TextLine(t, 15) for t in wrap_to_width(value["name"], 260, 15)]
+                + [TextLine(c, 12) for c in [claim_cue(value.get("status"))] if c]
             )
             for ident, value in frames.items()
         }
@@ -111,12 +113,15 @@ def build_scene(
         parent = parents.get(ident)
         (nodes[parent] if parent in frames else root)["children"].append(node)
     edge_labels = {}
+    statuses = {r["id"]: r.get("status") for r in relationships}
     for r in relationships:
         if r["source_id"] not in nodes or r["destination_id"] not in nodes:
             continue
         text = r["description"] + (
             f" [{r['technology']}]" if r.get("technology") else ""
         )
+        if claim_cue(r.get("status")):
+            text += " " + claim_cue(r.get("status"))
         label = Label(
             [TextLine(t, 11) for t in wrap_to_width(text, LABEL_MAX_WIDTH, 11)]
         )
@@ -200,6 +205,7 @@ def build_scene(
                     edge["targets"][0],
                     points,
                     label_box,
+                    status=statuses.get(edge["id"]),
                 )
             )
 

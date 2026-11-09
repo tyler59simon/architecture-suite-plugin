@@ -66,6 +66,20 @@
                 }
               }
             ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
           }
         },
         "required": [
@@ -102,6 +116,20 @@
                   "type": "string"
                 }
               }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
             ]
           }
         },
@@ -141,6 +169,20 @@
               }
             ]
           },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          },
           "aws_service": {
             "type": "string"
           },
@@ -177,6 +219,20 @@
                     }
                   ]
                 },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "enum": [
+                    "observed",
+                    "inferred",
+                    "proposed",
+                    "unknown"
+                  ]
+                },
                 "aws_service": {
                   "type": "string"
                 },
@@ -211,6 +267,20 @@
                               "type": "string"
                             }
                           }
+                        ]
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "status": {
+                        "enum": [
+                          "observed",
+                          "inferred",
+                          "proposed",
+                          "unknown"
                         ]
                       },
                       "kind": {
@@ -283,6 +353,14 @@
                   "type": "string"
                 }
               }
+            ]
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
             ]
           }
         },

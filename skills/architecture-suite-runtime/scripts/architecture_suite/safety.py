@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -152,9 +154,108 @@ def require_write_authorization(
         raise SafetyError("Existing output requires --confirm-overwrite")
 
 
+OUTPUT_MANIFEST = ".architecture-suite-manifest.json"
+OUTPUT_MANIFEST_VERSION = "architecture-output-manifest/v1"
+_DIGEST = re.compile(r"[0-9a-f]{64}")
+
+
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _read_output_manifest(root: Path) -> dict:
+    """Owner sections of a previous publication; empty when there is no manifest."""
+    path = root / OUTPUT_MANIFEST
+    if not path.exists():
+        return {}
+    _no_links(path)
+    malformed = SafetyError(
+        f"Malformed {OUTPUT_MANIFEST}; remove it or choose another output directory"
+    )
+    if not path.is_file() or path.stat().st_size > 5_000_000:
+        raise malformed
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise malformed from exc
+    owners = data.get("owners") if isinstance(data, dict) else None
+    if data.get("schema_version") != OUTPUT_MANIFEST_VERSION or not isinstance(owners, dict):
+        raise malformed
+    for section in owners.values():
+        files = section.get("files") if isinstance(section, dict) else None
+        if not isinstance(files, dict):
+            raise malformed
+        for relative, digest in files.items():
+            if (
+                not isinstance(relative, str)
+                or relative == OUTPUT_MANIFEST
+                or not isinstance(digest, str)
+                or not _DIGEST.fullmatch(digest)
+            ):
+                raise malformed
+            contained_path(root, relative)  # no escapes, absolute paths or links
+    return owners
+
+
+def ownership_changes(output: Path, owner: str, files) -> dict:
+    """Files `owner` generated last time that this run no longer produces.
+
+    Unchanged ones are removed on publication; edited ones are kept and reported as
+    conflicts. Files no manifest lists are never touched.
+    """
+    output = Path(output)
+    if not output.is_dir():
+        return {"remove": [], "conflicts": []}
+    produced = set(files)
+    remove, conflicts = [], []
+    previous = _read_output_manifest(output).get(owner, {}).get("files", {})
+    for relative, digest in sorted(previous.items()):
+        path = contained_path(output, relative)
+        if relative in produced or not path.is_file():
+            continue
+        (remove if _digest(path) == digest else conflicts).append(relative)
+    return {"remove": remove, "conflicts": conflicts}
+
+
+def _claim_outputs(stage: Path, owner: str, command: str, files) -> None:
+    """Retire this owner's stale outputs in the stage and record what it produced."""
+    from . import __version__
+
+    owners = _read_output_manifest(stage)
+    for relative in ownership_changes(stage, owner, files)["remove"]:
+        path = contained_path(stage, relative)
+        path.unlink()
+        parent = path.parent
+        while parent != stage and not any(parent.iterdir()):
+            parent.rmdir()
+            parent = parent.parent
+    produced = {}
+    for relative in files:
+        if relative == OUTPUT_MANIFEST:
+            continue
+        path = contained_path(stage, relative)
+        if not path.is_file():
+            raise SafetyError(f"Declared output was not written: {relative}")
+        produced[relative] = _digest(path)
+    for section in owners.values():  # a file belongs to the owner that last wrote it
+        for relative in produced:
+            section["files"].pop(relative, None)
+    owners[owner] = {"command": command, "tool_version": __version__, "files": produced}
+    manifest = {"schema_version": OUTPUT_MANIFEST_VERSION, "owners": owners}
+    (stage / OUTPUT_MANIFEST).write_bytes(
+        (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+    )
+
+
 @contextmanager
-def atomic_output_directory(output: Path) -> Iterator[Path]:
-    """Stage all artifacts, preserve unrelated files, roll back if promotion fails."""
+def atomic_output_directory(
+    output: Path, *, owner: str | None = None, command: str | None = None, files=()
+) -> Iterator[Path]:
+    """Stage all artifacts, preserve unrelated files, roll back if promotion fails.
+
+    With an `owner`, the declared `files` are recorded in the output manifest and that
+    owner's previously generated files that are no longer produced are retired.
+    """
     output = canonical_output_directory(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=".architecture-stage-", dir=output.parent))
@@ -163,6 +264,8 @@ def atomic_output_directory(output: Path) -> Iterator[Path]:
         if output.exists():
             shutil.copytree(output, stage, dirs_exist_ok=True)
         yield stage
+        if owner:
+            _claim_outputs(stage, owner, command or owner, files)
         canonical_output_directory(output)
         if output.exists():
             output.rename(backup)
@@ -237,6 +340,18 @@ def run_bounded(
             if process is not None and process.poll() is None:
                 process.kill()
                 process.wait()
+
+
+class _RedactedText(str):
+    """Redacted file text; `source` keeps the original for in-memory parsing only.
+
+    Redaction can break syntax, so parsers read `source` and redact what they record.
+    """
+
+    def __new__(cls, source: str):
+        text = super().__new__(cls, redact(source))
+        text.source = source
+        return text
 
 
 @dataclass
@@ -320,7 +435,7 @@ def scan_repository(
                 text = data.decode("utf-8-sig")
                 if detect_prompt_injection(text):
                     result.prompt_injection_paths += (relative,)
-                result.files += (ScannedFile(path, relative, redact(text), len(data)),)
+                result.files += (ScannedFile(path, relative, _RedactedText(text), len(data)),)
             except (UnicodeError, OSError, SafetyError):
                 result.skipped_files += 1
                 result.skipped.append(
