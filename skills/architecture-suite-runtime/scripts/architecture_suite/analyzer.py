@@ -72,12 +72,10 @@ def _source_roots(files: dict[str, str]) -> tuple[dict, list[str], list[str]]:
 
 
 def _declarations(text: str, suffix: str) -> list[dict]:
+    """Declarations of one source file; raises SyntaxError when Python does not parse."""
     result = []
     if suffix == ".py":
-        try:
-            tree = ast.parse(text)
-        except SyntaxError:
-            return result
+        tree = ast.parse(text)
         for node in tree.body:
             if isinstance(node, ast.ClassDef):
                 methods = [
@@ -113,7 +111,7 @@ def _declarations(text: str, suffix: str) -> list[dict]:
                     }
                 )
     else:
-        from .inventory import LANGUAGES
+        from .inventory import LANGUAGES, _name
         from tree_sitter_language_pack import get_parser
 
         if suffix not in LANGUAGES:
@@ -128,19 +126,19 @@ def _declarations(text: str, suffix: str) -> list[dict]:
                 "function_declaration",
                 "function_definition",
             }:
-                name = node.child_by_field_name("name")
-                if name is None:
-                    name = next(
-                        (
-                            n
-                            for n in node.named_children
-                            if n.type in {"simple_identifier", "identifier"}
-                        ),
-                        None,
-                    )
+                name = _name(node)
                 if not name:
                     continue
                 parameters = node.child_by_field_name("parameters")
+                if parameters is None:  # Kotlin has no `parameters` field
+                    parameters = next(
+                        (
+                            n
+                            for n in node.named_children
+                            if n.type == "function_value_parameters"
+                        ),
+                        None,
+                    )
                 scopes = []
                 ancestor = node.parent
                 while ancestor:
@@ -148,8 +146,9 @@ def _declarations(text: str, suffix: str) -> list[dict]:
                         "class_declaration",
                         "class_definition",
                         "interface_declaration",
+                        "object_declaration",
                     }:
-                        scope_name = ancestor.child_by_field_name("name")
+                        scope_name = _name(ancestor)
                         if scope_name:
                             scopes.insert(0, scope_name.text.decode())
                     ancestor = ancestor.parent
@@ -253,13 +252,24 @@ def draft_plan(
                 "status": "inferred",
                 "code": [],
             }
-            for declaration in _declarations(text, PurePosixPath(path).suffix):
+            # Parse the original text (redaction can break syntax); redact what is recorded.
+            try:
+                declarations = _declarations(
+                    getattr(text, "source", text), PurePosixPath(path).suffix
+                )
+            except SyntaxError as exc:
+                plan["gaps"].append(
+                    f"{path}:{exc.lineno or 1}: Python syntax error; declarations not inventoried."
+                )
+                declarations = []
+            for declaration in declarations:
+                declared = safe_text(declaration["name"])
                 component["code"].append(
                     {
-                        "name": f"{component_name} {declaration['name']}",
-                        "description": f"Declared {declaration['kind']} {declaration['name']}",
+                        "name": f"{component_name} {declared}",
+                        "description": f"Declared {declaration['kind']} {declared}",
                         "kind": declaration["kind"],
-                        "members": declaration["members"],
+                        "members": [safe_text(m) for m in declaration["members"]],
                         "evidence": f"{path}:{declaration['line']}",
                         # The declaration itself was read from source.
                         "status": "observed",

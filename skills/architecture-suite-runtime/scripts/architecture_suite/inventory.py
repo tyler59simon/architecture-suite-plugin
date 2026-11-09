@@ -4,6 +4,7 @@ import ast
 import re
 from pathlib import PurePosixPath
 from tree_sitter_language_pack import get_parser
+from .safety import redact
 
 LANGUAGES = {
     ".cs": "csharp",
@@ -17,12 +18,29 @@ LANGUAGES = {
 }
 
 
+def _name(node):
+    """A declaration's name node; the Kotlin grammar has no `name` field."""
+    name = node.child_by_field_name("name")
+    if name is None:
+        name = next(
+            (
+                n
+                for n in node.named_children
+                if n.type in {"simple_identifier", "type_identifier", "identifier"}
+            ),
+            None,
+        )
+    return name
+
+
 def dependency_inventory(files):
     declarations, references, routes, findings = [], [], [], []
     for path, text in sorted(files.items()):
         suffix = PurePosixPath(path).suffix
         if suffix != ".py" and suffix not in LANGUAGES:
             continue
+        # Parse the original text (redaction can break syntax); redact what is recorded.
+        text = getattr(text, "source", text)
         if suffix == ".py":
             try:
                 tree = ast.parse(text)
@@ -33,10 +51,11 @@ def dependency_inventory(files):
                 if isinstance(
                     node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
                 ):
+                    name = redact(node.name)
                     declarations.append(
                         {
-                            "id": path + ":" + str(node.lineno) + ":" + node.name,
-                            "name": node.name,
+                            "id": path + ":" + str(node.lineno) + ":" + name,
+                            "name": name,
                             "kind": type(node).__name__,
                             "reference": path,
                             "line": node.lineno,
@@ -53,7 +72,7 @@ def dependency_inventory(files):
                             {
                                 "reference": path,
                                 "line": node.lineno,
-                                "target": name or "relative import",
+                                "target": redact(name or "relative import"),
                                 "kind": "import",
                                 "confidence": 1.0,
                             }
@@ -79,17 +98,15 @@ def dependency_inventory(files):
                     "function_definition",
                     "class_definition",
                     "function_item",
+                    "object_declaration",
                 }:
-                    name = node.child_by_field_name("name")
+                    name = _name(node)
                     if name:
+                        name = redact(name.text.decode())
                         declarations.append(
                             {
-                                "id": path
-                                + ":"
-                                + str(node.start_point[0] + 1)
-                                + ":"
-                                + name.text.decode(),
-                                "name": name.text.decode(),
+                                "id": path + ":" + str(node.start_point[0] + 1) + ":" + name,
+                                "name": name,
                                 "kind": node.type,
                                 "reference": path,
                                 "line": node.start_point[0] + 1,
@@ -107,7 +124,7 @@ def dependency_inventory(files):
                         {
                             "reference": path,
                             "line": node.start_point[0] + 1,
-                            "target": node.text.decode(),
+                            "target": redact(node.text.decode()),
                             "kind": "import",
                             "confidence": 1.0,
                         }
@@ -117,7 +134,7 @@ def dependency_inventory(files):
                         {
                             "reference": path,
                             "line": node.start_point[0] + 1,
-                            "target": node.text.decode()[:240],
+                            "target": redact(node.text.decode())[:240],
                             "kind": "unresolved-call",
                             "confidence": 0.4,
                         }
@@ -136,7 +153,7 @@ def dependency_inventory(files):
             for match in re.finditer(pattern, text):
                 routes.append(
                     {
-                        "path": match[1],
+                        "path": redact(match[1]),
                         "reference": path,
                         "line": text.count("\n", 0, match.start()) + 1,
                         "kind": "explicit-route",

@@ -342,6 +342,18 @@ def run_bounded(
                 process.wait()
 
 
+class _RedactedText(str):
+    """Redacted file text; `source` keeps the original for in-memory parsing only.
+
+    Redaction can break syntax, so parsers read `source` and redact what they record.
+    """
+
+    def __new__(cls, source: str):
+        text = super().__new__(cls, redact(source))
+        text.source = source
+        return text
+
+
 @dataclass
 class ScannedFile:
     path: Path
@@ -423,7 +435,7 @@ def scan_repository(
                 text = data.decode("utf-8-sig")
                 if detect_prompt_injection(text):
                     result.prompt_injection_paths += (relative,)
-                result.files += (ScannedFile(path, relative, redact(text), len(data)),)
+                result.files += (ScannedFile(path, relative, _RedactedText(text), len(data)),)
             except (UnicodeError, OSError, SafetyError):
                 result.skipped_files += 1
                 result.skipped.append(
