@@ -1,6 +1,6 @@
 # Architecture Suite
 
-Offline, evidence-backed C4 architecture diagrams for coding agents and the command line: system context, containers, components, code, overviews, AWS and Google Cloud deployment diagrams, request scenarios, infrastructure imports, architecture diffs and rule checks, and a read-only HTML explorer. Output is editable Draw.io, Mermaid, PNG and SVG.
+Offline, evidence-backed C4 architecture diagrams for coding agents and the command line: system context, containers, components, code, overviews, AWS and Google Cloud deployment diagrams, request scenarios, infrastructure imports, architecture diffs and rule checks, and a read-only HTML explorer. Output is editable Draw.io, Mermaid, PNG and SVG, plus Visio (`.vsdx`) on request.
 
 ## Install in Claude Code
 

@@ -42,4 +42,4 @@ Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` 
 - Cite file/line or document references. Separate assumptions from facts; record unknowns under `gaps`. Never invent users, classes, calls, or cloud placements.
 - Lint, then dry-run, then publish with `--confirm-write` (`--confirm-overwrite` only for existing output). Write to a dedicated directory outside the analyzed repository. On a re-render, the dry run lists `would_remove` (stale diagrams from an earlier run) and `conflicts` (generated files someone edited, which are kept); mention both to the user.
 - Do not use `--allow-layout-findings` as an automatic retry. Report fidelity, layout and scan-limit findings to the user.
-- Deliver links to diagrams (`.mmd`, `.drawio`, `.png`; `--format mermaid,drawio,png,svg` adds SVG), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.
+- Deliver links to diagrams (`.mmd`, `.drawio`, `.png`; `--format mermaid,drawio,png,svg` adds SVG; `visio` or `all` adds Visio `.vsdx`), the editable plan, `architecture-report.md` and `plan-fidelity.md`, plus a short note on uncertainty.

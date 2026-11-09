@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Visio output:** `--format visio` (also part of `--format all`) writes editable `.vsdx` drawings for every diagram and scenario. Boxes keep their role shapes and colours, connectors are glued to the boxes they join, claim status stays dotted, and cloud icons are embedded as PNG. Default formats are unchanged.
+
 ## 1.0.1 - audit fixes
 
 Fixes from an external audit of 1.0.0, plus two additions.

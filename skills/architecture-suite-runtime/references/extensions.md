@@ -32,9 +32,9 @@ Optional `--bindings <mapping.json> --model <model.json>` maps topology resource
 
 ## Structured scenarios
 
-`scenario-lint --model <model.json> --scenario <scenario.json>` checks a scenario. `scenario-render` accepts the same inputs plus `--output` and `--format all|mermaid,svg,drawio,png`.
+`scenario-lint --model <model.json> --scenario <scenario.json>` checks a scenario. `scenario-render` accepts the same inputs plus `--output` and `--format all|mermaid,svg,drawio,png,visio`.
 
-`architecture-scenario/v1` requires name, a unique participants array of canonical element IDs, and steps. Message/response steps have `from`, `to`, `description`, and optional `type`. Groups have type alt/opt/loop/par, condition and steps. Alt/par groups may include branches, each with condition and steps. Nesting is limited to 12. SVG, PNG and editable Draw.io share sequence geometry; Mermaid uses sequenceDiagram. See the generated [scenario example](../samples/extensions/scenario.json).
+`architecture-scenario/v1` requires name, a unique participants array of canonical element IDs, and steps. Message/response steps have `from`, `to`, `description`, and optional `type`. Groups have type alt/opt/loop/par, condition and steps. Alt/par groups may include branches, each with condition and steps. Nesting is limited to 12. SVG, PNG, editable Draw.io and Visio share sequence geometry; Mermaid uses sequenceDiagram. See the generated [scenario example](../samples/extensions/scenario.json).
 
 ## Differences and rules
 

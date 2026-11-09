@@ -24,7 +24,7 @@ AUTHOR = {"name": "Tyler Simon"}
 # Public GitHub repository URL, e.g. "https://github.com/<owner>/architecture-suite".
 # homepage/repository are omitted from manifests while this is empty.
 REPOSITORY = "https://github.com/tyler59simon/architecture-suite-plugin"
-KEYWORDS = ["c4", "architecture", "diagrams", "drawio", "mermaid", "aws", "gcp", "offline"]
+KEYWORDS = ["c4", "architecture", "diagrams", "drawio", "visio", "mermaid", "aws", "gcp", "offline"]
 # Repository-root legal files shipped with every package and install.
 LEGAL_FILES = ("LICENSE", "NOTICE")
 NEWLINE = chr(10)

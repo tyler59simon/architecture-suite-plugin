@@ -178,6 +178,8 @@ def test_gcp_deployment_rendering():
     drawio = renderers.render_gcp_deployment_drawio(model)
     assert "shape=image" in drawio and "Rider Gateway" in drawio
     assert "Rider Gateway" in renderers.render_gcp_deployment_mermaid(model)
+    vsdx = renderers.render_gcp_deployment_vsdx(model)
+    assert vsdx == renderers.scene_vsdx(scene)
     # AWS sample keeps its original folder name.
     from architecture_suite.examples import example_model
 

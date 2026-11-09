@@ -22,7 +22,7 @@ def test_published_helpers_and_tuple_contracts(model, tmp_path):
     assert count == 13 and not findings
     advisory, metrics = renderers.measure_model_layout(model, ["executive"])
     assert isinstance(advisory, list) and metrics["scenes"] == 9
-    for kind in ("mermaid", "drawio", "svg"):
+    for kind in ("mermaid", "drawio", "svg", "vsdx"):
         for prefix in ("overview", "aws_deployment"):
             function = getattr(renderers, f"render_{prefix}_{kind}")
             assert function(model)

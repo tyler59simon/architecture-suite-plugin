@@ -26,7 +26,8 @@ def test_defaults_and_invalid_arguments():
         and args.timeout == 45.0
     )
     args = parser.parse_args(["render", "--model", "x", "--output", "y", "--format", "all"])
-    assert args.format == DEFAULT_FORMATS | {"svg"}  # "all" means every format
+    assert args.format == DEFAULT_FORMATS | {"svg", "visio"}  # "all" means every format
+    assert "visio" not in DEFAULT_FORMATS  # Visio is opt-in
     args = parser.parse_args(["plan-draft", "--repo", "x", "--output", "y"])
     assert args.classification == "Internal" and args.max_file_bytes == 400000
     assert parse_overview_styles(None) == ("progressive",)

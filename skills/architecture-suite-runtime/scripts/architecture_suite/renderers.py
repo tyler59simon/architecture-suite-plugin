@@ -1,14 +1,15 @@
 """Portable Mermaid plus shared-scene exports. Rasterization is strictly offline."""
 
 from __future__ import annotations
-from contextlib import contextmanager
+import base64
+from contextlib import contextmanager, nullcontext
 import math
 from pathlib import Path
 from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright, Error as BrowserError
 from .c4_layout import build_view_scene_elk
-from .aws import verify_assets
-from .emit import _claimed, render_scene_drawio, render_scene_svg
+from .aws import icon_bytes, verify_assets
+from .emit import _claimed, render_scene_drawio, render_scene_svg, render_scene_vsdx
 from .model import VIEW_FOLDERS
 from .overview_layout import (
     build_aws_scene,
@@ -39,6 +40,7 @@ ARTIFACT_VIEW_TYPES = {
 }
 MAX_PNG_WIDTH = 6000
 MAX_PNG_PIXELS = 24_000_000
+EXTENSIONS = {"mermaid": "mmd", "drawio": "drawio", "png": "png", "svg": "svg", "visio": "vsdx"}
 
 
 def normalize_artifact_level(level: str = "all") -> str:
@@ -78,11 +80,10 @@ def diagram_specs(
 def expected_artifact_paths(
     model: dict, formats: set[str], overview_styles=None, level: str = "all"
 ) -> list[str]:
-    extensions = {"mermaid": "mmd", "drawio": "drawio", "png": "png", "svg": "svg"}
-    if not formats or set(formats) - set(extensions):
+    if not formats or set(formats) - set(EXTENSIONS):
         raise ValueError("Unsupported output format")
     return [
-        base + "." + extensions[f]
+        base + "." + EXTENSIONS[f]
         for base, _ in diagram_specs(model, overview_styles, level)
         for f in sorted(formats)
     ]
@@ -177,6 +178,10 @@ def render_drawio(model: dict, view: dict) -> str:
     return render_scene_drawio(_scene(model, view))
 
 
+def render_vsdx(model: dict, view: dict) -> bytes:
+    return scene_vsdx(_scene(model, view))
+
+
 def layout_measurements(model: dict, overview_styles=None, level: str = "all") -> dict:
     return {
         base: {"width": scene.width, "height": scene.height, **score_scene(scene)}
@@ -234,6 +239,10 @@ def render_overview_svg(model: dict, style: str = "progressive") -> str:
     return render_scene_svg(build_overview_scene(model, style))
 
 
+def render_overview_vsdx(model: dict, style: str = "progressive") -> bytes:
+    return scene_vsdx(build_overview_scene(model, style))
+
+
 def render_aws_deployment_mermaid(model: dict) -> str:
     return render_mermaid(model, {"type": "deployment"})
 
@@ -246,6 +255,10 @@ def render_aws_deployment_svg(model: dict) -> str:
     return render_scene_svg(build_aws_scene(model))
 
 
+def render_aws_deployment_vsdx(model: dict) -> bytes:
+    return scene_vsdx(build_aws_scene(model))
+
+
 def render_gcp_deployment_mermaid(model: dict) -> str:
     return render_mermaid(model, {"type": "deployment"})
 
@@ -256,6 +269,10 @@ def render_gcp_deployment_drawio(model: dict) -> str:
 
 def render_gcp_deployment_svg(model: dict) -> str:
     return render_scene_svg(build_gcp_scene(model))
+
+
+def render_gcp_deployment_vsdx(model: dict) -> bytes:
+    return scene_vsdx(build_gcp_scene(model))
 
 
 @contextmanager
@@ -349,6 +366,45 @@ def render_svg_png(
     validate_png(path)
 
 
+def rasterize_icons(scene, page) -> dict[str, bytes]:
+    """PNG copies of the scene's SVG icons at twice their largest drawn size."""
+    sizes = {}
+    for box in scene.boxes:
+        if box.label.icon:
+            sizes[box.label.icon] = max(sizes.get(box.label.icon, 0), box.label.icon_size)
+    icons = {}
+    for name, size in sorted(sizes.items()):
+        side = 2 * size
+        uri = base64.b64encode(icon_bytes(name)).decode()
+        page.set_viewport_size({"width": side, "height": side})
+        page.set_content(
+            '<html><head><meta http-equiv="Content-Security-Policy" '
+            "content=\"default-src 'none'; img-src data:\"></head><body style=\"margin:0\">"
+            f'<img src="data:image/svg+xml;base64,{uri}" width="{side}" height="{side}" '
+            'style="display:block"></body></html>',
+            wait_until="load",
+            timeout=30000,
+        )
+        page.evaluate(
+            "async () => { await Promise.all("
+            "[...document.images].map(i=>i.decode().catch(()=>{}))); }"
+        )
+        icons[name] = page.screenshot(
+            omit_background=True, animations="disabled", timeout=30000
+        )
+    return icons
+
+
+def scene_vsdx(scene, *, page=None) -> bytes:
+    """Visio export; icons are rasterized offline, opening a browser only if needed."""
+    if not any(box.label.icon for box in scene.boxes):
+        return render_scene_vsdx(scene)
+    if page is None:
+        with browser_page() as active:
+            return render_scene_vsdx(scene, rasterize_icons(scene, active))
+    return render_scene_vsdx(scene, rasterize_icons(scene, page))
+
+
 def write_rendered_artifacts(
     model: dict,
     output: Path,
@@ -365,21 +421,16 @@ def write_rendered_artifacts(
         raise SafetyError(
             "Layout verification failed; inspect verify findings before publishing"
         )
-    from contextlib import nullcontext
-
-    with browser_page() if "png" in formats else nullcontext(None) as page:
+    needs_browser = {"png", "visio"} & set(formats)
+    with browser_page() if needs_browser else nullcontext(None) as page:
         for base, view in diagram_specs(model, overview_styles, level):
             scene = _scene(model, view)
             for fmt in sorted(formats):
-                ext = {
-                    "mermaid": "mmd",
-                    "drawio": "drawio",
-                    "svg": "svg",
-                    "png": "png",
-                }[fmt]
-                path = contained_path(output, base + "." + ext)
+                path = contained_path(output, base + "." + EXTENSIONS[fmt])
                 path.parent.mkdir(parents=True, exist_ok=True)
-                if fmt == "png":
+                if fmt == "visio":
+                    path.write_bytes(scene_vsdx(scene, page=page))
+                elif fmt == "png":
                     render_svg_png(
                         render_scene_svg(scene),
                         path,
