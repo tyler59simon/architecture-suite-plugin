@@ -31,6 +31,20 @@ def _read(path):
     return parse_yaml(p.read_text(encoding="utf-8"))
 
 
+def _document(path, version, fields):
+    # Companion documents follow their JSON schemas: the version and field types are required.
+    doc = _read(path)
+    if (
+        not isinstance(doc, dict)
+        or doc.get("schema_version") != version
+        or not all(isinstance(doc.get(k), t) for k, t in fields.items())
+    ):
+        raise ValueError(
+            f"Expected {version} with " + ", ".join(sorted(fields)) + ": " + str(path)
+        )
+    return doc
+
+
 def _model(path):
     m = load_model(canonical_existing_file(Path(path)))
     # Partial models remain useful: validate only the deepest supplied C4 view.
@@ -97,8 +111,12 @@ def _cmd_extension(args):
     elif args.command == "check":
         report = check_rules(
             _model(args.model),
-            _read(args.rules),
-            _read(args.baseline) if args.baseline else None,
+            _document(args.rules, "architecture-rules/v1", {"rules": list}),
+            _document(
+                args.baseline, "architecture-baseline/v1", {"fingerprints": list}
+            )
+            if args.baseline
+            else None,
         )
         files = {
             "architecture-check.json": report,
@@ -146,7 +164,13 @@ def _cmd_extension(args):
             "explorer.html": explorer_html(
                 model,
                 [_read(p) for p in args.scenario],
-                _read(args.diff) if args.diff else None,
+                _document(
+                    args.diff,
+                    "architecture-diff/v1",
+                    {"changes": list, "changed": bool},
+                )
+                if args.diff
+                else None,
             )
         }
     output = canonical_output_directory(Path(args.output))

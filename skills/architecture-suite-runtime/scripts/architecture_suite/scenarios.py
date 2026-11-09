@@ -4,6 +4,8 @@ from .scene import Scene, Box, Edge
 from .style import Label, TextLine, wrap_to_width
 
 GROUPS = {"alt", "opt", "loop", "par"}
+# Sequence spacing: between messages, around frames, inside frames, and per nesting level.
+STEP_GAP, FRAME_GAP, FRAME_PAD, FRAME_INSET = 90, 40, 20, 12
 
 
 def validate_scenario(scenario, model):
@@ -74,7 +76,9 @@ def scenario_mermaid(scenario, model):
     aliases = {p: f"p{i}" for i, p in enumerate(scenario["participants"])}
 
     def clean(text):
-        return _quoted(text)[1:-1].replace(";", ";")
+        # ";" ends a sequence statement; encode it between quoted parts so the entity
+        # codes _quoted emits keep their own semicolons.
+        return "#59;".join(_quoted(part)[1:-1] for part in str(text).split(";"))
 
     lines = ["sequenceDiagram"] + [
         f"  participant {aliases[p]} as {clean(names[p])}" for p in aliases
@@ -126,58 +130,74 @@ def scenario_scene(scenario, model):
         scene.boxes.append(
             Box(p, "card", x - 130, 120, 260, max(80, lab.height + 32), lab)
         )
-    y = max(b.y + b.height for b in scene.boxes) + 60
+    # y is the bottom of the content placed so far; every step starts below it with
+    # a gap, so frames, branch dividers and message labels never share a line.
+    y = max(b.y + b.height for b in scene.boxes)
 
-    def walk(steps, parent=None):
+    def walk(steps, depth=0, parent=None):
         nonlocal y
+        previous = None
         for step in steps:
             kind = step.get("type", "message")
+            if previous is None:
+                y += FRAME_PAD if parent else FRAME_GAP
+            elif kind in GROUPS or previous in GROUPS:
+                y += FRAME_GAP
+            else:
+                y += STEP_GAP
+            previous = kind
             if kind in GROUPS:
                 ident = "group-" + str(len(scene.boxes))
+                # Nested frames are inset per depth so every level stays visible.
+                left = 55 + depth * FRAME_INSET
+                inner = width - 2 * left
                 top = y
-                y += 70
-                box = Box(
-                    ident,
-                    "frame",
-                    55,
-                    top,
-                    width - 110,
-                    100,
-                    Label(
-                        [
-                            TextLine(kind + ": " + t)
-                            for t in wrap_to_width(step["condition"], width - 180)
-                        ]
-                    ),
-                    parent,
+                title = Label(
+                    [
+                        TextLine(kind + ": " + t)
+                        for t in wrap_to_width(step["condition"], inner - 70)
+                    ]
                 )
+                box = Box(ident, "frame", left, top, inner, 0, title, parent)
                 scene.boxes.append(box)
-                walk(step["steps"], ident)
+                y = top + 10 + title.height
+                walk(step["steps"], depth + 1, ident)
                 for branch in step.get("branches", []):
+                    y += FRAME_PAD
+                    scene.edges.append(
+                        Edge(
+                            "divider-" + str(len(scene.edges)),
+                            ident,
+                            ident,
+                            [(left, y), (left + inner, y)],
+                            kind="lifeline",
+                        )
+                    )
+                    lab = Label(
+                        [
+                            TextLine(t)
+                            for t in wrap_to_width(
+                                ("else: " if kind == "alt" else "and: ")
+                                + branch["condition"],
+                                inner - 70,
+                            )
+                        ]
+                    )
                     scene.boxes.append(
                         Box(
                             "branch-" + str(len(scene.boxes)),
                             "panel-title",
-                            75,
-                            y,
-                            width - 150,
-                            60,
-                            Label(
-                                [
-                                    TextLine(t)
-                                    for t in wrap_to_width(
-                                        ("else: " if kind == "alt" else "and: ")
-                                        + branch["condition"],
-                                        width - 180,
-                                    )
-                                ]
-                            ),
+                            left + 20,
+                            y + 4,
+                            inner - 40,
+                            lab.height + 24,
+                            lab,
                             ident,
                         )
                     )
-                    y += 80
-                    walk(branch["steps"], ident)
-                y += 30
+                    y += lab.height + 28
+                    walk(branch["steps"], depth + 1, ident)
+                y += FRAME_PAD
                 box.height = y - top
             else:
                 x1, x2 = positions[step["from"]], positions[step["to"]]
@@ -187,19 +207,20 @@ def scenario_scene(scenario, model):
                         for t in wrap_to_width(step["description"], 240, 11)
                     ]
                 )
-                if x1 == x2:
-                    points = [(x1, y), (x1 + 110, y), (x1 + 110, y + 60), (x1, y + 60)]
-                else:
-                    points = [(x1, y), (x2, y)]
                 box = Box(
                     "message-label-" + str(len(scene.edges)),
                     "edge-label",
                     (x1 + x2) / 2 - 130,
-                    y - lab.height - 20,
+                    y,
                     260,
                     lab.height + 10,
                     lab,
                 )
+                y += lab.height + 20
+                if x1 == x2:
+                    points = [(x1, y), (x1 + 110, y), (x1 + 110, y + 60), (x1, y + 60)]
+                else:
+                    points = [(x1, y), (x2, y)]
                 scene.edges.append(
                     Edge(
                         "message-" + str(len(scene.edges)),
@@ -210,9 +231,10 @@ def scenario_scene(scenario, model):
                         kind=kind,
                     )
                 )
-                y += lab.height + 110
+                y = points[-1][1]
 
     walk(scenario["steps"])
+    y += STEP_GAP
     # Lifelines are separate visual strokes and never dependencies in the model.
     for p, x in positions.items():
         scene.edges.insert(

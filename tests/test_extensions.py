@@ -318,7 +318,14 @@ def test_new_cli(inputs, tmp_path, scenario, model):
     scenario_file = tmp_path / "scenario.json"
     scenario_file.write_text(json.dumps(scenario))
     rules = tmp_path / "rules.json"
-    rules.write_text(json.dumps({"rules": [{"id": "deny", "effect": "deny"}]}))
+    rules.write_text(
+        json.dumps(
+            {
+                "schema_version": "architecture-rules/v1",
+                "rules": [{"id": "deny", "effect": "deny"}],
+            }
+        )
+    )
     infra = tmp_path / "compose.yaml"
     infra.write_text("services:\n  api: {}\n")
     repo = tmp_path / "repo"
