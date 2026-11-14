@@ -1,0 +1,9 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+Boundary(n0, "Card Tokenizer", "component") {
+  Component(n1, "CardTokenizer", "class", "Illustrative implementation\n+tokenize(pan, expiry): CardToken\n+detokenize(token): CardData")
+}
+SHOW_LEGEND()
+@enduml

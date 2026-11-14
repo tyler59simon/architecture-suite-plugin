@@ -1,0 +1,81 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+System_Ext(n0, "3-D Secure Directory Server", "Card network cardholder authentication")
+System_Ext(n1, "Acquirer Processor", "Card authorization, capture and settlement")
+System_Ext(n2, "Bank Payout Rail", "Bank transfers for merchant payouts")
+Person(n3, "Finance Operations", "Reconciles settlements and payouts")
+Person(n4, "Merchant", "Accepts payments and receives payouts")
+System_Ext(n5, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
+Person(n6, "Risk Analyst", "Reviews flagged payments and fraud rules")
+Person(n7, "Shopper", "Pays for orders at merchant checkouts")
+System_Boundary(n8, "PayStream") {
+  Container(n9, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
+  ContainerDb(n10, "Idempotency Cache", "Redis", "Short-lived idempotency keys and responses")
+  ContainerDb(n11, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
+  Container(n12, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
+  ContainerQueue(n13, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
+  ContainerDb(n14, "Payments Database", "PostgreSQL", "Payment intents, merchants and API keys")
+  ContainerDb(n15, "Reporting Warehouse", "Columnar warehouse", "Reconciliation and finance analytics")
+  ContainerDb(n16, "Settlement Archive", "Object storage", "Raw acquirer settlement files")
+  Container(n17, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
+  ContainerDb(n18, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
+  Container(n19, "Webhook Dispatcher", "Node.js", "Signs and delivers payment events to merchants, with retries")
+  Container_Boundary(n20, "Card Vault") {
+    Component(n21, "Card Tokenizer", "Rust", "Swaps card numbers for single-purpose tokens\nDrill-down: 1 code")
+    Component(n22, "Envelope Encryptor", "Rust", "Encrypts card data with per-record data keys\nDrill-down: 1 code")
+  }
+  Container_Boundary(n23, "Fraud Scoring") {
+    Component(n24, "Risk Scorer", "Python", "Returns a risk score from the hosted model\nDrill-down: 1 code")
+    Component(n25, "Rules Engine", "Python", "Applies merchant and platform block rules\nDrill-down: 1 code")
+  }
+  Container_Boundary(n26, "Ledger Service") {
+    Component(n27, "Balance Calculator", "Kotlin", "Computes available and pending merchant balances\nDrill-down: 1 code")
+    Component(n28, "Journal Writer", "Kotlin", "Posts balanced journal entries for money movements\nDrill-down: 1 code")
+  }
+  Container_Boundary(n29, "Payment Orchestrator") {
+    Component(n30, "3DS Handler", "Java", "Runs 3-D Secure cardholder authentication\nDrill-down: 1 code")
+    Component(n31, "Acquirer Router", "Java", "Chooses the acquiring connection by card and region\nDrill-down: 1 code")
+    Component(n32, "Payment State Machine", "Java", "Owns payment state transitions and retries\nDrill-down: 2 code")
+  }
+  Container_Boundary(n33, "Payments API") {
+    Component(n34, "Idempotency Guard", "Go", "Makes retried requests return the original result\nDrill-down: 1 code")
+    Component(n35, "Merchant Authenticator", "Go", "Validates secret API keys and scopes\nDrill-down: 1 code")
+    Component(n36, "Payment Intents Controller", "Go", "Creates and confirms payment intents\nDrill-down: 1 code")
+  }
+}
+Rel(n9, n21, "Submits card data for a token [HTTPS]")
+Rel(n29, n21, "Detokenizes the card for the network request [mTLS]")
+Rel(n21, n22, "Encrypts card records [in-process]")
+Rel(n22, n18, "Wraps and unwraps data keys [KMS API]")
+Rel(n29, n24, "Requests a fraud score [gRPC]")
+Rel(n24, n25, "Applies block and review rules [in-process]")
+Rel(n6, n25, "Reviews flagged payments and tunes rules [HTTPS]")
+Rel(n13, n28, "Delivers captured, refunded and fee events [events]")
+Rel(n28, n11, "Posts double-entry journal entries [SQL]")
+Rel(n28, n15, "Streams journal entries [batch export]")
+Rel(n17, n27, "Reconciles merchant balances [gRPC]")
+Rel(n33, n32, "Starts authorization [gRPC]")
+Rel(n32, n30, "Requests cardholder authentication [in-process]")
+Rel(n30, n0, "Authenticates the cardholder [EMV 3DS over HTTPS]")
+Rel(n32, n31, "Sends authorization and capture [in-process]")
+Rel(n31, n1, "Authorizes, captures and refunds [ISO 8583 over TLS]")
+Rel(n32, n13, "Publishes payment lifecycle events [events]")
+Rel(n9, n36, "Confirms the payment with the card token [HTTPS]")
+Rel(n12, n36, "Lists payments and issues refunds [HTTPS]")
+Rel(n5, n35, "Calls the API server-side with a secret key [HTTPS]")
+Rel(n35, n14, "Looks up API keys [SQL]")
+Rel(n36, n34, "Reserves the idempotency key [in-process]")
+Rel(n34, n10, "Stores request keys and responses [Redis]")
+Rel(n36, n14, "Persists payment intents [SQL]")
+Rel(n7, n9, "Enters card details at checkout [HTTPS]")
+Rel(n13, n19, "Delivers merchant-facing events [events]")
+Rel(n19, n5, "Delivers signed webhooks [HTTPS]")
+Rel(n17, n1, "Downloads settlement files [SFTP]")
+Rel(n17, n16, "Archives settlement files [object API]")
+Rel(n17, n2, "Initiates merchant payouts [ISO 20022]")
+Rel(n3, n15, "Runs reconciliation and payout reports [SQL]")
+Rel(n4, n12, "Reviews payments, refunds and payouts [HTTPS]")
+SHOW_LEGEND()
+@enduml

@@ -46,3 +46,4 @@ def test_analyze_complete_offline_artifact_set(
     assert len(list(output.rglob("*.png"))) == 5
     assert all(validate_png(p) for p in output.rglob("*.png"))
     assert len(list(output.rglob("*.vsdx"))) == 5
+    assert len(list(output.rglob("*.puml"))) == 5

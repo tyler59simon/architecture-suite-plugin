@@ -26,8 +26,8 @@ def test_defaults_and_invalid_arguments():
         and args.timeout == 45.0
     )
     args = parser.parse_args(["render", "--model", "x", "--output", "y", "--format", "all"])
-    assert args.format == {"mermaid", "drawio", "png", "svg", "visio"}  # "all" means every format
-    assert DEFAULT_FORMATS == {"mermaid", "png"}  # Draw.io, SVG and Visio are opt-in
+    assert args.format == {"mermaid", "drawio", "png", "svg", "visio", "plantuml"}  # "all" means every format
+    assert DEFAULT_FORMATS == {"mermaid", "png"}  # Draw.io, SVG, Visio and PlantUML are opt-in
     args = parser.parse_args(["plan-draft", "--repo", "x", "--output", "y"])
     assert args.classification == "Internal" and args.max_file_bytes == 400000
     assert parse_overview_styles(None) == ("progressive",)
@@ -321,6 +321,8 @@ def test_examples_dry_and_write(tmp_path, capsys):
     assert not output.exists()
     assert main(argv + ["--format", "visio", "--dry-run"]) == 0
     assert any(f.endswith(".vsdx") for f in json.loads(capsys.readouterr().out)["files"])
+    assert main(argv + ["--format", "plantuml", "--dry-run"]) == 0
+    assert any(f.endswith(".puml") for f in json.loads(capsys.readouterr().out)["files"])
     # Use the real exporter without PNG for this CLI transaction test.
     # PNG and the offline browser are exercised by export tests.
     assert main(argv + ["--format", "mermaid,drawio", "--confirm-write"]) == 0

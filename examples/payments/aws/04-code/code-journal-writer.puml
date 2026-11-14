@@ -1,0 +1,9 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+Boundary(n0, "Journal Writer", "component") {
+  Component(n1, "JournalWriter", "class", "Illustrative implementation\n+post(entries): JournalId")
+}
+SHOW_LEGEND()
+@enduml

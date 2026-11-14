@@ -1,0 +1,24 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Container>
+LAYOUT_LEFT_RIGHT()
+System(n0, "PayStream", "Online payments platform: checkout, card processing, ledger and payouts")
+Person(n1, "Shopper", "Pays for orders at merchant checkouts")
+Person(n2, "Merchant", "Accepts payments and receives payouts")
+Person(n3, "Risk Analyst", "Reviews flagged payments and fraud rules")
+Person(n4, "Finance Operations", "Reconciles settlements and payouts")
+System_Ext(n5, "Acquirer Processor", "Card authorization, capture and settlement")
+System_Ext(n6, "3-D Secure Directory Server", "Card network cardholder authentication")
+System_Ext(n7, "Bank Payout Rail", "Bank transfers for merchant payouts")
+System_Ext(n8, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
+Rel(n1, n0, "Enters card details at checkout [HTTPS]")
+Rel(n2, n0, "Reviews payments, refunds and payouts [HTTPS]")
+Rel(n8, n0, "Calls the API server-side with a secret key [HTTPS]")
+Rel(n3, n0, "Reviews flagged payments and tunes rules [HTTPS]")
+Rel(n0, n6, "Authenticates the cardholder [EMV 3DS over HTTPS]")
+Rel(n0, n5, "Authorizes, captures and refunds; Downloads settlement\nfiles [ISO 8583 over TLS; SFTP]")
+Rel(n0, n8, "Delivers signed webhooks [HTTPS]")
+Rel(n0, n7, "Initiates merchant payouts [ISO 20022]")
+Rel(n4, n0, "Runs reconciliation and payout reports [SQL]")
+SHOW_LEGEND()
+@enduml

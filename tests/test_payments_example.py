@@ -58,7 +58,7 @@ def test_checked_in_payments_views_reproduce_byte_for_byte():
     """Golden check: rendering changes must not silently alter checked-in diagrams."""
     from architecture_suite.cli import _selected_model
     from architecture_suite.emit import render_scene_drawio, render_scene_svg
-    from architecture_suite.renderers import _scene, diagram_specs, render_mermaid
+    from architecture_suite.renderers import _scene, diagram_specs, render_mermaid, render_plantuml
 
     plan = parse_plan_document((PLANS / "aws-architecture-plan.md").read_text(encoding="utf-8"))
     styles = ("executive", "hierarchy")
@@ -66,6 +66,7 @@ def test_checked_in_payments_views_reproduce_byte_for_byte():
     specs = dict(diagram_specs(model, styles, "all"))
     renderers = {
         "mmd": lambda view, scene: render_mermaid(model, view),
+        "puml": lambda view, scene: render_plantuml(model, view),
         "drawio": lambda view, scene: render_scene_drawio(scene),
         "svg": lambda view, scene: render_scene_svg(scene),
     }

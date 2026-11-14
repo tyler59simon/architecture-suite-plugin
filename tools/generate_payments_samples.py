@@ -353,7 +353,11 @@ def main():
         run("plan-lint", "--plan", plan_path, "--strict", label=f"{cloud} plan-lint")
         for job, extra in JOBS.items():
             target = folder if job == "." else folder / job
-            formats = "mermaid,drawio,svg" if job == "large-overviews" else "mermaid,drawio,png,svg"
+            formats = (
+                "mermaid,drawio,svg,plantuml"
+                if job == "large-overviews"
+                else "mermaid,drawio,png,svg,plantuml"
+            )
             run("plan-render", "--plan", plan_path, "--output", target, "--format", formats,
                 "--confirm-write", *extra, label=f"{cloud} {job} render")
         (folder / "c4-dynamic.mmd").write_bytes(DYNAMIC_SEQUENCE.encode("utf-8"))
