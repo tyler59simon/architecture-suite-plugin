@@ -1,0 +1,9 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+Boundary(n0, "Idempotency Guard", "component") {
+  Component(n1, "IdempotencyGuard", "class", "Illustrative implementation\n+reserve(key, requestHash): Reservation\n+complete(key, response)")
+}
+SHOW_LEGEND()
+@enduml

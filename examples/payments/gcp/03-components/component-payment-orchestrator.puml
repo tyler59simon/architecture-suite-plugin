@@ -1,0 +1,25 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+System_Ext(n0, "Acquirer Processor", "Card authorization, capture and settlement")
+System_Ext(n1, "3-D Secure Directory Server", "Card network cardholder authentication")
+Container(n2, "Payments API", "Go", "Public REST API for payment intents, captures and refunds")
+Container(n3, "Card Vault", "Rust", "Tokenizes card numbers inside the cardholder data environment")
+Container(n4, "Fraud Scoring", "Python ML model", "Scores each payment for fraud risk before authorization")
+ContainerQueue(n5, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
+Container_Boundary(n6, "Payment Orchestrator") {
+  Component(n7, "Payment State Machine", "Java", "Owns payment state transitions and retries")
+  Component(n8, "Acquirer Router", "Java", "Chooses the acquiring connection by card and region")
+  Component(n9, "3DS Handler", "Java", "Runs 3-D Secure cardholder authentication")
+}
+Rel(n2, n7, "Starts authorization [gRPC]")
+Rel(n7, n4, "Requests a fraud score [gRPC]")
+Rel(n7, n9, "Requests cardholder authentication [in-process]")
+Rel(n9, n1, "Authenticates the cardholder [EMV 3DS over HTTPS]")
+Rel(n7, n8, "Sends authorization and capture [in-process]")
+Rel(n8, n3, "Detokenizes the card for the network request [mTLS]")
+Rel(n8, n0, "Authorizes, captures and refunds [ISO 8583 over TLS]")
+Rel(n7, n5, "Publishes payment lifecycle events [events]")
+SHOW_LEGEND()
+@enduml

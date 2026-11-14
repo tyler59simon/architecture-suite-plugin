@@ -1,0 +1,62 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Deployment>
+LAYOUT_LEFT_RIGHT()
+Deployment_Node(n0, "Google Cloud", "cloud") {
+  Deployment_Node(n1, "Example Organization", "organization") {
+    Deployment_Node(n2, "paystream-prod", "project") {
+      ContainerDb(n3, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
+      Container(n4, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
+      ContainerDb(n5, "Reporting Warehouse", "Columnar warehouse", "Reconciliation and finance analytics")
+      Deployment_Node(n6, "europe-west1", "region") {
+        Container(n7, "Fraud Scoring", "Python ML model", "Scores each payment for fraud risk before authorization")
+        ContainerQueue(n8, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
+        ContainerDb(n9, "Settlement Archive", "Object storage", "Raw acquirer settlement files")
+        Container(n10, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
+        ContainerDb(n11, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
+        Container(n12, "Webhook Dispatcher", "Node.js", "Signs and delivers payment events to merchants, with retries")
+        Deployment_Node(n13, "payments-vpc", "vpc") {
+          Deployment_Node(n14, "app-subnet", "subnet") {
+            Container(n15, "Ledger Service", "Kotlin", "Double-entry ledger of balances, fees and payouts")
+            Container(n16, "Payments API", "Go", "Public REST API for payment intents, captures and refunds")
+            Deployment_Node(n17, "orchestrator-cluster", "cluster") {
+              Container(n18, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
+            }
+          }
+          Deployment_Node(n19, "cde-subnet (cardholder data)", "subnet") {
+            Deployment_Node(n20, "vault-cluster", "cluster") {
+              Container(n21, "Card Vault", "Rust", "Tokenizes card numbers inside the cardholder data environment")
+            }
+          }
+          Deployment_Node(n22, "data-subnet", "subnet") {
+            ContainerDb(n23, "Idempotency Cache", "Redis", "Short-lived idempotency keys and responses")
+            ContainerDb(n24, "Payments Database", "PostgreSQL", "Payment intents, merchants and API keys")
+          }
+        }
+      }
+    }
+  }
+}
+Deployment_Node(n25, "Shopper browser", "device") {
+  Deployment_Node(n26, "Web browser", "execution-environment") {
+    Container(n27, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
+  }
+}
+Rel(n18, n7, "Requests a fraud score [gRPC]")
+Rel(n18, n21, "Detokenizes the card for the network request [mTLS]")
+Rel(n21, n11, "Wraps and unwraps data keys [KMS API]")
+Rel(n18, n8, "Publishes payment lifecycle events [events]")
+Rel(n8, n15, "Delivers captured, refunded and fee events [events]")
+Rel(n15, n3, "Posts double-entry journal entries [SQL]")
+Rel(n15, n5, "Streams journal entries [batch export]")
+Rel(n27, n21, "Submits card data for a token [HTTPS]")
+Rel(n8, n12, "Delivers merchant-facing events [events]")
+Rel(n10, n9, "Archives settlement files [object API]")
+Rel(n10, n15, "Reconciles merchant balances [gRPC]")
+Rel(n27, n16, "Confirms the payment with the card token [HTTPS]")
+Rel(n4, n16, "Lists payments and issues refunds [HTTPS]")
+Rel(n16, n24, "Looks up API keys; Persists payment intents [SQL]")
+Rel(n16, n23, "Stores request keys and responses [Redis]")
+Rel(n16, n18, "Starts authorization [gRPC]")
+SHOW_LEGEND()
+@enduml

@@ -40,9 +40,9 @@ from .safety import (
     scan_repository,
 )
 
-# Draw.io, SVG and Visio are opt-in; `--format all` writes every format.
+# Draw.io, SVG, Visio and PlantUML are opt-in; `--format all` writes every format.
 DEFAULT_FORMATS = {"mermaid", "png"}
-ALL_FORMATS = {"mermaid", "drawio", "png", "svg", "visio"}
+ALL_FORMATS = {"mermaid", "drawio", "png", "svg", "visio", "plantuml"}
 
 
 def _json_print(value):
@@ -61,7 +61,7 @@ def _parse_formats(value):
         else {x.strip() for x in value.split(",") if x.strip()}
     )
     if not formats or formats - ALL_FORMATS:
-        raise argparse.ArgumentTypeError("format must be all or mermaid,drawio,png,svg,visio")
+        raise argparse.ArgumentTypeError("format must be all or mermaid,drawio,png,svg,visio,plantuml")
     return formats
 
 

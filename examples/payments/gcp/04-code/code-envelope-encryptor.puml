@@ -1,0 +1,9 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+Boundary(n0, "Envelope Encryptor", "component") {
+  Component(n1, "EnvelopeEncryptor", "class", "Illustrative implementation\n+encrypt(plaintext, keyId): Ciphertext\n+decrypt(ciphertext): Bytes")
+}
+SHOW_LEGEND()
+@enduml

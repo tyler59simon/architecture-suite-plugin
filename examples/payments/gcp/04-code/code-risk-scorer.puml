@@ -1,0 +1,9 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+Boundary(n0, "Risk Scorer", "component") {
+  Component(n1, "RiskScorer", "class", "Illustrative implementation\n+score(payment): RiskScore")
+}
+SHOW_LEGEND()
+@enduml

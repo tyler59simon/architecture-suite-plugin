@@ -1,4 +1,4 @@
-"""Portable Mermaid plus shared-scene exports. Rasterization is strictly offline."""
+"""Portable Mermaid and PlantUML text plus shared-scene exports. Rasterization is strictly offline."""
 
 from __future__ import annotations
 import base64
@@ -20,7 +20,7 @@ from .overview_layout import (
 )
 from .readability import readability_findings, score_scene
 from .safety import SafetyError, contained_path
-from .style import box_style, element_visual
+from .style import box_style, claim_cue, element_visual
 from .scene import scene_collisions
 
 ARTIFACT_LEVELS = (
@@ -40,7 +40,7 @@ ARTIFACT_VIEW_TYPES = {
 }
 MAX_PNG_WIDTH = 6000
 MAX_PNG_PIXELS = 24_000_000
-EXTENSIONS = {"mermaid": "mmd", "drawio": "drawio", "png": "png", "svg": "svg", "visio": "vsdx"}
+EXTENSIONS = {"mermaid": "mmd", "drawio": "drawio", "png": "png", "svg": "svg", "visio": "vsdx", "plantuml": "puml"}
 
 
 def normalize_artifact_level(level: str = "all") -> str:
@@ -170,6 +170,116 @@ def render_mermaid(model: dict, view: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _puml_text(value) -> str:
+    """A value that stays text inside a quoted PlantUML macro argument."""
+    # Unicode escapes keep quotes, backslashes and creole tags (<b>) from becoming syntax.
+    escapes = {
+        '"': "<U+0022>",
+        "\\": "<U+005C>",
+        "<": "<U+003C>",
+        ">": "<U+003E>",
+        "\r": "",
+        "\n": "\\n",
+    }
+    return "".join(escapes.get(c, c) for c in str(value or ""))
+
+
+# C4-PlantUML macros: (plain, cylinder, pill) per element type.
+PLANTUML_CARDS = {
+    "container": ("Container", "ContainerDb", "ContainerQueue"),
+    "component": ("Component", "ComponentDb", "ComponentQueue"),
+    "code": ("Component", "ComponentDb", "ComponentQueue"),
+}
+
+
+def render_plantuml(model: dict, view: dict) -> str:
+    """C4-PlantUML text from the shared scene; PlantUML computes its own layout."""
+    scene = _scene(model, view)
+    ids = {b.id: f"n{i}" for i, b in enumerate(scene.boxes)}
+    children = {}
+    for b in scene.boxes:
+        children.setdefault(b.parent_id, []).append(b)
+    deployment = view["type"] == "deployment"
+    library = (
+        "C4_Deployment"
+        if deployment
+        else "C4_Component"
+        if view["type"] in {"component", "code", "overview"}
+        else "C4_Container"
+    )
+    claims = any(_claimed(b) for b in scene.boxes) or any(_claimed(e) for e in scene.edges)
+    lines = [
+        "@startuml",
+        "' Architecture Suite schema 2.0; PlantUML computes its own layout",
+        f"!include <C4/{library}>",
+        "LAYOUT_TOP_DOWN()" if view.get("direction") == "down" else "LAYOUT_LEFT_RIGHT()",
+    ]
+    if claims:
+        lines += [
+            'AddElementTag("claim", $borderStyle=DashedLine(), '
+            '$legendText="claim not observed (inferred, proposed or unknown)")',
+            'AddRelTag("claim", $lineStyle=DashedLine(), '
+            '$legendText="claim not observed (inferred, proposed or unknown)")',
+        ]
+
+    def args(*values, tagged=False):
+        quoted = ", ".join(f'"{_puml_text(v)}"' for v in values)
+        return quoted + (', $tags="claim"' if tagged else "")
+
+    def emit(parent, indent):
+        for b in children.get(parent, []):
+            element = b.element or {}
+            alias = ids[b.id]
+            name = element.get("name") or b.label.plain()
+            if b.role == "frame":
+                kind = element.get("type")
+                if deployment:
+                    opening = f"Deployment_Node({alias}, {args(name, kind or '')})"
+                elif kind == "software_system":
+                    opening = f"System_Boundary({alias}, {args(name)})"
+                elif kind == "container":
+                    opening = f"Container_Boundary({alias}, {args(name)})"
+                else:
+                    opening = f"Boundary({alias}, {args(name, kind or '')})"
+                lines.append(indent + opening + " {")
+                emit(b.id, indent + "  ")
+                lines.append(indent + "}")
+                continue
+            kind = element.get("type")
+            if not element:
+                # Small-multiples panel titles carry no element.
+                lines.append(indent + f'rectangle "{_puml_text(b.label.plain())}" as {alias}')
+                continue
+            cue = claim_cue(element.get("status"))
+            description = "\n".join(
+                x
+                for x in (element.get("description"), *element.get("members", []), cue)
+                if x
+            )
+            tagged = _claimed(b)
+            if kind in PLANTUML_CARDS:
+                shape = {"cylinder": 1, "pill": 2}.get(box_style(b)[0], 0)
+                macro = PLANTUML_CARDS[kind][shape]
+                technology = element.get("technology") or element.get("kind", "")
+                body = args(name, technology, description, tagged=tagged)
+            else:
+                macro = "Person" if kind == "person" else "System"
+                macro += "_Ext" if element.get("external") else ""
+                body = args(name, description, tagged=tagged)
+            lines.append(indent + f"{macro}({alias}, {body})")
+
+    emit(None, "")
+    for edge in scene.edges:
+        text = edge.label.label.plain() if edge.label else "depends on"
+        lines.append(
+            f"Rel({ids[edge.source_id]}, {ids[edge.destination_id]}, "
+            + args(text, tagged=_claimed(edge))
+            + ")"
+        )
+    lines += ["SHOW_LEGEND()", "@enduml"]
+    return "\n".join(lines) + "\n"
+
+
 def render_svg(model: dict, view: dict) -> str:
     return render_scene_svg(_scene(model, view))
 
@@ -243,6 +353,10 @@ def render_overview_vsdx(model: dict, style: str = "progressive") -> bytes:
     return scene_vsdx(build_overview_scene(model, style))
 
 
+def render_overview_plantuml(model: dict, style: str = "progressive") -> str:
+    return render_plantuml(model, {"type": "overview", "style": style})
+
+
 def render_aws_deployment_mermaid(model: dict) -> str:
     return render_mermaid(model, {"type": "deployment"})
 
@@ -259,8 +373,16 @@ def render_aws_deployment_vsdx(model: dict) -> bytes:
     return scene_vsdx(build_aws_scene(model))
 
 
+def render_aws_deployment_plantuml(model: dict) -> str:
+    return render_plantuml(model, {"type": "deployment"})
+
+
 def render_gcp_deployment_mermaid(model: dict) -> str:
     return render_mermaid(model, {"type": "deployment"})
+
+
+def render_gcp_deployment_plantuml(model: dict) -> str:
+    return render_plantuml(model, {"type": "deployment"})
 
 
 def render_gcp_deployment_drawio(model: dict) -> str:
@@ -442,6 +564,8 @@ def write_rendered_artifacts(
                     content = (
                         render_mermaid(model, view)
                         if fmt == "mermaid"
+                        else render_plantuml(model, view)
+                        if fmt == "plantuml"
                         else render_scene_drawio(scene)
                         if fmt == "drawio"
                         else render_scene_svg(scene)

@@ -1,0 +1,17 @@
+@startuml
+' Architecture Suite schema 2.0; PlantUML computes its own layout
+!include <C4/C4_Component>
+LAYOUT_LEFT_RIGHT()
+Container(n0, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
+Container(n1, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
+ContainerDb(n2, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
+Container_Boundary(n3, "Card Vault") {
+  Component(n4, "Card Tokenizer", "Rust", "Swaps card numbers for single-purpose tokens")
+  Component(n5, "Envelope Encryptor", "Rust", "Encrypts card data with per-record data keys")
+}
+Rel(n0, n4, "Submits card data for a token [HTTPS]")
+Rel(n1, n4, "Detokenizes the card for the network request [mTLS]")
+Rel(n4, n5, "Encrypts card records [in-process]")
+Rel(n5, n2, "Wraps and unwraps data keys [KMS API]")
+SHOW_LEGEND()
+@enduml
