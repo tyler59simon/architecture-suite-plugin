@@ -9,10 +9,10 @@ on:
         default: trigger negative safety e2e
       runs:
         description: Runs per case
-        default: '3'
+        default: '1'
       max_cost_usd:
         description: Hard cost ceiling for the whole run
-        default: '20'
+        default: '10'
 permissions:
   contents: read
 

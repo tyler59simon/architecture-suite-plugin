@@ -1,13 +1,25 @@
 name: Architecture validation
+# Routine runs (pull requests into main, pushes to main) are lean: lint plus one Linux test
+# job. The full OS and Python matrix, dependency audit and bootstrap run only with full: true,
+# which release.yml passes and which a manual run can set.
 on:
   push:
-    # Tags are verified by release.yml, which calls this workflow; running it here as well
-    # would double the demand for scarce macOS runners.
-    branches: ['**']
+    # Feature branches are covered by their pull request; tags are verified by release.yml.
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      full:
+        description: Run the full OS and Python matrix, dependency audit and bootstrap
+        type: boolean
+        default: false
   workflow_call:
     inputs:
+      full:
+        description: Run the full OS and Python matrix, dependency audit and bootstrap
+        type: boolean
+        default: false
       os:
         description: JSON list of runner images for the test and bootstrap matrices
         type: string
@@ -39,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.os || '["ubuntu-24.04", "windows-latest", "macos-latest"]') }}
-        python: ['3.11', '3.13', '3.14']
+        os: ${{ fromJSON(inputs.full && (inputs.os || '["ubuntu-24.04", "windows-latest", "macos-latest"]') || '["ubuntu-24.04"]') }}
+        python: ${{ fromJSON(inputs.full && '["3.11", "3.13", "3.14"]' || '["3.13"]') }}
         # Hosted macOS runners are scarce (jobs have gone unassigned) and bill at 10x on
         # private repositories: test one Python there; Linux and Windows cover the range.
         exclude:
@@ -49,15 +61,18 @@ jobs:
           - os: macos-latest
             python: '3.14'
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
       - name: Install locked development tree
         run: |
           python -m pip install -r requirements-lock.txt
@@ -79,7 +94,7 @@ jobs:
             dist/hosts
 
   dependencies:
-    if: ${{ !inputs.skip-os-independent }}
+    if: ${{ inputs.full && !inputs.skip-os-independent }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -98,6 +113,8 @@ jobs:
         run: npm audit --audit-level=moderate
 
   bootstrap:
+    if: ${{ inputs.full }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
