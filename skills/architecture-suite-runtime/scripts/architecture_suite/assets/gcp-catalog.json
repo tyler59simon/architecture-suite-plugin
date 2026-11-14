@@ -1,0 +1,2090 @@
+{
+  "GCP-AI-Hypercomputer": {
+    "file": "modern/GCP-AI-Hypercomputer.svg",
+    "kind": "product",
+    "label": "AI Hypercomputer",
+    "service_id": "aihypercomputer",
+    "source": "gcp-products-icons/Unique Icons/AI Hypercomputer/SVG/AIHypercomputer-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-AlloyDB": {
+    "file": "modern/GCP-AlloyDB.svg",
+    "kind": "product",
+    "label": "AlloyDB",
+    "service_id": "alloydb",
+    "source": "gcp-products-icons/Unique Icons/AlloyDB/SVG/AlloyDB-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Anthos": {
+    "file": "modern/GCP-Anthos.svg",
+    "kind": "product",
+    "label": "Anthos",
+    "service_id": "anthos",
+    "source": "gcp-products-icons/Unique Icons/Anthos/SVG/Anthos-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Apigee": {
+    "file": "modern/GCP-Apigee.svg",
+    "kind": "product",
+    "label": "Apigee",
+    "service_id": "apigeeapiplatform",
+    "source": "gcp-products-icons/Unique Icons/Apigee/SVG/Apigee-512-color-rgb.svg",
+    "style": "modern"
+  },
+  "GCP-BigQuery": {
+    "file": "modern/GCP-BigQuery.svg",
+    "kind": "product",
+    "label": "BigQuery",
+    "service_id": "bigquery",
+    "source": "gcp-products-icons/Unique Icons/BigQuery/SVG/BigQuery-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-AI-Machine-Learning": {
+    "file": "modern/GCP-Category-AI-Machine-Learning.svg",
+    "kind": "category",
+    "label": "AI & Machine Learning",
+    "service_id": "categoryaimachinelearning",
+    "source": "gcp-category-icons/Category Icons/AI _ Machine Learning/SVG/AIMachineLearning-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Agents": {
+    "file": "modern/GCP-Category-Agents.svg",
+    "kind": "category",
+    "label": "Agents",
+    "service_id": "categoryagents",
+    "source": "gcp-category-icons/Category Icons/Agents/SVG/Agents-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Business-Intelligence": {
+    "file": "modern/GCP-Category-Business-Intelligence.svg",
+    "kind": "category",
+    "label": "Business Intelligence",
+    "service_id": "categorybusinessintelligence",
+    "source": "gcp-category-icons/Category Icons/Business Intelligence/SVG/BusinessIntelligence-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Collaboration": {
+    "file": "modern/GCP-Category-Collaboration.svg",
+    "kind": "category",
+    "label": "Collaboration",
+    "service_id": "categorycollaboration",
+    "source": "gcp-category-icons/Category Icons/Collaboration/SVG/Collaboration-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Compute": {
+    "file": "modern/GCP-Category-Compute.svg",
+    "kind": "category",
+    "label": "Compute",
+    "service_id": "categorycompute",
+    "source": "gcp-category-icons/Category Icons/Compute/SVG/Compute-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Containers": {
+    "file": "modern/GCP-Category-Containers.svg",
+    "kind": "category",
+    "label": "Containers",
+    "service_id": "categorycontainers",
+    "source": "gcp-category-icons/Category Icons/Containers/SVG/Containers-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Data-Analytics": {
+    "file": "modern/GCP-Category-Data-Analytics.svg",
+    "kind": "category",
+    "label": "Data Analytics",
+    "service_id": "categorydataanalytics",
+    "source": "gcp-category-icons/Category Icons/Data Analytics/SVG/DataAnalytics-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Databases": {
+    "file": "modern/GCP-Category-Databases.svg",
+    "kind": "category",
+    "label": "Databases",
+    "service_id": "categorydatabases",
+    "source": "gcp-category-icons/Category Icons/Databases/SVG/Databases-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-DevOps": {
+    "file": "modern/GCP-Category-DevOps.svg",
+    "kind": "category",
+    "label": "DevOps",
+    "service_id": "categorydevops",
+    "source": "gcp-category-icons/Category Icons/DevOps/SVG/DevOps-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Developer-Tools": {
+    "file": "modern/GCP-Category-Developer-Tools.svg",
+    "kind": "category",
+    "label": "Developer Tools",
+    "service_id": "categorydevelopertools",
+    "source": "gcp-category-icons/Category Icons/Developer Tools/SVG/Developer_Tools-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Hybrid-Multicloud": {
+    "file": "modern/GCP-Category-Hybrid-Multicloud.svg",
+    "kind": "category",
+    "label": "Hybrid & Multicloud",
+    "service_id": "categoryhybridmulticloud",
+    "source": "gcp-category-icons/Category Icons/Hybrid & Multicloud/SVG/HybridMulticloud-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Integration-Services": {
+    "file": "modern/GCP-Category-Integration-Services.svg",
+    "kind": "category",
+    "label": "Integration Services",
+    "service_id": "categoryintegrationservices",
+    "source": "gcp-category-icons/Category Icons/Integration Services/SVG/IntegrationServices-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Management-Tools": {
+    "file": "modern/GCP-Category-Management-Tools.svg",
+    "kind": "category",
+    "label": "Management Tools",
+    "service_id": "categorymanagementtools",
+    "source": "gcp-category-icons/Category Icons/Management Tools/SVG/ManagementTools-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Maps-Geospatial": {
+    "file": "modern/GCP-Category-Maps-Geospatial.svg",
+    "kind": "category",
+    "label": "Maps & Geospatial",
+    "service_id": "categorymapsgeospatial",
+    "source": "gcp-category-icons/Category Icons/Maps & Geospatial/SVG/MapsGeospatial-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Marketplace": {
+    "file": "modern/GCP-Category-Marketplace.svg",
+    "kind": "category",
+    "label": "Marketplace",
+    "service_id": "categorymarketplace",
+    "source": "gcp-category-icons/Category Icons/Marketplace/SVG/Marketplace-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Media-Services": {
+    "file": "modern/GCP-Category-Media-Services.svg",
+    "kind": "category",
+    "label": "Media Services",
+    "service_id": "categorymediaservices",
+    "source": "gcp-category-icons/Category Icons/Media Services/SVG/MediaServices-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Migration": {
+    "file": "modern/GCP-Category-Migration.svg",
+    "kind": "category",
+    "label": "Migration",
+    "service_id": "categorymigration",
+    "source": "gcp-category-icons/Category Icons/Migration/SVG/Migration-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Mixed-Reality": {
+    "file": "modern/GCP-Category-Mixed-Reality.svg",
+    "kind": "category",
+    "label": "Mixed Reality",
+    "service_id": "categorymixedreality",
+    "source": "gcp-category-icons/Category Icons/Mixed Reality/SVG/MixedReality-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Networking": {
+    "file": "modern/GCP-Category-Networking.svg",
+    "kind": "category",
+    "label": "Networking",
+    "service_id": "categorynetworking",
+    "source": "gcp-category-icons/Category Icons/Networking/SVG/Networking-512-color-rgb.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Observability": {
+    "file": "modern/GCP-Category-Observability.svg",
+    "kind": "category",
+    "label": "Observability",
+    "service_id": "categoryobservability",
+    "source": "gcp-category-icons/Category Icons/Observability/SVG/Observability-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Operations": {
+    "file": "modern/GCP-Category-Operations.svg",
+    "kind": "category",
+    "label": "Operations",
+    "service_id": "categoryoperations",
+    "source": "gcp-category-icons/Category Icons/Operations/SVG/Operations-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Security-Identity": {
+    "file": "modern/GCP-Category-Security-Identity.svg",
+    "kind": "category",
+    "label": "Security & Identity",
+    "service_id": "categorysecurityidentity",
+    "source": "gcp-category-icons/Category Icons/Security Identity/SVG/SecurityIdentity-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Serverless-Computing": {
+    "file": "modern/GCP-Category-Serverless-Computing.svg",
+    "kind": "category",
+    "label": "Serverless Computing",
+    "service_id": "categoryserverlesscomputing",
+    "source": "gcp-category-icons/Category Icons/Serverless Computing/SVG/ServerlessComputing-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Storage": {
+    "file": "modern/GCP-Category-Storage.svg",
+    "kind": "category",
+    "label": "Storage",
+    "service_id": "categorystorage",
+    "source": "gcp-category-icons/Category Icons/Storage/SVG/Storage-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Web-Mobile": {
+    "file": "modern/GCP-Category-Web-Mobile.svg",
+    "kind": "category",
+    "label": "Web & Mobile",
+    "service_id": "categorywebmobile",
+    "source": "gcp-category-icons/Category Icons/Web & Mobile/SVG/WebMobile-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Category-Web3": {
+    "file": "modern/GCP-Category-Web3.svg",
+    "kind": "category",
+    "label": "Web3",
+    "service_id": "categoryweb3",
+    "source": "gcp-category-icons/Category Icons/Web3/SVG/Web3-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Cloud-Run": {
+    "file": "modern/GCP-Cloud-Run.svg",
+    "kind": "product",
+    "label": "Cloud Run",
+    "service_id": "cloudrun",
+    "source": "gcp-products-icons/Unique Icons/Cloud Run/SVG/CloudRun-512-color-rgb.svg",
+    "style": "modern"
+  },
+  "GCP-Cloud-SQL": {
+    "file": "modern/GCP-Cloud-SQL.svg",
+    "kind": "product",
+    "label": "Cloud SQL",
+    "service_id": "cloudsql",
+    "source": "gcp-products-icons/Unique Icons/Cloud SQL/SVG/CloudSQL-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Cloud-Spanner": {
+    "file": "modern/GCP-Cloud-Spanner.svg",
+    "kind": "product",
+    "label": "Cloud Spanner",
+    "service_id": "cloudspanner",
+    "source": "gcp-products-icons/Unique Icons/Cloud Spanner/SVG/CloudSpanner-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Cloud-Storage": {
+    "file": "modern/GCP-Cloud-Storage.svg",
+    "kind": "product",
+    "label": "Cloud Storage",
+    "service_id": "cloudstorage",
+    "source": "gcp-products-icons/Unique Icons/Cloud Storage/SVG/Cloud_Storage-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Compute-Engine": {
+    "file": "modern/GCP-Compute-Engine.svg",
+    "kind": "product",
+    "label": "Compute Engine",
+    "service_id": "computeengine",
+    "source": "gcp-products-icons/Unique Icons/Compute Engine/SVG/ComputeEngine-512-color-rgb.svg",
+    "style": "modern"
+  },
+  "GCP-Distributed-Cloud": {
+    "file": "modern/GCP-Distributed-Cloud.svg",
+    "kind": "product",
+    "label": "Distributed Cloud",
+    "service_id": "distributedcloud",
+    "source": "gcp-products-icons/Unique Icons/Distributed Cloud/SVG/DistributedCloud-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Google-Kubernetes-Engine": {
+    "file": "modern/GCP-Google-Kubernetes-Engine.svg",
+    "kind": "product",
+    "label": "Google Kubernetes Engine",
+    "service_id": "kubernetesengine",
+    "source": "gcp-products-icons/Unique Icons/GKE/SVG/GKE-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Hyperdisk": {
+    "file": "modern/GCP-Hyperdisk.svg",
+    "kind": "product",
+    "label": "Hyperdisk",
+    "service_id": "hyperdisk",
+    "source": "gcp-products-icons/Unique Icons/Hyperdisk/SVG/Hyperdisk-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Legacy-access_context_manager": {
+    "file": "legacy/GCP-Legacy-access_context_manager.svg",
+    "kind": "product",
+    "label": "Access Context Manager",
+    "service_id": "accesscontextmanager",
+    "source": "access_context_manager/access_context_manager.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-administration": {
+    "file": "legacy/GCP-Legacy-administration.svg",
+    "kind": "product",
+    "label": "Administration",
+    "service_id": "administration",
+    "source": "administration/administration.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-advanced_agent_modeling": {
+    "file": "legacy/GCP-Legacy-advanced_agent_modeling.svg",
+    "kind": "product",
+    "label": "Advanced Agent Modeling",
+    "service_id": "advancedagentmodeling",
+    "source": "advanced_agent_modeling/advanced_agent_modeling.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-advanced_solutions_lab": {
+    "file": "legacy/GCP-Legacy-advanced_solutions_lab.svg",
+    "kind": "product",
+    "label": "Advanced Solutions Lab",
+    "service_id": "advancedsolutionslab",
+    "source": "advanced_solutions_lab/advanced_solutions_lab.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-agent_assist": {
+    "file": "legacy/GCP-Legacy-agent_assist.svg",
+    "kind": "product",
+    "label": "Agent Assist",
+    "service_id": "agentassist",
+    "source": "agent_assist/agent_assist.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-ai_hub": {
+    "file": "legacy/GCP-Legacy-ai_hub.svg",
+    "kind": "product",
+    "label": "Ai Hub",
+    "service_id": "aihub",
+    "source": "ai_hub/ai_hub.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-ai_platform": {
+    "file": "legacy/GCP-Legacy-ai_platform.svg",
+    "kind": "product",
+    "label": "Ai Platform",
+    "service_id": "aiplatform",
+    "source": "ai_platform/ai_platform.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-ai_platform_unified": {
+    "file": "legacy/GCP-Legacy-ai_platform_unified.svg",
+    "kind": "product",
+    "label": "Ai Platform Unified",
+    "service_id": "aiplatformunified",
+    "source": "ai_platform_unified/ai_platform_unified.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-analytics_hub": {
+    "file": "legacy/GCP-Legacy-analytics_hub.svg",
+    "kind": "product",
+    "label": "Analytics Hub",
+    "service_id": "analyticshub",
+    "source": "analytics_hub/analytics_hub.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-anthos": {
+    "file": "legacy/GCP-Legacy-anthos.svg",
+    "kind": "product",
+    "label": "Anthos",
+    "service_id": "anthos",
+    "source": "anthos/anthos.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-anthos_config_management": {
+    "file": "legacy/GCP-Legacy-anthos_config_management.svg",
+    "kind": "product",
+    "label": "Anthos Config Management",
+    "service_id": "anthosconfigmanagement",
+    "source": "anthos_config_management/anthos_config_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-anthos_service_mesh": {
+    "file": "legacy/GCP-Legacy-anthos_service_mesh.svg",
+    "kind": "product",
+    "label": "Anthos Service Mesh",
+    "service_id": "anthosservicemesh",
+    "source": "anthos_service_mesh/anthos_service_mesh.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-api": {
+    "file": "legacy/GCP-Legacy-api.svg",
+    "kind": "product",
+    "label": "Api",
+    "service_id": "api",
+    "source": "api/api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-api_analytics": {
+    "file": "legacy/GCP-Legacy-api_analytics.svg",
+    "kind": "product",
+    "label": "Api Analytics",
+    "service_id": "apianalytics",
+    "source": "api_analytics/api_analytics.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-api_monetization": {
+    "file": "legacy/GCP-Legacy-api_monetization.svg",
+    "kind": "product",
+    "label": "Api Monetization",
+    "service_id": "apimonetization",
+    "source": "api_monetization/api_monetization.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-apigee_api_platform": {
+    "file": "legacy/GCP-Legacy-apigee_api_platform.svg",
+    "kind": "product",
+    "label": "Apigee Api Platform",
+    "service_id": "apigeeapiplatform",
+    "source": "apigee_api_platform/apigee_api_platform.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-apigee_sense": {
+    "file": "legacy/GCP-Legacy-apigee_sense.svg",
+    "kind": "product",
+    "label": "Apigee Sense",
+    "service_id": "apigeesense",
+    "source": "apigee_sense/apigee_sense.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-app_engine": {
+    "file": "legacy/GCP-Legacy-app_engine.svg",
+    "kind": "product",
+    "label": "App Engine",
+    "service_id": "appengine",
+    "source": "app_engine/app_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-artifact_registry": {
+    "file": "legacy/GCP-Legacy-artifact_registry.svg",
+    "kind": "product",
+    "label": "Artifact Registry",
+    "service_id": "artifactregistry",
+    "source": "artifact_registry/artifact_registry.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-asset_inventory": {
+    "file": "legacy/GCP-Legacy-asset_inventory.svg",
+    "kind": "product",
+    "label": "Asset Inventory",
+    "service_id": "assetinventory",
+    "source": "asset_inventory/asset_inventory.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-assured_workloads": {
+    "file": "legacy/GCP-Legacy-assured_workloads.svg",
+    "kind": "product",
+    "label": "Assured Workloads",
+    "service_id": "assuredworkloads",
+    "source": "assured_workloads/assured_workloads.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-automl": {
+    "file": "legacy/GCP-Legacy-automl.svg",
+    "kind": "product",
+    "label": "Automl",
+    "service_id": "automl",
+    "source": "automl/automl.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-automl_natural_language": {
+    "file": "legacy/GCP-Legacy-automl_natural_language.svg",
+    "kind": "product",
+    "label": "Automl Natural Language",
+    "service_id": "automlnaturallanguage",
+    "source": "automl_natural_language/automl_natural_language.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-automl_tables": {
+    "file": "legacy/GCP-Legacy-automl_tables.svg",
+    "kind": "product",
+    "label": "Automl Tables",
+    "service_id": "automltables",
+    "source": "automl_tables/automl_tables.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-automl_translation": {
+    "file": "legacy/GCP-Legacy-automl_translation.svg",
+    "kind": "product",
+    "label": "Automl Translation",
+    "service_id": "automltranslation",
+    "source": "automl_translation/automl_translation.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-automl_video_intelligence": {
+    "file": "legacy/GCP-Legacy-automl_video_intelligence.svg",
+    "kind": "product",
+    "label": "Automl Video Intelligence",
+    "service_id": "automlvideointelligence",
+    "source": "automl_video_intelligence/automl_video_intelligence.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-automl_vision": {
+    "file": "legacy/GCP-Legacy-automl_vision.svg",
+    "kind": "product",
+    "label": "Automl Vision",
+    "service_id": "automlvision",
+    "source": "automl_vision/automl_vision.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-bare_metal_solutions": {
+    "file": "legacy/GCP-Legacy-bare_metal_solutions.svg",
+    "kind": "product",
+    "label": "Bare Metal Solutions",
+    "service_id": "baremetalsolutions",
+    "source": "bare_metal_solutions/bare_metal_solutions.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-batch": {
+    "file": "legacy/GCP-Legacy-batch.svg",
+    "kind": "product",
+    "label": "Batch",
+    "service_id": "batch",
+    "source": "batch/batch.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-beyondcorp": {
+    "file": "legacy/GCP-Legacy-beyondcorp.svg",
+    "kind": "product",
+    "label": "Beyondcorp",
+    "service_id": "beyondcorp",
+    "source": "beyondcorp/beyondcorp.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-bigquery": {
+    "file": "legacy/GCP-Legacy-bigquery.svg",
+    "kind": "product",
+    "label": "Bigquery",
+    "service_id": "bigquery",
+    "source": "bigquery/bigquery.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-bigtable": {
+    "file": "legacy/GCP-Legacy-bigtable.svg",
+    "kind": "product",
+    "label": "Bigtable",
+    "service_id": "bigtable",
+    "source": "bigtable/bigtable.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-billing": {
+    "file": "legacy/GCP-Legacy-billing.svg",
+    "kind": "product",
+    "label": "Billing",
+    "service_id": "billing",
+    "source": "billing/billing.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-binary_authorization": {
+    "file": "legacy/GCP-Legacy-binary_authorization.svg",
+    "kind": "product",
+    "label": "Binary Authorization",
+    "service_id": "binaryauthorization",
+    "source": "binary_authorization/binary_authorization.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-catalog": {
+    "file": "legacy/GCP-Legacy-catalog.svg",
+    "kind": "product",
+    "label": "Catalog",
+    "service_id": "catalog",
+    "source": "catalog/catalog.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-certificate_authority_service": {
+    "file": "legacy/GCP-Legacy-certificate_authority_service.svg",
+    "kind": "product",
+    "label": "Certificate Authority Service",
+    "service_id": "certificateauthorityservice",
+    "source": "certificate_authority_service/certificate_authority_service.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-certificate_manager": {
+    "file": "legacy/GCP-Legacy-certificate_manager.svg",
+    "kind": "product",
+    "label": "Certificate Manager",
+    "service_id": "certificatemanager",
+    "source": "certificate_manager/certificate_manager.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_api_gateway": {
+    "file": "legacy/GCP-Legacy-cloud_api_gateway.svg",
+    "kind": "product",
+    "label": "Cloud Api Gateway",
+    "service_id": "cloudapigateway",
+    "source": "cloud_api_gateway/cloud_api_gateway.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_apis": {
+    "file": "legacy/GCP-Legacy-cloud_apis.svg",
+    "kind": "product",
+    "label": "Cloud Apis",
+    "service_id": "cloudapis",
+    "source": "cloud_apis/cloud_apis.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_armor": {
+    "file": "legacy/GCP-Legacy-cloud_armor.svg",
+    "kind": "product",
+    "label": "Cloud Armor",
+    "service_id": "cloudarmor",
+    "source": "cloud_armor/cloud_armor.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_asset_inventory": {
+    "file": "legacy/GCP-Legacy-cloud_asset_inventory.svg",
+    "kind": "product",
+    "label": "Cloud Asset Inventory",
+    "service_id": "cloudassetinventory",
+    "source": "cloud_asset_inventory/cloud_asset_inventory.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_audit_logs": {
+    "file": "legacy/GCP-Legacy-cloud_audit_logs.svg",
+    "kind": "product",
+    "label": "Cloud Audit Logs",
+    "service_id": "cloudauditlogs",
+    "source": "cloud_audit_logs/cloud_audit_logs.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_build": {
+    "file": "legacy/GCP-Legacy-cloud_build.svg",
+    "kind": "product",
+    "label": "Cloud Build",
+    "service_id": "cloudbuild",
+    "source": "cloud_build/cloud_build.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_cdn": {
+    "file": "legacy/GCP-Legacy-cloud_cdn.svg",
+    "kind": "product",
+    "label": "Cloud Cdn",
+    "service_id": "cloudcdn",
+    "source": "cloud_cdn/cloud_cdn.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_code": {
+    "file": "legacy/GCP-Legacy-cloud_code.svg",
+    "kind": "product",
+    "label": "Cloud Code",
+    "service_id": "cloudcode",
+    "source": "cloud_code/cloud_code.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_composer": {
+    "file": "legacy/GCP-Legacy-cloud_composer.svg",
+    "kind": "product",
+    "label": "Cloud Composer",
+    "service_id": "cloudcomposer",
+    "source": "cloud_composer/cloud_composer.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_data_fusion": {
+    "file": "legacy/GCP-Legacy-cloud_data_fusion.svg",
+    "kind": "product",
+    "label": "Cloud Data Fusion",
+    "service_id": "clouddatafusion",
+    "source": "cloud_data_fusion/cloud_data_fusion.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_deploy": {
+    "file": "legacy/GCP-Legacy-cloud_deploy.svg",
+    "kind": "product",
+    "label": "Cloud Deploy",
+    "service_id": "clouddeploy",
+    "source": "cloud_deploy/cloud_deploy.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_deployment_manager": {
+    "file": "legacy/GCP-Legacy-cloud_deployment_manager.svg",
+    "kind": "product",
+    "label": "Cloud Deployment Manager",
+    "service_id": "clouddeploymentmanager",
+    "source": "cloud_deployment_manager/cloud_deployment_manager.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_dns": {
+    "file": "legacy/GCP-Legacy-cloud_dns.svg",
+    "kind": "product",
+    "label": "Cloud Dns",
+    "service_id": "clouddns",
+    "source": "cloud_dns/cloud_dns.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_domains": {
+    "file": "legacy/GCP-Legacy-cloud_domains.svg",
+    "kind": "product",
+    "label": "Cloud Domains",
+    "service_id": "clouddomains",
+    "source": "cloud_domains/cloud_domains.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_ekm": {
+    "file": "legacy/GCP-Legacy-cloud_ekm.svg",
+    "kind": "product",
+    "label": "Cloud Ekm",
+    "service_id": "cloudekm",
+    "source": "cloud_ekm/cloud_ekm.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_endpoints": {
+    "file": "legacy/GCP-Legacy-cloud_endpoints.svg",
+    "kind": "product",
+    "label": "Cloud Endpoints",
+    "service_id": "cloudendpoints",
+    "source": "cloud_endpoints/cloud_endpoints.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_external_ip_addresses": {
+    "file": "legacy/GCP-Legacy-cloud_external_ip_addresses.svg",
+    "kind": "product",
+    "label": "Cloud External Ip Addresses",
+    "service_id": "cloudexternalipaddresses",
+    "source": "cloud_external_ip_addresses/cloud_external_ip_addresses.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_firewall_rules": {
+    "file": "legacy/GCP-Legacy-cloud_firewall_rules.svg",
+    "kind": "product",
+    "label": "Cloud Firewall Rules",
+    "service_id": "cloudfirewallrules",
+    "source": "cloud_firewall_rules/cloud_firewall_rules.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_for_marketing": {
+    "file": "legacy/GCP-Legacy-cloud_for_marketing.svg",
+    "kind": "product",
+    "label": "Cloud For Marketing",
+    "service_id": "cloudformarketing",
+    "source": "cloud_for_marketing/cloud_for_marketing.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_functions": {
+    "file": "legacy/GCP-Legacy-cloud_functions.svg",
+    "kind": "product",
+    "label": "Cloud Functions",
+    "service_id": "cloudfunctions",
+    "source": "cloud_functions/cloud_functions.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_generic": {
+    "file": "legacy/GCP-Legacy-cloud_generic.svg",
+    "kind": "product",
+    "label": "Cloud Generic",
+    "service_id": "cloudgeneric",
+    "source": "cloud_generic/cloud_generic.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_gpu": {
+    "file": "legacy/GCP-Legacy-cloud_gpu.svg",
+    "kind": "product",
+    "label": "Cloud Gpu",
+    "service_id": "cloudgpu",
+    "source": "cloud_gpu/cloud_gpu.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_healthcare_api": {
+    "file": "legacy/GCP-Legacy-cloud_healthcare_api.svg",
+    "kind": "product",
+    "label": "Cloud Healthcare Api",
+    "service_id": "cloudhealthcareapi",
+    "source": "cloud_healthcare_api/cloud_healthcare_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_healthcare_marketplace": {
+    "file": "legacy/GCP-Legacy-cloud_healthcare_marketplace.svg",
+    "kind": "product",
+    "label": "Cloud Healthcare Marketplace",
+    "service_id": "cloudhealthcaremarketplace",
+    "source": "cloud_healthcare_marketplace/cloud_healthcare_marketplace.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_hsm": {
+    "file": "legacy/GCP-Legacy-cloud_hsm.svg",
+    "kind": "product",
+    "label": "Cloud Hsm",
+    "service_id": "cloudhsm",
+    "source": "cloud_hsm/cloud_hsm.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_ids": {
+    "file": "legacy/GCP-Legacy-cloud_ids.svg",
+    "kind": "product",
+    "label": "Cloud Ids",
+    "service_id": "cloudids",
+    "source": "cloud_ids/cloud_ids.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_inference_api": {
+    "file": "legacy/GCP-Legacy-cloud_inference_api.svg",
+    "kind": "product",
+    "label": "Cloud Inference Api",
+    "service_id": "cloudinferenceapi",
+    "source": "cloud_inference_api/cloud_inference_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_interconnect": {
+    "file": "legacy/GCP-Legacy-cloud_interconnect.svg",
+    "kind": "product",
+    "label": "Cloud Interconnect",
+    "service_id": "cloudinterconnect",
+    "source": "cloud_interconnect/cloud_interconnect.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_jobs_api": {
+    "file": "legacy/GCP-Legacy-cloud_jobs_api.svg",
+    "kind": "product",
+    "label": "Cloud Jobs Api",
+    "service_id": "cloudjobsapi",
+    "source": "cloud_jobs_api/cloud_jobs_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_load_balancing": {
+    "file": "legacy/GCP-Legacy-cloud_load_balancing.svg",
+    "kind": "product",
+    "label": "Cloud Load Balancing",
+    "service_id": "cloudloadbalancing",
+    "source": "cloud_load_balancing/cloud_load_balancing.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_logging": {
+    "file": "legacy/GCP-Legacy-cloud_logging.svg",
+    "kind": "product",
+    "label": "Cloud Logging",
+    "service_id": "cloudlogging",
+    "source": "cloud_logging/cloud_logging.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_media_edge": {
+    "file": "legacy/GCP-Legacy-cloud_media_edge.svg",
+    "kind": "product",
+    "label": "Cloud Media Edge",
+    "service_id": "cloudmediaedge",
+    "source": "cloud_media_edge/cloud_media_edge.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_monitoring": {
+    "file": "legacy/GCP-Legacy-cloud_monitoring.svg",
+    "kind": "product",
+    "label": "Cloud Monitoring",
+    "service_id": "cloudmonitoring",
+    "source": "cloud_monitoring/cloud_monitoring.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_nat": {
+    "file": "legacy/GCP-Legacy-cloud_nat.svg",
+    "kind": "product",
+    "label": "Cloud Nat",
+    "service_id": "cloudnat",
+    "source": "cloud_nat/cloud_nat.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_natural_language_api": {
+    "file": "legacy/GCP-Legacy-cloud_natural_language_api.svg",
+    "kind": "product",
+    "label": "Cloud Natural Language Api",
+    "service_id": "cloudnaturallanguageapi",
+    "source": "cloud_natural_language_api/cloud_natural_language_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_network": {
+    "file": "legacy/GCP-Legacy-cloud_network.svg",
+    "kind": "product",
+    "label": "Cloud Network",
+    "service_id": "cloudnetwork",
+    "source": "cloud_network/cloud_network.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_ops": {
+    "file": "legacy/GCP-Legacy-cloud_ops.svg",
+    "kind": "product",
+    "label": "Cloud Ops",
+    "service_id": "cloudops",
+    "source": "cloud_ops/cloud_ops.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_optimization_ai": {
+    "file": "legacy/GCP-Legacy-cloud_optimization_ai.svg",
+    "kind": "product",
+    "label": "Cloud Optimization Ai",
+    "service_id": "cloudoptimizationai",
+    "source": "cloud_optimization_ai/cloud_optimization_ai.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_optimization_ai_-_fleet_routing_api": {
+    "file": "legacy/GCP-Legacy-cloud_optimization_ai_-_fleet_routing_api.svg",
+    "kind": "product",
+    "label": "Cloud Optimization Ai   Fleet Routing Api",
+    "service_id": "cloudoptimizationaifleetroutingapi",
+    "source": "cloud_optimization_ai_-_fleet_routing_api/cloud_optimization_ai_-_fleet_routing_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_router": {
+    "file": "legacy/GCP-Legacy-cloud_router.svg",
+    "kind": "product",
+    "label": "Cloud Router",
+    "service_id": "cloudrouter",
+    "source": "cloud_router/cloud_router.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_routes": {
+    "file": "legacy/GCP-Legacy-cloud_routes.svg",
+    "kind": "product",
+    "label": "Cloud Routes",
+    "service_id": "cloudroutes",
+    "source": "cloud_routes/cloud_routes.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_run": {
+    "file": "legacy/GCP-Legacy-cloud_run.svg",
+    "kind": "product",
+    "label": "Cloud Run",
+    "service_id": "cloudrun",
+    "source": "cloud_run/cloud_run.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_run_for_anthos": {
+    "file": "legacy/GCP-Legacy-cloud_run_for_anthos.svg",
+    "kind": "product",
+    "label": "Cloud Run For Anthos",
+    "service_id": "cloudrunforanthos",
+    "source": "cloud_run_for_anthos/cloud_run_for_anthos.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_scheduler": {
+    "file": "legacy/GCP-Legacy-cloud_scheduler.svg",
+    "kind": "product",
+    "label": "Cloud Scheduler",
+    "service_id": "cloudscheduler",
+    "source": "cloud_scheduler/cloud_scheduler.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_security_scanner": {
+    "file": "legacy/GCP-Legacy-cloud_security_scanner.svg",
+    "kind": "product",
+    "label": "Cloud Security Scanner",
+    "service_id": "cloudsecurityscanner",
+    "source": "cloud_security_scanner/cloud_security_scanner.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_shell": {
+    "file": "legacy/GCP-Legacy-cloud_shell.svg",
+    "kind": "product",
+    "label": "Cloud Shell",
+    "service_id": "cloudshell",
+    "source": "cloud_shell/cloud_shell.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_spanner": {
+    "file": "legacy/GCP-Legacy-cloud_spanner.svg",
+    "kind": "product",
+    "label": "Cloud Spanner",
+    "service_id": "cloudspanner",
+    "source": "cloud_spanner/cloud_spanner.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_sql": {
+    "file": "legacy/GCP-Legacy-cloud_sql.svg",
+    "kind": "product",
+    "label": "Cloud Sql",
+    "service_id": "cloudsql",
+    "source": "cloud_sql/cloud_sql.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_storage": {
+    "file": "legacy/GCP-Legacy-cloud_storage.svg",
+    "kind": "product",
+    "label": "Cloud Storage",
+    "service_id": "cloudstorage",
+    "source": "cloud_storage/cloud_storage.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_tasks": {
+    "file": "legacy/GCP-Legacy-cloud_tasks.svg",
+    "kind": "product",
+    "label": "Cloud Tasks",
+    "service_id": "cloudtasks",
+    "source": "cloud_tasks/cloud_tasks.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_test_lab": {
+    "file": "legacy/GCP-Legacy-cloud_test_lab.svg",
+    "kind": "product",
+    "label": "Cloud Test Lab",
+    "service_id": "cloudtestlab",
+    "source": "cloud_test_lab/cloud_test_lab.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_tpu": {
+    "file": "legacy/GCP-Legacy-cloud_tpu.svg",
+    "kind": "product",
+    "label": "Cloud Tpu",
+    "service_id": "cloudtpu",
+    "source": "cloud_tpu/cloud_tpu.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_translation_api": {
+    "file": "legacy/GCP-Legacy-cloud_translation_api.svg",
+    "kind": "product",
+    "label": "Cloud Translation Api",
+    "service_id": "cloudtranslationapi",
+    "source": "cloud_translation_api/cloud_translation_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_vision_api": {
+    "file": "legacy/GCP-Legacy-cloud_vision_api.svg",
+    "kind": "product",
+    "label": "Cloud Vision Api",
+    "service_id": "cloudvisionapi",
+    "source": "cloud_vision_api/cloud_vision_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-cloud_vpn": {
+    "file": "legacy/GCP-Legacy-cloud_vpn.svg",
+    "kind": "product",
+    "label": "Cloud Vpn",
+    "service_id": "cloudvpn",
+    "source": "cloud_vpn/cloud_vpn.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-compute_engine": {
+    "file": "legacy/GCP-Legacy-compute_engine.svg",
+    "kind": "product",
+    "label": "Compute Engine",
+    "service_id": "computeengine",
+    "source": "compute_engine/compute_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-configuration_management": {
+    "file": "legacy/GCP-Legacy-configuration_management.svg",
+    "kind": "product",
+    "label": "Configuration Management",
+    "service_id": "configurationmanagement",
+    "source": "configuration_management/configuration_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-connectivity_test": {
+    "file": "legacy/GCP-Legacy-connectivity_test.svg",
+    "kind": "product",
+    "label": "Connectivity Test",
+    "service_id": "connectivitytest",
+    "source": "connectivity_test/connectivity_test.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-connectors": {
+    "file": "legacy/GCP-Legacy-connectors.svg",
+    "kind": "product",
+    "label": "Connectors",
+    "service_id": "connectors",
+    "source": "connectors/connectors.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-contact_center_ai": {
+    "file": "legacy/GCP-Legacy-contact_center_ai.svg",
+    "kind": "product",
+    "label": "Contact Center Ai",
+    "service_id": "contactcenterai",
+    "source": "contact_center_ai/contact_center_ai.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-container_optimized_os": {
+    "file": "legacy/GCP-Legacy-container_optimized_os.svg",
+    "kind": "product",
+    "label": "Container Optimized Os",
+    "service_id": "containeroptimizedos",
+    "source": "container_optimized_os/container_optimized_os.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-container_registry": {
+    "file": "legacy/GCP-Legacy-container_registry.svg",
+    "kind": "product",
+    "label": "Container Registry",
+    "service_id": "containerregistry",
+    "source": "container_registry/container_registry.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_catalog": {
+    "file": "legacy/GCP-Legacy-data_catalog.svg",
+    "kind": "product",
+    "label": "Data Catalog",
+    "service_id": "datacatalog",
+    "source": "data_catalog/data_catalog.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_labeling": {
+    "file": "legacy/GCP-Legacy-data_labeling.svg",
+    "kind": "product",
+    "label": "Data Labeling",
+    "service_id": "datalabeling",
+    "source": "data_labeling/data_labeling.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_layers": {
+    "file": "legacy/GCP-Legacy-data_layers.svg",
+    "kind": "product",
+    "label": "Data Layers",
+    "service_id": "datalayers",
+    "source": "data_layers/data_layers.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_loss_prevention_api": {
+    "file": "legacy/GCP-Legacy-data_loss_prevention_api.svg",
+    "kind": "product",
+    "label": "Data Loss Prevention Api",
+    "service_id": "datalosspreventionapi",
+    "source": "data_loss_prevention_api/data_loss_prevention_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_qna": {
+    "file": "legacy/GCP-Legacy-data_qna.svg",
+    "kind": "product",
+    "label": "Data Qna",
+    "service_id": "dataqna",
+    "source": "data_qna/data_qna.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_studio": {
+    "file": "legacy/GCP-Legacy-data_studio.svg",
+    "kind": "product",
+    "label": "Data Studio",
+    "service_id": "datastudio",
+    "source": "data_studio/data_studio.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-data_transfer": {
+    "file": "legacy/GCP-Legacy-data_transfer.svg",
+    "kind": "product",
+    "label": "Data Transfer",
+    "service_id": "datatransfer",
+    "source": "data_transfer/data_transfer.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-database_migration_service": {
+    "file": "legacy/GCP-Legacy-database_migration_service.svg",
+    "kind": "product",
+    "label": "Database Migration Service",
+    "service_id": "databasemigrationservice",
+    "source": "database_migration_service/database_migration_service.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dataflow": {
+    "file": "legacy/GCP-Legacy-dataflow.svg",
+    "kind": "product",
+    "label": "Dataflow",
+    "service_id": "dataflow",
+    "source": "dataflow/dataflow.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-datalab": {
+    "file": "legacy/GCP-Legacy-datalab.svg",
+    "kind": "product",
+    "label": "Datalab",
+    "service_id": "datalab",
+    "source": "datalab/datalab.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dataplex": {
+    "file": "legacy/GCP-Legacy-dataplex.svg",
+    "kind": "product",
+    "label": "Dataplex",
+    "service_id": "dataplex",
+    "source": "dataplex/dataplex.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-datapol": {
+    "file": "legacy/GCP-Legacy-datapol.svg",
+    "kind": "product",
+    "label": "Datapol",
+    "service_id": "datapol",
+    "source": "datapol/datapol.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dataprep": {
+    "file": "legacy/GCP-Legacy-dataprep.svg",
+    "kind": "product",
+    "label": "Dataprep",
+    "service_id": "dataprep",
+    "source": "dataprep/dataprep.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dataproc": {
+    "file": "legacy/GCP-Legacy-dataproc.svg",
+    "kind": "product",
+    "label": "Dataproc",
+    "service_id": "dataproc",
+    "source": "dataproc/dataproc.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dataproc_metastore": {
+    "file": "legacy/GCP-Legacy-dataproc_metastore.svg",
+    "kind": "product",
+    "label": "Dataproc Metastore",
+    "service_id": "dataprocmetastore",
+    "source": "dataproc_metastore/dataproc_metastore.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-datashare": {
+    "file": "legacy/GCP-Legacy-datashare.svg",
+    "kind": "product",
+    "label": "Datashare",
+    "service_id": "datashare",
+    "source": "datashare/datashare.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-datastore": {
+    "file": "legacy/GCP-Legacy-datastore.svg",
+    "kind": "product",
+    "label": "Datastore",
+    "service_id": "datastore",
+    "source": "datastore/datastore.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-datastream": {
+    "file": "legacy/GCP-Legacy-datastream.svg",
+    "kind": "product",
+    "label": "Datastream",
+    "service_id": "datastream",
+    "source": "datastream/datastream.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-debugger": {
+    "file": "legacy/GCP-Legacy-debugger.svg",
+    "kind": "product",
+    "label": "Debugger",
+    "service_id": "debugger",
+    "source": "debugger/debugger.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-developer_portal": {
+    "file": "legacy/GCP-Legacy-developer_portal.svg",
+    "kind": "product",
+    "label": "Developer Portal",
+    "service_id": "developerportal",
+    "source": "developer_portal/developer_portal.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dialogflow": {
+    "file": "legacy/GCP-Legacy-dialogflow.svg",
+    "kind": "product",
+    "label": "Dialogflow",
+    "service_id": "dialogflow",
+    "source": "dialogflow/dialogflow.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dialogflow_cx": {
+    "file": "legacy/GCP-Legacy-dialogflow_cx.svg",
+    "kind": "product",
+    "label": "Dialogflow Cx",
+    "service_id": "dialogflowcx",
+    "source": "dialogflow_cx/dialogflow_cx.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-dialogflow_insights": {
+    "file": "legacy/GCP-Legacy-dialogflow_insights.svg",
+    "kind": "product",
+    "label": "Dialogflow Insights",
+    "service_id": "dialogflowinsights",
+    "source": "dialogflow_insights/dialogflow_insights.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-document_ai": {
+    "file": "legacy/GCP-Legacy-document_ai.svg",
+    "kind": "product",
+    "label": "Document Ai",
+    "service_id": "documentai",
+    "source": "document_ai/document_ai.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-early_access_center": {
+    "file": "legacy/GCP-Legacy-early_access_center.svg",
+    "kind": "product",
+    "label": "Early Access Center",
+    "service_id": "earlyaccesscenter",
+    "source": "early_access_center/early_access_center.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-error_reporting": {
+    "file": "legacy/GCP-Legacy-error_reporting.svg",
+    "kind": "product",
+    "label": "Error Reporting",
+    "service_id": "errorreporting",
+    "source": "error_reporting/error_reporting.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-eventarc": {
+    "file": "legacy/GCP-Legacy-eventarc.svg",
+    "kind": "product",
+    "label": "Eventarc",
+    "service_id": "eventarc",
+    "source": "eventarc/eventarc.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-filestore": {
+    "file": "legacy/GCP-Legacy-filestore.svg",
+    "kind": "product",
+    "label": "Filestore",
+    "service_id": "filestore",
+    "source": "filestore/filestore.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-financial_services_marketplace": {
+    "file": "legacy/GCP-Legacy-financial_services_marketplace.svg",
+    "kind": "product",
+    "label": "Financial Services Marketplace",
+    "service_id": "financialservicesmarketplace",
+    "source": "financial_services_marketplace/financial_services_marketplace.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-firestore": {
+    "file": "legacy/GCP-Legacy-firestore.svg",
+    "kind": "product",
+    "label": "Firestore",
+    "service_id": "firestore",
+    "source": "firestore/firestore.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-fleet_engine": {
+    "file": "legacy/GCP-Legacy-fleet_engine.svg",
+    "kind": "product",
+    "label": "Fleet Engine",
+    "service_id": "fleetengine",
+    "source": "fleet_engine/fleet_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-free_trial": {
+    "file": "legacy/GCP-Legacy-free_trial.svg",
+    "kind": "product",
+    "label": "Free Trial",
+    "service_id": "freetrial",
+    "source": "free_trial/free_trial.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-game_servers": {
+    "file": "legacy/GCP-Legacy-game_servers.svg",
+    "kind": "product",
+    "label": "Game Servers",
+    "service_id": "gameservers",
+    "source": "game_servers/game_servers.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-gce_systems_management": {
+    "file": "legacy/GCP-Legacy-gce_systems_management.svg",
+    "kind": "product",
+    "label": "Gce Systems Management",
+    "service_id": "gcesystemsmanagement",
+    "source": "gce_systems_management/gce_systems_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-genomics": {
+    "file": "legacy/GCP-Legacy-genomics.svg",
+    "kind": "product",
+    "label": "Genomics",
+    "service_id": "genomics",
+    "source": "genomics/genomics.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-gke_on-prem": {
+    "file": "legacy/GCP-Legacy-gke_on-prem.svg",
+    "kind": "product",
+    "label": "Gke On Prem",
+    "service_id": "gkeonprem",
+    "source": "gke_on-prem/gke_on-prem.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-google_cloud_marketplace": {
+    "file": "legacy/GCP-Legacy-google_cloud_marketplace.svg",
+    "kind": "product",
+    "label": "Google Cloud Marketplace",
+    "service_id": "cloudmarketplace",
+    "source": "google_cloud_marketplace/google_cloud_marketplace.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-google_kubernetes_engine": {
+    "file": "legacy/GCP-Legacy-google_kubernetes_engine.svg",
+    "kind": "product",
+    "label": "Google Kubernetes Engine",
+    "service_id": "kubernetesengine",
+    "source": "google_kubernetes_engine/google_kubernetes_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-google_maps_platform": {
+    "file": "legacy/GCP-Legacy-google_maps_platform.svg",
+    "kind": "product",
+    "label": "Google Maps Platform",
+    "service_id": "mapsplatform",
+    "source": "google_maps_platform/google_maps_platform.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-healthcare_nlp_api": {
+    "file": "legacy/GCP-Legacy-healthcare_nlp_api.svg",
+    "kind": "product",
+    "label": "Healthcare Nlp Api",
+    "service_id": "healthcarenlpapi",
+    "source": "healthcare_nlp_api/healthcare_nlp_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-home": {
+    "file": "legacy/GCP-Legacy-home.svg",
+    "kind": "product",
+    "label": "Home",
+    "service_id": "home",
+    "source": "home/home.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-identity-aware_proxy": {
+    "file": "legacy/GCP-Legacy-identity-aware_proxy.svg",
+    "kind": "product",
+    "label": "Identity Aware Proxy",
+    "service_id": "identityawareproxy",
+    "source": "identity-aware_proxy/identity-aware_proxy.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-identity_and_access_management": {
+    "file": "legacy/GCP-Legacy-identity_and_access_management.svg",
+    "kind": "product",
+    "label": "Identity And Access Management",
+    "service_id": "identityandaccessmanagement",
+    "source": "identity_and_access_management/identity_and_access_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-identity_platform": {
+    "file": "legacy/GCP-Legacy-identity_platform.svg",
+    "kind": "product",
+    "label": "Identity Platform",
+    "service_id": "identityplatform",
+    "source": "identity_platform/identity_platform.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-iot_core": {
+    "file": "legacy/GCP-Legacy-iot_core.svg",
+    "kind": "product",
+    "label": "Iot Core",
+    "service_id": "iotcore",
+    "source": "iot_core/iot_core.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-iot_edge": {
+    "file": "legacy/GCP-Legacy-iot_edge.svg",
+    "kind": "product",
+    "label": "Iot Edge",
+    "service_id": "iotedge",
+    "source": "iot_edge/iot_edge.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-key_access_justifications": {
+    "file": "legacy/GCP-Legacy-key_access_justifications.svg",
+    "kind": "product",
+    "label": "Key Access Justifications",
+    "service_id": "keyaccessjustifications",
+    "source": "key_access_justifications/key_access_justifications.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-key_management_service": {
+    "file": "legacy/GCP-Legacy-key_management_service.svg",
+    "kind": "product",
+    "label": "Key Management Service",
+    "service_id": "keymanagementservice",
+    "source": "key_management_service/key_management_service.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-kuberun": {
+    "file": "legacy/GCP-Legacy-kuberun.svg",
+    "kind": "product",
+    "label": "Kuberun",
+    "service_id": "kuberun",
+    "source": "kuberun/kuberun.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-launcher": {
+    "file": "legacy/GCP-Legacy-launcher.svg",
+    "kind": "product",
+    "label": "Launcher",
+    "service_id": "launcher",
+    "source": "launcher/launcher.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-local_ssd": {
+    "file": "legacy/GCP-Legacy-local_ssd.svg",
+    "kind": "product",
+    "label": "Local Ssd",
+    "service_id": "localssd",
+    "source": "local_ssd/local_ssd.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-looker": {
+    "file": "legacy/GCP-Legacy-looker.svg",
+    "kind": "product",
+    "label": "Looker",
+    "service_id": "looker",
+    "source": "looker/looker.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-managed_service_for_microsoft_active_directory": {
+    "file": "legacy/GCP-Legacy-managed_service_for_microsoft_active_directory.svg",
+    "kind": "product",
+    "label": "Managed Service For Microsoft Active Directory",
+    "service_id": "managedserviceformicrosoftactivedirectory",
+    "source": "managed_service_for_microsoft_active_directory/managed_service_for_microsoft_active_directory.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-media_translation_api": {
+    "file": "legacy/GCP-Legacy-media_translation_api.svg",
+    "kind": "product",
+    "label": "Media Translation Api",
+    "service_id": "mediatranslationapi",
+    "source": "media_translation_api/media_translation_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-memorystore": {
+    "file": "legacy/GCP-Legacy-memorystore.svg",
+    "kind": "product",
+    "label": "Memorystore",
+    "service_id": "memorystore",
+    "source": "memorystore/memorystore.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-migrate_for_anthos": {
+    "file": "legacy/GCP-Legacy-migrate_for_anthos.svg",
+    "kind": "product",
+    "label": "Migrate For Anthos",
+    "service_id": "migrateforanthos",
+    "source": "migrate_for_anthos/migrate_for_anthos.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-migrate_for_compute_engine": {
+    "file": "legacy/GCP-Legacy-migrate_for_compute_engine.svg",
+    "kind": "product",
+    "label": "Migrate For Compute Engine",
+    "service_id": "migrateforcomputeengine",
+    "source": "migrate_for_compute_engine/migrate_for_compute_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-my_cloud": {
+    "file": "legacy/GCP-Legacy-my_cloud.svg",
+    "kind": "product",
+    "label": "My Cloud",
+    "service_id": "mycloud",
+    "source": "my_cloud/my_cloud.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-network_connectivity_center": {
+    "file": "legacy/GCP-Legacy-network_connectivity_center.svg",
+    "kind": "product",
+    "label": "Network Connectivity Center",
+    "service_id": "networkconnectivitycenter",
+    "source": "network_connectivity_center/network_connectivity_center.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-network_intelligence_center": {
+    "file": "legacy/GCP-Legacy-network_intelligence_center.svg",
+    "kind": "product",
+    "label": "Network Intelligence Center",
+    "service_id": "networkintelligencecenter",
+    "source": "network_intelligence_center/network_intelligence_center.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-network_security": {
+    "file": "legacy/GCP-Legacy-network_security.svg",
+    "kind": "product",
+    "label": "Network Security",
+    "service_id": "networksecurity",
+    "source": "network_security/network_security.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-network_tiers": {
+    "file": "legacy/GCP-Legacy-network_tiers.svg",
+    "kind": "product",
+    "label": "Network Tiers",
+    "service_id": "networktiers",
+    "source": "network_tiers/network_tiers.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-network_topology": {
+    "file": "legacy/GCP-Legacy-network_topology.svg",
+    "kind": "product",
+    "label": "Network Topology",
+    "service_id": "networktopology",
+    "source": "network_topology/network_topology.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-onboarding": {
+    "file": "legacy/GCP-Legacy-onboarding.svg",
+    "kind": "product",
+    "label": "Onboarding",
+    "service_id": "onboarding",
+    "source": "onboarding/onboarding.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-os_configuration_management": {
+    "file": "legacy/GCP-Legacy-os_configuration_management.svg",
+    "kind": "product",
+    "label": "Os Configuration Management",
+    "service_id": "osconfigurationmanagement",
+    "source": "os_configuration_management/os_configuration_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-os_inventory_management": {
+    "file": "legacy/GCP-Legacy-os_inventory_management.svg",
+    "kind": "product",
+    "label": "Os Inventory Management",
+    "service_id": "osinventorymanagement",
+    "source": "os_inventory_management/os_inventory_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-os_patch_management": {
+    "file": "legacy/GCP-Legacy-os_patch_management.svg",
+    "kind": "product",
+    "label": "Os Patch Management",
+    "service_id": "ospatchmanagement",
+    "source": "os_patch_management/os_patch_management.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-partner_interconnect": {
+    "file": "legacy/GCP-Legacy-partner_interconnect.svg",
+    "kind": "product",
+    "label": "Partner Interconnect",
+    "service_id": "partnerinterconnect",
+    "source": "partner_interconnect/partner_interconnect.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-partner_portal": {
+    "file": "legacy/GCP-Legacy-partner_portal.svg",
+    "kind": "product",
+    "label": "Partner Portal",
+    "service_id": "partnerportal",
+    "source": "partner_portal/partner_portal.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-performance_dashboard": {
+    "file": "legacy/GCP-Legacy-performance_dashboard.svg",
+    "kind": "product",
+    "label": "Performance Dashboard",
+    "service_id": "performancedashboard",
+    "source": "performance_dashboard/performance_dashboard.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-permissions": {
+    "file": "legacy/GCP-Legacy-permissions.svg",
+    "kind": "product",
+    "label": "Permissions",
+    "service_id": "permissions",
+    "source": "permissions/permissions.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-persistent_disk": {
+    "file": "legacy/GCP-Legacy-persistent_disk.svg",
+    "kind": "product",
+    "label": "Persistent Disk",
+    "service_id": "persistentdisk",
+    "source": "persistent_disk/persistent_disk.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-phishing_protection": {
+    "file": "legacy/GCP-Legacy-phishing_protection.svg",
+    "kind": "product",
+    "label": "Phishing Protection",
+    "service_id": "phishingprotection",
+    "source": "phishing_protection/phishing_protection.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-policy_analyzer": {
+    "file": "legacy/GCP-Legacy-policy_analyzer.svg",
+    "kind": "product",
+    "label": "Policy Analyzer",
+    "service_id": "policyanalyzer",
+    "source": "policy_analyzer/policy_analyzer.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-premium_network_tier": {
+    "file": "legacy/GCP-Legacy-premium_network_tier.svg",
+    "kind": "product",
+    "label": "Premium Network Tier",
+    "service_id": "premiumnetworktier",
+    "source": "premium_network_tier/premium_network_tier.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-private_connectivity": {
+    "file": "legacy/GCP-Legacy-private_connectivity.svg",
+    "kind": "product",
+    "label": "Private Connectivity",
+    "service_id": "privateconnectivity",
+    "source": "private_connectivity/private_connectivity.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-private_service_connect": {
+    "file": "legacy/GCP-Legacy-private_service_connect.svg",
+    "kind": "product",
+    "label": "Private Service Connect",
+    "service_id": "privateserviceconnect",
+    "source": "private_service_connect/private_service_connect.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-producer_portal": {
+    "file": "legacy/GCP-Legacy-producer_portal.svg",
+    "kind": "product",
+    "label": "Producer Portal",
+    "service_id": "producerportal",
+    "source": "producer_portal/producer_portal.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-profiler": {
+    "file": "legacy/GCP-Legacy-profiler.svg",
+    "kind": "product",
+    "label": "Profiler",
+    "service_id": "profiler",
+    "source": "profiler/profiler.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-project": {
+    "file": "legacy/GCP-Legacy-project.svg",
+    "kind": "product",
+    "label": "Project",
+    "service_id": "project",
+    "source": "project/project.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-pubsub": {
+    "file": "legacy/GCP-Legacy-pubsub.svg",
+    "kind": "product",
+    "label": "Pubsub",
+    "service_id": "pubsub",
+    "source": "pubsub/pubsub.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-quantum_engine": {
+    "file": "legacy/GCP-Legacy-quantum_engine.svg",
+    "kind": "product",
+    "label": "Quantum Engine",
+    "service_id": "quantumengine",
+    "source": "quantum_engine/quantum_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-quotas": {
+    "file": "legacy/GCP-Legacy-quotas.svg",
+    "kind": "product",
+    "label": "Quotas",
+    "service_id": "quotas",
+    "source": "quotas/quotas.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-real-world_insights": {
+    "file": "legacy/GCP-Legacy-real-world_insights.svg",
+    "kind": "product",
+    "label": "Real World Insights",
+    "service_id": "realworldinsights",
+    "source": "real-world_insights/real-world_insights.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-recommendations_ai": {
+    "file": "legacy/GCP-Legacy-recommendations_ai.svg",
+    "kind": "product",
+    "label": "Recommendations Ai",
+    "service_id": "recommendationsai",
+    "source": "recommendations_ai/recommendations_ai.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-release_notes": {
+    "file": "legacy/GCP-Legacy-release_notes.svg",
+    "kind": "product",
+    "label": "Release Notes",
+    "service_id": "releasenotes",
+    "source": "release_notes/release_notes.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-retail_api": {
+    "file": "legacy/GCP-Legacy-retail_api.svg",
+    "kind": "product",
+    "label": "Retail Api",
+    "service_id": "retailapi",
+    "source": "retail_api/retail_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-risk_manager": {
+    "file": "legacy/GCP-Legacy-risk_manager.svg",
+    "kind": "product",
+    "label": "Risk Manager",
+    "service_id": "riskmanager",
+    "source": "risk_manager/risk_manager.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-runtime_config": {
+    "file": "legacy/GCP-Legacy-runtime_config.svg",
+    "kind": "product",
+    "label": "Runtime Config",
+    "service_id": "runtimeconfig",
+    "source": "runtime_config/runtime_config.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-secret_manager": {
+    "file": "legacy/GCP-Legacy-secret_manager.svg",
+    "kind": "product",
+    "label": "Secret Manager",
+    "service_id": "secretmanager",
+    "source": "secret_manager/secret_manager.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-security": {
+    "file": "legacy/GCP-Legacy-security.svg",
+    "kind": "product",
+    "label": "Security",
+    "service_id": "security",
+    "source": "security/security.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-security_command_center": {
+    "file": "legacy/GCP-Legacy-security_command_center.svg",
+    "kind": "product",
+    "label": "Security Command Center",
+    "service_id": "securitycommandcenter",
+    "source": "security_command_center/security_command_center.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-security_health_advisor": {
+    "file": "legacy/GCP-Legacy-security_health_advisor.svg",
+    "kind": "product",
+    "label": "Security Health Advisor",
+    "service_id": "securityhealthadvisor",
+    "source": "security_health_advisor/security_health_advisor.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-security_key_enforcement": {
+    "file": "legacy/GCP-Legacy-security_key_enforcement.svg",
+    "kind": "product",
+    "label": "Security Key Enforcement",
+    "service_id": "securitykeyenforcement",
+    "source": "security_key_enforcement/security_key_enforcement.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-service_discovery": {
+    "file": "legacy/GCP-Legacy-service_discovery.svg",
+    "kind": "product",
+    "label": "Service Discovery",
+    "service_id": "servicediscovery",
+    "source": "service_discovery/service_discovery.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-speech-to-text": {
+    "file": "legacy/GCP-Legacy-speech-to-text.svg",
+    "kind": "product",
+    "label": "Speech To Text",
+    "service_id": "speechtotext",
+    "source": "speech-to-text/speech-to-text.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-stackdriver": {
+    "file": "legacy/GCP-Legacy-stackdriver.svg",
+    "kind": "product",
+    "label": "Stackdriver",
+    "service_id": "stackdriver",
+    "source": "stackdriver/stackdriver.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-standard_network_tier": {
+    "file": "legacy/GCP-Legacy-standard_network_tier.svg",
+    "kind": "product",
+    "label": "Standard Network Tier",
+    "service_id": "standardnetworktier",
+    "source": "standard_network_tier/standard_network_tier.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-stream_suite": {
+    "file": "legacy/GCP-Legacy-stream_suite.svg",
+    "kind": "product",
+    "label": "Stream Suite",
+    "service_id": "streamsuite",
+    "source": "stream_suite/stream_suite.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-support": {
+    "file": "legacy/GCP-Legacy-support.svg",
+    "kind": "product",
+    "label": "Support",
+    "service_id": "support",
+    "source": "support/support.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-tensorflow_enterprise": {
+    "file": "legacy/GCP-Legacy-tensorflow_enterprise.svg",
+    "kind": "product",
+    "label": "Tensorflow Enterprise",
+    "service_id": "tensorflowenterprise",
+    "source": "tensorflow_enterprise/tensorflow_enterprise.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-text-to-speech": {
+    "file": "legacy/GCP-Legacy-text-to-speech.svg",
+    "kind": "product",
+    "label": "Text To Speech",
+    "service_id": "texttospeech",
+    "source": "text-to-speech/text-to-speech.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-tools_for_powershell": {
+    "file": "legacy/GCP-Legacy-tools_for_powershell.svg",
+    "kind": "product",
+    "label": "Tools For Powershell",
+    "service_id": "toolsforpowershell",
+    "source": "tools_for_powershell/tools_for_powershell.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-trace": {
+    "file": "legacy/GCP-Legacy-trace.svg",
+    "kind": "product",
+    "label": "Trace",
+    "service_id": "trace",
+    "source": "trace/trace.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-traffic_director": {
+    "file": "legacy/GCP-Legacy-traffic_director.svg",
+    "kind": "product",
+    "label": "Traffic Director",
+    "service_id": "trafficdirector",
+    "source": "traffic_director/traffic_director.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-transfer": {
+    "file": "legacy/GCP-Legacy-transfer.svg",
+    "kind": "product",
+    "label": "Transfer",
+    "service_id": "transfer",
+    "source": "transfer/transfer.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-transfer_appliance": {
+    "file": "legacy/GCP-Legacy-transfer_appliance.svg",
+    "kind": "product",
+    "label": "Transfer Appliance",
+    "service_id": "transferappliance",
+    "source": "transfer_appliance/transfer_appliance.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-user_preferences": {
+    "file": "legacy/GCP-Legacy-user_preferences.svg",
+    "kind": "product",
+    "label": "User Preferences",
+    "service_id": "userpreferences",
+    "source": "user_preferences/user_preferences.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-vertexai": {
+    "file": "legacy/GCP-Legacy-vertexai.svg",
+    "kind": "product",
+    "label": "Vertexai",
+    "service_id": "vertexai",
+    "source": "vertexai/vertexai.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-video_intelligence_api": {
+    "file": "legacy/GCP-Legacy-video_intelligence_api.svg",
+    "kind": "product",
+    "label": "Video Intelligence Api",
+    "service_id": "videointelligenceapi",
+    "source": "video_intelligence_api/video_intelligence_api.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-virtual_private_cloud": {
+    "file": "legacy/GCP-Legacy-virtual_private_cloud.svg",
+    "kind": "product",
+    "label": "Virtual Private Cloud",
+    "service_id": "virtualprivatecloud",
+    "source": "virtual_private_cloud/virtual_private_cloud.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-visual_inspection": {
+    "file": "legacy/GCP-Legacy-visual_inspection.svg",
+    "kind": "product",
+    "label": "Visual Inspection",
+    "service_id": "visualinspection",
+    "source": "visual_inspection/visual_inspection.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-vmware_engine": {
+    "file": "legacy/GCP-Legacy-vmware_engine.svg",
+    "kind": "product",
+    "label": "Vmware Engine",
+    "service_id": "vmwareengine",
+    "source": "vmware_engine/vmware_engine.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-web_risk": {
+    "file": "legacy/GCP-Legacy-web_risk.svg",
+    "kind": "product",
+    "label": "Web Risk",
+    "service_id": "webrisk",
+    "source": "web_risk/web_risk.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-web_security_scanner": {
+    "file": "legacy/GCP-Legacy-web_security_scanner.svg",
+    "kind": "product",
+    "label": "Web Security Scanner",
+    "service_id": "websecurityscanner",
+    "source": "web_security_scanner/web_security_scanner.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-workflows": {
+    "file": "legacy/GCP-Legacy-workflows.svg",
+    "kind": "product",
+    "label": "Workflows",
+    "service_id": "workflows",
+    "source": "workflows/workflows.svg",
+    "style": "legacy"
+  },
+  "GCP-Legacy-workload_identity_pool": {
+    "file": "legacy/GCP-Legacy-workload_identity_pool.svg",
+    "kind": "product",
+    "label": "Workload Identity Pool",
+    "service_id": "workloadidentitypool",
+    "source": "workload_identity_pool/workload_identity_pool.svg",
+    "style": "legacy"
+  },
+  "GCP-Looker": {
+    "file": "modern/GCP-Looker.svg",
+    "kind": "product",
+    "label": "Looker",
+    "service_id": "looker",
+    "source": "gcp-products-icons/Unique Icons/Looker/SVG/Looker-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Mandiant": {
+    "file": "modern/GCP-Mandiant.svg",
+    "kind": "product",
+    "label": "Mandiant",
+    "service_id": "mandiant",
+    "source": "gcp-products-icons/Unique Icons/Mandiant/SVG/Mandiant-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Security-Command-Center": {
+    "file": "modern/GCP-Security-Command-Center.svg",
+    "kind": "product",
+    "label": "Security Command Center",
+    "service_id": "securitycommandcenter",
+    "source": "gcp-products-icons/Unique Icons/Security Command Center/SVG/SecurityCommandCenter-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Security-Operations": {
+    "file": "modern/GCP-Security-Operations.svg",
+    "kind": "product",
+    "label": "Security Operations",
+    "service_id": "securityoperations",
+    "source": "gcp-products-icons/Unique Icons/Security Operations/SVG/SecOps-512-color-rgb.svg",
+    "style": "modern"
+  },
+  "GCP-Threat-Intelligence": {
+    "file": "modern/GCP-Threat-Intelligence.svg",
+    "kind": "product",
+    "label": "Threat Intelligence",
+    "service_id": "threatintelligence",
+    "source": "gcp-products-icons/Unique Icons/Threat Intelligence/SVG/ThreatIntelligence-512-color.svg",
+    "style": "modern"
+  },
+  "GCP-Vertex-AI": {
+    "file": "modern/GCP-Vertex-AI.svg",
+    "kind": "product",
+    "label": "Vertex AI",
+    "service_id": "vertexai",
+    "source": "gcp-products-icons/Unique Icons/Vertex AI/SVG/VertexAI-512-color.svg",
+    "style": "modern"
+  }
+}

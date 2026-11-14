@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "architecture-rules/v1"
+    },
+    "rules": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rules"
+  ]
+}
