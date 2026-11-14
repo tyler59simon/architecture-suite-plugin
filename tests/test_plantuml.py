@@ -51,15 +51,18 @@ def test_external_systems_direction_and_escaping(model):
                   and e["type"] == "software_system")
     system["external"] = True
     system["name"] = 'Say "hi" <b>now</b> C:\\path'
-    system["description"] = "first\nsecond"
+    system["description"] = "first\nsecond %date() $var"
     text = renderers.render_plantuml(model, view)
+    # The preprocessor would otherwise run %date() and expand $var.
+    assert "%date()" not in text and "$var" not in text
+    assert "<U+0025>date() <U+0024>var" in text
     assert "LAYOUT_LEFT_RIGHT()" in text
     assert (
         'System_Ext(n' in text
         and '"Say <U+0022>hi<U+0022> <U+003C>b<U+003E>now<U+003C>/b<U+003E> C:<U+005C>path"'
         in text
     )
-    assert '"first\\nsecond"' in text
+    assert '"first\\nsecond <U+0025>date() <U+0024>var"' in text
     view["direction"] = "down"
     assert "LAYOUT_TOP_DOWN()" in renderers.render_plantuml(model, view)
 

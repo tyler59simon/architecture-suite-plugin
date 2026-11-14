@@ -172,10 +172,13 @@ def render_mermaid(model: dict, view: dict) -> str:
 
 def _puml_text(value) -> str:
     """A value that stays text inside a quoted PlantUML macro argument."""
-    # Unicode escapes keep quotes, backslashes and creole tags (<b>) from becoming syntax.
+    # Unicode escapes keep quotes, backslashes and creole tags (<b>) from becoming syntax,
+    # and stop the preprocessor from running %functions() or expanding $variables.
     escapes = {
         '"': "<U+0022>",
         "\\": "<U+005C>",
+        "%": "<U+0025>",
+        "$": "<U+0024>",
         "<": "<U+003C>",
         ">": "<U+003E>",
         "\r": "",
