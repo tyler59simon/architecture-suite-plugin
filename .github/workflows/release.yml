@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
     with:
+      full: true
       os: '["ubuntu-24.04", "windows-latest"]'
 
   # Hosted macOS arm64 runners are capacity-constrained and have gone unassigned for whole
@@ -21,6 +22,7 @@ jobs:
     permissions:
       contents: read
     with:
+      full: true
       os: '["macos-latest"]'
       skip-os-independent: true
 
