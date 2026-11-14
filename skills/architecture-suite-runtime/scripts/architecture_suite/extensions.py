@@ -18,7 +18,12 @@ from .plan import parse_yaml
 from .changes import diff_models, check_rules, markdown_report
 from .infrastructure import import_infrastructure, topology_plan
 from .draft import render_plan
-from .scenarios import validate_scenario, scenario_scene, scenario_mermaid
+from .scenarios import (
+    validate_scenario,
+    scenario_scene,
+    scenario_mermaid,
+    scenario_plantuml,
+)
 from .emit import render_scene_svg, render_scene_drawio
 from .renderers import EXTENSIONS, render_svg_png, scene_vsdx
 from .explorer import explorer_html
@@ -142,6 +147,8 @@ def _cmd_extension(args):
             files[name] = (
                 scenario_mermaid(scenario, model)
                 if fmt == "mermaid"
+                else scenario_plantuml(scenario, model)
+                if fmt == "plantuml"
                 else render_scene_svg(scene)
                 if fmt == "svg"
                 else render_scene_drawio(scene)

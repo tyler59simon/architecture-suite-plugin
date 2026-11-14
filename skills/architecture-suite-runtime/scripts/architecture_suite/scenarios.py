@@ -113,6 +113,42 @@ def scenario_mermaid(scenario, model):
     return "\n".join(lines) + "\n"
 
 
+def scenario_plantuml(scenario, model):
+    validate_scenario(scenario, model)
+    from .renderers import _puml_text
+
+    names = {e["id"]: e["name"] for e in model["elements"]}
+    aliases = {p: f"p{i}" for i, p in enumerate(scenario["participants"])}
+    lines = ["@startuml"] + [
+        f'participant "{_puml_text(names[p])}" as {aliases[p]}' for p in aliases
+    ]
+
+    def walk(steps, indent):
+        for step in steps:
+            kind = step.get("type", "message")
+            if kind in GROUPS:
+                lines.append(indent + kind + " " + _puml_text(step["condition"]))
+                walk(step["steps"], indent + "  ")
+                # PlantUML separates both alt and par branches with else.
+                for branch in step.get("branches", []):
+                    lines.append(indent + "else " + _puml_text(branch["condition"]))
+                    walk(branch["steps"], indent + "  ")
+                lines.append(indent + "end")
+            else:
+                lines.append(
+                    indent
+                    + aliases[step["from"]]
+                    + (" --> " if kind == "response" else " -> ")
+                    + aliases[step["to"]]
+                    + ": "
+                    + _puml_text(step["description"])
+                )
+
+    walk(scenario["steps"], "")
+    lines.append("@enduml")
+    return "\n".join(lines) + "\n"
+
+
 def scenario_scene(scenario, model):
     validate_scenario(scenario, model)
     names = {e["id"]: e["name"] for e in model["elements"]}
