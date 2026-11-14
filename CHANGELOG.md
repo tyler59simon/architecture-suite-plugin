@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 - PlantUML export
+
+Editable C4-PlantUML output for every diagram and scenario.
 
 ### Added
 

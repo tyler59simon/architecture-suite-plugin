@@ -1,6 +1,6 @@
 {
-  "timestamp_utc": "2026-11-09T12:59:44.782538+00:00",
-  "version": "1.1.0",
+  "timestamp_utc": "2026-11-14T17:44:54.148793+00:00",
+  "version": "1.2.0",
   "method": "tools/record_packages.py: install into temporary directories; no live agent session",
   "installs": {
     "codex/project": {
