@@ -12,7 +12,7 @@ from .safety import (
 )
 
 RUNTIME_NAME = "architecture-suite-runtime"
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 PLUGIN_NAME = "architecture-suite"
 DESCRIPTION = (
     "Offline evidence-backed C4 architecture diagrams: architecture-plan, c4-diagrams, "
@@ -24,7 +24,7 @@ AUTHOR = {"name": "Tyler Simon"}
 # Public GitHub repository URL, e.g. "https://github.com/<owner>/architecture-suite".
 # homepage/repository are omitted from manifests while this is empty.
 REPOSITORY = "https://github.com/tyler59simon/architecture-suite-plugin"
-KEYWORDS = ["c4", "architecture", "diagrams", "planning", "drawio", "visio", "mermaid", "aws", "gcp", "offline"]
+KEYWORDS = ["c4", "architecture", "diagrams", "planning", "drawio", "visio", "mermaid", "plantuml", "aws", "gcp", "offline"]
 # Repository-root legal files shipped with every package and install.
 LEGAL_FILES = ("LICENSE", "NOTICE")
 NEWLINE = chr(10)

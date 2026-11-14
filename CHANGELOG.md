@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 - PlantUML export
+
+Editable C4-PlantUML output for every diagram and scenario.
+
+### Added
+
+- **PlantUML output:** `--format plantuml` (also part of `--format all`) writes C4-PlantUML `.puml` text for every diagram and scenario. Diagrams use the C4 macros (`Person`, `System`, `Container`, `ContainerDb`, `Component`, boundaries and `Deployment_Node`) from the `<C4/...>` library bundled with PlantUML, so they render offline; PlantUML computes its own layout. Claims that are not observed carry a dashed `claim` tag. Scenarios become PlantUML sequence diagrams.
+
 ## 1.1.0 - planning workflow, Visio export and new default formats
 
 A planning workflow that checks a plan before anything is drawn, editable Visio output, and Mermaid and PNG as the default formats.
