@@ -102,18 +102,28 @@ def _font(size: int):
     )
 
 
+# SVGs embed a Roboto subset (assets/font-embed.woff, built by tools/setup_assets.py) that
+# covers Latin up to U+017F. Other characters render in a fallback font, so they are
+# measured with a conservative bound.
+EMBEDDED_MAX = 0x017F
+
+
+def _fallback(c: str) -> bool:
+    return ord(c) > EMBEDDED_MAX
+
+
 def text_width(text: str, font_px: int = 13, *, bold: bool = False) -> int:
     # The font file is regular; SVG and Draw.io also use regular for measured content.
     measured = _font(font_px).getlength(text)
-    if any(ord(c) > 0x052F for c in text):
-        # Roboto covers Latin/Greek/Cyrillic. Bound fallback-script glyphs conservatively
-        # so local CJK/Arabic/emoji font substitution cannot overflow a measured card.
+    if any(_fallback(c) for c in text):
+        # Bound fallback glyphs (Greek, Cyrillic, CJK, Arabic, emoji) conservatively so
+        # local font substitution cannot overflow a measured card.
         fallback_bound = sum(
             max(
                 _font(font_px).getlength(c),
                 font_px * (2 if unicodedata.east_asian_width(c) in {"W", "F"} else 1.3),
             )
-            if ord(c) > 0x052F
+            if _fallback(c)
             else _font(font_px).getlength(c)
             for c in text
         )

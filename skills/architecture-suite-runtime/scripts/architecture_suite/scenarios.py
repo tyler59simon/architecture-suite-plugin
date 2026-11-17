@@ -19,8 +19,17 @@ def validate_scenario(scenario, model):
     ):
         raise ValueError("Expected scenario/v1 name and unique participants")
     ids = {e["id"] for e in model["elements"]}
-    if not set(scenario["participants"]) <= ids:
-        raise ValueError("Unknown scenario participant")
+    unknown = [p for p in scenario["participants"] if p not in ids]
+    if unknown:
+        valid = sorted(ids)
+        more = f" (and {len(valid) - 20} more)" if len(valid) > 20 else ""
+        raise ValueError(
+            "Unknown scenario participant: "
+            + ", ".join(repr(str(p)) for p in unknown)
+            + "; valid element ids: "
+            + ", ".join(valid[:20])
+            + more
+        )
 
     def walk(steps, depth):
         if depth > 12 or not isinstance(steps, list) or not steps:
@@ -159,6 +168,7 @@ def scenario_scene(scenario, model):
         400,
         title_lines=wrap_to_width(scenario["name"], width - 96, 22),
         content_top=120,
+        sequence=True,
     )
     positions = {p: 208 + i * 320 for i, p in enumerate(scenario["participants"])}
     for p, x in positions.items():

@@ -10,7 +10,9 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
+import sys
 import tempfile
 import time
 from typing import Iterator
@@ -20,8 +22,16 @@ class SafetyError(ValueError):
     """An operation cannot satisfy its safety contract; CLI exit status 3."""
 
 
+# `key=value` (config syntax) counts as a credential for any 4+ character value. A
+# `key: value` pair counts only when the value is quoted, contains a digit (8+
+# characters) or is a long opaque token (24+), so type annotations (`password: str`)
+# and prose ("session token: Redis-backed cache") do not match.
 SECRET = re.compile(
-    r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*[:=]\s*[\"']?[^\s\"',;}]{4,}|(?:https?|postgres(?:ql)?|mysql|mongodb)://[^/\s:@]+:[^@\s/]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"
+    r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
+    r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
+    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
+    r"|(?:https?|postgres(?:ql)?|mysql|mongodb)://[^/\s:@]+:[^@\s/]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 )
 PROMPT_INJECTION = re.compile(
     r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|(?:reveal|print|exfiltrate).{0,40}(?:secret|token|password)|(?:system|developer)\s+prompt|run\s+(?:this|the following)\s+(?:command|script)",
@@ -74,10 +84,6 @@ def redact(value: str) -> str:
     return SECRET.sub("[REDACTED]", value)
 
 
-def contains_likely_secret(value: str) -> bool:
-    return bool(SECRET.search(value))
-
-
 def detect_prompt_injection(value: str) -> bool:
     return bool(PROMPT_INJECTION.search(value))
 
@@ -98,20 +104,27 @@ def _no_links(path: Path) -> None:
             raise SafetyError(f"Symlink/reparse path is not allowed: {part.name}")
 
 
-def canonical_existing_directory(path: Path) -> Path:
+def canonical_existing_directory(path: Path, label: str = "") -> Path:
     path = Path(path).absolute()
     _no_links(path)
     if not path.is_dir():
-        raise SafetyError("Repository must be an existing directory")
+        # A missing input is an input error (exit 2); links stay a safety error (exit 3).
+        raise ValueError(f"{_prefix(label)}no such directory: {path.resolve()}")
     return path.resolve()
 
 
-def canonical_existing_file(path: Path) -> Path:
+def canonical_existing_file(path: Path, label: str = "") -> Path:
     path = Path(path).absolute()
     _no_links(path)
-    if not path.is_file() or path.stat().st_size > 20_000_000:
-        raise SafetyError("Input must be an existing file under 20 MB")
+    if not path.is_file():
+        raise ValueError(f"{_prefix(label)}no such file: {path.resolve()}")
+    if path.stat().st_size > 20_000_000:
+        raise ValueError(f"{_prefix(label)}file exceeds 20 MB: {path.resolve()}")
     return path.resolve()
+
+
+def _prefix(label: str) -> str:
+    return f"{label}: " if label else ""
 
 
 def canonical_output_directory(path: Path) -> Path:
@@ -198,23 +211,30 @@ def _read_output_manifest(root: Path) -> dict:
 
 
 def ownership_changes(output: Path, owner: str, files) -> dict:
-    """Files `owner` generated last time that this run no longer produces.
+    """Compare this run's files with what `owner` generated last time.
 
-    Unchanged ones are removed on publication; edited ones are kept and reported as
-    conflicts. Files no manifest lists are never touched.
+    `remove`: files no longer produced and unchanged; removed on publication.
+    `conflicts`: files no longer produced but edited since; kept.
+    `overwrites_edited`: files this run produces again that were edited since; the
+    publication replaces them. Files no manifest lists are never touched.
     """
     output = Path(output)
     if not output.is_dir():
-        return {"remove": [], "conflicts": []}
+        return {"remove": [], "conflicts": [], "overwrites_edited": []}
     produced = set(files)
-    remove, conflicts = [], []
+    remove, conflicts, overwrites = [], [], []
     previous = _read_output_manifest(output).get(owner, {}).get("files", {})
     for relative, digest in sorted(previous.items()):
         path = contained_path(output, relative)
-        if relative in produced or not path.is_file():
+        if not path.is_file():
             continue
-        (remove if _digest(path) == digest else conflicts).append(relative)
-    return {"remove": remove, "conflicts": conflicts}
+        unchanged = _digest(path) == digest
+        if relative in produced:
+            if not unchanged:
+                overwrites.append(relative)
+            continue
+        (remove if unchanged else conflicts).append(relative)
+    return {"remove": remove, "conflicts": conflicts, "overwrites_edited": overwrites}
 
 
 def _claim_outputs(stage: Path, owner: str, command: str, files) -> None:
@@ -247,21 +267,48 @@ def _claim_outputs(stage: Path, owner: str, command: str, files) -> None:
     )
 
 
+def _clear_readonly(func, path, _exc) -> None:
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def _remove_temporary(path: Path) -> None:
+    """Delete a stage or backup folder, including read-only files (Windows)."""
+    try:
+        if sys.version_info >= (3, 12):
+            shutil.rmtree(path, onexc=_clear_readonly)
+        else:  # Python 3.11 has no onexc
+            shutil.rmtree(path, onerror=_clear_readonly)
+    except OSError as exc:
+        # The publication itself already succeeded or failed; never mask that.
+        print(
+            f"architecture-suite: warning: could not remove temporary folder {path}: {exc}",
+            file=sys.stderr,
+        )
+
+
 @contextmanager
 def atomic_output_directory(
-    output: Path, *, owner: str | None = None, command: str | None = None, files=()
+    output: Path,
+    *,
+    owner: str | None = None,
+    command: str | None = None,
+    files=(),
+    seed_existing: bool = True,
 ) -> Iterator[Path]:
     """Stage all artifacts, preserve unrelated files, roll back if promotion fails.
 
     With an `owner`, the declared `files` are recorded in the output manifest and that
-    owner's previously generated files that are no longer produced are retired.
+    owner's previously generated files that are no longer produced are retired. With
+    `seed_existing=False` the stage starts empty, so the result holds only what the
+    caller writes (used to replace an installed copy).
     """
     output = canonical_output_directory(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=".architecture-stage-", dir=output.parent))
     backup = stage.with_name(stage.name + "-backup")
     try:
-        if output.exists():
+        if seed_existing and output.exists():
             shutil.copytree(output, stage, dirs_exist_ok=True)
         yield stage
         if owner:
@@ -282,7 +329,7 @@ def atomic_output_directory(
                 and temp.parent.resolve() == output.parent.resolve()
                 and temp.name.startswith(".architecture-stage-")
             ):
-                shutil.rmtree(temp)
+                _remove_temporary(temp)
 
 
 def run_bounded(
