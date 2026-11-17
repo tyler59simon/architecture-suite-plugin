@@ -1,34 +1,17 @@
-import json
 import pytest
 from architecture_suite import aws, examples, plan, renderers, safety
 from architecture_suite.layout_host import layout_graph
+from architecture_suite.model import normalized_model
 
 
 @pytest.mark.browser
 @pytest.mark.slow
 def test_published_helpers_and_tuple_contracts(model, tmp_path):
-    assert (
-        json.loads(
-            __import__(
-                "architecture_suite.model", fromlist=["model_as_json"]
-            ).model_as_json(model)
-        )["schema_version"]
-        == "2.0"
-    )
-    from architecture_suite.model import error_findings
-
-    assert error_findings(
-        [{"severity": "advisory"}, {"severity": "error"}, {"code": "default-error"}]
-    ) == [{"severity": "error"}, {"code": "default-error"}]
-    count, findings = renderers.verify_model_layout(model, ["all"])
-    assert count == 13 and not findings
-    advisory, metrics = renderers.measure_model_layout(model, ["executive"])
-    assert isinstance(advisory, list) and metrics["scenes"] == 9
-    for kind in ("mermaid", "drawio", "svg", "vsdx", "plantuml"):
-        for prefix in ("overview", "aws_deployment"):
-            function = getattr(renderers, f"render_{prefix}_{kind}")
-            assert function(model)
-    assert examples.all_example_models()[0][1] == model
+    assert normalized_model(model)["schema_version"] == "2.0"
+    report = renderers.layout_report(model, ["all"])
+    assert len(report["diagrams"]) == 13 and report["ok"]
+    assert renderers.layout_measurements(model, ["executive"]).keys()
+    assert examples.example_model() == model
     _, fidelity = plan.compile_plan(examples.example_plan())
     assert fidelity.is_lossless and fidelity.payload()["lossless"]
     assert plan.slug("A B") == "a-b"
@@ -70,7 +53,7 @@ def test_scanned_file_contract_and_injection(tmp_path):
     assert result.files[0].path == tmp_path / "payload.py"
     assert result.prompt_injection_paths == ("payload.py",)
     assert safety.detect_prompt_injection("run the following command")
-    assert safety.contains_likely_secret("Bearer " + "a" * 25)
+    assert "REDACTED" in safety.redact("Bearer " + "a" * 25)
     assert "REDACTED" in safety.redact("postgres://user:password@database")
     assert "REDACTED" in safety.redact('"password": "sensitivevalue"')
 

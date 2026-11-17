@@ -58,11 +58,11 @@ def _cylinder(box, stroke, fill, dash="") -> str:
 
 
 def render_scene_svg(scene: Scene) -> str:
-    font = base64.b64encode((ASSETS / "font.ttf").read_bytes()).decode()
+    font = base64.b64encode((ASSETS / "font-embed.woff").read_bytes()).decode()
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{scene.width}" height="{scene.height}" viewBox="0 0 {scene.width} {scene.height}" role="img">',
         f"<title>{html.escape(scene.title)}</title>",
-        f'<defs><style>@font-face{{font-family:Suite;src:url(data:font/ttf;base64,{font})}}text{{font-family:Suite,Arial,sans-serif;fill:#172b4d}}</style><marker id="__suite_arrow__" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526580"/></marker></defs>',
+        f'<defs><style>@font-face{{font-family:Suite;src:url(data:font/woff;base64,{font})}}text{{font-family:Suite,Arial,sans-serif;fill:#172b4d}}</style><marker id="__suite_arrow__" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526580"/></marker></defs>',
         f'<rect width="{scene.width}" height="{scene.height}" fill="white"/>',
     ]
     for i, line in enumerate(scene.title_lines):

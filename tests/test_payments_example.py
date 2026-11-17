@@ -48,10 +48,14 @@ def test_both_clouds_share_one_logical_architecture():
         {k: v for k, v in c.items() if not k.endswith("_service")} for c in gcp["containers"]
     ]
     rendered = ROOT / "examples/payments"
-    for cloud in ("aws", "gcp"):
-        for folder in ("01-system-context", "02-containers", "03-components", "04-code",
-                       "05-overview", f"06-{cloud}-deployment"):
-            assert any((rendered / cloud / folder).glob("*.png")), (cloud, folder)
+    for folder in ("01-system-context", "02-containers", "03-components", "04-code",
+                   "05-overview", "06-aws-deployment"):
+        assert any((rendered / "aws" / folder).glob("*.png")), folder
+    # The Google Cloud package keeps only what differs from AWS (see tools/sample_dedupe.py).
+    for folder in ("02-containers", "05-overview", "06-gcp-deployment"):
+        assert any((rendered / "gcp" / folder).glob("*.png")), folder
+    for folder in ("01-system-context", "04-code"):
+        assert not (rendered / "gcp" / folder).exists(), folder
 
 
 @pytest.mark.browser

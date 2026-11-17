@@ -7,8 +7,7 @@ import posixpath
 import re
 import sys
 from .aws import normalize_cloud_profile
-from .aws_analyzer import detect_aws
-from .gcp_analyzer import detect_gcp
+from .cloud_signals import detect_aws, detect_gcp
 from .model import project_model
 from .plan import compile_plan
 from .safety import ScanResult, scan_repository, safe_text

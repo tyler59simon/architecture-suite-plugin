@@ -1,6 +1,6 @@
 # Validation
 
-Executable results are recorded in [validation-results.json](../reports/validation-results.json), with source coverage in [coverage.json](../reports/coverage.json) and public-callable execution in [public-coverage.json](../reports/public-coverage.json). `tools/record_validation.py` refuses to write them unless all tests pass, coverage is at least 90% of lines and 85% of branches, and every public function is executed by a test.
+Executable results are recorded in [validation-results.json](../reports/validation-results.json), with the raw coverage and the per-callable execution record (`coverage.json` and `public-coverage.json`) written to the ignored `test-results/` folder, which CI uploads as an artifact. `tools/record_validation.py` refuses to write them unless all tests pass, coverage is at least 90% of lines and 85% of branches, and every public function is executed by a test.
 
 The suite covers models, plans, scope projection, source parsers, `plan-draft` container grouping, infrastructure inputs, dynamic scenarios, rules and diffs, offline browser rendering, explorer interaction, path containment, overwrite controls, process limits, asset integrity including the bundled Google Cloud icons, the bootstrap and launcher, dependency locks, and host package layouts and sizes.
 

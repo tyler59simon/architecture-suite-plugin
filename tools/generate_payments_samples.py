@@ -14,7 +14,8 @@ rendered as a complete package:
   examples/payments/<cloud>/c4-dynamic.mmd         card payment authorization sequence
 
 Levels 1-4 are identical in both packages apart from cloud icons; the deployment differs.
-Every fact here is fictional.
+A Google Cloud file that is byte-identical to its AWS counterpart is not kept. Every fact here
+is fictional.
 """
 
 from copy import deepcopy
@@ -26,7 +27,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "skills/architecture-suite-runtime/scripts"))
-from architecture_suite.draft import render_plan  # noqa: E402
+from architecture_suite.plan import render_plan  # noqa: E402
+from sample_dedupe import drop_identical  # noqa: E402
 
 OUT = ROOT / "examples/payments"
 # Console scripts live in the interpreter's scripts folder (Scripts\ on Windows, bin/ elsewhere),
@@ -323,9 +325,11 @@ def run(*args, label):
 README = """# PayStream: online payments example (fictional)
 
 One payments architecture, rendered twice: once on AWS and once on Google Cloud. The editable
-plans are in `plans/`. Each cloud folder is a complete package with C4 levels 1-4, overviews, the cloud deployment diagram,
-a card-payment sequence (`c4-dynamic.mmd`) and the fidelity and architecture reports. Levels 1-4
-match apart from cloud service icons; the deployment diagrams differ.
+plans are in `plans/`. `aws/` is a complete package with C4 levels 1-4, overviews, the cloud
+deployment diagram, a card-payment sequence (`c4-dynamic.mmd`) and the fidelity and architecture
+reports. `gcp/` holds only the files that differ from `aws/`: the views that use cloud service
+icons and the deployment diagram. Where a `gcp/` path is missing, the AWS file at the same path is
+byte-identical.
 
 | | AWS | Google Cloud |
 | --- | --- | --- |
@@ -340,6 +344,20 @@ match apart from cloud service icons; the deployment diagrams differ.
 
 Regenerate with `python tools/generate_payments_samples.py`. Every fact here is fictional.
 """
+SAME = "same as AWS"
+
+
+def readme():
+    """The README, with a plain "same as AWS" where no Google Cloud folder remains."""
+    lines = []
+    for line in README.splitlines():
+        cells = line.split(" | ")
+        if len(cells) == 3 and cells[2].startswith("[gcp/"):
+            link = cells[2].removeprefix("[").split("]")[0]
+            if not (OUT / link).is_dir():
+                line = " | ".join([cells[0], cells[1], SAME + " |"])
+        lines.append(line)
+    return chr(10).join(lines) + chr(10)
 
 
 def main():
@@ -361,8 +379,10 @@ def main():
             run("plan-render", "--plan", plan_path, "--output", target, "--format", formats,
                 "--confirm-write", *extra, label=f"{cloud} {job} render")
         (folder / "c4-dynamic.mmd").write_bytes(DYNAMIC_SEQUENCE.encode("utf-8"))
+        if cloud != "aws":
+            drop_identical(OUT / "aws", folder)
         print(f"{cloud}: {sum(1 for p in folder.rglob('*') if p.is_file())} files")
-    (OUT / "README.md").write_bytes(README.encode("utf-8"))
+    (OUT / "README.md").write_bytes(readme().encode("utf-8"))
 
 
 if __name__ == "__main__":

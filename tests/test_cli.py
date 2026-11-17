@@ -10,7 +10,7 @@ from architecture_suite.cli import (
     DEFAULT_FORMATS,
     parse_overview_styles,
 )
-from architecture_suite.draft import render_plan
+from architecture_suite.plan import render_plan
 from architecture_suite import __version__, cli
 
 

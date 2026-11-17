@@ -5,6 +5,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+import sys
 import urllib.request
 import zipfile
 
@@ -16,6 +17,32 @@ AWS_URL = "https://d1.awsstatic.com/onedam/marketing-channels/website/public/sha
 def download(url):
     with urllib.request.urlopen(url, timeout=120) as response:
         return response.read()
+
+
+# Characters the SVG embeds from the font; anything else falls back to Arial.
+EMBED_UNICODES = (
+    "U+0020-007E,U+00A0-017F,U+2000-206F,U+2190-21FF,U+00AB,U+00BB"
+)
+
+
+def build_font_embed():
+    """Build font-embed.woff, the unhinted subset embedded in SVG, from font.ttf.
+
+    Needs fontTools (maintainer-only). font.ttf stays whole for Pillow text metrics.
+    """
+    from fontTools import subset
+
+    options = subset.Options()
+    options.flavor = "woff"
+    options.hinting = False
+    options.layout_features = ["*"]
+    options.notdef_outline = True
+    options.name_IDs = [0, 1, 2, 3, 4, 5, 6, 13, 14]
+    font = subset.load_font(str(ASSETS / "font.ttf"), options)
+    subsetter = subset.Subsetter(options)
+    subsetter.populate(unicodes=subset.parse_unicodes(EMBED_UNICODES))
+    subsetter.subset(font)
+    subset.save_font(font, str(ASSETS / "font-embed.woff"), options)
 
 
 def main():
@@ -37,6 +64,7 @@ def main():
             "https://raw.githubusercontent.com/googlefonts/roboto-2/v2.138/LICENSE"
         )
     )
+    build_font_embed()
     archive = download(AWS_URL)
     aws_dir = ASSETS / "aws"
     aws_dir.mkdir(exist_ok=True)
@@ -106,4 +134,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if sys.argv[1:] == ["--font-only"]:  # offline: rebuild the subset from font.ttf
+        build_font_embed()
+    else:
+        main()

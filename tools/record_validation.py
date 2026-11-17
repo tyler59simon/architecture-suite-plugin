@@ -1,9 +1,12 @@
-"""Record test results, separate line/branch coverage, and public-callable execution."""
+"""Record test results, separate line/branch coverage, and public-callable execution.
+
+Writes reports/validation-results.json (tracked summary) and test-results/public-coverage.json
+(ignored; CI uploads test-results as an artifact). The raw coverage.json stays in test-results/.
+"""
 
 import ast
 import json
 from pathlib import Path
-import shutil
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,14 +81,11 @@ def main():
     (ROOT / "reports/validation-results.json").write_text(
         json.dumps(results, indent=2), encoding="utf-8"
     )
-    (ROOT / "reports/public-coverage.json").write_text(
+    (ROOT / "test-results/public-coverage.json").write_text(
         json.dumps(
             {"callables": functions, "uncovered_lines": uncovered_lines}, indent=2
         ),
         encoding="utf-8",
-    )
-    shutil.copyfile(
-        ROOT / "test-results/coverage.json", ROOT / "reports/coverage.json"
     )
     print(json.dumps(results, indent=2))
 

@@ -103,3 +103,58 @@ def test_check_runs_fast_or_full_steps():
     assert fast[-1] == '-m pytest -m not slow -n auto'
     assert "--cov=architecture_suite" in full[-2]
     assert full[-1] == "tools/record_validation.py"
+
+
+def test_package_hosts_refuses_untracked_skill_files(tmp_path, monkeypatch, capsys):
+    import host_packaging
+
+    assert host_packaging.untracked_skill_files(tmp_path) == []  # not a checkout
+    if shutil.which("git"):
+        import subprocess
+
+        subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+        (tmp_path / "skills").mkdir()
+        (tmp_path / "skills/stray.txt").write_text("x")
+        assert host_packaging.untracked_skill_files(tmp_path) == ["skills/stray.txt"]
+    tool = load("package_hosts")  # importing builds nothing
+    monkeypatch.setattr(tool, "untracked_skill_files", lambda root: ["skills/stray.txt"])
+    assert tool.main() == 1
+    assert "skills/stray.txt" in capsys.readouterr().err
+
+
+def test_drop_identical_keeps_only_differing_files(tmp_path):
+    from sample_dedupe import drop_identical
+
+    for name, text in (("a/same.txt", "x"), ("a/diff.txt", "1"), ("b/only.txt", "y")):
+        (tmp_path / "ref" / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / "ref" / name).write_text(text)
+    for name, text in (("a/same.txt", "x"), ("a/diff.txt", "2"), ("b/only.txt", "y"), ("c/new.txt", "z")):
+        (tmp_path / "out" / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / "out" / name).write_text(text)
+    (tmp_path / "out/.manifest.json").write_text("{}")
+    assert drop_identical(tmp_path / "ref", tmp_path / "out") == ["a/same.txt", "b/only.txt"]
+    assert sorted(p.relative_to(tmp_path / "out").as_posix() for p in (tmp_path / "out").rglob("*")
+                  if p.is_file()) == [".manifest.json", "a/diff.txt", "c/new.txt"]
+    assert not (tmp_path / "out/b").exists()
+
+
+def test_examples_have_no_duplicate_files():
+    import hashlib
+
+    seen = {}
+    for path in sorted((ROOT / "examples").rglob("*")):
+        if path.is_file():
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            assert digest not in seen, f"{path} duplicates {seen[digest]}"
+            seen[digest] = path
+
+
+def test_example_markdown_links_resolve():
+    import re
+
+    for doc in sorted((ROOT / "examples").rglob("*.md")):
+        if "ridepulse-repo" in doc.as_posix():
+            continue
+        for target in re.findall(r"\]\(([^)#\s]+)\)", doc.read_text(encoding="utf-8")):
+            if "://" not in target:
+                assert (doc.parent / target).exists(), f"{doc.relative_to(ROOT)} links to {target}"

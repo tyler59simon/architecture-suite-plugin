@@ -1,7 +1,7 @@
 """Fictional Google Cloud example: RidePulse, a real-time ride dispatch platform."""
 
 from copy import deepcopy
-from .plan import compile_plan
+from architecture_suite.plan import compile_plan
 
 SYSTEM_ID = "ridepulse"
 BRIEF = "fictional brief"

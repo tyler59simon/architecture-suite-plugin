@@ -11,7 +11,7 @@ from architecture_suite.plan import (
     parse_plan_document,
     parse_yaml,
 )
-from architecture_suite.draft import render_plan
+from architecture_suite.plan import render_plan
 
 
 def test_model_roundtrip_profiles(model, inputs):

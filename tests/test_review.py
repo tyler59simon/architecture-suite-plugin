@@ -2,7 +2,7 @@ from copy import deepcopy
 import json
 import pytest
 from architecture_suite.cli import main
-from architecture_suite.draft import render_plan
+from architecture_suite.plan import render_plan
 from architecture_suite.review import render_review_markdown, review_exit_code, review_plan
 
 

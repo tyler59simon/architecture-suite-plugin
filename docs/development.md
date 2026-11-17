@@ -36,7 +36,7 @@ python tools/check_wheels.py           # the runtime lock installs from wheels o
 npm audit --audit-level=moderate
 ```
 
-`record_validation.py` writes `reports/`; commit refreshed reports only from a full local run. Temporary test artifacts go to the ignored `test-results/`.
+`record_validation.py` writes the summary `reports/validation-results.json` (commit it only from a full local run) and the raw coverage files to the ignored `test-results/`.
 
 ## Tools
 
@@ -49,17 +49,19 @@ npm audit --audit-level=moderate
 | `tools/build_manifest.py` | Rebuilds `assets/manifest.json` (asset checksums). `--check` compares without writing. |
 | `tools/lock_python.py` | Writes `requirements-lock.txt` and the hashed runtime lock (network). |
 | `tools/check_wheels.py` | Proves the runtime lock installs from wheels on every supported Python and OS (network). |
-| `tools/package_hosts.py` | Builds `dist/hosts/<host>.zip` and `dist/plugin/`. |
+| `tools/package_hosts.py` | Builds `dist/hosts/<host>.zip` and `dist/plugin/`. Fails if `skills/` holds an untracked, unignored file (git checkouts only). |
+| `tools/host_packaging.py` | The archive and plugin-tree builders `package_hosts.py`, `record_packages.py` and the tests import. |
 | `tools/install_skill.py` | Installs the skills and runtime into one or more agent hosts. |
 | `tools/record_validation.py` | Records test results, coverage and public-callable execution in `reports/`; enforces the gate. |
 | `tools/record_packages.py` | Records skill, package and install evidence in `reports/` from checks run here. |
 | `tools/build_schemas.py` | Generates the distributed JSON contracts. |
 | `tools/build_extension_schemas.py` | Generates the versioned extension document schemas. |
-| `tools/setup_assets.py` | Downloads and vendors ELK, Mermaid and other bundled assets (network). |
+| `tools/setup_assets.py` | Downloads and vendors ELK, Mermaid and other bundled assets (network), then builds `assets/font-embed.woff`, the unhinted subset embedded in SVG. `--font-only` rebuilds only the subset from `font.ttf` (needs `fonttools`, offline). |
 | `tools/setup_gcp_assets.py` | Vendors the Google Cloud icon sets from user-supplied downloads. |
 | `tools/generate_samples.py` | Regenerates `examples/starter-systems`. |
 | `tools/generate_payments_samples.py` | Regenerates `examples/payments`. |
 | `tools/generate_gcp_samples.py` | Regenerates `examples/ride-dispatch`. |
+| `tools/examples_gcp.py` | The RidePulse plan that `generate_gcp_samples.py` and the Google Cloud tests share. |
 | `tools/generate_extensions.py` | Regenerates `examples/cli-features` and the fixtures the plugin ships. |
 
 ## Dependencies
@@ -86,7 +88,7 @@ python tools/generate_samples.py           # examples/starter-systems (three sma
 python tools/generate_extensions.py        # examples/cli-features, and the small fixtures the plugin ships
 ```
 
-Samples live in `examples/`, outside the shipped plugin, and are explicitly fictional. To refresh bundled dependencies, run `npm ci --ignore-scripts`, `python tools/setup_assets.py`, `python tools/build_schemas.py` and `python tools/build_extension_schemas.py`. After editing any bundled asset by hand, run `python tools/build_manifest.py`. Review asset sources, licenses and checksums before distributing. The setup utilities access the network; normal generation does not.
+Samples live in `examples/`, outside the shipped plugin, and are explicitly fictional. The generators write a variant only where it differs from its reference (`tools/sample_dedupe.py`), and a test rejects byte-identical files. To refresh bundled dependencies, run `npm ci --ignore-scripts`, `python tools/setup_assets.py`, `python tools/build_schemas.py` and `python tools/build_extension_schemas.py`. After editing any bundled asset by hand, run `python tools/build_manifest.py`. Review asset sources, licenses and checksums before distributing. The setup utilities access the network; normal generation does not.
 
 ## Google Cloud icons
 

@@ -11,12 +11,17 @@ import tempfile
 from . import __version__
 from .analyzer import analyze_repository, draft_plan
 from .aws import gcp_icon_status, verify_assets
-from .draft import render_plan
 from .examples import SCENARIOS, example_model, example_plan
 from .layout_host import layout_graph
 from .model import format_findings, load_model, normalized_model, project_model, validate_model
 from .overview_layout import normalize_overview_styles
-from .plan import compile_plan, errors, lint_plan, parse_plan_document
+from .plan import (
+    compile_plan,
+    errors,
+    lint_plan,
+    parse_plan_document,
+    render_plan,
+)
 from .renderers import (
     ARTIFACT_LEVELS,
     BROWSER_CHOICES,

@@ -1,4 +1,4 @@
-"""Conservative static AWS signals; SDK usage never establishes deployment topology."""
+"""Conservative static AWS and GCP signals; SDK usage never establishes deployment topology."""
 
 from __future__ import annotations
 import re
@@ -8,7 +8,7 @@ from .aws import resolve_service
 # declarations count as infrastructure: `resource "aws_s3_bucket" "x"` (HCL),
 # `"aws_s3_bucket": {` (.tf.json) and `Type: AWS::S3::Bucket`, not references
 # (`aws_s3_bucket.x.id`) or attachment types (bucket policies, Lambda permissions).
-SERVICES = {
+AWS_SERVICES = {
     "Amazon Simple Storage Service": (
         ["aws_s3_bucket"],
         ["S3::Bucket"],
@@ -54,12 +54,12 @@ def declaration_pattern(terraform: list[str], cloud: str, stacks: list[str]) -> 
     )
 
 
-PATTERNS = {
+AWS_PATTERNS = {
     service: (
         declaration_pattern(terraform, "AWS", stacks),
         re.compile(sdk, re.I) if sdk else None,
     )
-    for service, (terraform, stacks, sdk) in SERVICES.items()
+    for service, (terraform, stacks, sdk) in AWS_SERVICES.items()
 }
 
 
@@ -93,4 +93,57 @@ def signals_in(files: dict[str, str], patterns: dict, provider: str = "aws") -> 
 
 
 def detect_aws(files: dict[str, str]) -> list[dict]:
-    return signals_in(files, PATTERNS)
+    return signals_in(files, AWS_PATTERNS)
+
+
+# Service label -> (Terraform resource types, SDK pattern). Labels resolve to catalogue
+# icons. Only declarations (`resource "google_storage_bucket" "x"`) and `gcloud run deploy`
+# count as infrastructure; references and IAM bindings do not.
+GCP_SERVICES = {
+    "Cloud Storage": (
+        ["google_storage_bucket"],
+        r"@google-cloud/storage|google\.cloud(?:\.|\s+import\s+)storage|cloud\.google\.com/go/storage",
+    ),
+    "Cloud Run": (
+        ["google_cloud_run_service", "google_cloud_run_v2_service"],
+        r"@google-cloud/run|google\.cloud(?:\.|\s+import\s+)run",
+    ),
+    "Pub/Sub": (
+        ["google_pubsub_topic", "google_pubsub_subscription"],
+        r"@google-cloud/pubsub|google\.cloud(?:\.|\s+import\s+)pubsub\w*|cloud\.google\.com/go/pubsub",
+    ),
+    "Cloud Spanner": (
+        ["google_spanner_instance", "google_spanner_database"],
+        r"@google-cloud/spanner|google\.cloud(?:\.|\s+import\s+)spanner",
+    ),
+    "BigQuery": (
+        ["google_bigquery_dataset", "google_bigquery_table"],
+        r"@google-cloud/bigquery|google\.cloud(?:\.|\s+import\s+)bigquery",
+    ),
+    "Bigtable": (
+        ["google_bigtable_instance", "google_bigtable_table"],
+        r"@google-cloud/bigtable|google\.cloud(?:\.|\s+import\s+)bigtable",
+    ),
+    "Google Kubernetes Engine": (["google_container_cluster", "google_container_node_pool"], None),
+    "Cloud SQL": (["google_sql_database_instance"], None),
+    "Memorystore": (["google_redis_instance"], None),
+    "Compute Engine": (["google_compute_instance"], None),
+    "Cloud Functions": (["google_cloudfunctions_function", "google_cloudfunctions2_function"], None),
+}
+
+
+def _declaration(terraform: list[str], service: str) -> re.Pattern:
+    pattern = declaration_pattern(terraform, "GCP", []).pattern
+    if service == "Cloud Run":
+        pattern += r"|gcloud run deploy"
+    return re.compile(pattern)
+
+
+GCP_PATTERNS = {
+    service: (_declaration(terraform, service), re.compile(sdk, re.I) if sdk else None)
+    for service, (terraform, sdk) in GCP_SERVICES.items()
+}
+
+
+def detect_gcp(files: dict[str, str]) -> list[dict]:
+    return signals_in(files, GCP_PATTERNS, "gcp")

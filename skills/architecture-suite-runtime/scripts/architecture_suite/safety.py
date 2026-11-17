@@ -84,10 +84,6 @@ def redact(value: str) -> str:
     return SECRET.sub("[REDACTED]", value)
 
 
-def contains_likely_secret(value: str) -> bool:
-    return bool(SECRET.search(value))
-
-
 def detect_prompt_injection(value: str) -> bool:
     return bool(PROMPT_INJECTION.search(value))
 

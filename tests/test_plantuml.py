@@ -38,10 +38,10 @@ def test_each_view_type_includes_the_matching_library(model):
     }
     for kind, library in includes.items():
         assert f"!include <C4/{library}>" in renderers.render_plantuml(model, _view(model, kind))
-    overview = renderers.render_overview_plantuml(model, "small-multiples")
+    overview = renderers.render_plantuml(model, {"type": "overview", "style": "small-multiples"})
     assert "!include <C4/C4_Component>" in overview
     assert re.search(r'^rectangle ".+" as n\d+$', overview, re.M)  # panel titles
-    deployment = renderers.render_aws_deployment_plantuml(model)
+    deployment = renderers.render_plantuml(model, {"type": "deployment"})
     assert "!include <C4/C4_Deployment>" in deployment
     assert re.search(r"^Deployment_Node\(n\d+, ", deployment, re.M)
 
@@ -96,12 +96,6 @@ def test_claims_get_a_dashed_tag(plan):
     assert 'AddRelTag("claim", $lineStyle=DashedLine()' in text
     assert re.search(r'^  Container\w*\(n\d+, ".*«proposed»", \$tags="claim"\)$', text, re.M)
     assert re.search(r'^Rel\(n\d+, n\d+, ".*", \$tags="claim"\)$', text, re.M)
-
-
-def test_gcp_deployment_matches_the_cloud_scene(model):
-    assert renderers.render_gcp_deployment_plantuml(model) == renderers.render_plantuml(
-        model, {"type": "deployment"}
-    )
 
 
 def test_cli_publishes_plantuml_on_request(inputs, tmp_path, capsys):
