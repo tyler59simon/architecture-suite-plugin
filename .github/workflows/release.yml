@@ -39,11 +39,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Install locked tree
-        run: |
-          python -m pip install -r requirements-lock.txt
-          python -m pip install --no-deps -e .
+      # Packaging needs only the standard library and the package source, so there is no
+      # dependency install here (and nothing for a pip cache to hold).
       - name: Tag matches the package version
+        env:
+          PYTHONPATH: skills/architecture-suite-runtime/scripts
         run: |
           version=$(python -c "import architecture_suite; print(architecture_suite.__version__)")
           test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }

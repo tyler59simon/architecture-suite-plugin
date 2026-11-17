@@ -42,6 +42,7 @@ def _container_scene(model):
     return renderers._scene(model, view)
 
 
+@pytest.mark.browser
 def test_vsdx_package_shapes_geometry_and_glue(model):
     scene = _container_scene(model)
     data = renderers.scene_vsdx(scene)
@@ -114,6 +115,7 @@ def test_vsdx_package_shapes_geometry_and_glue(model):
     )
 
 
+@pytest.mark.browser
 def test_vsdx_claim_cues(plan):
     claimed = deepcopy(plan)
     claimed["containers"][2]["status"] = "proposed"
@@ -146,6 +148,8 @@ def test_vsdx_without_icons_needs_no_browser(model, monkeypatch):
     assert render_scene_vsdx(scene) == renderers.scene_vsdx(scene)
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_cli_publishes_visio_on_request(inputs, tmp_path, capsys):
     output = tmp_path / "out"
     argv = ["render", "--model", str(inputs[0]), "--output", str(output)]

@@ -34,6 +34,7 @@ def codes(findings):
     return {f.code for f in findings}
 
 
+@pytest.mark.slow
 def test_both_icon_styles_are_vendored_and_safe():
     entries = aws.catalog("gcp")
     modern = {k for k, v in entries.items() if v["style"] == "modern"}
@@ -163,6 +164,8 @@ def test_gcp_deployment_hierarchy_and_service_validation():
     assert "aws-service" in {f["code"] for f in validate_model(model)}
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_gcp_deployment_rendering():
     model = ridepulse_model()
     specs = dict(renderers.diagram_specs(model, ["executive"]))
@@ -217,6 +220,8 @@ def test_detect_gcp_and_reverse_engineering(tmp_path):
     assert "deployment" not in model
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_cli_cloud_profile_and_icon_style(tmp_path, capsys):
     plan_path = tmp_path / "plan.md"
     plan_path.write_text(render_plan(ridepulse_plan()), encoding="utf-8")
@@ -249,6 +254,7 @@ def test_cli_cloud_profile_and_icon_style(tmp_path, capsys):
     assert (out / "06-gcp-deployment/gcp-deployment.mmd").exists()
 
 
+@pytest.mark.browser
 def test_role_shapes_across_exporters():
     from architecture_suite.examples import example_model
     from architecture_suite.style import Label, box_style, element_visual

@@ -12,6 +12,7 @@ from architecture_suite.style import element_label
 GKE = "GCP-Google-Kubernetes-Engine"
 
 
+@pytest.mark.slow
 def test_bundled_icons_are_complete_and_verified():
     expected = aws.gcp_manifest()
     assert set(expected) == {entry["file"] for entry in aws.catalog("gcp").values()}
@@ -34,6 +35,8 @@ def test_missing_override_folder_renders_without_icons(tmp_path, monkeypatch):
         aws.icon_bytes(GKE)
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_tampered_icon_is_rejected(tmp_path, monkeypatch, capsys):
     rel = aws.catalog("gcp")[GKE]["file"]
     (tmp_path / rel).parent.mkdir(parents=True)
@@ -47,6 +50,8 @@ def test_tampered_icon_is_rejected(tmp_path, monkeypatch, capsys):
     assert "checksum" in json.loads(capsys.readouterr().out)["gcp_icons"]
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_doctor_reports_bundled_icons(capsys):
     assert main(["doctor"]) == 0
     assert json.loads(capsys.readouterr().out)["gcp_icons"].startswith("ok (")

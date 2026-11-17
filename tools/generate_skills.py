@@ -1,11 +1,12 @@
 """Generate the ten SKILL.md files from one shared preamble (keeps them consistent).
 
-Run: python tools/generate_skills.py
+Run: python tools/generate_skills.py          (add --check to compare without writing)
 """
 
+import argparse
 import json
 from pathlib import Path
-import shutil
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
@@ -195,10 +196,11 @@ No Google Cloud API calls are made. Automatic detection with `--cloud-profile gc
 }
 
 
-def main():
+def outputs():
+    """Return {path: bytes} for every generated file."""
+    files = {}
     for name, d in SKILL_DEFS.items():
         folder = SKILLS / name
-        folder.mkdir(parents=True, exist_ok=True)
         # A JSON string is a YAML double-quoted scalar; strict parsers (GitHub
         # Copilot) reject an unquoted description that contains ": ".
         description = json.dumps(d["description"], ensure_ascii=False)
@@ -208,12 +210,32 @@ def main():
             + "\n\n"
             + RUNTIME
         )
-        (folder / "SKILL.md").write_text(text, encoding="utf-8", newline="\n")
+        files[folder / "SKILL.md"] = text.encode("utf-8")
         if d["template"]:
-            (folder / "assets").mkdir(exist_ok=True)
-            shutil.copyfile(TEMPLATE, folder / "assets/architecture-plan-template.md")
+            files[folder / "assets/architecture-plan-template.md"] = TEMPLATE.read_bytes()
+    return files
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--check", action="store_true", help="exit 1 if files differ; write nothing")
+    args = parser.parse_args(argv)
+    files = outputs()
+    if args.check:
+        differing = [
+            path.relative_to(ROOT).as_posix()
+            for path, data in files.items()
+            if not path.is_file() or path.read_bytes() != data
+        ]
+        for path in differing:
+            print("differs:", path, file=sys.stderr)
+        return 1 if differing else 0
+    for path, data in files.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
     print("generated", len(SKILL_DEFS), "skills")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

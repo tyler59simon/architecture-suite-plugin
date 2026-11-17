@@ -54,6 +54,8 @@ def test_both_clouds_share_one_logical_architecture():
             assert any((rendered / cloud / folder).glob("*.png")), (cloud, folder)
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_checked_in_payments_views_reproduce_byte_for_byte():
     """Golden check: rendering changes must not silently alter checked-in diagrams."""
     from architecture_suite.cli import _selected_model

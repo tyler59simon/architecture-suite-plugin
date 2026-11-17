@@ -4,6 +4,7 @@ import io
 import json
 from copy import deepcopy
 
+import pytest
 from PIL import ImageFont
 
 from architecture_suite import cli
@@ -251,6 +252,7 @@ def test_frame_titles_draw_over_edges_and_mermaid_keeps_direction(model):
     assert "flowchart TB" in render_mermaid(down, next(v for v in down["views"] if v["type"] == "container"))
 
 
+@pytest.mark.browser
 def test_small_multiples_pack_panels_into_rows(model):
     scene = build_overview_scene(model, "small-multiples")
     panels = [b for b in scene.boxes if b.role == "panel-title"]

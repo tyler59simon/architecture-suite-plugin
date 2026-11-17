@@ -1,9 +1,9 @@
 {
-  "tests": 323,
+  "tests": 329,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
-  "seconds": 292.283,
+  "seconds": 106.04,
   "line_coverage_percent": 97.75,
   "branch_coverage_percent": 95.5,
   "covered_lines": 3866,

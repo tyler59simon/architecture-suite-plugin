@@ -389,6 +389,7 @@ def _value_paths(value, prefix=()):
         yield from _value_paths(value[0], prefix + (0,))
 
 
+@pytest.mark.slow
 def test_malformed_values_give_findings_not_crashes(plan):
     """Any field with the wrong type is a lint finding; lint, review and compile never raise."""
     from architecture_suite.review import review_plan

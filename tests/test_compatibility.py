@@ -4,6 +4,8 @@ from architecture_suite import aws, examples, plan, renderers, safety
 from architecture_suite.layout_host import layout_graph
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_published_helpers_and_tuple_contracts(model, tmp_path):
     assert (
         json.loads(
@@ -37,6 +39,7 @@ def test_published_helpers_and_tuple_contracts(model, tmp_path):
     assert renderers.find_browser().is_file()
 
 
+@pytest.mark.browser
 def test_browser_and_node_layout_agree(monkeypatch):
     graph = {
         "id": "root",
@@ -72,6 +75,7 @@ def test_scanned_file_contract_and_injection(tmp_path):
     assert "REDACTED" in safety.redact('"password": "sensitivevalue"')
 
 
+@pytest.mark.slow
 def test_every_official_asset_is_self_contained_svg():
     manifest = aws.verify_assets()
     for name, item in aws.catalog().items():
