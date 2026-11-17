@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "skills/architecture-suite-runtime/scripts"
 sys.path.insert(0, str(RUNTIME))
 from architecture_suite.aws import gcp_key, validate_svg  # noqa: E402
+from build_manifest import main as build_manifest  # noqa: E402
 
 ASSETS = RUNTIME / "architecture_suite/assets"
 
@@ -161,12 +162,7 @@ def main():
         "legacy_icons": sum(e["style"] == "legacy" for e in catalog.values()),
     }
     provenance_path.write_bytes(json.dumps(provenance, indent=2).encode())
-    files = {
-        p.relative_to(ASSETS).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in sorted(ASSETS.rglob("*"))
-        if p.is_file() and p.name != "manifest.json"
-    }
-    (ASSETS / "manifest.json").write_bytes(json.dumps(files, indent=2).encode())
+    build_manifest([], ASSETS)
     print(json.dumps(provenance["gcp"], indent=2))
 
 

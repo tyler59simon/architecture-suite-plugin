@@ -53,6 +53,17 @@ def test_build_manifest_check(tmp_path, capsys):
     assert "differs:" in capsys.readouterr().err
 
 
+def test_build_manifest_order_is_the_same_on_every_os(tmp_path):
+    # Windows paths sort case-insensitively, so sorting Path objects put "B.txt" after
+    # "a.txt" there and before it on Linux; the manifest must sort by the POSIX string.
+    tool = load("build_manifest")
+    for name in ("a.txt", "B.txt", "c/D.txt", "c-x.txt"):
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_text(name)
+    keys = list(json.loads(tool.manifest_bytes(tmp_path)[0]))
+    assert keys == sorted(keys) == ["B.txt", "a.txt", "c-x.txt", "c/D.txt"]
+
+
 def test_bump_version_rewrites_every_location(tmp_path, capsys):
     tool = load("bump_version")
     for relative, _, _ in tool.LOCATIONS:

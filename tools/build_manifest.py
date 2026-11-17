@@ -19,11 +19,13 @@ ASSETS = Path(__file__).resolve().parents[1] / (
 
 
 def manifest_bytes(assets=ASSETS):
-    files = {
-        p.relative_to(assets).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in sorted(assets.rglob("*"))
+    # Sort by the POSIX string: Path ordering differs between Windows and Linux.
+    paths = sorted(
+        (p.relative_to(assets).as_posix(), p)
+        for p in assets.rglob("*")
         if p.is_file() and p.name != "manifest.json"
-    }
+    )
+    files = {name: hashlib.sha256(p.read_bytes()).hexdigest() for name, p in paths}
     return json.dumps(files, indent=2).encode(), len(files)
 
 

@@ -9,6 +9,8 @@ import sys
 import urllib.request
 import zipfile
 
+from build_manifest import main as build_manifest
+
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "skills/architecture-suite-runtime/scripts/architecture_suite/assets"
 AWS_URL = "https://d1.awsstatic.com/onedam/marketing-channels/website/public/shared/architecture-icon-release/Icon-package_07312026.5846e92413caa21490223536cc97f1269e44fa92.zip"
@@ -124,12 +126,7 @@ def main():
             }
         )
     previous.write_text(json.dumps(provenance, indent=2), encoding="utf-8")
-    files = {
-        p.relative_to(ASSETS).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in sorted(ASSETS.rglob("*"))
-        if p.is_file() and p.name != "manifest.json"
-    }
-    (ASSETS / "manifest.json").write_text(json.dumps(files, indent=2), encoding="utf-8")
+    build_manifest([], ASSETS)
     print(json.dumps(provenance, indent=2))
 
 
