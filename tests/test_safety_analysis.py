@@ -477,3 +477,44 @@ def test_output_manifest_rollback_and_missing_outputs(tmp_path, monkeypatch):
     with pytest.raises(OSError):
         _publish(output, "c4", {"new.svg": "new"})
     assert (output / "old.svg").is_file() and (output / OUTPUT_MANIFEST).read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "token=abcd1234",
+        'password = "hunter2"',
+        "api_key='sensitivevalue'",
+        '"password": "sensitivevalue"',
+        "secret: Zx81kQp0wLm3",
+        "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6",
+        "postgres://app:pw@db/orders",
+        "AKIA" + "A" * 16,
+    ],
+)
+def test_credentials_are_detected(text):
+    assert "REDACTED" in redact(text)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "login(self, username: str, password: str) -> bool",
+        "refresh(self, token: str)",
+        "Stores the session token: Redis-backed cache",
+        "Reset password: email link",
+        "secret: none",
+    ],
+)
+def test_ordinary_text_is_not_a_credential(text):
+    assert redact(text) == text
+
+
+def test_plan_credential_finding_names_the_field(plan):
+    from architecture_suite.plan import lint_plan
+
+    plan["containers"][0]["description"] = "Calls the API with token=abcd1234"
+    found = [f for f in lint_plan(plan) if f.code == "credential"]
+    assert [f.where for f in found] == ["containers.0.description"]
+    plan["containers"][0]["description"] = "Stores the session token: Redis-backed cache"
+    assert not [f for f in lint_plan(plan) if f.code == "credential"]

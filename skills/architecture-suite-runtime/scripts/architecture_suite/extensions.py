@@ -139,9 +139,15 @@ def _cmd_extension(args):
             print(json.dumps({"ok": True, "name": scenario["name"]}))
             return 0
         scene = scenario_scene(scenario, model)
-        formats = set(args.format.split(",")) if args.format != "all" else set(EXTENSIONS)
+        formats = (
+            {x.strip() for x in args.format.split(",") if x.strip()}
+            if args.format != "all"
+            else set(EXTENSIONS)
+        )
         if not formats or formats - set(EXTENSIONS):
-            raise ValueError("Invalid scenario format")
+            raise ValueError(
+                "Invalid scenario format: use all or " + ",".join(sorted(EXTENSIONS))
+            )
         for fmt in formats:
             name = "scenario." + EXTENSIONS[fmt]
             files[name] = (

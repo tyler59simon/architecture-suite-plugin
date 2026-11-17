@@ -157,3 +157,7 @@ def test_scenario_render_plantuml(model, inputs, tmp_path, capsys):
         "scenario.puml",
     ]
     assert (output / "scenario.puml").read_text(encoding="utf-8") == text
+    # A space after the comma is accepted, as in the C4 commands.
+    spaced = tmp_path / "spaced"
+    assert main(argv + ["--output", str(spaced), "--format", "plantuml, mermaid", "--dry-run"]) == 0
+    assert "scenario.mmd" in json.loads(capsys.readouterr().out)["files"]

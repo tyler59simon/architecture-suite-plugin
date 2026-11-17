@@ -341,6 +341,30 @@ def test_devices_and_off_cloud_nodes_sit_outside_the_cloud_root(plan):
     assert not models.validate_model(model)
 
 
+def test_on_premises_only_deployment_has_no_invented_cloud(plan):
+    plan = deepcopy(plan)
+    container = plan["containers"][0]["name"]
+    plan["deployment"] = {
+        "nodes": [
+            {"id": "dc", "name": "Head office", "type": "off-cloud",
+             "children": [{"id": "srv", "name": "App server", "type": "execution-environment"}]}
+        ],
+        "placements": [{"element": container, "node": "App server"}],
+    }
+    assert not errors(lint_plan(plan))
+    model = compile_plan(plan)[0]
+    assert all(n["type"] != "cloud" for n in model["deployment"]["nodes"])
+    assert not models.validate_model(model)
+
+
+def test_deployment_node_without_a_name(plan):
+    plan = deepcopy(plan)
+    plan["deployment"]["nodes"].append({"id": "edge"})
+    codes = {(f.code, f.where) for f in lint_plan(plan)}
+    assert ("deployment-node-name", "edge") in codes
+    assert "deployment-shape" not in {code for code, _ in codes}
+
+
 def test_inputs_with_a_utf8_bom(plan, model, tmp_path):
     """Windows PowerShell 5.1 writes UTF-8 with a BOM; plans and models must still load."""
     import json
@@ -352,3 +376,43 @@ def test_inputs_with_a_utf8_bom(plan, model, tmp_path):
     path = tmp_path / "model.json"
     path.write_text(json.dumps(model), encoding="utf-8-sig")
     assert models.load_model(path) == model
+
+
+def _value_paths(value, prefix=()):
+    """Paths to every value in nested dicts, and to the first item of each list."""
+    if prefix:
+        yield prefix
+    if isinstance(value, dict):
+        for key, child in value.items():
+            yield from _value_paths(child, prefix + (key,))
+    elif isinstance(value, list) and value:
+        yield from _value_paths(value[0], prefix + (0,))
+
+
+def test_malformed_values_give_findings_not_crashes(plan):
+    """Any field with the wrong type is a lint finding; lint, review and compile never raise."""
+    from architecture_suite.review import review_plan
+
+    base = deepcopy(plan)
+    base["layout"] = {"direction": "down", "views": {"containers": "right"}}
+    base["evidence"] = ["brief.md", {"reference": "adr-001.md"}]
+    for path in _value_paths(base):
+        for wrong in (["x"], 5, {"a": 1}):
+            mutated = deepcopy(base)
+            target = mutated
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = wrong
+            findings = lint_plan(mutated)
+            review_plan(mutated)
+            if not errors(findings):
+                try:
+                    compile_plan(mutated)
+                except PlanError:
+                    pass
+
+
+@pytest.mark.parametrize("evidence", ["docs/adr-001.md", [5], [{"title": "no reference"}], [""]])
+def test_top_level_evidence_is_linted(plan, evidence):
+    plan["evidence"] = evidence
+    assert "evidence" in {f.where for f in lint_plan(plan) if f.blocking}

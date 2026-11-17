@@ -6,8 +6,18 @@
 
 - **Installed Chrome or Edge for PNG:** `architecture-suite --browser auto|playwright|chrome|chrome-cli` (or `ARCHITECTURE_SUITE_BROWSER`) picks the browser for PNG export and Visio icons. `chrome` drives an installed Google Chrome or Microsoft Edge through Playwright; `chrome-cli` uses that browser's own headless mode and needs no Playwright. `auto` (the default) uses Playwright's Chromium when installed, then the installed browser. `ARCHITECTURE_SUITE_CHROME` names a browser executable, and `doctor` reports `browser_engine` and `browser_path`. With an installed browser, `bootstrap.py --no-browser` skips the Chromium download.
 
+### Changed
+
+- **Exit code 4 for internal errors:** an unexpected exception now exits 4 with `internal error: <type>: <message>` instead of a traceback with exit 1, which automation could not tell apart from lint findings.
+- **`plan-lint --strict` catches template placeholders:** `placeholder` (leftover `Replace with ...`, `TBD` or `Unspecified` text) is now a lint advisory, so an unedited template fails `--strict`; `plan-review` reports it with the same question as before.
+
 ### Fixed
 
+- **Plan lint never crashes on wrong types:** list or number values for a code `kind`, `layout.direction`, `layout.views`, an element `name` or `description`, and the top-level `evidence` section now give findings. Top-level `evidence` is linted (a string was split into one evidence entry per character, and a number crashed rendering).
+- **Fewer false credential matches:** `password: str` in a signature and prose such as "session token: Redis-backed cache" are no longer redacted or reported. The plan `credential` finding names the field (for example `containers.0.description`).
+- **No invented cloud:** a deployment whose nodes are all `off-cloud` or `device` no longer gets an "AWS Cloud" (or "Google Cloud") box, and execution environments may sit under an `off-cloud` node.
+- **Clearer lint for nameless deployment nodes:** `deployment-node-name` names the node instead of a generic `deployment-shape` finding.
+- **`scenario-render --format` accepts spaces** after commas, like the C4 commands.
 - **Read-only files no longer fail a publish:** on Windows, a read-only file in an existing output folder made a successful `--confirm-overwrite` publish exit 2 and leave a `.architecture-stage-*-backup` folder behind. Temporary folders are now removed including read-only files; if one still cannot be removed, the publish reports a warning instead of failing.
 - **Edited files that a render replaces are reported:** dry runs and writes list `overwrites_edited`, the generated files edited since the last run that this run writes again.
 - **Upgrades drop removed files:** installing a new version over an old one (`tools/install_skill.py`) no longer keeps files that the new version removed.

@@ -562,6 +562,14 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, RecursionError) as exc:
         print(f"architecture-suite: error: {exc}", file=sys.stderr)
         return 2
+    except Exception as exc:  # a bug, not a finding: never exit 1 (lint findings) or 2
+        print(
+            f"architecture-suite: internal error: {type(exc).__name__}: {exc}\n"
+            "This is a bug in Architecture Suite; please report it with the command "
+            "and input that caused it.",
+            file=sys.stderr,
+        )
+        return 4
     finally:  # --browser applies to this call only, not to later in-process calls
         if previous is None:
             os.environ.pop("ARCHITECTURE_SUITE_BROWSER", None)
