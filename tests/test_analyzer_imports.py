@@ -72,6 +72,14 @@ FILES = {
         "const r = {a: 1} / require('./obj');\n"
     ),
     "web/src/jsx.js": "module.exports = 1\n",
+    # A regex at the start of a file or after an arrow is still a regex.
+    "web/src/arrow.ts": (
+        "const hasTick = value => /[`]/.test(value);\n"
+        "import arrowed from './arrowed';\n"
+    ),
+    "web/src/arrowed.ts": "export default 1\n",
+    "web/src/lead.ts": "/[`]/.test(value);\nimport led from './led';\n",
+    "web/src/led.ts": "export default 1\n",
     "web/src/scale.js": "module.exports = 1\n",
     "web/src/obj.js": "module.exports = 1\n",
     "web/src/tpl.js": "module.exports = 1\n",
@@ -111,4 +119,6 @@ def test_import_flows_follow_real_imports(tmp_path):
         ("web/src/nodes.tsx:1", "web/src/jsx.js"),
         ("web/src/nodes.tsx:2", "web/src/scale.js"),
         ("web/src/nodes.tsx:3", "web/src/obj.js"),
+        ("web/src/arrow.ts:2", "web/src/arrowed.ts"),
+        ("web/src/lead.ts:2", "web/src/led.ts"),
     }

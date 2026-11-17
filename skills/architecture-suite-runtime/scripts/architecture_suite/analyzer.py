@@ -132,8 +132,11 @@ def _mask_js(text: str) -> str:
             end = n if end < 0 else end + 2
             blank(i, end)
             i = end
-        elif c == "/" and (not previous or previous in REGEX_PRECEDERS) and not (
-            previous in "+-" and text[: i].rstrip().endswith(previous * 2)  # n++ / x
+        elif c == "/" and (
+            not previous
+            or previous in REGEX_PRECEDERS
+            and not (previous in {"+", "-"} and text[:i].rstrip().endswith(previous * 2))
+            or previous == ">" and text[:i].rstrip().endswith("=>")  # x => /re/
         ):
             j, in_class = i + 1, False
             while j < n and text[j] != "\n":
