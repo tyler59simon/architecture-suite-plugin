@@ -1,0 +1,19 @@
+{
+  "schema_version": "architecture-rules/v1",
+  "rules": [
+    {
+      "id": "no-direct-payments-from-worker",
+      "effect": "deny",
+      "source": {
+        "ids": [
+          "worker"
+        ]
+      },
+      "destination": {
+        "ids": [
+          "payment-provider"
+        ]
+      }
+    }
+  ]
+}

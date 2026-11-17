@@ -1,0 +1,423 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "architecture-plan/v1"
+    },
+    "title": {
+      "type": "string"
+    },
+    "gcp_icon_style": {
+      "enum": [
+        "auto",
+        "modern",
+        "legacy"
+      ]
+    },
+    "system": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "classification",
+        "scope"
+      ]
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "evidence": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      }
+    },
+    "external_systems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "evidence": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      }
+    },
+    "containers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "evidence": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          },
+          "aws_service": {
+            "type": "string"
+          },
+          "gcp_service": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "technology": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "enum": [
+                    "observed",
+                    "inferred",
+                    "proposed",
+                    "unknown"
+                  ]
+                },
+                "aws_service": {
+                  "type": "string"
+                },
+                "gcp_service": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "technology": {
+                        "type": "string"
+                      },
+                      "group": {
+                        "type": "string"
+                      },
+                      "evidence": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "status": {
+                        "enum": [
+                          "observed",
+                          "inferred",
+                          "proposed",
+                          "unknown"
+                        ]
+                      },
+                      "kind": {
+                        "enum": [
+                          "class",
+                          "interface",
+                          "module",
+                          "function"
+                        ]
+                      },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "members"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "description"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "technology": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "evidence": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "observed",
+              "inferred",
+              "proposed",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "description"
+        ]
+      }
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "enum": [
+            "auto",
+            "down",
+            "right"
+          ]
+        },
+        "views": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "auto",
+              "down",
+              "right"
+            ]
+          }
+        }
+      },
+      "required": []
+    },
+    "deployment": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "array"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "system",
+    "containers",
+    "flows"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false
+}
