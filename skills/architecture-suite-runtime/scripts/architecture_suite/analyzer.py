@@ -87,19 +87,39 @@ JS_IMPORT = re.compile(
 JVM_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+)", re.M)
 
 
+# A `/` after one of these (or at the start) begins a regex literal, not a division.
+REGEX_PRECEDERS = set("(,=:[!&|?{};+-*%<>~^")
+
+
 def _mask_js(text: str) -> str:
-    """The source with comments and the contents of string and template literals replaced
-    by spaces (newlines kept), so offsets and line numbers match the original."""
+    """The source with comments and the contents of string, template and regex literals
+    replaced by spaces (newlines kept), so offsets and line numbers match the original.
+    Template substitutions (`${require('./x')}`) stay code."""
     out, i, n = list(text), 0, len(text)
+    stack = []  # "`" template text, "${" substitution, "{" brace inside a substitution
+    previous = ""  # last significant code character
 
     def blank(start, end):
-        for k in range(start, end):
+        for k in range(start, min(end, n)):
             if out[k] != "\n":
                 out[k] = " "
 
     while i < n:
         c, nxt = text[i], text[i + 1 : i + 2]
-        if c == "/" and nxt == "/":
+        if stack and stack[-1] == "`":  # inside template text
+            if c == "\\":
+                blank(i, i + 2)
+                i += 2
+            elif c == "`":
+                stack.pop()
+                previous, i = "`", i + 1
+            elif c == "$" and nxt == "{":
+                stack.append("${")
+                previous, i = "{", i + 2
+            else:
+                blank(i, i + 1)
+                i += 1
+        elif c == "/" and nxt == "/":
             end = text.find("\n", i)
             end = n if end < 0 else end
             blank(i, end)
@@ -109,13 +129,36 @@ def _mask_js(text: str) -> str:
             end = n if end < 0 else end + 2
             blank(i, end)
             i = end
-        elif c in "'\"`":
+        elif c == "/" and (not previous or previous in REGEX_PRECEDERS):
+            j, in_class = i + 1, False
+            while j < n and text[j] != "\n":
+                if text[j] == "\\":
+                    j += 2
+                    continue
+                if text[j] == "/" and not in_class:
+                    break
+                in_class = (in_class or text[j] == "[") and text[j] != "]"
+                j += 1
+            blank(i + 1, j)
+            previous, i = "/", j + 1
+        elif c in "'\"":
             j = i + 1
-            while j < n and text[j] != c and (c == "`" or text[j] != "\n"):
+            while j < n and text[j] != c and text[j] != "\n":
                 j += 2 if text[j] == "\\" else 1
-            blank(i + 1, min(j, n))
-            i = j + 1
+            blank(i + 1, j)
+            previous, i = c, j + 1
+        elif c == "`":
+            stack.append("`")
+            i += 1
+        elif c == "{" and stack:
+            stack.append("{")
+            previous, i = "{", i + 1
+        elif c == "}" and stack and stack[-1] in {"{", "${"}:
+            stack.pop()  # closing "${" returns to the template text
+            previous, i = "}", i + 1
         else:
+            if not c.isspace():
+                previous = c
             i += 1
     return "".join(out)
 

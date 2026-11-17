@@ -56,6 +56,17 @@ FILES = {
         "const path = `${base}/import x from './helper'`\n"
     ),
     "web/src/real.ts": "export default 1\n",
+    # A backtick in a regex literal is not a template; template substitutions are code.
+    "web/src/regex.ts": (
+        "const ticks = /[`]/g;\n"
+        "import after from './after';\n"
+        "const text = `Name: ${require('./tpl')} and ${ {a: 1}.a }`;\n"
+        "const half = total / 2; const quote = '\"';\n"
+        "import last from './last';\n"
+    ),
+    "web/src/after.ts": "export default 1\n",
+    "web/src/tpl.js": "module.exports = 1\n",
+    "web/src/last.ts": "export default 1\n",
     "web/src/helper.ts": "export default 1\n",
     # A Python namespace folder: index.py is not the package, so `import helpers` stays unlinked.
     "app/jobs.py": "import helpers\n",
@@ -85,4 +96,7 @@ def test_import_flows_follow_real_imports(tmp_path):
         ("web/src/other.ts:3", "web/src/a.js"),
         ("web/src/other.ts:3", "web/src/b.js"),  # second require on the same line
         ("web/src/strings.ts:2", "web/src/real.ts"),
+        ("web/src/regex.ts:2", "web/src/after.ts"),
+        ("web/src/regex.ts:3", "web/src/tpl.js"),
+        ("web/src/regex.ts:5", "web/src/last.ts"),
     }
