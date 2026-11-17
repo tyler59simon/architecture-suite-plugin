@@ -5,7 +5,6 @@ or completes a plan; each finding carries a question for the person who knows th
 """
 
 from __future__ import annotations
-import re
 from .model import CLAIM_STATUSES, project_model, slugify, validate_model
 from .plan import ADVISORY, _entries, compile_plan, errors, lint_plan
 
@@ -21,8 +20,6 @@ ELEMENT_LEVELS = {
     "code": "code",
 }
 CROWDED_VIEW = 35  # boxes; matches the layout readability advisory
-# Values left over from assets/architecture-plan-template.md or common stand-ins.
-PLACEHOLDER = re.compile(r"(replace with\b|unspecified$|tbd$|todo$|\?+$)", re.IGNORECASE)
 
 
 def _percent(part: int, whole: int) -> int | None:
@@ -40,7 +37,9 @@ def _finding(code, message, where="", level="plan", question="", severity=ADVISO
     }
 
 
-def _lint_question(code: str, where: str, flows: list) -> str:
+def _lint_question(code: str, where: str, flows: list, message: str = "") -> str:
+    if code == "placeholder":  # message: "<field> still holds template placeholder text"
+        return f"What is the real {message.split(' ', 1)[0]} of {where!r}?"
     if code == "unevidenced-element":
         return f"What document, file or decision shows {where!r}, or is it only proposed?"
     if code == "unevidenced-flow" and where.isdigit() and int(where) < len(flows):
@@ -61,7 +60,9 @@ def review_plan(plan: dict, gcp_icon_style: str | None = None) -> dict:
         if isinstance(plan, dict)
         else []
     )
-    level_of = {i.get("name"): ELEMENT_LEVELS[t] for i, t in items}
+    level_of = {
+        i["name"]: ELEMENT_LEVELS[t] for i, t in items if isinstance(i.get("name"), str)
+    }
     flows = plan.get("flows") if isinstance(plan, dict) else None
     flows = flows if isinstance(flows, list) else []
     findings = [
@@ -70,7 +71,7 @@ def review_plan(plan: dict, gcp_icon_style: str | None = None) -> dict:
             f.message,
             f.where,
             level_of.get(f.where, "plan"),
-            _lint_question(f.code, f.where, flows),
+            _lint_question(f.code, f.where, flows, f.message),
             f.severity,
         )
         for f in lint
@@ -225,20 +226,6 @@ def review_plan(plan: dict, gcp_icon_style: str | None = None) -> dict:
                     f"In one sentence, what does {item['name']!r} do?",
                 )
             )
-    for item, typ in items:
-        for key in ("description", "technology", "scope", "evidence"):
-            values = item.get(key)
-            for value in [values] if isinstance(values, str) else values or []:
-                if isinstance(value, str) and PLACEHOLDER.match(value.strip()):
-                    add(
-                        _finding(
-                            "placeholder",
-                            f"{key} still holds template placeholder text",
-                            item["name"],
-                            ELEMENT_LEVELS[typ],
-                            f"What is the real {key} of {item['name']!r}?",
-                        )
-                    )
     if "deployment" in model:
         placed = {p["element_id"] for p in model["deployment"].get("placements", [])}
         for e in model["elements"]:

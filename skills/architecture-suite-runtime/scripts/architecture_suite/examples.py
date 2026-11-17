@@ -169,7 +169,3 @@ def example_plan(index: int = 0) -> dict:
 
 def example_model(index: int = 0) -> dict:
     return compile_plan(example_plan(index))[0]
-
-
-def all_example_models() -> list[tuple[dict, dict]]:
-    return [(scenario, example_model(i)) for i, scenario in enumerate(SCENARIOS)]

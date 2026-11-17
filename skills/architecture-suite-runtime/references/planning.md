@@ -1,6 +1,6 @@
 # Architecture planning guide
 
-How to build a `plan.md` that produces accurate diagrams. The `architecture-plan` skill follows this guide, and `architecture-suite plan-review` checks the result. Plan format: `runtime.md` (Plans) and `assets/architecture-plan-template.md`.
+How to build a `plan.md` that produces accurate diagrams. The `architecture-plan` skill follows this guide, and `architecture-suite plan-review` checks the result. Plan format: `runtime.md` (Plan and schema) and `assets/architecture-plan-template.md`.
 
 ## Choose target levels first
 

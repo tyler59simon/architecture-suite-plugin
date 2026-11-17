@@ -18,6 +18,7 @@ KEY = (
     "Enclosing frame = named scope or deployment boundary",
     "Arrow = directed dependency; label states its purpose",
 )
+SEQUENCE_ARROW = "Arrow = message, in time order from top to bottom"
 CLAIM_KEY = "Dotted outline or arrow, «inferred»/«proposed»/«unknown» = claim not observed"
 
 
@@ -30,7 +31,8 @@ def _claimed(item) -> bool:
 
 def _key(scene) -> tuple:
     claims = any(_claimed(b) for b in scene.boxes) or any(_claimed(e) for e in scene.edges)
-    return KEY + ((CLAIM_KEY,) if claims else ())
+    key = KEY[:3] + (SEQUENCE_ARROW,) if scene.sequence else KEY
+    return key + ((CLAIM_KEY,) if claims else ())
 
 
 def _placements(box):
@@ -56,11 +58,11 @@ def _cylinder(box, stroke, fill, dash="") -> str:
 
 
 def render_scene_svg(scene: Scene) -> str:
-    font = base64.b64encode((ASSETS / "font.ttf").read_bytes()).decode()
+    font = base64.b64encode((ASSETS / "font-embed.woff").read_bytes()).decode()
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{scene.width}" height="{scene.height}" viewBox="0 0 {scene.width} {scene.height}" role="img">',
         f"<title>{html.escape(scene.title)}</title>",
-        f'<defs><style>@font-face{{font-family:Suite;src:url(data:font/ttf;base64,{font})}}text{{font-family:Suite,Arial,sans-serif;fill:#172b4d}}</style><marker id="__suite_arrow__" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526580"/></marker></defs>',
+        f'<defs><style>@font-face{{font-family:Suite;src:url(data:font/woff;base64,{font})}}text{{font-family:Suite,Arial,sans-serif;fill:#172b4d}}</style><marker id="__suite_arrow__" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#526580"/></marker></defs>',
         f'<rect width="{scene.width}" height="{scene.height}" fill="white"/>',
     ]
     for i, line in enumerate(scene.title_lines):

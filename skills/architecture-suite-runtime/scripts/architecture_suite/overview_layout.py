@@ -3,8 +3,7 @@
 from copy import deepcopy
 import math
 from .model import ELEMENT_TYPE_DEPTH
-from .c4_layout import build_view_scene_elk, choose_scene
-from .scene import Scene
+from .scene import Scene, build_view_scene_elk, choose_scene
 
 # Below the 6000 px PNG cap, leaving room for the page margin.
 SMALL_MULTIPLES_MAX_WIDTH = 5600
@@ -67,7 +66,7 @@ def overview_data(model: dict, style: str):
                 ELEMENT_TYPE_DEPTH[by_id[x]["type"]]
                 for x in (r["source_id"], r["destination_id"])
             )
-            for flow in r.get("flow_ids", [r["id"]]):
+            for flow in r.get("flow_ids") or [r["id"]]:  # [] means none recorded
                 if flow not in selected or rank > selected[flow][0]:
                     selected[flow] = (rank, r)
     relationships = (

@@ -32,9 +32,13 @@ def layout_graph(graph: dict, *, timeout_seconds: float = 120.0) -> dict:
 
 
 def _browser_layout(graph, timeout):
-    from .renderers import browser_page
+    from .renderers import ChromeCli, browser_page
 
     with browser_page() as page:
+        if isinstance(page, ChromeCli):
+            raise SafetyError(
+                "Browser layout needs Playwright; install Node.js or the playwright package"
+            )
         page.set_default_timeout(timeout * 1000)
         page.set_content("<html><body></body></html>")
         page.add_script_tag(path=str(ASSETS / "elk.bundled.js"))

@@ -11,6 +11,9 @@ from .aws import PROVIDERS, normalize_gcp_icon_style, resolve_service
 from .model import CLAIM_STATUSES, derive_views, slugify, validate_model
 from .safety import SECRET, safe_text
 
+# Values left over from assets/architecture-plan-template.md or common stand-ins.
+PLACEHOLDER = re.compile(r"(replace with\b|unspecified$|tbd$|todo$|\?+$)", re.IGNORECASE)
+
 PLAN_SCHEMA_VERSION = "architecture-plan/v1"
 SECTION_KEYS = (
     "system",
@@ -51,7 +54,8 @@ def _mapping(loader, node):
 _Loader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _mapping)
 
 
-def parse_yaml(source: str) -> Any:
+def parse_yaml(source: str, line_offset: int = 0) -> Any:
+    """Parse YAML; `line_offset` is the number of file lines before the first line of `source`."""
     if len(source) > 2_000_000:
         raise PlanError("Plan exceeds 2 MB")
     try:
@@ -63,29 +67,38 @@ def parse_yaml(source: str) -> Any:
                 raise PlanError("YAML anchors, aliases, and tags are unsupported")
         return yaml.load(source, Loader=_Loader)
     except (yaml.YAMLError, RecursionError) as exc:
+        mark = getattr(exc, "problem_mark", None)
+        if mark is not None:
+            problem = getattr(exc, "problem", None) or str(exc)
+            raise PlanError(
+                f"Malformed YAML at line {line_offset + mark.line + 1}: {problem[:200]}"
+            ) from exc
         raise PlanError(f"Malformed YAML: {str(exc)[:200]}") from exc
 
 
 def parse_plan_document(source: str) -> dict:
+    source = source.removeprefix("\ufeff")  # editors on Windows may add a BOM
     if len(source) > 2_000_000:
         raise PlanError("Plan exceeds 2 MB")
     blocks = []
     current = None
-    for line in source.splitlines():
+    start = 0
+    for number, line in enumerate(source.splitlines(), 1):
         if re.fullmatch(r"\s*```ya?ml\s*", line):
             if current is not None:
                 raise PlanError("Unclosed YAML fence")
             current = []
+            start = number  # the block's first line is the next file line
         elif current is not None and line.strip() == "```":
-            blocks.append("\n".join(current))
+            blocks.append(("\n".join(current), start))
             current = None
         elif current is not None:
             current.append(line)
     if current is not None or not blocks:
         raise PlanError("Expected closed fenced YAML blocks")
     result = {}
-    for block in blocks:
-        value = parse_yaml(block)
+    for block, offset in blocks:
+        value = parse_yaml(block, offset)
         if value in (None, {}, []):
             continue
         if not isinstance(value, dict):
@@ -170,7 +183,12 @@ def _deployment(deployment: dict, names: dict, provider: str = "aws") -> dict:
     nodes = []
     entries = deployment.get("nodes", [])
     cloud = None
-    if not any(n.get("type") == "cloud" for n in entries):
+    # Top-level devices and off-cloud locations (a shopper's browser, an on-premises site)
+    # sit beside the cloud root, not inside it.
+    outside = [n for n in entries if n.get("type") in OFF_CLOUD_TYPES]
+    # Supply a cloud root only when something goes in it: an on-premises-only
+    # deployment gets no invented cloud.
+    if len(outside) < len(entries) and not any(n.get("type") == "cloud" for n in entries):
         cloud, cloud_name = CLOUD_ROOTS[provider]
         nodes.append({"id": cloud, "name": cloud_name, "type": "cloud"})
 
@@ -184,9 +202,6 @@ def _deployment(deployment: dict, names: dict, provider: str = "aws") -> dict:
             nodes.append(node)
             walk(item.get("children", item.get("nodes", [])), ident)
 
-    # Top-level devices and off-cloud locations (a shopper's browser, an on-premises site)
-    # sit beside the supplied cloud root, not inside it.
-    outside = [n for n in entries if n.get("type") in OFF_CLOUD_TYPES]
     walk([n for n in entries if n not in outside], cloud)
     walk(outside, None)
     node_names = {n["name"]: n["id"] for n in nodes}
@@ -234,9 +249,22 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         "flows",
         "assumptions",
         "gaps",
+        "evidence",
     ):
         if section in plan and not isinstance(plan[section], list):
             add("section-list", f"{section} must be a list", section)
+    if isinstance(plan.get("evidence"), list) and not all(
+        isinstance(ref, str) and ref.strip()
+        or isinstance(ref, dict)
+        and isinstance(ref.get("reference"), str)
+        and ref["reference"].strip()
+        for ref in plan["evidence"]
+    ):
+        add(
+            "evidence-type",
+            "Evidence entries must be references or mappings with a reference",
+            "evidence",
+        )
     for section in ("containers", "flows"):
         if section not in plan:
             add("section-required", f"{section} is required", section)
@@ -320,12 +348,12 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             if nested in item and not isinstance(item[nested], list):
                 add("nested-list", f"{nested} must be a list", name)
         if typ == "code":
-            if item.get("kind", "class") not in {
+            if item.get("kind", "class") not in (
                 "class",
                 "interface",
                 "module",
                 "function",
-            }:
+            ):
                 add("code-kind", "Unsupported code kind", name)
             if (
                 not isinstance(item.get("members"), list)
@@ -333,6 +361,16 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                 or not all(isinstance(m, str) and m.strip() for m in item["members"])
             ):
                 add("code-members", "At least one UML member required", name)
+        for key in ("description", "technology", "scope", "evidence"):
+            values = item.get(key)
+            for value in [values] if isinstance(values, str) else values if isinstance(values, list) else []:
+                if isinstance(value, str) and PLACEHOLDER.match(value.strip()):
+                    add(
+                        "placeholder",
+                        f"{key} still holds template placeholder text",
+                        name,
+                        ADVISORY,
+                    )
         if item.get("group"):
             groups.setdefault((parent, str(item["group"])), []).append(name)
     for group, members in groups.items():
@@ -415,7 +453,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
     if (
         not isinstance(layout, dict)
         or set(layout) - {"direction", "views"}
-        or layout.get("direction", "auto") not in {"auto", "down", "right"}
+        or layout.get("direction", "auto") not in ("auto", "down", "right")
         or not isinstance(layout.get("views", {}), dict)
     ):
         add(
@@ -427,7 +465,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         for v, direction in layout.get("views", {}).items():
             if v not in valid_views:
                 add("unknown-view", "Layout names an absent view", v)
-            if direction not in {"auto", "down", "right"}:
+            if direction not in ("auto", "down", "right"):
                 add("layout-direction", "Unknown layout direction", v)
     if (
         isinstance(plan.get("deployment"), dict)
@@ -450,7 +488,22 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                     str(item.get("name", "")),
                     ADVISORY,
                 )
-    if "deployment" in plan:
+    def unnamed_nodes(items):
+        for item in items if isinstance(items, list) else []:
+            if isinstance(item, dict):
+                if not isinstance(item.get("name"), str) or not item["name"].strip():
+                    yield str(item.get("id", ""))
+                yield from unnamed_nodes(item.get("children", item.get("nodes", [])))
+
+    deployment_section = plan.get("deployment")
+    unnamed = list(
+        unnamed_nodes(deployment_section.get("nodes"))
+        if isinstance(deployment_section, dict)
+        else []
+    )
+    for ident in unnamed:
+        add("deployment-node-name", "Every deployment node needs a name", ident)
+    if "deployment" in plan and not unnamed:
         try:
             deployment = _deployment(plan["deployment"], names, plan_provider(plan))
             dummy = {
@@ -477,8 +530,30 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         except (KeyError, TypeError, AttributeError, RecursionError):
             add("deployment-shape", "Invalid deployment mapping")
     if SECRET.search(json.dumps(plan, default=str)):
-        add("credential", "Remove credential-like values")
+        add(
+            "credential",
+            "Remove credential-like values",
+            _credential_path(plan) or "plan",
+        )
     return findings
+
+
+def _credential_path(value, path="") -> str:
+    """Dotted path (e.g. containers.0.description) of the first credential-like value."""
+    items = (
+        value.items() if isinstance(value, dict)
+        else enumerate(value) if isinstance(value, list)
+        else ()
+    )
+    for key, child in items:
+        where = f"{path}.{key}" if path else str(key)
+        if isinstance(child, (dict, list)):
+            found = _credential_path(child, where)
+            if found:
+                return found
+        elif SECRET.search(json.dumps({str(key): child}, default=str)):
+            return where
+    return ""
 
 
 @dataclass
@@ -633,3 +708,11 @@ def compile_plan(
 
 def slug(value: str) -> str:
     return slugify(value)
+
+
+def render_plan(plan: dict) -> str:
+    return (
+        "# Architecture plan\n\nDrafted by bounded static analysis. Review candidate boundaries and gaps before publishing.\n\n```yaml\n"
+        + yaml.safe_dump(plan, allow_unicode=True, sort_keys=False)
+        + "```\n"
+    )

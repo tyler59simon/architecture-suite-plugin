@@ -64,24 +64,23 @@ def view_id_for(view_type: str, boundary_id: str) -> str:
     return f"{view_type}-{boundary_id}"
 
 
-def load_model(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
+def load_model(path: Path, label: str = "") -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8-sig"))  # tolerate a BOM
+    except json.JSONDecodeError as exc:
+        hint = (
+            "; expected architecture-model.json from plan-render --emit-model or analyze"
+            if label == "--model"
+            else ""
+        )
+        where = f"{label}: " if label else ""
+        raise ValueError(
+            f"{where}{path} is not valid JSON (line {exc.lineno}, column {exc.colno}): "
+            f"{exc.msg}{hint}"
+        ) from exc
     if not isinstance(value, dict):
         raise ValueError("Architecture model root must be a JSON object")
     return value
-
-
-def model_as_json(model: dict) -> str:
-    return (
-        json.dumps(
-            normalized_model(model), indent=2, sort_keys=True, ensure_ascii=False
-        )
-        + "\n"
-    )
-
-
-def error_findings(findings: list[dict]) -> list[dict]:
-    return [f for f in findings if f.get("severity", "error") == "error"]
 
 
 def normalize_validation_profile(profile: str = "full") -> str:
@@ -273,6 +272,18 @@ def derive_views(
             .get(view["id"], (layout or {}).get("direction", "auto"))
         )
     return views, relationships, merges
+
+
+def format_findings(findings: list[dict], limit: int = 8) -> str:
+    """One finding per line: "code: message (path)"."""
+    lines = [
+        f"{f.get('code', '')}: {f.get('message', '')}"
+        + (f" ({f['path']})" if f.get("path") else "")
+        for f in findings[:limit]
+    ]
+    if len(findings) > limit:
+        lines.append(f"... and {len(findings) - limit} more")
+    return "\n".join(lines)
 
 
 def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
@@ -556,7 +567,7 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                     "availability-zone": {"vpc"},
                     "subnet": {"availability-zone", "vpc"},
                     "cluster": {"subnet", "availability-zone", "vpc", "region"},
-                    "execution-environment": {"device", "execution-environment"},
+                    "execution-environment": {"device", "off-cloud", "execution-environment"},
                 }
                 if deployment.get("provider") == "gcp":
                     parent_types = {
@@ -568,7 +579,7 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                         "zone": {"region", "vpc"},
                         "subnet": {"region", "zone", "vpc"},
                         "cluster": {"subnet", "zone", "vpc", "region", "project"},
-                        "execution-environment": {"device", "execution-environment"},
+                        "execution-environment": {"device", "off-cloud", "execution-environment"},
                     }
                 if (
                     node.get("type") in parent_types
