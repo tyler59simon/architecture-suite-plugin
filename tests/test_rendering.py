@@ -468,6 +468,21 @@ def test_claim_status_cues_in_every_format(plan):
         assert page.evaluate("async s=>!!(await mermaid.parse(s))", mermaid)
 
 
+def test_measurement_matches_embedded_font_coverage():
+    import architecture_suite
+    from architecture_suite.style import EMBEDDED_MAX, text_width
+    from fontTools.ttLib import TTFont
+
+    assets = Path(architecture_suite.__file__).parent / "assets"
+    embedded = TTFont(assets / "font-embed.woff").getBestCmap()
+    full = TTFont(assets / "font.ttf").getBestCmap()
+    # Everything measured as Roboto is in the embedded subset...
+    assert not [hex(c) for c in full if 0x20 <= c <= EMBEDDED_MAX and c not in embedded]
+    # ...and text outside it (here Cyrillic, which full Roboto has) gets the fallback bound.
+    assert 0x0416 in full and 0x0416 not in embedded
+    assert text_width("ЖЖЖЖЖЖ", 13) >= 6 * 13 * 1.3
+
+
 def test_embedded_font_covers_runtime_literals_and_stays_small(model):
     import base64
     import io
