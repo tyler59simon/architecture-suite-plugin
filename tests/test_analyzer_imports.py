@@ -46,6 +46,17 @@ FILES = {
     "web/src/a.js": "module.exports = 1\n",
     "web/src/b.js": "module.exports = 2\n",
     "web/src/gone.ts": "export default 1\n",
+    # Comment markers and import text inside string literals are not code.
+    "web/src/strings.ts": (
+        'const include = "src/**";\n'
+        "import real from './real';\n"
+        'const exclude = "**/*.test.ts";\n'
+        "const example = \"import { helper } from './helper'\";\n"
+        "const label = \"ok\"// import helper from './helper'\n"
+        "const path = `${base}/import x from './helper'`\n"
+    ),
+    "web/src/real.ts": "export default 1\n",
+    "web/src/helper.ts": "export default 1\n",
     # A Python namespace folder: index.py is not the package, so `import helpers` stays unlinked.
     "app/jobs.py": "import helpers\n",
     "app/helpers/index.py": "X = 1\n",
@@ -73,4 +84,5 @@ def test_import_flows_follow_real_imports(tmp_path):
         ("web/src/other.ts:2", "web/src/utils2.ts"),  # declaration over two lines
         ("web/src/other.ts:3", "web/src/a.js"),
         ("web/src/other.ts:3", "web/src/b.js"),  # second require on the same line
+        ("web/src/strings.ts:2", "web/src/real.ts"),
     }

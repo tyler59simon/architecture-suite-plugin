@@ -74,17 +74,50 @@ def _source_roots(files: dict[str, str]) -> tuple[dict, list[str], list[str]]:
 
 
 JS_SUFFIXES = (".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx")
-# Run on source with comments removed. An import or export declaration may span lines
+# Run on _mask_js output, where comments and string contents are blank, so imports
+# quoted in strings or comments never match; the specifier is read back from the
+# original text at the same offsets. An import or export declaration may span lines
 # (`import {\n a\n} from './x'`); a declaration without `from` stops at its first quote
 # or semicolon, so `export const label = 'store'` is not an import.
 JS_IMPORT = re.compile(
-    r"\bimport\s*['\"]([^'\"\n]+)['\"]"
-    r"|\b(?:import|export)\b[^'\";]*?\bfrom\s*['\"]([^'\"\n]+)['\"]"
-    r"|\brequire\(\s*['\"]([^'\"\n]+)['\"]\s*\)"
+    r"\bimport\s*['\"]([^'\"\n]*)['\"]"
+    r"|\b(?:import|export)\b[^'\";]*?\bfrom\s*['\"]([^'\"\n]*)['\"]"
+    r"|\brequire\(\s*['\"]([^'\"\n]*)['\"]\s*\)"
 )
-JS_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
-JS_LINE_COMMENT = re.compile(r"(^|[^:'\"\\])//[^\n]*", re.M)  # not the // in http://
 JVM_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+)", re.M)
+
+
+def _mask_js(text: str) -> str:
+    """The source with comments and the contents of string and template literals replaced
+    by spaces (newlines kept), so offsets and line numbers match the original."""
+    out, i, n = list(text), 0, len(text)
+
+    def blank(start, end):
+        for k in range(start, end):
+            if out[k] != "\n":
+                out[k] = " "
+
+    while i < n:
+        c, nxt = text[i], text[i + 1 : i + 2]
+        if c == "/" and nxt == "/":
+            end = text.find("\n", i)
+            end = n if end < 0 else end
+            blank(i, end)
+            i = end
+        elif c == "/" and nxt == "*":
+            end = text.find("*/", i + 2)
+            end = n if end < 0 else end + 2
+            blank(i, end)
+            i = end
+        elif c in "'\"`":
+            j = i + 1
+            while j < n and text[j] != c and (c == "`" or text[j] != "\n"):
+                j += 2 if text[j] == "\\" else 1
+            blank(i + 1, min(j, n))
+            i = j + 1
+        else:
+            i += 1
+    return "".join(out)
 
 
 def _language(path: str) -> str:
@@ -143,11 +176,12 @@ def _imports(path: str, text: str) -> list[tuple[list[str], bool, int]]:
                     found.append(([submodule, base] if base else [submodule], exact, node.lineno))
     elif suffix in JS_SUFFIXES:
         # Blank comments out but keep their newlines, so line numbers stay true.
-        code = JS_BLOCK_COMMENT.sub(lambda m: "\n" * m.group().count("\n"), text)
-        code = JS_LINE_COMMENT.sub(r"\1", code)
+        code = _mask_js(text)
         for match in JS_IMPORT.finditer(code):
-            group = next(i for i, value in enumerate(match.groups(), 1) if value)
-            specifier = match.group(group)
+            group = next(i for i, value in enumerate(match.groups(), 1) if value is not None)
+            specifier = text[match.start(group) : match.end(group)]
+            if not specifier.strip():
+                continue
             line = code.count("\n", 0, match.start(group)) + 1  # the line naming the module
             relative = specifier.startswith(".")
             if relative:
