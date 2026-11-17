@@ -34,22 +34,25 @@ def current_version(root=ROOT):
 
 
 def bump(new, root=ROOT, write=True):
-    """Rewrite every version location; return the relative paths that changed."""
+    """Rewrite every version location; return the relative paths that changed.
+
+    Every location is checked before any file is written, so a mismatch leaves the
+    checkout untouched."""
     old = current_version(root)
-    changed = []
+    updates = {}
     for relative, pattern, count in LOCATIONS:
-        path = root / relative
-        text = path.read_bytes().decode("utf-8")
+        text = (root / relative).read_bytes().decode("utf-8")
         updated, found = re.subn(
             pattern.replace("{old}", re.escape(old)), rf"\g<1>{new}\g<3>", text, count=count
         )
         if found != count:
             raise SystemExit(f"{relative}: expected {count} occurrence(s) of {old}, found {found}")
         if updated != text:
-            changed.append(relative)
-            if write:
-                path.write_bytes(updated.encode("utf-8"))
-    return changed
+            updates[relative] = updated
+    if write:
+        for relative, updated in updates.items():
+            (root / relative).write_bytes(updated.encode("utf-8"))
+    return list(updates)
 
 
 def main(argv=None):

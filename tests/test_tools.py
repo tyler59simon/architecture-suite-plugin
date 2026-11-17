@@ -69,6 +69,20 @@ def test_bump_version_rewrites_every_location(tmp_path, capsys):
     assert f'"{__version__}"' not in (tmp_path / "pyproject.toml").read_text(encoding="utf-8")
 
 
+def test_bump_version_writes_nothing_when_a_later_location_mismatches(tmp_path):
+    tool = load("bump_version")
+    for relative, _, _ in tool.LOCATIONS:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
+    readme = tmp_path / "README.md"  # the last location: already edited by hand
+    readme.write_text(readme.read_text(encoding="utf-8").replace(__version__, "0.0.1"), encoding="utf-8")
+    before = {relative: (tmp_path / relative).read_bytes() for relative, _, _ in tool.LOCATIONS}
+    with pytest.raises(SystemExit, match="README.md"):
+        tool.bump("9.8.7", root=tmp_path)
+    assert {r: (tmp_path / r).read_bytes() for r in before} == before
+
+
 def test_bump_version_dry_run_and_format(capsys):
     tool = load("bump_version")
     before = (ROOT / "package.json").read_bytes()

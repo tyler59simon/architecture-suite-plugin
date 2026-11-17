@@ -22,7 +22,7 @@ python -m pytest -m "not slow" -n auto     # fast tests only (about 20 seconds)
 python tools/check.py --full               # the CI commands below, including coverage and the gate
 ```
 
-Tests that take about 3 seconds or more are marked `slow`. Tests that launch Playwright, an installed Chrome or Node are marked `browser` (`-m "not browser"` skips them). Tests must write only under `tmp_path` so `-n auto` is safe.
+Tests that take about 3 seconds or more are marked `slow`. Tests that launch Playwright or an installed Chrome are marked `browser` (`-m "not browser"` skips them). Every layout test runs ELK in Node, so `npm ci` is required either way; without Node, layout falls back to Playwright. Tests must write only under `tmp_path` so `-n auto` is safe.
 
 ## Checks (what CI runs)
 

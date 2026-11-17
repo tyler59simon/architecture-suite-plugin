@@ -29,7 +29,7 @@ testpaths = ["tests"]
 addopts = "--strict-markers"
 markers = [
     "slow: takes about 3 seconds or more; skipped by the fast loop (-m \"not slow\")",
-    "browser: launches Playwright, an installed Chrome or Node",
+    "browser: launches Playwright or an installed Chrome (layout tests need only Node)",
 ]
 
 [tool.coverage.run]
