@@ -65,6 +65,15 @@ FILES = {
         "import last from './last';\n"
     ),
     "web/src/after.ts": "export default 1\n",
+    # Division and JSX closing tags are not regex literals.
+    "web/src/nodes.tsx": (
+        "const node = <div><span>hello</span>{require('./jsx')}</div>;\n"
+        "const scaled = n++ / require('./scale');\n"
+        "const r = {a: 1} / require('./obj');\n"
+    ),
+    "web/src/jsx.js": "module.exports = 1\n",
+    "web/src/scale.js": "module.exports = 1\n",
+    "web/src/obj.js": "module.exports = 1\n",
     "web/src/tpl.js": "module.exports = 1\n",
     "web/src/last.ts": "export default 1\n",
     "web/src/helper.ts": "export default 1\n",
@@ -99,4 +108,7 @@ def test_import_flows_follow_real_imports(tmp_path):
         ("web/src/regex.ts:2", "web/src/after.ts"),
         ("web/src/regex.ts:3", "web/src/tpl.js"),
         ("web/src/regex.ts:5", "web/src/last.ts"),
+        ("web/src/nodes.tsx:1", "web/src/jsx.js"),
+        ("web/src/nodes.tsx:2", "web/src/scale.js"),
+        ("web/src/nodes.tsx:3", "web/src/obj.js"),
     }

@@ -88,7 +88,10 @@ JVM_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+)", re.M)
 
 
 # A `/` after one of these (or at the start) begins a regex literal, not a division.
-REGEX_PRECEDERS = set("(,=:[!&|?{};+-*%<>~^")
+# `<`, `>` and `}` are left out (JSX `</span>`, `<p>/x</p>`, an object literal divided),
+# and `++`/`--` end an expression. This is a heuristic, not a JavaScript parser: a regex
+# literal after other tokens (`return /'/`) is scanned as code.
+REGEX_PRECEDERS = set("(,=:[!&|?{;+-*%~^")
 
 
 def _mask_js(text: str) -> str:
@@ -129,7 +132,9 @@ def _mask_js(text: str) -> str:
             end = n if end < 0 else end + 2
             blank(i, end)
             i = end
-        elif c == "/" and (not previous or previous in REGEX_PRECEDERS):
+        elif c == "/" and (not previous or previous in REGEX_PRECEDERS) and not (
+            previous in "+-" and text[: i].rstrip().endswith(previous * 2)  # n++ / x
+        ):
             j, in_class = i + 1, False
             while j < n and text[j] != "\n":
                 if text[j] == "\\":
