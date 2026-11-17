@@ -220,3 +220,21 @@ def test_plan_review_cli_blocked_plan(plan, tmp_path, capsys):
     path.write_text(render_plan(plan), encoding="utf-8")
     assert main(["plan-review", "--plan", str(path)]) == 1
     assert json.loads(capsys.readouterr().out)["ok"] is False
+
+
+def test_unedited_template_fails_strict_lint(capsys):
+    """plan-lint --strict must catch leftover template text, not only plan-review."""
+    import json
+    from pathlib import Path
+
+    from architecture_suite.cli import main
+
+    template = (
+        Path(__file__).resolve().parents[1]
+        / "skills/architecture-suite-runtime/assets/architecture-plan-template.md"
+    )
+    assert main(["plan-lint", "--plan", str(template)]) == 0  # advisories only
+    capsys.readouterr()
+    assert main(["plan-lint", "--plan", str(template), "--strict"]) == 1
+    codes = {f["code"] for f in json.loads(capsys.readouterr().out)["findings"]}
+    assert "placeholder" in codes

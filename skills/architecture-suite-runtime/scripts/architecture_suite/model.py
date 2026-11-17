@@ -556,7 +556,7 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                     "availability-zone": {"vpc"},
                     "subnet": {"availability-zone", "vpc"},
                     "cluster": {"subnet", "availability-zone", "vpc", "region"},
-                    "execution-environment": {"device", "execution-environment"},
+                    "execution-environment": {"device", "off-cloud", "execution-environment"},
                 }
                 if deployment.get("provider") == "gcp":
                     parent_types = {
@@ -568,7 +568,7 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                         "zone": {"region", "vpc"},
                         "subnet": {"region", "zone", "vpc"},
                         "cluster": {"subnet", "zone", "vpc", "region", "project"},
-                        "execution-environment": {"device", "execution-environment"},
+                        "execution-environment": {"device", "off-cloud", "execution-environment"},
                     }
                 if (
                     node.get("type") in parent_types

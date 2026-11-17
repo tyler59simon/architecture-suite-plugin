@@ -357,3 +357,16 @@ def test_module_and_console_entrypoints(tmp_path):
 def test_malformed_model_projection_is_a_controlled_failure(inputs):
     inputs[0].write_text(json.dumps({"schema_version": "2.0", "elements": [None]}))
     assert main(["verify", "--model", str(inputs[0]), "--level", "container"]) == 3
+
+
+def test_internal_errors_exit_4(inputs, monkeypatch, capsys):
+    """A bug must not look like lint findings (1) or bad input (2)."""
+    _, plan_path = inputs
+
+    def broken(*args, **kwargs):
+        raise KeyError("missing")
+
+    monkeypatch.setattr(cli, "lint_plan", broken)
+    assert main(["plan-lint", "--plan", str(plan_path)]) == 4
+    err = capsys.readouterr().err
+    assert "internal error: KeyError" in err and "please report" in err
