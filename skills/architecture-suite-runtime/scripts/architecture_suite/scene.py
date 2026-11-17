@@ -44,6 +44,7 @@ class Scene:
     title_lines: list[str] = field(default_factory=list)
     content_top: float = 100
     key_y: float = 0
+    sequence: bool = False  # a scenario: arrows are messages in time order
 
     def as_dict(self) -> dict:
         return asdict(self)

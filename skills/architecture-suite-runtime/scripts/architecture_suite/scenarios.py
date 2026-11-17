@@ -159,6 +159,7 @@ def scenario_scene(scenario, model):
         400,
         title_lines=wrap_to_width(scenario["name"], width - 96, 22),
         content_top=120,
+        sequence=True,
     )
     positions = {p: 208 + i * 320 for i, p in enumerate(scenario["participants"])}
     for p, x in positions.items():

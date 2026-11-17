@@ -3,7 +3,9 @@
 from __future__ import annotations
 import ast
 from pathlib import Path, PurePosixPath
+import posixpath
 import re
+import sys
 from .aws import normalize_cloud_profile
 from .aws_analyzer import detect_aws
 from .gcp_analyzer import detect_gcp
@@ -69,6 +71,182 @@ def _source_roots(files: dict[str, str]) -> tuple[dict, list[str], list[str]]:
         group["files"].append(path)
         grouped.add(top)
     return roots, sorted(grouped), sorted(tests)
+
+
+JS_SUFFIXES = (".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx")
+# Run on _mask_js output, where comments and string contents are blank, so imports
+# quoted in strings or comments never match; the specifier is read back from the
+# original text at the same offsets. An import or export declaration may span lines
+# (`import {\n a\n} from './x'`); a declaration without `from` stops at its first quote
+# or semicolon, so `export const label = 'store'` is not an import.
+JS_IMPORT = re.compile(
+    r"\bimport\s*['\"]([^'\"\n]*)['\"]"
+    r"|\b(?:import|export)\b[^'\";]*?\bfrom\s*['\"]([^'\"\n]*)['\"]"
+    r"|\brequire\(\s*['\"]([^'\"\n]*)['\"]\s*\)"
+)
+JVM_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+)", re.M)
+
+
+# A `/` after one of these (or at the start) begins a regex literal, not a division.
+# `<`, `>` and `}` are left out (JSX `</span>`, `<p>/x</p>`, an object literal divided),
+# and `++`/`--` end an expression. This is a heuristic, not a JavaScript parser: a regex
+# literal after other tokens (`return /'/`) is scanned as code.
+REGEX_PRECEDERS = set("(,=:[!&|?{;+-*%~^")
+
+
+def _mask_js(text: str) -> str:
+    """The source with comments and the contents of string, template and regex literals
+    replaced by spaces (newlines kept), so offsets and line numbers match the original.
+    Template substitutions (`${require('./x')}`) stay code."""
+    out, i, n = list(text), 0, len(text)
+    stack = []  # "`" template text, "${" substitution, "{" brace inside a substitution
+    previous = ""  # last significant code character
+
+    def blank(start, end):
+        for k in range(start, min(end, n)):
+            if out[k] != "\n":
+                out[k] = " "
+
+    while i < n:
+        c, nxt = text[i], text[i + 1 : i + 2]
+        if stack and stack[-1] == "`":  # inside template text
+            if c == "\\":
+                blank(i, i + 2)
+                i += 2
+            elif c == "`":
+                stack.pop()
+                previous, i = "`", i + 1
+            elif c == "$" and nxt == "{":
+                stack.append("${")
+                previous, i = "{", i + 2
+            else:
+                blank(i, i + 1)
+                i += 1
+        elif c == "/" and nxt == "/":
+            end = text.find("\n", i)
+            end = n if end < 0 else end
+            blank(i, end)
+            i = end
+        elif c == "/" and nxt == "*":
+            end = text.find("*/", i + 2)
+            end = n if end < 0 else end + 2
+            blank(i, end)
+            i = end
+        elif c == "/" and (
+            not previous
+            or previous in REGEX_PRECEDERS
+            and not (previous in {"+", "-"} and text[:i].rstrip().endswith(previous * 2))
+            or previous == ">" and text[:i].rstrip().endswith("=>")  # x => /re/
+        ):
+            j, in_class = i + 1, False
+            while j < n and text[j] != "\n":
+                if text[j] == "\\":
+                    j += 2
+                    continue
+                if text[j] == "/" and not in_class:
+                    break
+                in_class = (in_class or text[j] == "[") and text[j] != "]"
+                j += 1
+            blank(i + 1, j)
+            previous, i = "/", j + 1
+        elif c in "'\"":
+            j = i + 1
+            while j < n and text[j] != c and text[j] != "\n":
+                j += 2 if text[j] == "\\" else 1
+            blank(i + 1, j)
+            previous, i = c, j + 1
+        elif c == "`":
+            stack.append("`")
+            i += 1
+        elif c == "{" and stack:
+            stack.append("{")
+            previous, i = "{", i + 1
+        elif c == "}" and stack and stack[-1] in {"{", "${"}:
+            stack.pop()  # closing "${" returns to the template text
+            previous, i = "}", i + 1
+        else:
+            if not c.isspace():
+                previous = c
+            i += 1
+    return "".join(out)
+
+
+def _language(path: str) -> str:
+    """Imports resolve only within one language: Python, JavaScript/TypeScript or JVM."""
+    suffix = PurePosixPath(path).suffix
+    return "js" if suffix in JS_SUFFIXES else "jvm" if suffix in {".java", ".kt"} else suffix
+
+
+def _module_keys(path: str) -> set[str]:
+    """Names a module answers to: `pkg/mod` for pkg/mod.py, plus `pkg` for a Python
+    pkg/__init__.py or a JavaScript/TypeScript pkg/index.ts."""
+    p = PurePosixPath(path)
+    stem = str(p.with_suffix(""))
+    keys = {stem}
+    package = "/__init__" if p.suffix == ".py" else "/index" if p.suffix in JS_SUFFIXES else None
+    if package and stem.endswith(package):
+        keys.add(stem[: -len(package)])
+    return keys
+
+
+def _imports(path: str, text: str) -> list[tuple[list[str], bool, int]]:
+    """(candidate module stems, exact match only, line) for each import in a source file.
+
+    Python imports are read with `ast` (comments and docstrings are ignored); standard
+    library modules are skipped so `import logging` never links to a local logging.py.
+    Relative imports resolve against the importing file and match exactly; absolute ones
+    may match any source root (`app.models` -> src/app/models.py).
+    """
+    suffix = PurePosixPath(path).suffix
+    folder = PurePosixPath(path).parent
+    found = []
+    if suffix == ".py":
+        try:
+            tree = ast.parse(text)
+        except (SyntaxError, ValueError):
+            return []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name.split(".")[0] not in sys.stdlib_module_names:
+                        found.append(([alias.name.replace(".", "/")], False, node.lineno))
+            elif isinstance(node, ast.ImportFrom):
+                module = (node.module or "").replace(".", "/")
+                if node.level == 0:
+                    if module.split("/")[0] in sys.stdlib_module_names:
+                        continue
+                    base, exact = module, False
+                else:
+                    package = folder
+                    for _ in range(node.level - 1):
+                        package = package.parent
+                    base = posixpath.normpath(posixpath.join(package.as_posix(), module))
+                    base, exact = ("" if base == "." else base), True
+                for alias in node.names:
+                    submodule = posixpath.join(base, alias.name) if base else alias.name
+                    found.append(([submodule, base] if base else [submodule], exact, node.lineno))
+    elif suffix in JS_SUFFIXES:
+        # Blank comments out but keep their newlines, so line numbers stay true.
+        code = _mask_js(text)
+        for match in JS_IMPORT.finditer(code):
+            group = next(i for i, value in enumerate(match.groups(), 1) if value is not None)
+            specifier = text[match.start(group) : match.end(group)]
+            if not specifier.strip():
+                continue
+            line = code.count("\n", 0, match.start(group)) + 1  # the line naming the module
+            relative = specifier.startswith(".")
+            if relative:
+                specifier = posixpath.normpath(posixpath.join(folder.as_posix(), specifier))
+            stem = specifier[: -len(PurePosixPath(specifier).suffix)] if (
+                PurePosixPath(specifier).suffix in JS_SUFFIXES
+            ) else specifier
+            found.append(([stem.lstrip("/")], relative, line))
+    elif suffix in {".java", ".kt"}:
+        for match in JVM_IMPORT.finditer(text):
+            line = text.count("\n", 0, match.start()) + 1
+            name = match.group(1).replace(".", "/")
+            found.append(([name], False, line))
+    return sorted(found, key=lambda item: item[2])
 
 
 def _declarations(text: str, suffix: str) -> list[dict]:
@@ -284,33 +462,37 @@ def draft_plan(
             "is not modeled as containers."
         )
     # Imports establish a source dependency, not an invented runtime request.
+    keys = {p: _module_keys(p) for p in modules}
     for path, component_name in modules.items():
         text = files[path]
-        imports = re.findall(
-            r"(?:from\s+|import\s+)([\w./]+)|(?:from|require\()\s*['\"]([^'\"]+)", text
-        )
-        for imported in sorted({a or b for a, b in imports}):
-            stem = imported.lstrip("./").replace(".", "/")
-            candidates = [
-                p
-                for p in modules
-                if str(PurePosixPath(p).with_suffix("")) == stem
-                or str(PurePosixPath(p).with_suffix("")).endswith("/" + stem)
-            ]
-            if len(candidates) == 1 and candidates[0] != path:
-                line = next(
-                    (i + 1 for i, ln in enumerate(text.splitlines()) if imported in ln), 1
-                )
-                plan["flows"].append(
-                    {
-                        "from": component_name,
-                        "to": modules[candidates[0]],
-                        "description": "Imports source module",
-                        "technology": "static dependency",
-                        "evidence": f"{path}:{line}",
-                        "status": "inferred",
-                    }
-                )
+        linked = set()
+        language = _language(path)
+        for stems, exact, line in _imports(path, getattr(text, "source", text)):
+            for stem in stems:
+                candidates = [
+                    p
+                    for p, names in keys.items()
+                    if _language(p) == language
+                    and (
+                        stem in names
+                        or not exact and any(k.endswith("/" + stem) for k in names)
+                    )
+                ]
+                if candidates:
+                    break
+            if len(candidates) != 1 or candidates[0] == path or candidates[0] in linked:
+                continue
+            linked.add(candidates[0])
+            plan["flows"].append(
+                {
+                    "from": component_name,
+                    "to": modules[candidates[0]],
+                    "description": "Imports source module",
+                    "technology": "static dependency",
+                    "evidence": f"{path}:{line}",
+                    "status": "inferred",
+                }
+            )
     provider = normalize_cloud_profile(cloud_profile)
     if provider:
         label = provider.upper()

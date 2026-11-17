@@ -67,7 +67,7 @@ def overview_data(model: dict, style: str):
                 ELEMENT_TYPE_DEPTH[by_id[x]["type"]]
                 for x in (r["source_id"], r["destination_id"])
             )
-            for flow in r.get("flow_ids", [r["id"]]):
+            for flow in r.get("flow_ids") or [r["id"]]:  # [] means none recorded
                 if flow not in selected or rank > selected[flow][0]:
                     selected[flow] = (rank, r)
     relationships = (

@@ -178,3 +178,11 @@ def test_explore_rejects_non_diff_documents(model, tmp_path):
     ):
         diff.write_text(json.dumps(bad))
         assert main(command) == 2
+
+
+def test_scenario_key_describes_messages(model, nested):
+    from architecture_suite.emit import _key
+
+    lines = _key(scenario_scene(nested, model))
+    assert any(line.startswith("Arrow = message") for line in lines)
+    assert not any("directed dependency" in line for line in lines)

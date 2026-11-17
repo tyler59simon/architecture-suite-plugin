@@ -67,6 +67,18 @@ def test_external_systems_direction_and_escaping(model):
     assert "LAYOUT_TOP_DOWN()" in renderers.render_plantuml(model, view)
 
 
+def test_plantuml_redacts_like_every_other_format(model):
+    """Names, descriptions and members pass through safe_text, as in Mermaid, SVG and Draw.io."""
+    model = deepcopy(model)
+    view = _view(model, "container")
+    container = next(e for e in model["elements"] if e["id"] in view["element_ids"]
+                     and e["type"] == "container")
+    container["description"] = "postgres://app:hunter2@db/orders and token=abcd1234\x0b\x08"
+    text = renderers.render_plantuml(model, view)
+    assert "hunter2" not in text and "abcd1234" not in text and "[REDACTED]" in text
+    assert "\x0b" not in text and "\x08" not in text
+
+
 def test_claims_get_a_dashed_tag(plan):
     claimed = deepcopy(plan)
     claimed["containers"][2]["status"] = "proposed"

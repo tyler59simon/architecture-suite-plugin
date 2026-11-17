@@ -88,6 +88,81 @@ def _strings(value):
         yield value
 
 
+SUB_VARIABLE = re.compile(r"\$\{(?!!)([A-Za-z0-9]+)(?:\.[A-Za-z0-9.]+)?\}")
+
+
+def _getatt(target, names):
+    """CloudFormation GetAtt: `Name.Attr` or `[Name, Attr]` refers to resource Name."""
+    name = (
+        target.split(".", 1)[0]
+        if isinstance(target, str)
+        else target[0]
+        if isinstance(target, list) and target and isinstance(target[0], str)
+        else None
+    )
+    if name in names:
+        yield names[name]
+
+
+def _sub(target, names):
+    """CloudFormation Sub: `${Name}` and `${Name.Attr}` in the template string refer to
+    resources; `${!Literal}`, pseudo parameters and the variable map's own keys do not."""
+    template, variables = (
+        (target, {})
+        if isinstance(target, str)
+        else (target[0], target[1] if len(target) > 1 and isinstance(target[1], dict) else {})
+        if isinstance(target, list) and target and isinstance(target[0], str)
+        else ("", {})
+    )
+    for name in SUB_VARIABLE.findall(template):
+        if name in names and name not in variables:
+            yield names[name]
+
+
+TERRAFORM_INDEX = re.compile(r"\[(?:\"[^\"]*\"|[^\]]*)\]")
+MODULE_INSTANCE = re.compile(r"^(?:module\.[^.\[]+(?:\[(?:\"[^\"]*\"|[^\]]*)\])?\.)*")
+
+
+def _config_address(address: str) -> str:
+    """`module.net["prod"].aws_subnet.a[0]` -> `module.net.aws_subnet.a`: the address
+    in the configuration, without count or for_each instance keys."""
+    return TERRAFORM_INDEX.sub("", address)
+
+
+def _module_instance(address: str) -> str:
+    """`module.net["prod"].aws_subnet.a[0]` -> `module.net["prod"].`; root module: ``."""
+    return MODULE_INSTANCE.match(address).group()
+
+
+def _terraform_references(module, prefix=""):
+    """{config address: referenced resource addresses} from a plan's `configuration`."""
+    found = {}
+
+    def collect(value, into):
+        if isinstance(value, dict):
+            for ref in value.get("references", []) or []:
+                parts = ref.split(".") if isinstance(ref, str) else []
+                if len(parts) >= 2 and parts[0] not in {
+                    "var", "local", "data", "module", "each", "count", "path", "self", "terraform"
+                }:
+                    into.add(prefix + _config_address(".".join(parts[:2])))
+            for child in value.values():
+                collect(child, into)
+        elif isinstance(value, list):
+            for child in value:
+                collect(child, into)
+
+    for resource in module.get("resources", []) or []:
+        if isinstance(resource, dict) and isinstance(resource.get("address"), str):
+            targets = set()
+            collect(resource.get("expressions", {}), targets)
+            found[prefix + resource["address"]] = targets
+    for name, call in (module.get("module_calls") or {}).items():
+        if isinstance(call, dict) and isinstance(call.get("module"), dict):
+            found.update(_terraform_references(call["module"], f"{prefix}module.{name}."))
+    return found
+
+
 def import_infrastructure(paths, bindings=None):
     resources, edges, findings = [], [], []
     bindings = bindings or {}
@@ -134,8 +209,13 @@ def import_infrastructure(paths, bindings=None):
             if not isinstance(doc, dict):
                 raise ValueError("Infrastructure document must be a mapping")
             source = {"reference": evidence_reference(path), "document": doc_index + 1}
-            entries, depends = [], {}
+            entries, depends, terraform_refs = [], {}, {}
             if "planned_values" in doc:
+                configuration = doc.get("configuration")
+                if isinstance(configuration, dict):
+                    terraform_refs = _terraform_references(
+                        configuration.get("root_module") or {}
+                    )
                 changes = {
                     c.get("address"): c.get("change") or {}
                     for c in doc.get("resource_changes") or []
@@ -261,19 +341,24 @@ def import_infrastructure(paths, bindings=None):
 
                 def refs(value):
                     if isinstance(value, dict):
-                        # YAML short form `!Ref Name`, as data from _InfraLoader.
-                        target = value.get("expression")
-                        if (
-                            value.get("intrinsic") == "Ref"
-                            and isinstance(target, str)
-                            and target in names
-                        ):
+                        # YAML short forms (`!Ref Name`, `!GetAtt Name.Attr`, `!Sub "${Name}"`),
+                        # as data from _InfraLoader.
+                        function, target = value.get("intrinsic"), value.get("expression")
+                        if function == "Ref" and isinstance(target, str) and target in names:
                             yield names[target]
+                        if function == "GetAtt":
+                            yield from _getatt(target, names)
+                        if function == "Sub":
+                            yield from _sub(target, names)
                         for k, v in value.items():
                             if k in ref_keys:
                                 for item in v if isinstance(v, list) else [v]:
                                     if isinstance(item, str) and item in names:
                                         yield names[item]
+                            if k == "Fn::GetAtt":
+                                yield from _getatt(v, names)
+                            if k == "Fn::Sub":
+                                yield from _sub(v, names)
                             yield from refs(v)
                     elif isinstance(value, list):
                         for item in value:
@@ -283,7 +368,18 @@ def import_infrastructure(paths, bindings=None):
                 ref_keys = {"Ref", "DependsOn", "depends_on", "depends_on_resource"} - (
                     {"depends_on"} if kind == "compose/service" else set()
                 )
-                for target in sorted(set(refs(props))):
+                # Terraform: references recorded in the plan's configuration section
+                # (`bucket = aws_s3_bucket.logs.id`), mapped to the planned instances in
+                # the same module instance (a reference never leaves its module).
+                configured = {
+                    names[other]
+                    for ref in terraform_refs.get(_config_address(name), ())
+                    for other in names
+                    if _config_address(other) == ref
+                    and _module_instance(other) == _module_instance(name)
+                    and other != name
+                }
+                for target in sorted(set(refs(props)) | configured):
                     edges.append(
                         {
                             "source_id": ident,
@@ -347,10 +443,26 @@ def import_infrastructure(paths, bindings=None):
                         }
                     )
     resource_ids = {r["id"] for r in resources}
+    # A Terraform ID that several resources share (a bucket and its versioning both use
+    # the bucket name) identifies none of them.
+    terraform_ids = [
+        r["properties"].get("id")
+        for r in resources
+        if r["type"].startswith(("aws_", "google_")) and isinstance(r["properties"], dict)
+    ]
+    shared_ids = {v for v in terraform_ids if terraform_ids.count(v) > 1}
+    linked = {(e["source_id"], e["destination_id"]) for e in edges}
     for resource in resources:
         props = resource["properties"]
         # Exact values only: "vpc-1" must not match "vpc-123" or free text containing it.
-        scalars = set(_strings(props))
+        # Tags and labels are free text, not references.
+        scalars = set(
+            _strings(
+                {k: v for k, v in props.items() if k not in {"tags", "tags_all", "labels"}}
+                if isinstance(props, dict)
+                else props
+            )
+        )
         for target in resources:
             if resource["id"] == target["id"]:
                 continue
@@ -362,8 +474,10 @@ def import_infrastructure(paths, bindings=None):
                     isinstance(value, str)
                     and value
                     and value not in {SENSITIVE, UNKNOWN}
+                    and value not in shared_ids
                     and "[REDACTED]" not in value
                     and value in scalars
+                    and (resource["id"], target["id"]) not in linked
                 ):
                     edges.append(
                         {

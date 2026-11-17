@@ -18,6 +18,7 @@ KEY = (
     "Enclosing frame = named scope or deployment boundary",
     "Arrow = directed dependency; label states its purpose",
 )
+SEQUENCE_ARROW = "Arrow = message, in time order from top to bottom"
 CLAIM_KEY = "Dotted outline or arrow, «inferred»/«proposed»/«unknown» = claim not observed"
 
 
@@ -30,7 +31,8 @@ def _claimed(item) -> bool:
 
 def _key(scene) -> tuple:
     claims = any(_claimed(b) for b in scene.boxes) or any(_claimed(e) for e in scene.edges)
-    return KEY + ((CLAIM_KEY,) if claims else ())
+    key = KEY[:3] + (SEQUENCE_ARROW,) if scene.sequence else KEY
+    return key + ((CLAIM_KEY,) if claims else ())
 
 
 def _placements(box):

@@ -282,3 +282,15 @@ def test_role_shapes_across_exporters():
     # AWS models use the same role shapes (DynamoDB -> cylinder, SQS -> pill).
     aws_svg = renderers.render_aws_deployment_svg(example_model())
     assert "<ellipse" in aws_svg and 'rx="28"' in aws_svg
+
+
+def test_empty_flow_ids_keep_relationships_in_overviews(model):
+    """flow_ids: [] (valid in the schema) means no flows were recorded, not "draw nothing"."""
+    from copy import deepcopy
+
+    from architecture_suite.overview_layout import overview_data
+
+    model = deepcopy(model)
+    for relationship in model["relationships"]:
+        relationship["flow_ids"] = []
+    assert overview_data(model, "executive")[1]
