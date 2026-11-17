@@ -96,3 +96,15 @@ def test_bootstrap_reports_failures(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(bootstrap, "bootstrap", broken)
     assert bootstrap.main(["--target", str(tmp_path)]) == 3
     assert "Bootstrap failed" in capsys.readouterr().err
+
+
+def test_bootstrap_doctor_problems():
+    bootstrap = load_bootstrap()
+    healthy = {"assets": "ok", "layout_engine": "ok", "browser": "ok", "runtime_deps": "ok"}
+    assert bootstrap.doctor_problems(healthy) == []
+    no_browser = {**healthy, "browser": "No usable browser", "runtime_deps": "unmanaged"}
+    assert bootstrap.doctor_problems(no_browser) == ["browser"]
+    assert bootstrap.doctor_problems(no_browser, browser=False) == []
+    # --no-browser must not hide other failures.
+    broken = {**no_browser, "assets": "checksum mismatch", "runtime_deps": "stale"}
+    assert bootstrap.doctor_problems(broken, browser=False) == ["assets", "runtime_deps"]

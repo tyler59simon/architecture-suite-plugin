@@ -107,7 +107,7 @@ def import_infrastructure(paths, bindings=None):
 
     for file_index, path in enumerate(paths):
         path = canonical_existing_file(Path(path))
-        text = path.read_text(encoding="utf-8")
+        text = path.read_text(encoding="utf-8-sig")  # tolerate a BOM
         prefix = f"input-{file_index}-"
         declared = {}  # name -> id across this file's documents
 

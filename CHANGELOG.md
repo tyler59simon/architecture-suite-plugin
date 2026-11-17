@@ -8,6 +8,13 @@
 
 ### Fixed
 
+- **Read-only files no longer fail a publish:** on Windows, a read-only file in an existing output folder made a successful `--confirm-overwrite` publish exit 2 and leave a `.architecture-stage-*-backup` folder behind. Temporary folders are now removed including read-only files; if one still cannot be removed, the publish reports a warning instead of failing.
+- **Edited files that a render replaces are reported:** dry runs and writes list `overwrites_edited`, the generated files edited since the last run that this run writes again.
+- **Upgrades drop removed files:** installing a new version over an old one (`tools/install_skill.py`) no longer keeps files that the new version removed.
+- **`bootstrap.py --no-browser` checks the rest of `doctor`:** it ignored every doctor failure; now only a missing browser is tolerated.
+- **UTF-8 byte-order mark accepted:** plans, models, scenarios and infrastructure files saved with a BOM (Windows PowerShell 5.1 `Out-File`) are read normally.
+- **LF line endings on every OS:** generated text files (`.mmd`, `.puml`, reports, JSON) no longer get CRLF on Windows.
+- **`--browser auto` tries the installed browser:** when Playwright's Chromium is present but fails to start, `auto` now tries an installed Chrome or Edge before failing.
 - **GitHub Copilot:** SKILL.md descriptions are now quoted YAML. Four descriptions contained ": ", which strict YAML parsers such as Copilot's reject, so those skills failed to load.
 
 ## 1.2.0 - PlantUML export

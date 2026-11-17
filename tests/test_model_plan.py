@@ -339,3 +339,16 @@ def test_devices_and_off_cloud_nodes_sit_outside_the_cloud_root(plan):
     cloud = next(n for n in nodes.values() if n["type"] == "cloud")
     assert any(n.get("parent_id") == cloud["id"] for n in nodes.values())
     assert not models.validate_model(model)
+
+
+def test_inputs_with_a_utf8_bom(plan, model, tmp_path):
+    """Windows PowerShell 5.1 writes UTF-8 with a BOM; plans and models must still load."""
+    import json
+
+    from architecture_suite.plan import parse_plan_document
+
+    text = render_plan(plan)
+    assert parse_plan_document("\ufeff" + text) == parse_plan_document(text)
+    path = tmp_path / "model.json"
+    path.write_text(json.dumps(model), encoding="utf-8-sig")
+    assert models.load_model(path) == model

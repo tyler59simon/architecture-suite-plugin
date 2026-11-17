@@ -67,6 +67,7 @@ def parse_yaml(source: str) -> Any:
 
 
 def parse_plan_document(source: str) -> dict:
+    source = source.removeprefix("\ufeff")  # editors on Windows may add a BOM
     if len(source) > 2_000_000:
         raise PlanError("Plan exceeds 2 MB")
     blocks = []

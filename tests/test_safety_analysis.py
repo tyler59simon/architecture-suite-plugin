@@ -86,6 +86,58 @@ def test_atomic_publication_and_rollback(tmp_path, monkeypatch):
     assert not list(tmp_path.glob(".architecture-stage-*"))
 
 
+def test_publish_survives_read_only_files(tmp_path):
+    """A read-only file in the old output must not turn a good publish into a failure."""
+    import stat
+
+    output = tmp_path / "published"
+    (output / "keep").mkdir(parents=True)
+    notes = output / "keep" / "notes.txt"
+    notes.write_text("mine")
+    notes.chmod(stat.S_IREAD)
+    try:
+        with atomic_output_directory(output) as stage:
+            (stage / "diagram.svg").write_text("<svg/>")
+        assert (output / "diagram.svg").is_file()
+        assert notes.read_text() == "mine"
+        assert not list(tmp_path.glob(".architecture-stage-*"))
+    finally:
+        notes.chmod(stat.S_IWRITE | stat.S_IREAD)
+
+
+def test_cleanup_failure_warns_without_masking(tmp_path, monkeypatch, capsys):
+    import shutil
+
+    from architecture_suite import safety
+
+    def locked(path, **kwargs):
+        raise PermissionError("file in use")
+
+    output = tmp_path / "published"
+    output.mkdir()
+    (output / "old.svg").write_text("<svg/>")  # promotion then leaves a backup to delete
+    monkeypatch.setattr(shutil, "rmtree", locked)
+    with atomic_output_directory(output) as stage:
+        (stage / "diagram.svg").write_text("<svg/>")
+    assert (output / "diagram.svg").is_file()
+    assert "could not remove temporary folder" in capsys.readouterr().err
+    with pytest.raises(RuntimeError, match="export failed"):  # the original error wins
+        with atomic_output_directory(output):
+            raise RuntimeError("export failed")
+    monkeypatch.undo()
+    for leftover in tmp_path.glob(".architecture-stage-*"):
+        safety._remove_temporary(leftover)
+
+
+def test_unseeded_stage_drops_old_files(tmp_path):
+    output = tmp_path / "installed"
+    output.mkdir()
+    (output / "removed_module.py").write_text("old")
+    with atomic_output_directory(output, seed_existing=False) as stage:
+        (stage / "module.py").write_text("new")
+    assert sorted(p.name for p in output.iterdir()) == ["module.py"]
+
+
 def test_symlink_escape(tmp_path):
     outside = tmp_path / "outside"
     outside.mkdir()
@@ -323,22 +375,35 @@ def test_output_manifest_removes_stale_keeps_edited_and_unlisted(tmp_path):
     (output / "legacy.txt").write_text("user file")
     old = {"02-containers/a.svg": "a", "02-containers/b.svg": "b", "03-components/c.svg": "c"}
     # First run: nothing is adopted or deleted; the manifest records what was written.
-    assert _publish(output, "c4", old) == {"remove": [], "conflicts": []}
+    assert _publish(output, "c4", old) == {"remove": [], "conflicts": [], "overwrites_edited": []}
     manifest = json.loads((output / OUTPUT_MANIFEST).read_text())
     assert sorted(manifest["owners"]["c4"]["files"]) == sorted(old)
     assert "legacy.txt" not in json.dumps(manifest)
     (output / "02-containers/b.svg").write_text("edited by hand")
     new = {"02-containers/a.svg": "a2"}
     preview = ownership_changes(output, "c4", list(new))
-    assert preview == {"remove": ["03-components/c.svg"], "conflicts": ["02-containers/b.svg"]}
+    assert preview == {
+        "remove": ["03-components/c.svg"],
+        "conflicts": ["02-containers/b.svg"],
+        "overwrites_edited": [],
+    }
     assert _publish(output, "c4", new) == preview
     assert not (output / "03-components").exists()  # stale file and its empty folder
     assert (output / "02-containers/b.svg").read_text() == "edited by hand"
     assert (output / "legacy.txt").read_text() == "user file"
     files = json.loads((output / OUTPUT_MANIFEST).read_text())["owners"]["c4"]["files"]
     assert sorted(files) == ["02-containers/a.svg"]  # the edited file was released
-    assert ownership_changes(output, "c4", []) == {"remove": ["02-containers/a.svg"], "conflicts": []}
-    assert ownership_changes(tmp_path / "missing", "c4", []) == {"remove": [], "conflicts": []}
+    assert ownership_changes(output, "c4", []) == {
+        "remove": ["02-containers/a.svg"], "conflicts": [], "overwrites_edited": []
+    }
+    assert ownership_changes(tmp_path / "missing", "c4", []) == {
+        "remove": [], "conflicts": [], "overwrites_edited": []
+    }
+    # A file this run writes again, edited since the last run, is reported.
+    (output / "02-containers/a.svg").write_text("edited again")
+    assert ownership_changes(output, "c4", ["02-containers/a.svg"])["overwrites_edited"] == [
+        "02-containers/a.svg"
+    ]
 
 
 def test_output_manifest_owners_are_isolated(tmp_path):

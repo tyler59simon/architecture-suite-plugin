@@ -150,6 +150,7 @@ def test_publish_dry_write_overwrite(inputs, tmp_path, capsys, command, input_fl
     assert main(system + ["--dry-run"]) == 0
     preview = json.loads(capsys.readouterr().out)
     assert preview["conflicts"] == ["02-containers/containers.mmd"]
+    assert preview["overwrites_edited"] == []
     assert "02-containers/containers.svg" in preview["would_remove"]
     assert main(system + ["--confirm-write", "--confirm-overwrite"]) == 0
     assert json.loads(capsys.readouterr().out)["removed"] == preview["would_remove"]
@@ -157,6 +158,8 @@ def test_publish_dry_write_overwrite(inputs, tmp_path, capsys, command, input_fl
     assert (output / "notes.md").read_text(encoding="utf-8") == "mine"
     assert not (output / "02-containers/containers.svg").exists()
     assert (output / "01-system-context/system-context.svg").is_file()
+    for text in [*output.rglob("*.mmd"), output / "architecture-report.md"]:
+        assert b"\r" not in text.read_bytes()  # LF on every OS
 
 
 def test_plan_draft_lint_and_analyze(tmp_path, capsys):

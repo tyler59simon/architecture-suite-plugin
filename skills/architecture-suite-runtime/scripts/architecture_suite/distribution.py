@@ -230,7 +230,8 @@ def install_host(skills, host, scope, project=None, home=None, overwrite=False):
             backup.mkdir(parents=True, exist_ok=True)
             destination = Path(tempfile.mkdtemp(dir=backup)) / name
             shutil.copytree(target, destination)
-        with atomic_output_directory(target) as stage:
+        # The stage starts empty so files dropped from the new version do not survive.
+        with atomic_output_directory(target, seed_existing=False) as stage:
             shutil.copytree(
                 skills / name,
                 stage,

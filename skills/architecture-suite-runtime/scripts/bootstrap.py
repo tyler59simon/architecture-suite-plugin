@@ -13,6 +13,7 @@ located (Windows `py` launcher, or python3.X on PATH) and used instead.
 """
 
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
@@ -84,11 +85,20 @@ def existing_minor(target):
     return None
 
 
+def doctor_problems(report, browser=True):
+    """Doctor checks that failed. With --no-browser a missing browser is not a failure."""
+    gating = ["assets", "layout_engine"] + (["browser"] if browser else [])
+    problems = [key for key in gating if report.get(key) != "ok"]
+    if report.get("runtime_deps") not in {"ok", "unmanaged"}:
+        problems.append("runtime_deps")
+    return problems
+
+
 def bootstrap(target, browser=True):
     target = Path(target).expanduser().resolve()
     current = f"{sys.version_info[0]}.{sys.version_info[1]}"
     stale = target.exists() and existing_minor(target) not in {None, current}
-    print(f"Architecture Suite runtime: {target} (Python {current})")
+    print(f"Architecture Suite runtime: {target} (Python {current})", flush=True)
     try:
         venv.EnvBuilder(with_pip=True, clear=stale).create(target)
     except OSError as exc:
@@ -102,9 +112,22 @@ def bootstrap(target, browser=True):
     if browser:
         run("Installing Chromium", [python, "-m", "playwright", "install", "chromium"])
     write_stamp(target)
-    doctor = subprocess.run([str(python), str(SCRIPTS / "architecture-suite.py"), "doctor"])
-    if doctor.returncode and browser:
-        raise BootstrapError("doctor reported a problem; see the JSON above.")
+    doctor = subprocess.run(
+        [str(python), str(SCRIPTS / "architecture-suite.py"), "doctor"],
+        capture_output=True,
+        text=True,
+    )
+    print(doctor.stdout, end="")
+    print(doctor.stderr, end="", file=sys.stderr)
+    try:
+        report = json.loads(doctor.stdout)
+    except json.JSONDecodeError:
+        raise BootstrapError(f"doctor failed (exit {doctor.returncode}); see the output above.")
+    problems = doctor_problems(report, browser)
+    if problems:
+        raise BootstrapError("doctor reported a problem with " + ", ".join(problems) + "; see the JSON above.")
+    if not browser and report.get("browser") != "ok":
+        print("No usable browser yet: PNG output needs Google Chrome, Microsoft Edge or `bootstrap.py` without --no-browser.")
     print(
         "\nReady. Run the CLI with:\n  "
         f"{python} {SCRIPTS / 'architecture-suite.py'} <command>"

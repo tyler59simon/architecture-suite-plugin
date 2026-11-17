@@ -603,16 +603,33 @@ def browser_page():
                     else BROWSER_HELP
                 )
             engine, executable = found
-            try:
-                browser = p.chromium.launch(
+
+            def launch(engine, executable):
+                return p.chromium.launch(
                     headless=True,
                     executable_path=None if engine == "playwright" else str(executable),
                     args=LAUNCH_ARGS,
                 )
+
+            try:
+                browser = launch(engine, executable)
             except BrowserError:
-                if choice != "auto" or engine == "playwright":
+                if choice != "auto":
                     raise
-                browser, fallback = None, executable  # auto: use the browser's own CLI
+                browser = None
+                if engine == "playwright":
+                    # auto means "the first that works": only now look for an
+                    # installed browser, so a stale override cannot break Chromium.
+                    system = find_system_chrome()
+                    if system is None:
+                        raise
+                    engine, executable = "chrome", system
+                    try:
+                        browser = launch(engine, executable)
+                    except BrowserError:
+                        pass
+                if browser is None:
+                    fallback = executable  # the installed browser's own CLI
             if browser is not None:
                 try:
                     context = browser.new_context(offline=True, device_scale_factor=1)
@@ -798,7 +815,7 @@ def write_rendered_artifacts(
                         if fmt == "drawio"
                         else render_scene_svg(scene)
                     )
-                    path.write_text(content, encoding="utf-8")
+                    path.write_text(content, encoding="utf-8", newline="\n")
     return [
         f"{base}: {finding['code']}: {', '.join(finding.get('elements', []))}"
         for base, value in verification["diagrams"].items()

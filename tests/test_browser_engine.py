@@ -139,6 +139,31 @@ def test_auto_drops_to_chrome_cli_when_launch_fails(monkeypatch, fake_chrome):
             pass
 
 
+def test_auto_tries_installed_browser_when_bundled_chromium_fails(
+    monkeypatch, tmp_path, fake_chrome
+):
+    """auto means "the first that works": a broken bundled Chromium is not the end."""
+    empty = tmp_path / "no-browsers"
+    empty.mkdir()
+    monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(empty))  # bundled launch fails
+    monkeypatch.setattr(renderers, "_bundled_chromium", lambda p: fake_chrome)
+    monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "auto")
+    with renderers.browser_page() as page:  # Playwright + installed fails too: its CLI
+        assert isinstance(page, ChromeCli) and page.executable == fake_chrome
+    monkeypatch.setattr(renderers, "find_system_chrome", lambda: None)
+    with pytest.raises(SafetyError, match="Local browser unavailable"):
+        with renderers.browser_page():
+            pass
+
+
+def test_stale_chrome_override_does_not_break_working_chromium(monkeypatch, tmp_path):
+    """The installed-browser fallback is looked up only after Chromium fails."""
+    monkeypatch.setenv("ARCHITECTURE_SUITE_CHROME", str(tmp_path / "gone.exe"))
+    monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "auto")
+    with renderers.browser_page() as page:
+        assert not isinstance(page, ChromeCli)
+
+
 def test_browser_layout_needs_playwright(monkeypatch, fake_chrome):
     monkeypatch.setenv("ARCHITECTURE_SUITE_LAYOUT_HOST", "browser")
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "chrome-cli")
