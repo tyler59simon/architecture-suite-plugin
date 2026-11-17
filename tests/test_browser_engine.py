@@ -100,6 +100,7 @@ def test_playwright_api_missing(monkeypatch):
     assert renderers._playwright_api() is None
 
 
+@pytest.mark.browser
 def test_browser_page_without_playwright(monkeypatch, fake_chrome):
     monkeypatch.setattr(renderers, "_playwright_api", lambda: None)
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "auto")
@@ -118,6 +119,7 @@ def test_browser_page_without_playwright(monkeypatch, fake_chrome):
             pass
 
 
+@pytest.mark.browser
 def test_auto_drops_to_chrome_cli_when_launch_fails(monkeypatch, fake_chrome):
     monkeypatch.setattr(renderers, "_bundled_chromium", lambda p: None)
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "auto")
@@ -139,6 +141,7 @@ def test_auto_drops_to_chrome_cli_when_launch_fails(monkeypatch, fake_chrome):
             pass
 
 
+@pytest.mark.browser
 def test_auto_tries_installed_browser_when_bundled_chromium_fails(
     monkeypatch, tmp_path, fake_chrome
 ):
@@ -156,6 +159,7 @@ def test_auto_tries_installed_browser_when_bundled_chromium_fails(
             pass
 
 
+@pytest.mark.browser
 def test_stale_chrome_override_does_not_break_working_chromium(monkeypatch, tmp_path):
     """The installed-browser fallback is looked up only after Chromium fails."""
     monkeypatch.setenv("ARCHITECTURE_SUITE_CHROME", str(tmp_path / "gone.exe"))
@@ -164,6 +168,7 @@ def test_stale_chrome_override_does_not_break_working_chromium(monkeypatch, tmp_
         assert not isinstance(page, ChromeCli)
 
 
+@pytest.mark.browser
 def test_browser_layout_needs_playwright(monkeypatch, fake_chrome):
     monkeypatch.setenv("ARCHITECTURE_SUITE_LAYOUT_HOST", "browser")
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "chrome-cli")
@@ -227,6 +232,7 @@ def test_remove_tree_waits_for_open_files(monkeypatch, tmp_path):
 
 @needs_chrome
 @pytest.mark.parametrize("size",[(80, 80), (660, 120), (500, 500)])
+@pytest.mark.browser
 def test_chrome_cli_paints_the_whole_capture(size):
     # Headless Chrome paints only part of a short window; captures must still be full.
     width, height = size
@@ -240,6 +246,8 @@ def test_chrome_cli_paints_the_whole_capture(size):
 
 @needs_chrome
 @pytest.mark.parametrize("choice", ["chrome", "chrome-cli"])
+@pytest.mark.browser
+@pytest.mark.slow
 def test_installed_chrome_renders_png_and_icons(choice, model, monkeypatch, tmp_path):
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", choice)
     view = next(v for v in model["views"] if v["type"] == "container")
@@ -256,6 +264,8 @@ def test_installed_chrome_renders_png_and_icons(choice, model, monkeypatch, tmp_
 
 
 @needs_chrome
+@pytest.mark.browser
+@pytest.mark.slow
 def test_cli_browser_flag_reaches_doctor(monkeypatch, capsys):
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "auto")
     assert main(["--browser", "chrome-cli", "doctor"]) == 0

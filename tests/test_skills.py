@@ -4,6 +4,7 @@ import json
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 
 from architecture_suite import __version__
@@ -81,6 +82,7 @@ def test_runtime_lock_is_hashed_and_covers_dependencies():
         assert lowered[name.lower()] == version, spec
 
 
+@pytest.mark.slow
 def test_license_metadata_and_legal_files_ship(tmp_path):
     import zipfile
     from architecture_suite.distribution import install_host, package_hosts, plugin_manifest
@@ -117,6 +119,7 @@ def test_manifests_and_package_errors(tmp_path):
         package_hosts(tmp_path, tmp_path, hosts=["nope"])
 
 
+@pytest.mark.slow
 def test_packages_are_slim_and_release_tree_is_self_contained(tmp_path):
     import zipfile
     from architecture_suite.distribution import package_hosts, write_plugin_tree

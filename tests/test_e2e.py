@@ -23,6 +23,8 @@ from architecture_suite.renderers import validate_png
         ("pyproject.toml", "app.py", "def work(x: int) -> str:\n    return str(x)\n"),
     ],
 )
+@pytest.mark.browser
+@pytest.mark.slow
 def test_analyze_complete_offline_artifact_set(
     tmp_path, manifest, source, code, capsys
 ):

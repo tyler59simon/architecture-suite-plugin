@@ -52,6 +52,8 @@ def test_stamp_states(tmp_path):
     assert "re-run" in runtime_env.check_stamp(tmp_path, lock)
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_doctor_fails_when_dependencies_changed(monkeypatch, capsys):
     monkeypatch.setattr(cli, "check_stamp", lambda: "dependencies changed since bootstrap; re-run")
     assert main(["doctor"]) == 3

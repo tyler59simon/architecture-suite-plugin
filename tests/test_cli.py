@@ -46,6 +46,8 @@ def test_defaults_and_invalid_arguments():
             parser.parse_args(argv)
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_deployment_level_needs_no_component_or_code_views(tmp_path, capsys):
     plan = {
         "system": {
@@ -96,6 +98,8 @@ def test_deployment_level_needs_no_component_or_code_views(tmp_path, capsys):
 @pytest.mark.parametrize(
     "command,input_flag", [("render", "--model"), ("plan-render", "--plan")]
 )
+@pytest.mark.browser
+@pytest.mark.slow
 def test_publish_dry_write_overwrite(inputs, tmp_path, capsys, command, input_flag):
     input = inputs[0] if command == "render" else inputs[1]
     output = tmp_path / "artifacts"
@@ -162,6 +166,8 @@ def test_publish_dry_write_overwrite(inputs, tmp_path, capsys, command, input_fl
         assert b"\r" not in text.read_bytes()  # LF on every OS
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_plan_draft_lint_and_analyze(tmp_path, capsys):
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -254,6 +260,8 @@ def test_lint_strict_and_invalid_inputs(inputs, plan, tmp_path, capsys):
     assert main(["verify", "--model", str(inputs[0])]) == 2
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_verify_and_style_constraints(inputs, tmp_path, model, capsys, monkeypatch):
     assert main(["verify", "--model", str(inputs[0]), "--level", "system"]) == 0
     assert main(["verify", "--model", str(inputs[0]), "--overview-style", "all"]) == 0
@@ -302,6 +310,8 @@ def test_verify_and_style_constraints(inputs, tmp_path, model, capsys, monkeypat
     assert main(["verify", "--model", str(inputs[0])]) == 1
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_doctor_ready_and_missing(monkeypatch, capsys):
     assert main(["doctor"]) == 0
     assert json.loads(capsys.readouterr().out)["offline"]
@@ -314,6 +324,8 @@ def test_doctor_ready_and_missing(monkeypatch, capsys):
     assert "missing browser" in capsys.readouterr().out
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_examples_dry_and_write(tmp_path, capsys):
     output = tmp_path / "examples"
     argv = ["examples", "--output", str(output), "--overview-style", "executive"]
@@ -443,6 +455,8 @@ def test_plan_yaml_error_reports_file_line(tmp_path, capsys):
     assert "Malformed YAML at line 11" in capsys.readouterr().err
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_envelope_keys_are_additive(inputs, tmp_path, capsys):
     out = tmp_path / "env"
     argv = ["plan-render", "--plan", str(inputs[1]), "--output", str(out), "--level", "container"]
@@ -467,6 +481,7 @@ def test_examples_envelope(tmp_path, capsys):
     assert dry["ok"] is True and dry["dry_run"] is True
 
 
+@pytest.mark.browser
 def test_doctor_announces_itself_on_stderr(monkeypatch, capsys):
     monkeypatch.setattr(cli, "verify_assets", lambda: None)
     main(["doctor"])

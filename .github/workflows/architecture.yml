@@ -44,8 +44,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - run: python -m pip install ruff==0.11.2
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - name: Install the locked ruff
+        run: python -m pip install "$(grep -i '^ruff==' requirements-lock.txt)"
       - run: ruff check .
+      - name: Generated files are current
+        run: |
+          python tools/generate_skills.py --check
+          python tools/sync_manifests.py --check
+          python tools/build_manifest.py --check
 
   test:
     strategy:
@@ -77,13 +85,26 @@ jobs:
         run: |
           python -m pip install -r requirements-lock.txt
           python -m pip install --no-deps -e .
+      - name: Playwright version from the lock
+        id: playwright
+        shell: bash
+        run: echo "version=$(grep -i '^playwright==' requirements-lock.txt | cut -d= -f3)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+            ~/AppData/Local/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - run: python -m playwright install --with-deps chromium
       - run: npm ci --ignore-scripts
       - name: Tests with coverage
-        run: python -m pytest --cov=architecture_suite --cov-branch --cov-report=json:test-results/coverage.json --junitxml=test-results/junit.xml
+        run: python -m pytest -n auto --cov=architecture_suite --cov-branch --cov-report=json:test-results/coverage.json --junitxml=test-results/junit.xml
       - name: Coverage and public-callable gate
         run: python tools/record_validation.py
-      - run: python tools/package_hosts.py
+      - name: Package the host archives (one matrix entry is enough)
+        if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13'
+        run: python tools/package_hosts.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -101,10 +122,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install pip-audit==2.9.0
+      - name: Install the locked pip-audit
+        run: python -m pip install "$(grep -i '^pip_audit==' requirements-lock.txt)"
       - name: Audit the runtime lock
         run: pip-audit --require-hashes -r skills/architecture-suite-runtime/scripts/requirements-runtime.lock
       - name: Runtime lock installs from wheels on every supported Python and OS
@@ -125,8 +149,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          cache: pip
+          cache-dependency-path: skills/architecture-suite-runtime/scripts/requirements-runtime.lock
       - if: runner.os == 'Linux'
-        run: npx --yes playwright@1.51.0 install-deps chromium
+        run: npx --yes "playwright@$(grep -i '^playwright==' requirements-lock.txt | cut -d= -f3)" install-deps chromium
       - name: Portable bootstrap (as a skill user would run it)
         shell: bash
         run: python skills/architecture-suite-runtime/scripts/bootstrap.py --target "$RUNNER_TEMP/rt"

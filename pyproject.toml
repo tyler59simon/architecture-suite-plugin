@@ -26,6 +26,11 @@ architecture_suite = ["assets/*", "assets/aws/*", "assets/gcp/*/*", "assets/lice
 [tool.pytest.ini_options]
 pythonpath = ["skills/architecture-suite-runtime/scripts"]
 testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = [
+    "slow: takes about 3 seconds or more; skipped by the fast loop (-m \"not slow\")",
+    "browser: launches Playwright, an installed Chrome or Node",
+]
 
 [tool.coverage.run]
 branch = true

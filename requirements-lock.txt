@@ -7,6 +7,7 @@ colorama==0.4.6
 coverage==7.17.1
 cyclonedx-python-lib==9.1.0
 defusedxml==0.7.1
+execnet==2.1.2
 filelock==4.2.7
 greenlet==3.5.6
 idna==3.20
@@ -31,6 +32,7 @@ pyee==12.1.1
 Pygments==2.21.0
 pyparsing==3.3.3
 pytest-cov==6.0.0
+pytest-xdist==3.8.0
 pytest==8.3.5
 PyYAML==6.0.3
 referencing==0.37.0

@@ -89,6 +89,7 @@ def test_all_views_geometry_and_determinism(model):
     assert any(b.element.get("type") == "subnet" for b in aws.boxes if b.element)
 
 
+@pytest.mark.browser
 def test_empty_cycles_disconnected_long_labels_and_groups(model):
     elements = [
         {
@@ -195,6 +196,7 @@ def test_shared_tracks_and_readability_gates():
     )
 
 
+@pytest.mark.browser
 def test_dense_relationships_remain_in_scene():
     elements = [
         {
@@ -271,6 +273,7 @@ def test_export_xml_and_shared_geometry(model):
     assert source.startswith("%% Architecture Suite") and "«container»" in source
 
 
+@pytest.mark.browser
 def test_unicode_visual_text_bounds():
     element = {
         "id": "unicode",
@@ -290,6 +293,7 @@ def test_unicode_visual_text_bounds():
         assert all(width <= box.width - 20 for width in widths[1:-4])
 
 
+@pytest.mark.browser
 def test_missing_chromium_failure(tmp_path, monkeypatch):
     monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(tmp_path / "missing-browser"))
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "playwright")  # no installed-Chrome fallback
@@ -299,6 +303,7 @@ def test_missing_chromium_failure(tmp_path, monkeypatch):
             pass
 
 
+@pytest.mark.browser
 def test_png_offline_and_blank_detection(tmp_path, model):
     view = model["views"][0]
     scene = build_view_scene_elk(model, view)
@@ -315,6 +320,8 @@ def test_png_offline_and_blank_detection(tmp_path, model):
         renderers.render_svg_png("<svg/>", output, 6001, 100)
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_export_write_and_failure_gate(model, tmp_path, monkeypatch):
     assert renderers.normalize_artifact_level() == "all"
     with pytest.raises(ValueError):
@@ -355,6 +362,8 @@ def test_elk_missing_dependency_and_corruption(monkeypatch, tmp_path):
         layout_graph({"id": "root"})
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_parse_and_render_every_mermaid_example_offline(tmp_path):
     files = sorted((ROOT / "examples").rglob("*.mmd"))
     assert len(files) >= 40
@@ -379,6 +388,7 @@ def test_parse_and_render_every_mermaid_example_offline(tmp_path):
         assert not [r for r in requests if r.startswith("http")]
 
 
+@pytest.mark.browser
 def test_reserved_renderer_names_do_not_collide():
     elements = [
         {
@@ -396,6 +406,8 @@ def test_reserved_renderer_names_do_not_collide():
         assert len(ids) == len(set(ids))
 
 
+@pytest.mark.browser
+@pytest.mark.slow
 def test_claim_status_cues_in_every_format(plan):
     from architecture_suite.overview_layout import build_cloud_scene
     from architecture_suite.plan import compile_plan

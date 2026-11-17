@@ -31,7 +31,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bubblewrap socat
-          npx --yes playwright@1.51.0 install-deps chromium
+          npx --yes "playwright@$(grep -i '^playwright==' requirements-lock.txt | cut -d= -f3)" install-deps chromium
       - run: npm install -g @anthropic-ai/claude-code
       - name: Validate the plugin
         run: claude plugin validate .

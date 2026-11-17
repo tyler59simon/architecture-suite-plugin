@@ -4,6 +4,8 @@ import json
 import re
 from copy import deepcopy
 
+import pytest
+
 from architecture_suite import renderers
 from architecture_suite.cli import main
 from architecture_suite.plan import compile_plan
@@ -44,6 +46,7 @@ def test_each_view_type_includes_the_matching_library(model):
     assert re.search(r"^Deployment_Node\(n\d+, ", deployment, re.M)
 
 
+@pytest.mark.browser
 def test_external_systems_direction_and_escaping(model):
     model = deepcopy(model)
     view = _view(model, "context")
@@ -67,6 +70,7 @@ def test_external_systems_direction_and_escaping(model):
     assert "LAYOUT_TOP_DOWN()" in renderers.render_plantuml(model, view)
 
 
+@pytest.mark.browser
 def test_plantuml_redacts_like_every_other_format(model):
     """Names, descriptions and members pass through safe_text, as in Mermaid, SVG and Draw.io."""
     model = deepcopy(model)
@@ -79,6 +83,7 @@ def test_plantuml_redacts_like_every_other_format(model):
     assert "\x0b" not in text and "\x08" not in text
 
 
+@pytest.mark.browser
 def test_claims_get_a_dashed_tag(plan):
     claimed = deepcopy(plan)
     claimed["containers"][2]["status"] = "proposed"
