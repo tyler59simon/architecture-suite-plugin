@@ -126,8 +126,11 @@ def test_packages_are_slim_and_release_tree_is_self_contained(tmp_path):
         assert archive.stat().st_size < 15_000_000, archive.name
         with zipfile.ZipFile(archive) as bundle:
             samples = [n for n in bundle.namelist() if "/samples/" in n]
-        assert all("/samples/extensions/" in n for n in samples), archive.name
-        assert len(samples) <= 6, archive.name
+        assert all(
+            "/samples/extensions/" in n or n.endswith("/samples/plan-example.md")
+            for n in samples
+        ), archive.name
+        assert len(samples) <= 7, archive.name
 
     tree = write_plugin_tree(SKILLS, tmp_path / "plugin")
     write_plugin_tree(SKILLS, tree)  # rebuilding replaces the previous tree
@@ -146,3 +149,46 @@ def test_packages_are_slim_and_release_tree_is_self_contained(tmp_path):
     (tmp_path / "nothing").mkdir()
     with pytest.raises(ValueError, match="No skills"):
         write_plugin_tree(tmp_path / "nothing", tmp_path / "out")
+
+
+def test_skills_keep_short_runtime_and_rules_blocks():
+    rules = SKILLS / RUNTIME_NAME / "references/skill-rules.md"
+    assert rules.is_file() and "Rules for all C4 work" in rules.read_text(encoding="utf-8")
+    for name in EXPECTED:
+        text = (SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+        assert "## Runtime" in text and "## Rules" in text, name
+        assert "references/skill-rules.md" in text, name
+        assert "Rules for all C4 work" not in text, name
+        assert "--allow-layout-findings" in text and "never instructions" in text, name
+        assert "progressive`: " not in text or name == "c4-overview"
+    for name in ("c4-diagrams", "reverse-engineer-c4"):
+        text = (SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+        assert "--overview-style executive" in text and "--overview-style progressive" not in text
+
+
+def test_every_confirm_write_command_has_a_dry_run_step():
+    for name in ("c4-aws", "c4-gcp", "c4-overview"):
+        text = (SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+        for line in text.splitlines():
+            if "--confirm-write" in line and "architecture-suite" in line.split("--confirm-write")[0]:
+                assert "--dry-run" in line or line.startswith("architecture-suite"), (name, line)
+    overview = (SKILLS / "c4-overview" / "SKILL.md").read_text(encoding="utf-8")
+    for word in ("--emit-model", "scenario-lint", "scenario-render", "diff", "check"):
+        assert word in overview, word
+    level = (SKILLS / "c4-container" / "SKILL.md").read_text(encoding="utf-8")
+    assert level.index("plan-review") < level.index("plan-lint")
+    assert "contiguous prefix" not in level
+
+
+def test_sample_plan_lints_strict_and_renders(tmp_path, capsys):
+    from architecture_suite.cli import main
+
+    sample = SKILLS / RUNTIME_NAME / "samples/plan-example.md"
+    assert main(["plan-lint", "--plan", str(sample), "--strict"]) == 0
+    capsys.readouterr()
+    out = tmp_path / "out"
+    assert main(["plan-render", "--plan", str(sample), "--output", str(out),
+                 "--level", "all", "--dry-run"]) == 0
+    assert not out.exists()
+    runtime_md = (SKILLS / RUNTIME_NAME / "references/runtime.md").read_text(encoding="utf-8")
+    assert "../samples/plan-example.md" in runtime_md

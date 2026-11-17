@@ -108,20 +108,27 @@ def _no_links(path: Path) -> None:
             raise SafetyError(f"Symlink/reparse path is not allowed: {part.name}")
 
 
-def canonical_existing_directory(path: Path) -> Path:
+def canonical_existing_directory(path: Path, label: str = "") -> Path:
     path = Path(path).absolute()
     _no_links(path)
     if not path.is_dir():
-        raise SafetyError("Repository must be an existing directory")
+        # A missing input is an input error (exit 2); links stay a safety error (exit 3).
+        raise ValueError(f"{_prefix(label)}no such directory: {path.resolve()}")
     return path.resolve()
 
 
-def canonical_existing_file(path: Path) -> Path:
+def canonical_existing_file(path: Path, label: str = "") -> Path:
     path = Path(path).absolute()
     _no_links(path)
-    if not path.is_file() or path.stat().st_size > 20_000_000:
-        raise SafetyError("Input must be an existing file under 20 MB")
+    if not path.is_file():
+        raise ValueError(f"{_prefix(label)}no such file: {path.resolve()}")
+    if path.stat().st_size > 20_000_000:
+        raise ValueError(f"{_prefix(label)}file exceeds 20 MB: {path.resolve()}")
     return path.resolve()
+
+
+def _prefix(label: str) -> str:
+    return f"{label}: " if label else ""
 
 
 def canonical_output_directory(path: Path) -> Path:

@@ -14,7 +14,7 @@ from .aws import gcp_icon_status, verify_assets
 from .draft import render_plan
 from .examples import SCENARIOS, example_model, example_plan
 from .layout_host import layout_graph
-from .model import load_model, normalized_model, project_model, validate_model
+from .model import format_findings, load_model, normalized_model, project_model, validate_model
 from .overview_layout import normalize_overview_styles
 from .plan import compile_plan, errors, lint_plan, parse_plan_document
 from .renderers import (
@@ -46,6 +46,7 @@ from .safety import (
 # Draw.io, SVG, Visio and PlantUML are opt-in; `--format all` writes every format.
 DEFAULT_FORMATS = {"mermaid", "png"}
 ALL_FORMATS = {"mermaid", "drawio", "png", "svg", "visio", "plantuml"}
+FORMAT_HELP = "all or a comma-separated list of mermaid,drawio,png,svg,visio,plantuml"
 
 
 def _json_print(value):
@@ -60,11 +61,11 @@ def _json_print(value):
 def _parse_formats(value):
     formats = (
         ALL_FORMATS.copy()
-        if value == "all"
-        else {x.strip() for x in value.split(",") if x.strip()}
+        if value.strip().lower() == "all"
+        else {x.strip().lower() for x in value.split(",") if x.strip()}
     )
     if not formats or formats - ALL_FORMATS:
-        raise argparse.ArgumentTypeError("format must be all or mermaid,drawio,png,svg,visio,plantuml")
+        raise argparse.ArgumentTypeError(f"format must be {FORMAT_HELP}")
     return formats
 
 
@@ -111,11 +112,12 @@ def _selected_model(model, level, styles):
             ) from exc
     findings = validate_model(selected, profile)
     if findings:
-        raise SafetyError("Invalid architecture model: " + json.dumps(findings[:8]))
+        raise SafetyError("Invalid architecture model:\n" + format_findings(findings))
     return normalized_model(selected)
 
 
 def cmd_doctor(args) -> int:
+    print("architecture-suite: checking runtime...", file=sys.stderr, flush=True)
     result = {"version": __version__, "python": sys.version.split()[0], "offline": True}
 
     def check_browser():
@@ -167,7 +169,7 @@ def cmd_doctor(args) -> int:
 
 def cmd_plan_lint(args) -> int:
     plan = parse_plan_document(
-        canonical_existing_file(Path(args.plan)).read_text(encoding="utf-8")
+        canonical_existing_file(Path(args.plan), "--plan").read_text(encoding="utf-8")
     )
     findings = lint_plan(plan, args.gcp_icon_style)
     _json_print(
@@ -214,7 +216,7 @@ def _write_text_output(output: Path, text: str, args) -> None:
 
 
 def cmd_plan_review(args) -> int:
-    source = canonical_existing_file(Path(args.plan))
+    source = canonical_existing_file(Path(args.plan), "--plan")
     plan = parse_plan_document(source.read_text(encoding="utf-8"))
     review = review_plan(plan, args.gcp_icon_style)
     review["strict"] = args.strict
@@ -230,7 +232,7 @@ def cmd_plan_review(args) -> int:
 
 
 def cmd_plan_draft(args) -> int:
-    root = canonical_existing_directory(Path(args.repo))
+    root = canonical_existing_directory(Path(args.repo), "--repo")
     output = _checked_text_output(args.output, "Plan")
     if output.resolve().is_relative_to(root):
         raise SafetyError("Plan output must be outside the analyzed repository")
@@ -262,7 +264,7 @@ def cmd_verify(args) -> int:
     styles = parse_overview_styles(args.overview_style)
     _check_styles(args)
     model = _selected_model(
-        load_model(canonical_existing_file(Path(args.model))), args.level, styles
+        load_model(canonical_existing_file(Path(args.model), "--model"), "--model"), args.level, styles
     )
     result = layout_report(model, styles, args.level)
     result.update(
@@ -291,14 +293,14 @@ def cmd_publish(args) -> int:
     styles = parse_overview_styles(args.overview_style)
     fidelity, plan = None, None
     if args.command == "plan-render":
-        input_path = canonical_existing_file(Path(args.plan))
+        input_path = canonical_existing_file(Path(args.plan), "--plan")
         plan = parse_plan_document(input_path.read_text(encoding="utf-8"))
         blocking = errors(lint_plan(plan, args.gcp_icon_style))
         if blocking:
             raise SafetyError("Plan has blocking findings: " + blocking[0].render())
         model, fidelity = compile_plan(plan, args.gcp_icon_style)
     elif args.command == "analyze":
-        input_path = canonical_existing_directory(Path(args.repo))
+        input_path = canonical_existing_directory(Path(args.repo), "--repo")
         if output.is_relative_to(input_path) or input_path.is_relative_to(output):
             raise SafetyError("Analysis output must be outside the source repository")
         model, _ = analyze_repository(
@@ -311,8 +313,8 @@ def cmd_publish(args) -> int:
             cloud_profile=args.cloud_profile,
         )
     else:
-        input_path = canonical_existing_file(Path(args.model))
-        model = load_model(input_path)
+        input_path = canonical_existing_file(Path(args.model), "--model")
+        model = load_model(input_path, "--model")
     if input_path.is_relative_to(output):
         raise SafetyError("Output must not contain its input")
     model = _selected_model(model, args.level, styles)
@@ -326,16 +328,19 @@ def cmd_publish(args) -> int:
     changes = ownership_changes(output, "c4", paths)
     summary = {
         "operation": args.command,
+        "ok": True,
+        "dry_run": bool(args.dry_run),
         "output_root": str(output),
         "files": paths + [OUTPUT_MANIFEST],
         "expected_file_count": len(paths) + 1,
         "formats": sorted(formats),
-        "overview_styles": list(styles),
         "write_confirmation_required": True,
         "overwrite_confirmation_required": output.exists() and any(output.iterdir()),
         "conflicts": changes["conflicts"],
         "overwrites_edited": changes["overwrites_edited"],
     }
+    if args.level in {"all", "overview"}:
+        summary["overview_styles"] = list(styles)
     if args.dry_run:
         _json_print({**summary, "would_remove": changes["remove"]})
         return 0
@@ -377,6 +382,7 @@ def cmd_publish(args) -> int:
                 + "\n```\n",
                 encoding="utf-8", newline="\n",
             )
+    summary.update(write_confirmation_required=False, written=True)
     _json_print(summary)
     return 0
 
@@ -403,6 +409,8 @@ def cmd_examples(args) -> int:
         _json_print(
             {
                 "operation": "examples",
+                "ok": True,
+                "dry_run": True,
                 "files": paths + [OUTPUT_MANIFEST],
                 "systems": len(SCENARIOS),
                 "would_remove": changes["remove"],
@@ -441,6 +449,10 @@ def cmd_examples(args) -> int:
     _json_print(
         {
             "operation": "examples",
+            "ok": True,
+            "dry_run": False,
+            "write_confirmation_required": False,
+            "written": True,
             "files": paths + [OUTPUT_MANIFEST],
             "removed": changes["remove"],
             "conflicts": changes["conflicts"],
@@ -448,6 +460,32 @@ def cmd_examples(args) -> int:
         }
     )
     return 0
+
+
+COMMAND_HELP = {
+    "analyze": "scan a repository and write diagrams directly",
+    "render": "render diagrams from an existing architecture-model.json",
+    "plan-draft": "draft plan.md from a repository (inferred candidates)",
+    "plan-lint": "check plan.md for errors and advisory findings",
+    "plan-review": "report per-level readiness, evidence coverage and gaps of plan.md",
+    "plan-render": "render diagrams from plan.md",
+    "verify": "check layout of the diagrams a model would produce, without writing",
+    "examples": "write the fictional example diagram sets",
+}
+
+
+def _write_flags(p) -> None:
+    p.add_argument(
+        "--dry-run", action="store_true", help="show what would be written; write nothing"
+    )
+    p.add_argument(
+        "--confirm-write", action="store_true", help="authorize writing (required to write)"
+    )
+    p.add_argument(
+        "--confirm-overwrite",
+        action="store_true",
+        help="allow writing into a folder that already has files",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -461,12 +499,16 @@ def build_parser() -> argparse.ArgumentParser:
         "Playwright (chrome-cli), or the first that works (auto, the default); "
         "also ARCHITECTURE_SUITE_BROWSER",
     )
-    commands =parser.add_subparsers(dest="command", required=True)
-    from .extensions import register_commands
+    commands = parser.add_subparsers(
+        dest="command", required=True, title="commands", metavar="COMMAND"
+    )
+    from .extensions import HelpFormatter, register_commands
 
     register_commands(commands)
     commands.add_parser(
-        "doctor", help="Inspect offline runtime readiness"
+        "doctor",
+        help="check that the offline runtime is ready (assets, layout engine, browser)",
+        formatter_class=HelpFormatter,
     ).set_defaults(func=cmd_doctor)
     for name in (
         "analyze",
@@ -478,29 +520,50 @@ def build_parser() -> argparse.ArgumentParser:
         "verify",
         "examples",
     ):
-        p = commands.add_parser(name)
+        p = commands.add_parser(
+            name,
+            help=COMMAND_HELP[name],
+            description=COMMAND_HELP[name],
+            formatter_class=HelpFormatter,
+        )
         if name in {"analyze", "plan-draft"}:
-            p.add_argument("--repo", required=True)
+            p.add_argument(
+                "--repo", required=True, help="repository folder to scan (read-only)"
+            )
             p.add_argument(
                 "--classification",
                 default="Internal"
                 if name == "plan-draft"
                 else "Inherited from source repository",
+                help="data classification label written into the output",
             )
             p.add_argument(
-                "--cloud-profile", choices=("none", "aws", "gcp"), default="none"
+                "--cloud-profile",
+                choices=("none", "aws", "gcp"),
+                default="none",
+                help="cloud service detection rules to apply",
             )
-            for flag, default in (
-                ("max-files", 2000),
-                ("max-file-bytes", 400000 if name == "plan-draft" else 1000000),
-                ("max-total-bytes", 50000000),
+            for flag, default, text in (
+                ("max-files", 2000, "maximum number of files to scan"),
+                (
+                    "max-file-bytes",
+                    400000 if name == "plan-draft" else 1000000,
+                    "skip files larger than this many bytes",
+                ),
+                ("max-total-bytes", 50000000, "stop scanning after this many bytes"),
             ):
-                p.add_argument("--" + flag, type=int, default=default)
-            p.add_argument("--timeout", type=float, default=45.0)
+                p.add_argument("--" + flag, type=int, default=default, help=text)
+            p.add_argument(
+                "--timeout", type=float, default=45.0, help="scan time limit in seconds"
+            )
         if name in {"render", "verify"}:
-            p.add_argument("--model", required=True)
+            p.add_argument(
+                "--model",
+                required=True,
+                help="architecture-model.json from plan-render --emit-model or analyze",
+            )
         if name in {"plan-lint", "plan-review", "plan-render"}:
-            p.add_argument("--plan", required=True)
+            p.add_argument("--plan", required=True, help="plan.md file to read")
             p.add_argument(
                 "--gcp-icon-style",
                 choices=("auto", "modern", "legacy"),
@@ -508,36 +571,67 @@ def build_parser() -> argparse.ArgumentParser:
                 help="GCP icon set; overrides gcp_icon_style in the plan",
             )
         if name == "plan-lint":
-            p.add_argument("--strict", action="store_true")
+            p.add_argument(
+                "--strict",
+                action="store_true",
+                help="treat advisory findings as failures (exit 1)",
+            )
             p.set_defaults(func=cmd_plan_lint)
             continue
         if name == "plan-review":
-            p.add_argument("--strict", action="store_true")
+            p.add_argument(
+                "--strict",
+                action="store_true",
+                help="exit 1 when any level is blocked or has findings",
+            )
             p.add_argument("--output", help="Also write the review as Markdown to this file")
-            for flag in ("dry-run", "confirm-write", "confirm-overwrite"):
-                p.add_argument("--" + flag, action="store_true")
+            _write_flags(p)
             p.set_defaults(func=cmd_plan_review)
             continue
         if name != "plan-draft":
             p.add_argument(
-                "--overview-style", action="append", metavar="STYLE[,STYLE...]"
+                "--overview-style",
+                action="append",
+                metavar="STYLE[,STYLE...]",
+                help="overview styles (executive, progressive, hierarchy, "
+                "small-multiples, complete, or all); repeat or comma-separate; "
+                "only with --level all or overview",
             )
             if name != "examples":
-                p.add_argument("--level", choices=ARTIFACT_LEVELS, default="all")
+                p.add_argument(
+                    "--level",
+                    choices=ARTIFACT_LEVELS,
+                    default="all",
+                    help="C4 level or view to produce",
+                )
         if name == "verify":
             p.set_defaults(func=cmd_verify)
             continue
-        p.add_argument("--output", required=True)
+        p.add_argument("--output", required=True, help="dedicated output folder")
         if name in {"render", "analyze", "plan-render", "examples"}:
             p.add_argument(
-                "--format", type=_parse_formats, default=DEFAULT_FORMATS.copy()
+                "--format",
+                type=_parse_formats,
+                default=DEFAULT_FORMATS.copy(),
+                help="output formats, case-insensitive: " + FORMAT_HELP + " (default: mermaid,png)",
             )
         if name == "plan-render":
-            p.add_argument("--emit-model", action="store_true")
-            p.add_argument("--augmented", action="store_true")
-            p.add_argument("--allow-layout-findings", action="store_true")
-        for flag in ("dry-run", "confirm-write", "confirm-overwrite"):
-            p.add_argument("--" + flag, action="store_true")
+            p.add_argument(
+                "--emit-model",
+                action="store_true",
+                help="also write architecture-model.json (needed by explore, diff and check)",
+            )
+            p.add_argument(
+                "--augmented",
+                action="store_true",
+                help="record in the fidelity report that the plan adds architectural judgment",
+            )
+            p.add_argument(
+                "--allow-layout-findings",
+                action="store_true",
+                help="write diagrams despite layout findings (report them to the user)",
+            )
+        _write_flags(p)
         p.set_defaults(
             func=cmd_plan_draft
             if name == "plan-draft"

@@ -711,3 +711,31 @@ def test_cloudformation_getatt_and_sub_references(tmp_path):
         ("input-0-fn2", "input-0-role"),
         ("input-0-fn2", "input-0-queue"),
     }
+
+
+def test_unknown_participant_names_it_and_lists_valid_ids(scenario, model):
+    bad = deepcopy(scenario)
+    bad["participants"] = ["ghost"]
+    with pytest.raises(ValueError) as caught:
+        validate_scenario(bad, model)
+    text = str(caught.value)
+    assert "'ghost'" in text and "valid element ids:" in text
+    assert model["elements"][0]["id"] in text
+    assert text.count(",") <= 22  # the id list is capped
+
+
+def test_scenario_render_format_is_case_insensitive(inputs, tmp_path, scenario):
+    scenario_file = tmp_path / "scenario.json"
+    scenario_file.write_text(json.dumps(scenario))
+    out = tmp_path / "out"
+    argv = ["scenario-render", "--model", str(inputs[0]), "--scenario", str(scenario_file),
+            "--output", str(out), "--format", "Mermaid,SVG"]
+    assert main(argv + ["--confirm-write"]) == 0
+    assert (out / "scenario.mmd").is_file() and (out / "scenario.svg").is_file()
+
+
+def test_extension_missing_file_names_the_flag(inputs, tmp_path, capsys):
+    missing = tmp_path / "gone.json"
+    assert main(["diff", "--before", str(missing), "--after", str(inputs[0]),
+                 "--output", str(tmp_path / "d"), "--dry-run"]) == 2
+    assert f"--before: no such file: {missing.resolve()}" in capsys.readouterr().err
