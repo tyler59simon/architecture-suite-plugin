@@ -602,25 +602,34 @@ def browser_page():
                     if choice == "playwright"
                     else BROWSER_HELP
                 )
-            attempts = [found]
-            if choice == "auto" and found[0] == "playwright":
-                system = find_system_chrome()  # auto: "the first that works"
-                if system is not None:
-                    attempts.append(("chrome", system))
-            browser = None
-            for engine, executable in attempts:
-                try:
-                    browser = p.chromium.launch(
-                        headless=True,
-                        executable_path=None if engine == "playwright" else str(executable),
-                        args=LAUNCH_ARGS,
-                    )
-                    break
-                except BrowserError:
-                    if choice != "auto" or (len(attempts) == 1 and engine == "playwright"):
+            engine, executable = found
+
+            def launch(engine, executable):
+                return p.chromium.launch(
+                    headless=True,
+                    executable_path=None if engine == "playwright" else str(executable),
+                    args=LAUNCH_ARGS,
+                )
+
+            try:
+                browser = launch(engine, executable)
+            except BrowserError:
+                if choice != "auto":
+                    raise
+                browser = None
+                if engine == "playwright":
+                    # auto means "the first that works": only now look for an
+                    # installed browser, so a stale override cannot break Chromium.
+                    system = find_system_chrome()
+                    if system is None:
                         raise
-            if browser is None:
-                fallback = executable  # auto: use the installed browser's own CLI
+                    engine, executable = "chrome", system
+                    try:
+                        browser = launch(engine, executable)
+                    except BrowserError:
+                        pass
+                if browser is None:
+                    fallback = executable  # the installed browser's own CLI
             if browser is not None:
                 try:
                     context = browser.new_context(offline=True, device_scale_factor=1)

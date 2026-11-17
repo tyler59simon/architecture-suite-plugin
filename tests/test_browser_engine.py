@@ -156,6 +156,14 @@ def test_auto_tries_installed_browser_when_bundled_chromium_fails(
             pass
 
 
+def test_stale_chrome_override_does_not_break_working_chromium(monkeypatch, tmp_path):
+    """The installed-browser fallback is looked up only after Chromium fails."""
+    monkeypatch.setenv("ARCHITECTURE_SUITE_CHROME", str(tmp_path / "gone.exe"))
+    monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "auto")
+    with renderers.browser_page() as page:
+        assert not isinstance(page, ChromeCli)
+
+
 def test_browser_layout_needs_playwright(monkeypatch, fake_chrome):
     monkeypatch.setenv("ARCHITECTURE_SUITE_LAYOUT_HOST", "browser")
     monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "chrome-cli")
