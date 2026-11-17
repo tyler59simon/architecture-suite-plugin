@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "skills": [
     "architecture-plan",
     "c4-aws",
@@ -16,58 +16,60 @@
   "files": {
     "architecture-plan": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "6917cfba71ac8a06260fb6821b65c35e2a200c8be6bb759414d61cdba29ab64f"
+      "SKILL.md": "4c52cdb1629eb22c319cdcb2966c94d073b5eba0af110ff8df47f9de6cd19380"
     },
     "c4-aws": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "7549c9fb17bf7fd73a2b70461ed4cdd79cdfeccd0964ca12366e920e34a2b5a1"
+      "SKILL.md": "9cc44e02e949d568102a4dad30a2554d7d528f5ee66f6f1771cc22ae7a9f6c51"
     },
     "c4-code": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "71260f9fb46dd279d4d8f9153c73e13436a63cd42d2fe7982a9767d501073f26"
+      "SKILL.md": "7d0354d89533bef4b774a20d60513ae0427558ee52b8684c41a3f7df79a5687c"
     },
     "c4-component": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "cee82dac6452377d5529d2b4a87733269414c42e354fb2755c75d9a4f69edd3f"
+      "SKILL.md": "824f70b80a9bf4cba04fcdcad965ff946516e819dac831253c315cc51742ae5f"
     },
     "c4-container": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "9d544e897147e6b9eda1af16313009695ed68f9a8f0ec032c4f115985d02e805"
+      "SKILL.md": "12a021ee36864481ce8add019292a149fc255e5db5d15b8977bc61548e45e7eb"
     },
     "c4-diagrams": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "f6174d961e272d8beddfd3b1bb53e55b7b13305eaadb6ebce892b388fe01fa05"
+      "SKILL.md": "72d22fa9a0c325d076526f90176f45fadca9318b02719192fa0818818a5d9906"
     },
     "c4-gcp": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "80d4e6ba7d415374d8a48a9962397f010f5608b3f372bf48ce0bb4d64adb566c"
+      "SKILL.md": "fdba30dc35cb247fb4ce9a1f3eccc23abb8bfbe097a11d9827c9d7fd06827afe"
     },
     "c4-overview": {
-      "SKILL.md": "319ec8a08570a9e808d09de6b39148a0f1a0d39e35bbc4dd14f6d4e73261a6bd"
+      "SKILL.md": "e6006160c1c6f07db4601df8c1a1130b1d0764c451183b95eefebc0ce66b7814"
     },
     "c4-system": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "e36029554a42b2a60f4f7a6966dd24416b33019ca2de835adaec6c9168118a39"
+      "SKILL.md": "4ae932377ad30bd0e7f0f037507b0c6ab67e93b64c6385ded1dcb50db4774c2d"
     },
     "reverse-engineer-c4": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
-      "SKILL.md": "0ac1e8673723f907a5249a5d21b89c2f0d0b346dbadd2609d2f128c3e2340e3b"
+      "SKILL.md": "47c19e76795e60e7ff0dbb43667a8c8d9f9ee24fcaf44bf2dae4547db5213f2f"
     },
     "architecture-suite-runtime": {
       "assets/architecture-plan-template.md": "2da8efb06162c61c94fdd30c7fe38df8a7d9b8d767284bd9402c10739ae9ca88",
       "references/compatibility.md": "fb6c217196722e90eadd74a62f95c28cb6a98a30259bc945679a5972679ddf8e",
-      "references/extensions.md": "de05972ccfaab03cd99d3af3c2298977fe5fc80696e86cb39e0b7b191a86a78f",
-      "references/planning.md": "8e17a70f76dc0af41cfa014d8f51a8f7c85a9ed7b266fb69f80b91d47a970087",
-      "references/runtime.md": "803563bd18bf56ecfe93479f3589fe82a5c22236790771bd83e712b84df982ae",
-      "samples/extensions/checks/baseline.json": "ea3908abc2da2f53280cd538bf82b8a3e1e431c6a04dfedc612a81f17061b36e",
+      "references/extensions.md": "c6fd929b25ba2e9ad5f4daf0e6b78b0e50a64654aac6db4f817ac6b717a203b6",
+      "references/planning.md": "296325a80e0e35164503fdaee4b64fce362b6bbad28e629350fbb3337da93cb6",
+      "references/runtime.md": "c7bb69be3d155bbe8b65600cf50b4d1324515f7cdc68a768c7217482ffb7c561",
+      "references/skill-rules.md": "554180712435c0d4b9406af1fb331d9fdb56336328b7e2e125d4a74f4bd2197f",
+      "samples/extensions/checks/baseline.json": "9ff6353239a9289d3750ce39691b8175dc7ecfe0a52422f967b5fc242287ed8e",
       "samples/extensions/compose.json": "7744f66e5d9243103e4c6f3930887c5b9435416b050ef95156c3c7ace4aab440",
       "samples/extensions/model.json": "bdbe6a5ea68eb1fde908a6033aaadbf7890e0b2fef39eb802e97b8d1e03e0ae7",
       "samples/extensions/rules.json": "8545e7745b946fb317a86f425aa82261f8a8ccf5ea3201ff60d456bfa0e228b6",
       "samples/extensions/scenario.json": "96fc4d06a73af70922391cd9e8b34ebc4bf159beeb8ad27891e8919d7c51c280",
-      "scripts/architecture-suite.py": "ef8aad7cb105f2ba1125e8107b78e4f82f4de04a59317aaa1ddf76c1249f7d26",
-      "scripts/architecture_suite/__init__.py": "12c5d48edcf833c85acc9adf4d19bbaff741f4f96cb0f92d57057b311813b6c6",
+      "samples/plan-example.md": "d03fc3a9352c457acc2af4c81bbefa709b60808a7e29ba1d774a0c84c743ceec",
+      "scripts/architecture-suite.py": "108a66f818288889719228a6809dac587c5cfeed670162b8cc33787d5598faf6",
+      "scripts/architecture_suite/__init__.py": "002310d499e7c83669b0db3688bf5d4aea860df30b1077c21d64eb2f67504420",
       "scripts/architecture_suite/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
-      "scripts/architecture_suite/analyzer.py": "005bda4849985155c2499bcac56c85d1c5ec9e0eec124cd97faf0fd50d96c39b",
+      "scripts/architecture_suite/analyzer.py": "48419921c30947e7cb12d09408de02703701289b530d8b172d40f82e3a52e66f",
       "scripts/architecture_suite/assets/architecture-baseline.schema.json": "2a3f7b1c9ef0aaf4e4e910244b526acab9d7471e6690b76753ba94905d8f29dd",
       "scripts/architecture_suite/assets/architecture-check.schema.json": "9127525638aabe56c5f5e3a0b258734213fba1919505f3f172440bf2d9359ec9",
       "scripts/architecture_suite/assets/architecture-diff.schema.json": "d50b73a5ef0dc501ff9aea14d9f49980ba88bb2bd4921a2dced220df57a79a13",
@@ -1931,6 +1933,7 @@
       "scripts/architecture_suite/assets/aws/Virtual-private-cloud-VPC_32.svg": "a225286901ea59f74d52c37ccaa2660f9e2728a76cd4ee0892c29c7a386ef98c",
       "scripts/architecture_suite/assets/aws-catalog.json": "d317bd15367d7f184a2df91fb3cb59da5ba91f1244494aa45903e85b19a2a46b",
       "scripts/architecture_suite/assets/elk.bundled.js": "b0745abd7f23cd91690a1587e377edbe19fd7233c783300290936720546216d4",
+      "scripts/architecture_suite/assets/font-embed.woff": "3c7431c7b319e1719246608774d4db0fa8e9ac22507329b032ec3e5e7c7711ac",
       "scripts/architecture_suite/assets/font.ttf": "56a45233d29f11b4dfb86d248e921939d115778f87325e7ae8cc108383d6664d",
       "scripts/architecture_suite/assets/gcp/legacy/GCP-Legacy-access_context_manager.svg": "674146e5eeebac89cc23b7c4676724eb6f2fe11cb8ae416cbd2cc7d021047143",
       "scripts/architecture_suite/assets/gcp/legacy/GCP-Legacy-administration.svg": "359410bd8c138a1550b7610dfe9c3566b465d8b7f2a22cc6e27ab240a7fa56de",
@@ -2199,39 +2202,35 @@
       "scripts/architecture_suite/assets/licenses/FONT-LICENSE.txt": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
       "scripts/architecture_suite/assets/licenses/GCP-USAGE.md": "4acecd59e520c4747fe2f7bf20f354fd32ad0e636faed9b377c6804fd2613b5a",
       "scripts/architecture_suite/assets/manifest-gcp.json": "d1e2362b3a943373fc9024076c231f004292654597e9d1f7673edb1bca022cfa",
-      "scripts/architecture_suite/assets/manifest.json": "ac545f9c1a2431c18362b302769de52fb1ce31b216830ec804da03521f2e8081",
+      "scripts/architecture_suite/assets/manifest.json": "5f16e21f05cf50b7d864a3000bdc2eced859941687d7093df34c22c6befa0af6",
       "scripts/architecture_suite/assets/provenance.json": "a0ce19b7b20cb7392f59726eee01432d2bf54726318db93b003c43a3b93ec6ba",
       "scripts/architecture_suite/aws.py": "30c2544c03b8c1e33cdd1f25e902c171088ca50d8041c43c89e4197e13e012e1",
-      "scripts/architecture_suite/aws_analyzer.py": "e4753e970c804f81319e02429a65bc7656d9ead5dce2cd39a432dfa3792af62c",
-      "scripts/architecture_suite/c4_layout.py": "40915aa4adc5aa2d3ee9cde54d3c72d21987c537441d6ff68537db4a3cb188c0",
       "scripts/architecture_suite/changes.py": "c78fda1a18110f7f458ace3ac19676addb49477bdba96f294cf6f66d863fc7d6",
-      "scripts/architecture_suite/cli.py": "5bbf3019ba58401712a7d679dd741fdc4af249e3b4e3d4eddb9f6f6d5e127079",
-      "scripts/architecture_suite/distribution.py": "c4b2e27acc10a76d627e1673365369c4a72df35c200e20422ce13397d807b8f1",
-      "scripts/architecture_suite/draft.py": "a57c2f93ac6fcbf39794667ea7d26a0c84cc073ef382066941092480bf505ca3",
+      "scripts/architecture_suite/cli.py": "e783c53065bd7449b3664abf8cc79f2ea0a5a12c2bf5d94ac44d83406cc64a86",
+      "scripts/architecture_suite/cloud_signals.py": "373a826e0369ba1e7f719151f5df8279ee26dcc13fe579a790d66e3a372b8a4a",
+      "scripts/architecture_suite/distribution.py": "0892cbed388cd4f7c8af00d4e31c2659eb2b0bdcc616db91f6db81e073c89941",
       "scripts/architecture_suite/elk-runner.js": "752e3232934e3c0f71683999ad8e8b385bfc4d7eecea049f61ade1954ba91119",
-      "scripts/architecture_suite/emit.py": "9c62e066e145b6e2998d37a139f72da38885a7b4549f5bde40beb33ef81bd43c",
-      "scripts/architecture_suite/examples.py": "996ffecec13bb015356a825aaee834df14e22388f5360c3c34f407c0ad92d478",
-      "scripts/architecture_suite/examples_gcp.py": "f2d04010970b2856dec4f6aca74de6cd467f9bbe5677e53b044ac6e053fb83c4",
+      "scripts/architecture_suite/emit.py": "d2aa8f8adcad234e3b001d00a76e2aa4246494f4fe06386faa6ddff2a4db6537",
+      "scripts/architecture_suite/examples.py": "2888257bcfea44f8fefc9d6ccf527b29a898590f2d5bc23705b028dcd8406189",
       "scripts/architecture_suite/explorer.py": "263c10ccf2bbac10d4d6843456903705a6272dd3a39fab30b1166681ab45865c",
-      "scripts/architecture_suite/extensions.py": "51a22a2a8375dba2b00b62267280c7856767fdb3db6141d06e25436a56696a83",
-      "scripts/architecture_suite/gcp_analyzer.py": "365dae46991367e6e7441c32c71288a2ce0bc40f80eb5e1a9902f7639779f90a",
-      "scripts/architecture_suite/infrastructure.py": "2166fa74b179d565747d26c3dd89ff9fcb61fd9e7c37ce778dbc637efcb613f8",
+      "scripts/architecture_suite/extensions.py": "f961522b45a10c32b1c62d12547b66ab78778b75278c7d77d7d864cc2659ec9a",
+      "scripts/architecture_suite/infrastructure.py": "20d52bb19cb21b200c8f88dd9176c30459af232b6d0135e772c1d96985288765",
       "scripts/architecture_suite/inventory.py": "dc8f29e2bd45a92642a650b7eaf830f2c6b899e5421a68bd627784e1191c583d",
-      "scripts/architecture_suite/layout_host.py": "1ae516c9f2680d42c0709fcd424fd964b94c03602366c3326feeb0e06b1d12b3",
-      "scripts/architecture_suite/model.py": "f93d554f9d298b8c4987b760c7e0eac61dd6a1807a8015db2127f0386656b440",
-      "scripts/architecture_suite/overview_layout.py": "7250ef0388336d4cb7546e1a2630343a323fa6923e525e4209cbf3708733c11b",
-      "scripts/architecture_suite/plan.py": "7d0be8b7cc60e693f2d5383e8e08321dd31cf95b4d92935dd8b66c394e44fbbf",
+      "scripts/architecture_suite/layout_host.py": "8a368cf4f1074e079290fcbeb127944d8c44a0f5e774cbe21782b2ca6f9342f0",
+      "scripts/architecture_suite/model.py": "9b1b72983c2f29e1f1dd5f3eb09bec6b2b456854da1f4558c39ec112ef040d69",
+      "scripts/architecture_suite/overview_layout.py": "0e3e55d572fd3d72533624f2ba488224eab7133bc825c3de9b26631f0c5dca74",
+      "scripts/architecture_suite/plan.py": "ee50d1ad4d88bd864251284b8f3f59bf4cb825745a58aed4b68455cf9667cebb",
       "scripts/architecture_suite/readability.py": "cee13a1ef8f1900a459f133d97b7c72daef8f1b528e0bb79c8a55755a8e1553b",
-      "scripts/architecture_suite/renderers.py": "3f1fdb0d7621f27a2dead1b8f2d5a5c7e5fa225f7fdcd8a1522a945f69f4efe6",
+      "scripts/architecture_suite/renderers.py": "aa431ba5c8f353128d4465f77063181daf2e5e773b42b1237ff7fe48e0a13231",
       "scripts/architecture_suite/report.py": "0c44f5b3fd94adcb90cb0f939a65569da40fe57a343881f8fbd6af196ad07669",
-      "scripts/architecture_suite/review.py": "ff29d5d9996b1931f23c668cadf38bafe75e1a0539165829ecfb3a7bc4471da7",
+      "scripts/architecture_suite/review.py": "5d743e594fae4a79ad3a95646c7b5a4c11b664b8e278227270438f9b87db0e50",
       "scripts/architecture_suite/runtime_env.py": "c71cf53b01fef5726f38f43fca38bfe0dd5924c48bbedd8c7ad6137b415febb0",
-      "scripts/architecture_suite/safety.py": "fcae4cbdac34e3f31cde1fb936cf27cfcecaa5a6ca87753b439c5aa075ac6f3e",
-      "scripts/architecture_suite/scenarios.py": "a0fe23e6bb00110a04b1019fc7fe774e3e941162f05ef39e34f229ec5418f6d2",
-      "scripts/architecture_suite/scene.py": "f251ccdc435cd92188f5f457086b0dcecd8ebef8ceb30342a6a3beb55c4fa97f",
-      "scripts/architecture_suite/style.py": "2116c8e3422df26eaba222624f43f7e5b0c0197ba6b3176a31d7f6f5b3e4825a",
-      "scripts/bootstrap.py": "419a374e243ebc62df62e39b0ffd46137c925a586753f4aea89a087ca77e65b0",
-      "scripts/pyproject.toml": "cc3077cbad832d4226338b6049ac6be0d9f315385dc91a0190b716e918abc12d",
+      "scripts/architecture_suite/safety.py": "df1b627dbb180262475a87e7abebe3687343d2e4f98fe311c81ac5ec762ef34e",
+      "scripts/architecture_suite/scenarios.py": "9804a1f6173660c1eb92685f797efd0f9c6d260387b2736f326b8f1c694e60ec",
+      "scripts/architecture_suite/scene.py": "ac154fa842eb8054db97700e7539ce74b8067c23783dd63f1d426d660a0e1044",
+      "scripts/architecture_suite/style.py": "0536842599bb396923e66f2a0f16c50c0fd4f4e23d95776607d11833bb6ef30a",
+      "scripts/bootstrap.py": "8bc99f046af6e2c524061076711bb03df0ebfec4e8bb06c95fe4f04ea0552e96",
+      "scripts/pyproject.toml": "65f659e514fb1ef33e5c5e762094cee886a7c1f484636ceffe7655f80f7132b7",
       "scripts/requirements-runtime.lock": "042b77c765c4e5f8bc56f082edc7793653068b6ad0e8c5e5cdd4b398f27833ee"
     }
   }

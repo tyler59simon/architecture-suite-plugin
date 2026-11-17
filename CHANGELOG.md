@@ -1,12 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.3.0 - review fixes, smaller output and faster checks
+
+Fixes from a full code review, an installed-browser option for PNG, shorter skills, smaller SVG files and examples, and a faster development loop.
 
 ### Added
 
-- **Installed Chrome or Edge for PNG:** `architecture-suite --browser auto|playwright|chrome|chrome-cli` (or `ARCHITECTURE_SUITE_BROWSER`) picks the browser for PNG export and Visio icons. `chrome` drives an installed Google Chrome or Microsoft Edge through Playwright; `chrome-cli` uses that browser's own headless mode and needs no Playwright. `auto` (the default) uses Playwright's Chromium when installed, then the installed browser. `ARCHITECTURE_SUITE_CHROME` names a browser executable, and `doctor` reports `browser_engine` and `browser_path`. With an installed browser, `bootstrap.py --no-browser` skips the Chromium download.
+- **Installed Chrome or Edge for PNG:** `architecture-suite --browser auto|playwright|chrome|chrome-cli` (or `ARCHITECTURE_SUITE_BROWSER`) picks the browser for PNG export and Visio icons. `chrome` drives an installed Google Chrome or Microsoft Edge through Playwright; `chrome-cli` uses that browser's own headless mode and needs no Playwright. `auto` (the default) uses Playwright's Chromium when installed, then the installed browser. `ARCHITECTURE_SUITE_CHROME` names a browser executable, and `doctor` reports `browser_engine` and `browser_path`. With an installed browser, `bootstrap.py --no-browser` skips the Chromium download. Known limit: `chrome` times out taking the screenshot on CI runners (Linux and Windows), though it works on a desktop; if it times out, use `chrome-cli` or `playwright`.
 - **Skill rules file and sample plan:** `references/skill-rules.md` holds the full runtime and C4 rules text that every skill used to repeat. `samples/plan-example.md` is a complete small fictional plan (containers, components, code, flows with evidence, deployment placements) that a test keeps lint-clean under `--strict`.
-
 - **Fast test loop:** tests of about 3 seconds or more are marked `slow`, and tests that launch Playwright, Chrome or Node are marked `browser`. `python -m pytest -m "not slow" -n auto` finishes in well under a minute (`pytest-xdist` is in the dev lock), and CI runs the full suite with `-n auto`.
 - **Drift checks:** `tools/generate_skills.py`, `tools/sync_manifests.py` and `tools/build_manifest.py` accept `--check`. They compare the generated output with the files, list the paths that differ, exit 1 and write nothing. The CI lint job runs all three.
 - **Version bump and local checks:** `tools/bump_version.py X.Y.Z` rewrites every version location and regenerates the manifests (`--dry-run` lists the files). `tools/check.py` runs ruff, the drift checks and the fast tests; `--full` runs the coverage run and `record_validation.py`.
@@ -23,7 +24,6 @@
 - **Less dead code:** the one-line `render_overview_*`, `render_aws_deployment_*` and `render_gcp_deployment_*` wrappers, `render_drawio`, `render_vsdx`, `verify_model_layout`, `measure_model_layout`, `model_as_json`, `error_findings`, `all_example_models` and `contains_likely_secret` are removed because only tests called them. `aws_analyzer.py` and `gcp_analyzer.py` are now `cloud_signals.py`, `draft.py` is merged into `plan.py`, and `c4_layout.py` into `scene.py`. The RidePulse example plan (`examples_gcp.py`) and the host packaging code (`tools/host_packaging.py`) moved to `tools/`, so the shipped runtime no longer carries them.
 - **Smaller examples:** `examples/` drops from 107 MB to about 23 MB. Every SVG embeds the font subset, and the generators keep only files that differ from a reference render (`tools/sample_dedupe.py`): the Google Cloud payments package omits files identical to AWS, the legacy-icon ride-dispatch views are the deployment only, and the second and third starter systems omit component and code views identical to the order platform. A test fails if two files under `examples/` are byte-identical, and the order-platform outputs are refreshed.
 - **Packaging checks:** `tools/package_hosts.py` fails when a file under `skills/` is untracked and not ignored (git checkouts only), and importing it no longer writes `dist/`. `reports/coverage.json` and `reports/public-coverage.json` are no longer tracked; `record_validation.py` writes the coverage files under `test-results/`, which CI uploads.
-
 - **Exit code 4 for internal errors:** an unexpected exception now exits 4 with `internal error: <type>: <message>` instead of a traceback with exit 1, which automation could not tell apart from lint findings.
 - **`plan-lint --strict` catches template placeholders:** `placeholder` (leftover `Replace with ...`, `TBD` or `Unspecified` text) is now a lint advisory, so an unedited template fails `--strict`; `plan-review` reports it with the same question as before.
 
