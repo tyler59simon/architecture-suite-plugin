@@ -116,7 +116,7 @@ def main(argv=None):
     parser.add_argument("--target", type=Path, default=DEFAULT_TARGET)
     parser.add_argument(
         "--no-browser", action="store_true",
-        help="skip Chromium (PNG export and browser layout unavailable)",
+        help="skip Chromium; PNG export then uses an installed Chrome or Edge, if any",
     )
     args = parser.parse_args(argv)
     if not python_supported():

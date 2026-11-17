@@ -19,6 +19,9 @@ from .overview_layout import normalize_overview_styles
 from .plan import compile_plan, errors, lint_plan, parse_plan_document
 from .renderers import (
     ARTIFACT_LEVELS,
+    BROWSER_CHOICES,
+    BROWSER_HELP,
+    ChromeCli,
     browser_page,
     expected_artifact_paths,
     find_browser,
@@ -116,12 +119,17 @@ def cmd_doctor(args) -> int:
     result = {"version": __version__, "python": sys.version.split()[0], "offline": True}
 
     def check_browser():
-        if find_browser() is None:
-            raise SafetyError(
-                "Local Chromium missing; run python -m playwright install chromium"
-            )
-        with browser_page():
-            pass
+        path = find_browser()
+        if path is None:
+            raise SafetyError(BROWSER_HELP)
+        with browser_page() as page:
+            if isinstance(page, ChromeCli):  # no session to open; prove a screenshot works
+                page.screenshot("<html><body></body></html>", 16, 16)
+                path = page.executable
+        result["browser_engine"] = (
+            "chrome-cli" if isinstance(page, ChromeCli) else "playwright"
+        )
+        result["browser_path"] = str(path)
 
     for key, check in (
         ("assets", verify_assets),
@@ -442,7 +450,15 @@ def cmd_examples(args) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="architecture-suite")
     parser.add_argument("--version", action="version", version=__version__)
-    commands = parser.add_subparsers(dest="command", required=True)
+    parser.add_argument(
+        "--browser",
+        choices=BROWSER_CHOICES,
+        help="browser for PNG and Visio icons: Playwright's Chromium (playwright), "
+        "Playwright with installed Chrome/Edge (chrome), Chrome/Edge headless without "
+        "Playwright (chrome-cli), or the first that works (auto, the default); "
+        "also ARCHITECTURE_SUITE_BROWSER",
+    )
+    commands =parser.add_subparsers(dest="command", required=True)
     from .extensions import register_commands
 
     register_commands(commands)
@@ -532,6 +548,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.browser:
+        os.environ["ARCHITECTURE_SUITE_BROWSER"] = args.browser
     try:
         return int(args.func(args))
     except SafetyError as exc:

@@ -1,6 +1,6 @@
 ---
 name: c4-diagrams
-description: Generate a complete C4 diagram package (L1 context, L2 container, L3 component, L4 code, overview) from requirements, documents or the current agent chat. Use when the user describes a system, not a repository, and wants Mermaid and PNG diagrams (editable Draw.io, SVG or Visio on request).
+description: "Generate a complete C4 diagram package (L1 context, L2 container, L3 component, L4 code, overview) from requirements, documents or the current agent chat. Use when the user describes a system, not a repository, and wants Mermaid and PNG diagrams (editable Draw.io, SVG or Visio on request)."
 ---
 
 # C4 diagrams from requirements
@@ -23,7 +23,7 @@ These skills share one offline CLI. In this file, `architecture-suite <command>`
 
 `<skills-dir>` is the folder containing this skill's directory (the plugin's `skills/` folder). This always runs the installed skill's own code. Use a bare `architecture-suite` on PATH only when working inside the Architecture Suite source repository.
 
-Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` must be `ok`, and `runtime_deps` must be `ok` or `unmanaged`. If the runtime Python does not exist, or `runtime_deps` says dependencies changed, ask the user before running the one-time setup: `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py`. It needs network access, installs pinned dependencies into `~/.architecture-suite/runtime` and downloads about 150 MB of Chromium. It needs Python 3.11-3.14 and finds one automatically if the default `python` is outside that range. Full CLI reference: `../architecture-suite-runtime/references/runtime.md`.
+Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` must be `ok`, and `runtime_deps` must be `ok` or `unmanaged`. If the runtime Python does not exist, or `runtime_deps` says dependencies changed, ask the user before running the one-time setup: `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py`. It needs network access, installs pinned dependencies into `~/.architecture-suite/runtime` and downloads about 150 MB of Chromium; if Google Chrome or Microsoft Edge is installed, `bootstrap.py --no-browser` skips that download and PNGs use the installed browser. It needs Python 3.11-3.14 and finds one automatically if the default `python` is outside that range. Full CLI reference: `../architecture-suite-runtime/references/runtime.md`.
 
 ## Rules for all C4 work
 

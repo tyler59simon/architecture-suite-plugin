@@ -292,6 +292,7 @@ def test_unicode_visual_text_bounds():
 
 def test_missing_chromium_failure(tmp_path, monkeypatch):
     monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(tmp_path / "missing-browser"))
+    monkeypatch.setenv("ARCHITECTURE_SUITE_BROWSER", "playwright")  # no installed-Chrome fallback
     assert renderers.find_browser() is None
     with pytest.raises(SafetyError, match="Chromium"):
         with renderers.browser_page():

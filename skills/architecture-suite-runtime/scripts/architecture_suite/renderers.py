@@ -3,10 +3,19 @@
 from __future__ import annotations
 import base64
 from contextlib import contextmanager, nullcontext
+import io
 import math
+import os
 from pathlib import Path
+import shutil
+import sys
+import tempfile
 from PIL import Image, ImageChops
-from playwright.sync_api import sync_playwright, Error as BrowserError
+
+try:  # optional: without Playwright, PNGs use an installed Chrome/Edge (ChromeCli)
+    from playwright.sync_api import Error as BrowserError, sync_playwright
+except ImportError:
+    BrowserError = sync_playwright = None
 from .c4_layout import build_view_scene_elk
 from .aws import icon_bytes, verify_assets
 from .emit import _claimed, render_scene_drawio, render_scene_svg, render_scene_vsdx
@@ -19,7 +28,7 @@ from .overview_layout import (
     normalize_overview_styles,
 )
 from .readability import readability_findings, score_scene
-from .safety import SafetyError, contained_path
+from .safety import SafetyError, contained_path, run_bounded
 from .style import box_style, claim_cue, element_visual
 from .scene import scene_collisions
 
@@ -400,34 +409,221 @@ def render_gcp_deployment_vsdx(model: dict) -> bytes:
     return scene_vsdx(build_gcp_scene(model))
 
 
+BROWSER_CHOICES = ("auto", "playwright", "chrome", "chrome-cli")
+BROWSER_HELP = (
+    "No usable browser for PNG export; run python -m playwright install chromium, "
+    "or install Google Chrome or Microsoft Edge"
+)
+LAUNCH_ARGS = [
+    "--disable-background-networking",
+    "--disable-component-update",
+    "--no-proxy-server",
+]
+
+
+def browser_choice() -> str:
+    """The ARCHITECTURE_SUITE_BROWSER setting (the CLI's --browser)."""
+    choice = os.environ.get("ARCHITECTURE_SUITE_BROWSER", "auto")
+    if choice not in BROWSER_CHOICES:
+        raise SafetyError(
+            "ARCHITECTURE_SUITE_BROWSER must be auto, playwright, chrome or chrome-cli"
+        )
+    return choice
+
+
+def _system_chrome_candidates() -> list[Path]:
+    if sys.platform == "win32":
+        roots = [
+            os.environ.get(name)
+            for name in ("ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA")
+        ]
+        return [
+            Path(root) / exe
+            for exe in (
+                "Google/Chrome/Application/chrome.exe",
+                "Microsoft/Edge/Application/msedge.exe",
+            )
+            for root in roots
+            if root
+        ]
+    if sys.platform == "darwin":
+        return [
+            Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+            Path("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"),
+        ]
+    names = (
+        "google-chrome",
+        "google-chrome-stable",
+        "chromium",
+        "chromium-browser",
+        "microsoft-edge",
+    )
+    return [Path(found) for found in map(shutil.which, names) if found]
+
+
+def find_system_chrome() -> Path | None:
+    """An installed Chrome or Edge: ARCHITECTURE_SUITE_CHROME, else the usual locations."""
+    override = os.environ.get("ARCHITECTURE_SUITE_CHROME")
+    if override:
+        path = Path(override).expanduser()
+        if not path.is_file():
+            raise SafetyError(f"ARCHITECTURE_SUITE_CHROME is not a file: {path}")
+        return path
+    return next((path for path in _system_chrome_candidates() if path.is_file()), None)
+
+
+def _playwright_api():
+    return None if sync_playwright is None else (sync_playwright, BrowserError)
+
+
+def _bundled_chromium(p) -> Path | None:
+    path = Path(p.chromium.executable_path)
+    return path if path.is_file() else None
+
+
+def _resolve_browser(choice, api, bundled):
+    """(engine, executable) for this choice, or None when no browser is usable.
+
+    auto prefers Playwright's own Chromium, then Playwright driving an installed
+    Chrome/Edge, then that browser's own headless mode when Playwright is missing.
+    """
+    if api is None and choice in {"playwright", "chrome"}:
+        raise SafetyError(
+            f"--browser {choice} needs the playwright package; rerun bootstrap "
+            "or use --browser chrome-cli"
+        )
+    if choice == "playwright" or (choice == "auto" and bundled is not None):
+        return ("playwright", bundled) if bundled is not None else None
+    system = find_system_chrome()
+    if system is None:
+        return None
+    return ("chrome-cli" if api is None else "chrome"), system
+
+
+class ChromeCli:
+    """Chrome or Edge driven through its own headless screenshot mode, without Playwright.
+
+    Compared with Playwright, offline is enforced by the page's CSP and a DNS block
+    rather than request routing, rendering waits a fixed virtual-time budget rather
+    than for document.fonts.ready, and each screenshot starts a new browser.
+    """
+
+    def __init__(self, executable: Path):
+        self.executable = Path(executable)
+
+    # Headless Chrome paints only part of a short window (an 80 px tall window paints
+    # 2 rows), so small captures use a larger window and are cropped afterwards.
+    MIN_WINDOW = 400
+
+    def screenshot(
+        self, html: str, width: int, height: int, *, transparent: bool = False
+    ) -> bytes:
+        window = (max(width, self.MIN_WINDOW), max(height, self.MIN_WINDOW))
+        with tempfile.TemporaryDirectory(
+            prefix="architecture-suite-chrome-", ignore_cleanup_errors=True
+        ) as tmp:
+            folder = Path(tmp)
+            page, output = folder / "page.html", folder / "page.png"
+            page.write_text(html, encoding="utf-8")
+            run_bounded(
+                [
+                    str(self.executable),
+                    "--headless",
+                    "--disable-gpu",
+                    "--hide-scrollbars",
+                    "--no-first-run",
+                    "--no-default-browser-check",
+                    "--disable-extensions",
+                    *LAUNCH_ARGS,
+                    "--host-resolver-rules=MAP * ~NOTFOUND",
+                    f"--user-data-dir={folder / 'profile'}",
+                    f"--window-size={window[0]},{window[1]}",
+                    "--default-background-color="
+                    + ("00000000" if transparent else "ffffffff"),
+                    "--virtual-time-budget=5000",
+                    f"--screenshot={output}",
+                    page.as_uri(),
+                ],
+                timeout_seconds=60.0,
+            )
+            if not output.is_file():
+                raise SafetyError("Headless Chrome wrote no screenshot")
+            with Image.open(output) as image:
+                if image.size != window:
+                    raise SafetyError(
+                        f"Headless Chrome screenshot is {image.size}, expected {window}"
+                    )
+                if window == (width, height):
+                    return output.read_bytes()
+                buffer = io.BytesIO()
+                image.crop((0, 0, width, height)).save(buffer, format="PNG")
+                return buffer.getvalue()
+
+
+def _chrome_cli(executable: Path | None = None) -> ChromeCli:
+    executable = executable or find_system_chrome()
+    if executable is None:
+        raise SafetyError(BROWSER_HELP)
+    return ChromeCli(executable)
+
+
 @contextmanager
 def browser_page():
+    """A page for rasterizing: a Playwright page, or a ChromeCli without Playwright."""
+    choice = browser_choice()
+    api = None if choice == "chrome-cli" else _playwright_api()
+    if api is None:
+        _resolve_browser(choice, api, None)  # explains a missing playwright package
+        yield _chrome_cli()
+        return
+    sync_playwright, BrowserError = api
+    fallback = None
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    "--disable-background-networking",
-                    "--disable-component-update",
-                    "--no-proxy-server",
-                ],
-            )
+            found = _resolve_browser(choice, api, _bundled_chromium(p))
+            if found is None:
+                raise SafetyError(
+                    "Local Chromium unavailable; run python -m playwright install chromium"
+                    if choice == "playwright"
+                    else BROWSER_HELP
+                )
+            engine, executable = found
             try:
-                context = browser.new_context(offline=True, device_scale_factor=1)
-                context.route("**/*", lambda route: route.abort())
-                yield context.new_page()
-            finally:
-                browser.close()
+                browser = p.chromium.launch(
+                    headless=True,
+                    executable_path=None if engine == "playwright" else str(executable),
+                    args=LAUNCH_ARGS,
+                )
+            except BrowserError:
+                if choice != "auto" or engine == "playwright":
+                    raise
+                browser, fallback = None, executable  # auto: use the browser's own CLI
+            if browser is not None:
+                try:
+                    context = browser.new_context(offline=True, device_scale_factor=1)
+                    context.route("**/*", lambda route: route.abort())
+                    yield context.new_page()
+                finally:
+                    browser.close()
     except BrowserError as exc:
         raise SafetyError(
-            "Local Chromium unavailable or rendering failed; run python -m playwright install chromium"
+            "Local browser unavailable or rendering failed; run python -m playwright "
+            "install chromium, or use --browser chrome with Google Chrome or Microsoft Edge"
         ) from exc
+    if fallback is not None:
+        yield _chrome_cli(fallback)
 
 
 def find_browser() -> Path | None:
-    with sync_playwright() as p:
-        path = Path(p.chromium.executable_path)
-        return path if path.is_file() else None
+    """The browser executable PNG export will use, or None when there is none."""
+    choice = browser_choice()
+    api = None if choice == "chrome-cli" else _playwright_api()
+    if api is None:
+        found = _resolve_browser(choice, api, None)
+    else:
+        with api[0]() as p:
+            found = _resolve_browser(choice, api, _bundled_chromium(p))
+    return found[1] if found else None
 
 
 def validate_png(path: Path) -> tuple[int, int]:
@@ -469,12 +665,19 @@ def render_svg_png(
             "choose narrower scopes or another format"
         )
 
+    html = (
+        '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'"></head><body style="margin:0">'
+        + svg
+        + "</body></html>"
+    )
+
     def capture(active):
+        if isinstance(active, ChromeCli):
+            path.write_bytes(active.screenshot(html, width, height))
+            return
         active.set_viewport_size({"width": width, "height": height})
         active.set_content(
-            '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'"></head><body style="margin:0">'
-            + svg
-            + "</body></html>",
+            html,
             wait_until="load",
             timeout=30000,
         )
@@ -501,12 +704,19 @@ def rasterize_icons(scene, page) -> dict[str, bytes]:
     for name, size in sorted(sizes.items()):
         side = 2 * size
         uri = base64.b64encode(icon_bytes(name)).decode()
+        html = (
+            '<html><head><meta http-equiv="Content-Security-Policy" '
+            "content=\"default-src 'none'; img-src data:; style-src 'unsafe-inline'\">"
+            '</head><body style="margin:0">'
+            f'<img src="data:image/svg+xml;base64,{uri}" width="{side}" height="{side}" '
+            'style="display:block"></body></html>'
+        )
+        if isinstance(page, ChromeCli):
+            icons[name] = page.screenshot(html, side, side, transparent=True)
+            continue
         page.set_viewport_size({"width": side, "height": side})
         page.set_content(
-            '<html><head><meta http-equiv="Content-Security-Policy" '
-            "content=\"default-src 'none'; img-src data:\"></head><body style=\"margin:0\">"
-            f'<img src="data:image/svg+xml;base64,{uri}" width="{side}" height="{side}" '
-            'style="display:block"></body></html>',
+            html,
             wait_until="load",
             timeout=30000,
         )

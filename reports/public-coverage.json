@@ -572,6 +572,21 @@
     },
     {
       "module": "renderers.py",
+      "function": "browser_choice",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "find_system_chrome",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
+      "function": "ChromeCli.screenshot",
+      "executed": true
+    },
+    {
+      "module": "renderers.py",
       "function": "browser_page",
       "executed": true
     },
@@ -825,13 +840,12 @@
       171
     ],
     "cli.py": [
-      82,
-      83,
-      96,
-      120,
+      85,
+      86,
+      99,
       124,
-      205,
-      309
+      213,
+      317
     ],
     "emit.py": [
       361,
@@ -842,10 +856,10 @@
       44
     ],
     "layout_host.py": [
-      38,
-      39,
-      40,
-      41
+      42,
+      43,
+      44,
+      45
     ],
     "model.py": [
       309,
@@ -867,24 +881,31 @@
       590
     ],
     "renderers.py": [
-      131,
-      407,
-      415,
-      416,
-      417,
-      429,
-      430,
-      474,
-      481,
-      484,
-      488,
-      505,
-      513,
-      517,
-      520,
-      529,
-      557,
-      559
+      17,
+      18,
+      140,
+      583,
+      584,
+      585,
+      590,
+      591,
+      592,
+      597,
+      598,
+      599,
+      600,
+      601,
+      602,
+      603,
+      604,
+      625,
+      687,
+      718,
+      723,
+      727,
+      739,
+      767,
+      769
     ],
     "review.py": [
       108

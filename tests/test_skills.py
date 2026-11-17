@@ -4,6 +4,8 @@ import json
 import re
 from pathlib import Path
 
+import yaml
+
 from architecture_suite import __version__
 from architecture_suite.distribution import RUNTIME_NAME, VERSION, skill_names
 
@@ -23,9 +25,11 @@ def test_exactly_the_ten_skills():
 def test_frontmatter_is_valid():
     for name in EXPECTED:
         text = (SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
-        match = re.match(r"---\nname: (.+)\ndescription: (.+)\n---\n", text)
-        assert match and match.group(1) == name
-        assert 40 < len(match.group(2)) <= 1024
+        match = re.match(r"---\n(.*?)\n---\n", text, re.S)
+        # Strict YAML, as GitHub Copilot parses it: an unquoted ": " in a value fails here.
+        meta = yaml.safe_load(match.group(1))
+        assert set(meta) == {"name", "description"} and meta["name"] == name
+        assert 40 < len(meta["description"]) <= 1024
 
 
 def test_relative_runtime_links_resolve():

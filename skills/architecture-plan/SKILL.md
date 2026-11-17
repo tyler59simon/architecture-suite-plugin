@@ -1,6 +1,6 @@
 ---
 name: architecture-plan
-description: Build and review a sound architecture plan (plan.md) before drawing: scope, interview, evidence and claim status, then a per-level readiness review. Use when the user wants to plan, design or validate an architecture, check whether a plan is complete, or make diagrams more accurate, before rendering any C4 or cloud diagram.
+description: "Build and review a sound architecture plan (plan.md) before drawing: scope, interview, evidence and claim status, then a per-level readiness review. Use when the user wants to plan, design or validate an architecture, check whether a plan is complete, or make diagrams more accurate, before rendering any C4 or cloud diagram."
 ---
 
 # Architecture planning
@@ -24,7 +24,7 @@ These skills share one offline CLI. In this file, `architecture-suite <command>`
 
 `<skills-dir>` is the folder containing this skill's directory (the plugin's `skills/` folder). This always runs the installed skill's own code. Use a bare `architecture-suite` on PATH only when working inside the Architecture Suite source repository.
 
-Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` must be `ok`, and `runtime_deps` must be `ok` or `unmanaged`. If the runtime Python does not exist, or `runtime_deps` says dependencies changed, ask the user before running the one-time setup: `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py`. It needs network access, installs pinned dependencies into `~/.architecture-suite/runtime` and downloads about 150 MB of Chromium. It needs Python 3.11-3.14 and finds one automatically if the default `python` is outside that range. Full CLI reference: `../architecture-suite-runtime/references/runtime.md`.
+Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` must be `ok`, and `runtime_deps` must be `ok` or `unmanaged`. If the runtime Python does not exist, or `runtime_deps` says dependencies changed, ask the user before running the one-time setup: `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py`. It needs network access, installs pinned dependencies into `~/.architecture-suite/runtime` and downloads about 150 MB of Chromium; if Google Chrome or Microsoft Edge is installed, `bootstrap.py --no-browser` skips that download and PNGs use the installed browser. It needs Python 3.11-3.14 and finds one automatically if the default `python` is outside that range. Full CLI reference: `../architecture-suite-runtime/references/runtime.md`.
 
 ## Rules for all C4 work
 

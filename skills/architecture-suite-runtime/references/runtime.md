@@ -8,7 +8,7 @@ Python 3.11-3.14 is required. Run the portable setup once (needs network):
 python <skill-directory>/scripts/bootstrap.py [--target DIR] [--no-browser]
 ```
 
-It creates `~/.architecture-suite/runtime`, a virtual environment holding only the hash-pinned dependencies from `scripts/requirements-runtime.lock` (`pip install --require-hashes --only-binary=:all:`), installs the pinned Chromium unless `--no-browser` is given, records which lock it was built from, and runs `doctor`. If the interpreter running bootstrap is outside 3.11-3.14, bootstrap finds a supported one (Windows `py -3.X`, otherwise `python3.X` on PATH) and uses it.
+It creates `~/.architecture-suite/runtime`, a virtual environment holding only the hash-pinned dependencies from `scripts/requirements-runtime.lock` (`pip install --require-hashes --only-binary=:all:`), installs the pinned Chromium unless `--no-browser` is given, records which lock it was built from, and runs `doctor`. With `--no-browser`, PNG export and Visio icons use an installed Google Chrome or Microsoft Edge instead, which skips the 150 MB download. If the interpreter running bootstrap is outside 3.11-3.14, bootstrap finds a supported one (Windows `py -3.X`, otherwise `python3.X` on PATH) and uses it.
 
 Skill code is never installed into that environment. Run the CLI through the skill's own launcher, so a plugin update takes effect immediately:
 
@@ -18,6 +18,19 @@ Skill code is never installed into that environment. Run the CLI through the ski
 ```
 
 In a development checkout, `pip install -e .` provides the `architecture-suite` console command and `python -m architecture_suite`. ELK prefers a local Node.js and falls back to local Chromium. `ARCHITECTURE_SUITE_LAYOUT_HOST=node|browser` pins the host; `ARCHITECTURE_SUITE_NODE` selects a Node executable.
+
+### Browser for PNG and Visio icons
+
+`architecture-suite --browser <choice> <command>` (or `ARCHITECTURE_SUITE_BROWSER=<choice>`) picks the browser that rasterizes PNGs and Visio icons. `ARCHITECTURE_SUITE_CHROME` points at a specific Chrome or Edge executable; otherwise the usual install locations are searched.
+
+| Choice | Browser | Lost compared with `playwright` |
+|---|---|---|
+| `playwright` | Playwright with its pinned Chromium (installed by bootstrap) | Nothing |
+| `chrome` | Playwright driving the installed Chrome or Edge | The pinned browser version: Chrome updates itself, so output can drift slightly, and a much newer Chrome may not work with the pinned Playwright |
+| `chrome-cli` | Chrome or Edge's own headless screenshot mode, without Playwright | As `chrome`, plus: the ELK browser layout (used only without Node.js); the wait for fonts and images (a fixed time budget instead); request blocking (the page's CSP and a DNS block instead); speed (a new browser per PNG and per Visio icon); detailed errors |
+| `auto` (default) | The first that works: `playwright` if its Chromium is installed, else `chrome`, else `chrome-cli` when Playwright is missing or cannot launch the installed browser | |
+
+An explicit choice never falls back; it fails with a message naming the fix. All inputs are inline, so in testing the three choices produced identical PNGs and icons.
 
 Only setup accesses the network. AWS and Google Cloud icon sets are bundled. Provenance, licenses and SHA-256 values are in `scripts/architecture_suite/assets/{provenance.json,manifest.json,licenses/}`. Generation never downloads dependencies, contacts AWS or Google Cloud, or executes repository code.
 
@@ -65,4 +78,4 @@ Schemas: [plan](../scripts/architecture_suite/assets/architecture-plan.schema.js
 
 ## Failures
 
-`doctor` must report `assets`, `layout_engine` and `browser` as ok, and `runtime_deps` as ok or unmanaged (no bootstrap stamp, as in a development checkout). If `runtime_deps` says dependencies changed, re-run bootstrap. `gcp_icons` reports the bundled Google Cloud icons (or the `ARCHITECTURE_SUITE_GCP_ICONS` override folder). Install pinned dependencies/Chromium if missing. Restore reviewed assets on checksum failure; do not change expected digests to accept unknown content. PNG limits: width 6,000, total 24,000,000 pixels. Use narrower scopes, small-multiples, or SVG/Draw.io for large models. Blank PNGs are rejected. Fix layout findings through scope, grouping or reading direction and reverify before publication.
+`doctor` must report `assets`, `layout_engine` and `browser` as ok, and `runtime_deps` as ok or unmanaged (no bootstrap stamp, as in a development checkout). If `runtime_deps` says dependencies changed, re-run bootstrap. `gcp_icons` reports the bundled Google Cloud icons (or the `ARCHITECTURE_SUITE_GCP_ICONS` override folder). `browser_engine` and `browser_path` show which browser PNG export will use. Install pinned dependencies/Chromium, or Google Chrome or Microsoft Edge, if `browser` is not ok. Restore reviewed assets on checksum failure; do not change expected digests to accept unknown content. PNG limits: width 6,000, total 24,000,000 pixels. Use narrower scopes, small-multiples, or SVG/Draw.io for large models. Blank PNGs are rejected. Fix layout findings through scope, grouping or reading direction and reverify before publication.

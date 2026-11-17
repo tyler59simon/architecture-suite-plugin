@@ -3,6 +3,7 @@
 Run: python tools/generate_skills.py
 """
 
+import json
 from pathlib import Path
 import shutil
 
@@ -19,7 +20,7 @@ These skills share one offline CLI. In this file, `architecture-suite <command>`
 
 `<skills-dir>` is the folder containing this skill's directory (the plugin's `skills/` folder). This always runs the installed skill's own code. Use a bare `architecture-suite` on PATH only when working inside the Architecture Suite source repository.
 
-Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` must be `ok`, and `runtime_deps` must be `ok` or `unmanaged`. If the runtime Python does not exist, or `runtime_deps` says dependencies changed, ask the user before running the one-time setup: `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py`. It needs network access, installs pinned dependencies into `~/.architecture-suite/runtime` and downloads about 150 MB of Chromium. It needs Python 3.11-3.14 and finds one automatically if the default `python` is outside that range. Full CLI reference: `../architecture-suite-runtime/references/runtime.md`.
+Start with `architecture-suite doctor`. `assets`, `layout_engine` and `browser` must be `ok`, and `runtime_deps` must be `ok` or `unmanaged`. If the runtime Python does not exist, or `runtime_deps` says dependencies changed, ask the user before running the one-time setup: `python <skills-dir>/architecture-suite-runtime/scripts/bootstrap.py`. It needs network access, installs pinned dependencies into `~/.architecture-suite/runtime` and downloads about 150 MB of Chromium; if Google Chrome or Microsoft Edge is installed, `bootstrap.py --no-browser` skips that download and PNGs use the installed browser. It needs Python 3.11-3.14 and finds one automatically if the default `python` is outside that range. Full CLI reference: `../architecture-suite-runtime/references/runtime.md`.
 
 ## Rules for all C4 work
 
@@ -187,8 +188,11 @@ def main():
     for name, d in SKILL_DEFS.items():
         folder = SKILLS / name
         folder.mkdir(parents=True, exist_ok=True)
+        # A JSON string is a YAML double-quoted scalar; strict parsers (GitHub
+        # Copilot) reject an unquoted description that contains ": ".
+        description = json.dumps(d["description"], ensure_ascii=False)
         text = (
-            f"---\nname: {name}\ndescription: {d['description']}\n---\n\n"
+            f"---\nname: {name}\ndescription: {description}\n---\n\n"
             + d["body"].rstrip()
             + "\n\n"
             + RUNTIME

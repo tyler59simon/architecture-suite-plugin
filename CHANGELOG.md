@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Installed Chrome or Edge for PNG:** `architecture-suite --browser auto|playwright|chrome|chrome-cli` (or `ARCHITECTURE_SUITE_BROWSER`) picks the browser for PNG export and Visio icons. `chrome` drives an installed Google Chrome or Microsoft Edge through Playwright; `chrome-cli` uses that browser's own headless mode and needs no Playwright. `auto` (the default) uses Playwright's Chromium when installed, then the installed browser. `ARCHITECTURE_SUITE_CHROME` names a browser executable, and `doctor` reports `browser_engine` and `browser_path`. With an installed browser, `bootstrap.py --no-browser` skips the Chromium download.
+
+### Fixed
+
+- **GitHub Copilot:** SKILL.md descriptions are now quoted YAML. Four descriptions contained ": ", which strict YAML parsers such as Copilot's reject, so those skills failed to load.
+
 ## 1.2.0 - PlantUML export
 
 Editable C4-PlantUML output for every diagram and scenario.
