@@ -65,7 +65,7 @@ def view_id_for(view_type: str, boundary_id: str) -> str:
 
 
 def load_model(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
+    value = json.loads(path.read_text(encoding="utf-8-sig"))  # tolerate a BOM
     if not isinstance(value, dict):
         raise ValueError("Architecture model root must be a JSON object")
     return value

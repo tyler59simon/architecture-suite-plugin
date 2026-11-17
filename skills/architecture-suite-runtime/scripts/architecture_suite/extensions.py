@@ -33,7 +33,7 @@ from .safety import scan_repository
 
 def _read(path):
     p = canonical_existing_file(Path(path))
-    return parse_yaml(p.read_text(encoding="utf-8"))
+    return parse_yaml(p.read_text(encoding="utf-8-sig"))  # tolerate a BOM
 
 
 def _document(path, version, fields):
@@ -180,6 +180,7 @@ def _cmd_extension(args):
         "files": sorted([*files, OUTPUT_MANIFEST]),
         "status": "findings" if status else "ok",
         "conflicts": changes["conflicts"],
+        "overwrites_edited": changes["overwrites_edited"],
     }
     if args.dry_run:
         print(json.dumps({**summary, "would_remove": changes["remove"]}))
@@ -202,7 +203,7 @@ def _cmd_extension(args):
                     value
                     if isinstance(value, str)
                     else json.dumps(value, indent=2, ensure_ascii=False),
-                    encoding="utf-8",
+                    encoding="utf-8", newline="\n",
                 )
     print(json.dumps(summary))
     return status

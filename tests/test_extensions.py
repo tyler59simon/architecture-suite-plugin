@@ -458,7 +458,10 @@ def test_packages_and_install(tmp_path):
         for name in names:
             assert (base / HOSTS[host] / name / "SKILL.md").is_file()
         assert (base / HOSTS[host] / "architecture-suite-runtime/scripts/tool.py").is_file()
+        stale = base / HOSTS[host] / "architecture-suite-runtime/scripts/removed.py"
+        stale.write_text("dropped in the new version")
         install_host(skills, host, "project", project=base, overwrite=True)
+        assert not stale.exists()  # an upgrade does not keep files the new version lacks
         assert install_host(skills, host, "user", home=tmp_path / "home").is_dir()
     for args in [("unknown", "user", None), ("codex", "project", None)]:
         with pytest.raises(ValueError):

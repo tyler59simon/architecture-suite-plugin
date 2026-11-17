@@ -602,17 +602,25 @@ def browser_page():
                     if choice == "playwright"
                     else BROWSER_HELP
                 )
-            engine, executable = found
-            try:
-                browser = p.chromium.launch(
-                    headless=True,
-                    executable_path=None if engine == "playwright" else str(executable),
-                    args=LAUNCH_ARGS,
-                )
-            except BrowserError:
-                if choice != "auto" or engine == "playwright":
-                    raise
-                browser, fallback = None, executable  # auto: use the browser's own CLI
+            attempts = [found]
+            if choice == "auto" and found[0] == "playwright":
+                system = find_system_chrome()  # auto: "the first that works"
+                if system is not None:
+                    attempts.append(("chrome", system))
+            browser = None
+            for engine, executable in attempts:
+                try:
+                    browser = p.chromium.launch(
+                        headless=True,
+                        executable_path=None if engine == "playwright" else str(executable),
+                        args=LAUNCH_ARGS,
+                    )
+                    break
+                except BrowserError:
+                    if choice != "auto" or (len(attempts) == 1 and engine == "playwright"):
+                        raise
+            if browser is None:
+                fallback = executable  # auto: use the installed browser's own CLI
             if browser is not None:
                 try:
                     context = browser.new_context(offline=True, device_scale_factor=1)
@@ -798,7 +806,7 @@ def write_rendered_artifacts(
                         if fmt == "drawio"
                         else render_scene_svg(scene)
                     )
-                    path.write_text(content, encoding="utf-8")
+                    path.write_text(content, encoding="utf-8", newline="\n")
     return [
         f"{base}: {finding['code']}: {', '.join(finding.get('elements', []))}"
         for base, value in verification["diagrams"].items()
