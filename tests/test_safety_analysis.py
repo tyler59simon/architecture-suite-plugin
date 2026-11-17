@@ -18,7 +18,7 @@ from architecture_suite.safety import (
     scan_repository,
 )
 from architecture_suite.analyzer import analyze_repository
-from architecture_suite.aws_analyzer import detect_aws
+from architecture_suite.cloud_signals import detect_aws
 from architecture_suite.model import validate_model
 from architecture_suite import aws
 
@@ -529,7 +529,7 @@ def test_plan_credential_finding_names_the_field(plan):
 
 def test_cloud_signals_count_declarations_not_references():
     """One container per declared resource: references and attachment types are not resources."""
-    from architecture_suite.gcp_analyzer import detect_gcp
+    from architecture_suite.cloud_signals import detect_gcp
 
     files = {
         "main.tf": (

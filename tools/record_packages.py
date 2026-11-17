@@ -17,8 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 sys.path.insert(0, str(SKILLS / "architecture-suite-runtime/scripts"))
 from architecture_suite.distribution import (  # noqa: E402
-    AGENT_BEHAVIOUR, HOSTS, RUNTIME_NAME, VERSION, install_host, package_hosts, skill_names,
+    AGENT_BEHAVIOUR, HOSTS, RUNTIME_NAME, VERSION, install_host, skill_names,
 )
+from host_packaging import package_hosts  # noqa: E402
 
 
 def digest(path):

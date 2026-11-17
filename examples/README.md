@@ -14,6 +14,10 @@ Rendered output from Architecture Suite for fictional systems. Every diagram her
 architecture-report.md, plan-fidelity.md
 ```
 
+Each file is stored once. Where a variant (the Google Cloud payments package, the legacy-icon
+ride-dispatch views, the second and third starter systems) would repeat a byte-identical file, it
+keeps only the files that differ; the README of that example says where the rest is.
+
 None of this ships in the plugin. All systems and facts are invented.
 
 ## Systems
@@ -22,7 +26,7 @@ None of this ships in the plugin. All systems and facts are invented.
 | --- | --- | --- |
 | [payments](payments/README.md) | AWS **and** Google Cloud | PayStream online payments, the most complete example: one architecture rendered on both clouds with every level, overview and deployment, plus a card-payment sequence |
 | [ride-dispatch](ride-dispatch/README.md) | Google Cloud | RidePulse ride dispatch: full set, modern vs legacy GCP icons, and reverse-engineering diagrams from a small source repository |
-| [starter-systems](starter-systems/index.md) | AWS | Three small systems (order platform, research portal, telemetry platform), the output of `architecture-suite examples` |
+| [starter-systems](starter-systems/index.md) | AWS | Three small systems (order platform, research portal, telemetry platform), the output of `architecture-suite examples` with all five overview styles; shared component and code views appear once |
 | [cli-features](cli-features/README.md) | - | Request scenarios, architecture diffs, rule checks, infrastructure import and the offline HTML explorer |
 
 ## Find an example for a skill

@@ -17,21 +17,18 @@ try:  # optional: without Playwright, PNGs use an installed Chrome/Edge (ChromeC
     from playwright.sync_api import Error as BrowserError, sync_playwright
 except ImportError:
     BrowserError = sync_playwright = None
-from .c4_layout import build_view_scene_elk
+from .scene import build_view_scene_elk, scene_collisions
 from .aws import icon_bytes, verify_assets
 from .emit import _claimed, render_scene_drawio, render_scene_svg, render_scene_vsdx
 from .model import VIEW_FOLDERS
 from .overview_layout import (
-    build_aws_scene,
     build_cloud_scene,
-    build_gcp_scene,
     build_overview_scene,
     normalize_overview_styles,
 )
 from .readability import readability_findings, score_scene
 from .safety import SafetyError, contained_path, run_bounded, safe_text
 from .style import box_style, claim_cue, element_visual
-from .scene import scene_collisions
 
 ARTIFACT_LEVELS = (
     "all",
@@ -298,14 +295,6 @@ def render_svg(model: dict, view: dict) -> str:
     return render_scene_svg(_scene(model, view))
 
 
-def render_drawio(model: dict, view: dict) -> str:
-    return render_scene_drawio(_scene(model, view))
-
-
-def render_vsdx(model: dict, view: dict) -> bytes:
-    return scene_vsdx(_scene(model, view))
-
-
 def layout_measurements(model: dict, overview_styles=None, level: str = "all") -> dict:
     return {
         base: {"width": scene.width, "height": scene.height, **score_scene(scene)}
@@ -323,92 +312,6 @@ def layout_report(model: dict, overview_styles=None, level: str = "all") -> dict
             **score_scene(scene),
         }
     return {"ok": not any(v["findings"] for v in results.values()), "diagrams": results}
-
-
-def verify_model_layout(
-    model: dict, overview_styles=None, *, level: str = "all"
-) -> tuple[int, list[str]]:
-    report = layout_report(model, overview_styles, level)
-    return len(report["diagrams"]), [
-        f"{base}: {finding['code']}: {', '.join(finding.get('elements', []))}"
-        for base, value in report["diagrams"].items()
-        for finding in value["findings"]
-    ]
-
-
-def measure_model_layout(
-    model: dict, overview_styles=None, *, level: str = "all"
-) -> tuple[list[str], dict]:
-    values = layout_measurements(model, overview_styles, level)
-    advisories = [f"{base}: {a}" for base, v in values.items() for a in v["advisories"]]
-    return advisories, {
-        "scenes": float(len(values)),
-        "crossings": sum(v["crossings"] for v in values.values()),
-        "bends": sum(v["bends"] for v in values.values()),
-        "worst_aspect_ratio": max(
-            (v["aspect_ratio"] for v in values.values()), default=0
-        ),
-    }
-
-
-def render_overview_mermaid(model: dict, style: str = "progressive") -> str:
-    return render_mermaid(model, {"type": "overview", "style": style})
-
-
-def render_overview_drawio(model: dict, style: str = "progressive") -> str:
-    return render_scene_drawio(build_overview_scene(model, style))
-
-
-def render_overview_svg(model: dict, style: str = "progressive") -> str:
-    return render_scene_svg(build_overview_scene(model, style))
-
-
-def render_overview_vsdx(model: dict, style: str = "progressive") -> bytes:
-    return scene_vsdx(build_overview_scene(model, style))
-
-
-def render_overview_plantuml(model: dict, style: str = "progressive") -> str:
-    return render_plantuml(model, {"type": "overview", "style": style})
-
-
-def render_aws_deployment_mermaid(model: dict) -> str:
-    return render_mermaid(model, {"type": "deployment"})
-
-
-def render_aws_deployment_drawio(model: dict) -> str:
-    return render_scene_drawio(build_aws_scene(model))
-
-
-def render_aws_deployment_svg(model: dict) -> str:
-    return render_scene_svg(build_aws_scene(model))
-
-
-def render_aws_deployment_vsdx(model: dict) -> bytes:
-    return scene_vsdx(build_aws_scene(model))
-
-
-def render_aws_deployment_plantuml(model: dict) -> str:
-    return render_plantuml(model, {"type": "deployment"})
-
-
-def render_gcp_deployment_mermaid(model: dict) -> str:
-    return render_mermaid(model, {"type": "deployment"})
-
-
-def render_gcp_deployment_plantuml(model: dict) -> str:
-    return render_plantuml(model, {"type": "deployment"})
-
-
-def render_gcp_deployment_drawio(model: dict) -> str:
-    return render_scene_drawio(build_gcp_scene(model))
-
-
-def render_gcp_deployment_svg(model: dict) -> str:
-    return render_scene_svg(build_gcp_scene(model))
-
-
-def render_gcp_deployment_vsdx(model: dict) -> bytes:
-    return scene_vsdx(build_gcp_scene(model))
 
 
 BROWSER_CHOICES = ("auto", "playwright", "chrome", "chrome-cli")

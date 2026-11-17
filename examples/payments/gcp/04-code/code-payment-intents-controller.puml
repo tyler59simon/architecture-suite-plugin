@@ -1,9 +1,0 @@
-@startuml
-' Architecture Suite schema 2.0; PlantUML computes its own layout
-!include <C4/C4_Component>
-LAYOUT_LEFT_RIGHT()
-Boundary(n0, "Payment Intents Controller", "component") {
-  Component(n1, "PaymentIntentController", "class", "Illustrative implementation\n+create(request): PaymentIntent\n+confirm(id, cardToken): PaymentIntent\n+refund(id, amount): Refund")
-}
-SHOW_LEGEND()
-@enduml

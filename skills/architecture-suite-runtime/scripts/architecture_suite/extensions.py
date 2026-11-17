@@ -15,10 +15,9 @@ from .safety import (
     contained_path,
     ownership_changes,
 )
-from .plan import parse_yaml
+from .plan import parse_yaml, render_plan
 from .changes import diff_models, check_rules, markdown_report
 from .infrastructure import import_infrastructure, topology_plan
-from .draft import render_plan
 from .scenarios import (
     validate_scenario,
     scenario_scene,

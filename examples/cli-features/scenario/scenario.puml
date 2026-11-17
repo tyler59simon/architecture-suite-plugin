@@ -1,0 +1,11 @@
+@startuml
+participant "Customer" as p0
+participant "API" as p1
+participant "Order Queue" as p2
+p0 -> p1: Submit order
+alt valid order
+  p1 -> p2: Queue work
+else invalid
+  p1 --> p0: Validation error
+end
+@enduml

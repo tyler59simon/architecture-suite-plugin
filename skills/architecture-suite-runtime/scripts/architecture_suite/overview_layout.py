@@ -3,8 +3,7 @@
 from copy import deepcopy
 import math
 from .model import ELEMENT_TYPE_DEPTH
-from .c4_layout import build_view_scene_elk, choose_scene
-from .scene import Scene
+from .scene import Scene, build_view_scene_elk, choose_scene
 
 # Below the 6000 px PNG cap, leaving room for the page margin.
 SMALL_MULTIPLES_MAX_WIDTH = 5600

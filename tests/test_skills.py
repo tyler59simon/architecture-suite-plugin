@@ -85,7 +85,8 @@ def test_runtime_lock_is_hashed_and_covers_dependencies():
 @pytest.mark.slow
 def test_license_metadata_and_legal_files_ship(tmp_path):
     import zipfile
-    from architecture_suite.distribution import install_host, package_hosts, plugin_manifest
+    from architecture_suite.distribution import install_host, plugin_manifest
+    from host_packaging import package_hosts
 
     assert (ROOT / "LICENSE").read_text(encoding="utf-8").lstrip().startswith("Apache License")
     assert "Apache License" in (ROOT / "NOTICE").read_text(encoding="utf-8")
@@ -104,7 +105,8 @@ def test_license_metadata_and_legal_files_ship(tmp_path):
 
 
 def test_manifests_and_package_errors(tmp_path):
-    from architecture_suite.distribution import marketplace_manifest, package_hosts, plugin_manifest
+    from architecture_suite.distribution import marketplace_manifest, plugin_manifest
+    from host_packaging import package_hosts
 
     market = marketplace_manifest("9.9.9")
     assert market["plugins"][0]["source"] == "." and market["plugins"][0]["version"] == "9.9.9"
@@ -122,7 +124,7 @@ def test_manifests_and_package_errors(tmp_path):
 @pytest.mark.slow
 def test_packages_are_slim_and_release_tree_is_self_contained(tmp_path):
     import zipfile
-    from architecture_suite.distribution import package_hosts, write_plugin_tree
+    from host_packaging import package_hosts, write_plugin_tree
 
     package_hosts(SKILLS, tmp_path)
     for archive in tmp_path.glob("*.zip"):

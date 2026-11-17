@@ -7,7 +7,9 @@ Writes examples/ride-dispatch/:
   diagrams/                          C4 levels 1-4, overviews, Google Cloud deployment,
                                      a ride-request sequence (c4-dynamic.mmd)
   diagrams/large-overviews/          small-multiples and complete (SVG/Draw.io only)
-  icon-styles/{modern,legacy}/       containers and deployment in each forced icon style
+  icon-styles/modern/                containers and deployment in the modern icon style
+  icon-styles/legacy/                deployment only
+                                     (both minus files identical to diagrams/)
   from-source-code/ridepulse-repo/   fictional source repository (checked in)
   from-source-code/plan-draft.md     plan-draft output for that repository
   from-source-code/analysis/         analyze output for that repository
@@ -22,8 +24,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "skills/architecture-suite-runtime/scripts"))
-from architecture_suite.draft import render_plan  # noqa: E402
-from architecture_suite.examples_gcp import DYNAMIC_SEQUENCE, ridepulse_plan  # noqa: E402
+from architecture_suite.plan import render_plan  # noqa: E402
+from examples_gcp import DYNAMIC_SEQUENCE, ridepulse_plan  # noqa: E402
+from sample_dedupe import drop_identical  # noqa: E402
 
 OUT = ROOT / "examples/ride-dispatch"
 # Console scripts live in the interpreter's scripts folder (Scripts\ on Windows, bin/ elsewhere),
@@ -50,7 +53,7 @@ A real-time ride dispatch and fleet telemetry platform on Google Cloud.
 | Google Cloud deployment | [diagrams/06-gcp-deployment](diagrams/06-gcp-deployment) |
 | Ride request sequence | [diagrams/c4-dynamic.mmd](diagrams/c4-dynamic.mmd) |
 | Small-multiples and complete overviews (SVG/Draw.io) | [diagrams/large-overviews](diagrams/large-overviews) |
-| Modern vs legacy Google Cloud icons | [icon-styles/modern](icon-styles/modern), [icon-styles/legacy](icon-styles/legacy) |
+| Modern vs legacy Google Cloud icons | [icon-styles/modern](icon-styles/modern) (containers and deployment), [icon-styles/legacy](icon-styles/legacy) (deployment only); a file identical to its `diagrams/` twin is not repeated |
 | Reverse-engineered from source code | [from-source-code](from-source-code) |
 
 `from-source-code/` shows the `reverse-engineer-c4` workflow: a small fictional repository
@@ -93,10 +96,13 @@ def main():
         # Forced styles intentionally omit some icons; lint advisories are expected.
         render(target, "--level", "all", "--overview-style", "executive",
                "--gcp-icon-style", style, label=f"{style} icons")
-        # Icons only differ on containers and the deployment; keep just those views.
+        # Icons only differ on containers and the deployment. Modern keeps both views; legacy keeps
+        # the deployment. Files that match the default render are dropped in both.
+        keep = {"02-containers", "06-gcp-deployment"} if style == "modern" else {"06-gcp-deployment"}
         for child in target.iterdir():
-            if child.is_dir() and child.name not in {"02-containers", "06-gcp-deployment"}:
+            if child.is_dir() and child.name not in keep:
                 shutil.rmtree(child)
+        drop_identical(diagrams, target)
 
     source = OUT / "from-source-code"
     repo = source / "ridepulse-repo"

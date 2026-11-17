@@ -83,19 +83,6 @@ def load_model(path: Path, label: str = "") -> dict[str, Any]:
     return value
 
 
-def model_as_json(model: dict) -> str:
-    return (
-        json.dumps(
-            normalized_model(model), indent=2, sort_keys=True, ensure_ascii=False
-        )
-        + "\n"
-    )
-
-
-def error_findings(findings: list[dict]) -> list[dict]:
-    return [f for f in findings if f.get("severity", "error") == "error"]
-
-
 def normalize_validation_profile(profile: str = "full") -> str:
     profile = "code" if profile == "full" else profile
     if profile not in VALIDATION_PROFILES:

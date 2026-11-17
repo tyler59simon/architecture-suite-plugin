@@ -6,14 +6,14 @@ import pytest
 from architecture_suite import aws, renderers
 from architecture_suite.analyzer import analyze_repository
 from architecture_suite.cli import main
-from architecture_suite.draft import render_plan
-from architecture_suite.emit import render_scene_svg
-from architecture_suite.examples_gcp import (
+from architecture_suite.plan import render_plan
+from architecture_suite.emit import render_scene_drawio, render_scene_svg
+from examples_gcp import (
     DYNAMIC_SEQUENCE,
     ridepulse_model,
     ridepulse_plan,
 )
-from architecture_suite.gcp_analyzer import detect_gcp
+from architecture_suite.cloud_signals import detect_gcp
 from architecture_suite.model import validate_model
 from architecture_suite.overview_layout import (
     build_cloud_scene,
@@ -174,15 +174,15 @@ def test_gcp_deployment_rendering():
     assert scene.title == "RidePulse — Google Cloud deployment"
     assert build_cloud_scene(model).as_dict() == scene.as_dict()
     assert any(b.element.get("type") == "project" for b in scene.boxes if b.element)
-    svg = renderers.render_gcp_deployment_svg(model)
+    svg = renderers.render_svg(model, {"type": "deployment"})
     assert svg == render_scene_svg(scene)
     assert svg.count("data:image/svg+xml;base64,") >= 8
     assert not re.search(r'href="(?!data:)', svg)
-    drawio = renderers.render_gcp_deployment_drawio(model)
+    drawio = render_scene_drawio(build_gcp_scene(model))
     assert "shape=image" in drawio and "Rider Gateway" in drawio
-    assert "Rider Gateway" in renderers.render_gcp_deployment_mermaid(model)
-    assert "Rider Gateway" in renderers.render_gcp_deployment_plantuml(model)
-    vsdx = renderers.render_gcp_deployment_vsdx(model)
+    assert "Rider Gateway" in renderers.render_mermaid(model, {"type": "deployment"})
+    assert "Rider Gateway" in renderers.render_plantuml(model, {"type": "deployment"})
+    vsdx = renderers.scene_vsdx(build_gcp_scene(model))
     assert vsdx == renderers.scene_vsdx(scene)
     # AWS sample keeps its original folder name.
     from architecture_suite.examples import example_model
@@ -274,9 +274,9 @@ def test_role_shapes_across_exporters():
     svg = render_scene_svg(scene)
     assert svg.count("<ellipse") == 5  # Trip Store, Location Cache, Fleet Time Series, Telemetry Lake, Location Archive
     assert 'rx="28"' in svg  # messaging pill
-    mermaid = renderers.render_gcp_deployment_mermaid(model)
+    mermaid = renderers.render_mermaid(model, {"type": "deployment"})
     assert "[(" in mermaid and "([" in mermaid and "style n" in mermaid
-    drawio = renderers.render_gcp_deployment_drawio(model)
+    drawio = render_scene_drawio(build_gcp_scene(model))
     assert "shape=cylinder3" in drawio and "arcSize=25" in drawio
     # Cylinder labels reserve room for the cap, and frames get boundary colours.
     cylinder = next(b for b in scene.boxes if box_style(b)[0] == "cylinder")
@@ -286,7 +286,7 @@ def test_role_shapes_across_exporters():
     )
     assert box_style(project)[1] == "#4285f4"
     # AWS models use the same role shapes (DynamoDB -> cylinder, SQS -> pill).
-    aws_svg = renderers.render_aws_deployment_svg(example_model())
+    aws_svg = renderers.render_svg(example_model(), {"type": "deployment"})
     assert "<ellipse" in aws_svg and 'rx="28"' in aws_svg
 
 

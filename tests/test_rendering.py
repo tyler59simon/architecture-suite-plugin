@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import pytest
 from PIL import Image
 from architecture_suite import renderers
-from architecture_suite.c4_layout import build_view_scene_elk
+from architecture_suite.scene import build_view_scene_elk
 from architecture_suite.emit import render_scene_drawio, render_scene_svg
 from architecture_suite.layout_host import layout_graph
 from architecture_suite.overview_layout import (
@@ -228,7 +228,7 @@ def test_dense_relationships_remain_in_scene():
 
 def test_all_generated_formats_are_valid():
     samples = ROOT / "examples/starter-systems"
-    assert len(list(samples.rglob("*.png"))) == 39
+    assert len(list(samples.rglob("*.png"))) == 29
     for path in samples.rglob("*"):
         if path.suffix in {".svg", ".drawio"}:
             root = ET.fromstring(path.read_text(encoding="utf-8"))
@@ -246,10 +246,9 @@ def test_export_xml_and_shared_geometry(model):
     scene = build_view_scene_elk(model, view)
     svg = renderers.render_svg(model, view)
     svg_root = ET.fromstring(svg)
-    drawio = renderers.render_drawio(model, view)
+    drawio = render_scene_drawio(scene)
     drawio_root = ET.fromstring(drawio)
     assert svg == render_scene_svg(scene)
-    assert drawio == render_scene_drawio(scene)
     cell_ids = {box.id: f"n{i}" for i, box in enumerate(scene.boxes)}
     for box in scene.boxes:
         xml = next(e for e in svg_root.iter() if e.get("id") == "box-" + box.id)
@@ -420,7 +419,7 @@ def test_claim_status_cues_in_every_format(plan):
     container_view = next(v for v in plain["views"] if v["type"] == "container")
     baseline = {
         "svg": renderers.render_svg(plain, container_view),
-        "drawio": renderers.render_drawio(plain, container_view),
+        "drawio": render_scene_drawio(build_view_scene_elk(plain, container_view)),
         "mmd": renderers.render_mermaid(plain, container_view),
     }
     assert "## Claim status" not in render_architecture_report(plain)
@@ -446,7 +445,7 @@ def test_claim_status_cues_in_every_format(plan):
     assert re.search(rf'id="box-{ident}"[^>]*stroke-dasharray="2 3"', svg)
     assert re.search(r'<polyline id="edge-[^"]+"[^>]*stroke-dasharray="2 3"', svg)
     assert "claim not observed" in svg
-    drawio = renderers.render_drawio(model, container_view)
+    drawio = render_scene_drawio(build_view_scene_elk(model, container_view))
     assert drawio.count("dashPattern=2 3") >= 2 and "claim not observed" in drawio
     mermaid = renderers.render_mermaid(model, container_view)
     assert "classDef claim stroke-dasharray:3 3" in mermaid
@@ -467,3 +466,46 @@ def test_claim_status_cues_in_every_format(plan):
         page.add_script_tag(path=str(script))
         page.evaluate("mermaid.initialize({startOnLoad:false,securityLevel:'strict'})")
         assert page.evaluate("async s=>!!(await mermaid.parse(s))", mermaid)
+
+
+def test_measurement_matches_embedded_font_coverage():
+    import architecture_suite
+    from architecture_suite.style import EMBEDDED_MAX, text_width
+    from fontTools.ttLib import TTFont
+
+    assets = Path(architecture_suite.__file__).parent / "assets"
+    embedded = TTFont(assets / "font-embed.woff").getBestCmap()
+    full = TTFont(assets / "font.ttf").getBestCmap()
+    # Everything measured as Roboto is in the embedded subset...
+    assert not [hex(c) for c in full if 0x20 <= c <= EMBEDDED_MAX and c not in embedded]
+    # ...and text outside it (here Cyrillic, which full Roboto has) gets the fallback bound.
+    assert 0x0416 in full and 0x0416 not in embedded
+    assert text_width("ЖЖЖЖЖЖ", 13) >= 6 * 13 * 1.3
+
+
+def test_embedded_font_covers_runtime_literals_and_stays_small(model):
+    import base64
+    import io
+    import tokenize
+    import architecture_suite
+    from fontTools.ttLib import TTFont
+
+    package = Path(architecture_suite.__file__).parent
+    cmap = TTFont(package / "assets/font-embed.woff").getBestCmap()
+    missing = {}
+    for source in package.glob("*.py"):
+        with tokenize.open(source) as handle:
+            for token in tokenize.generate_tokens(handle.readline):
+                if token.type == tokenize.STRING or token.type == getattr(
+                    tokenize, "FSTRING_MIDDLE", -1
+                ):
+                    for char in token.string:
+                        if ord(char) > 127 and ord(char) not in cmap:
+                            missing[char] = source.name
+    assert not missing
+    scene = build_view_scene_elk(model, model["views"][1])
+    svg = render_scene_svg(scene)
+    match = re.search(r"data:font/woff;base64,([A-Za-z0-9+/=]+)", svg)
+    assert match
+    assert len(match.group(1)) < 80 * 1024
+    assert TTFont(io.BytesIO(base64.b64decode(match.group(1))))

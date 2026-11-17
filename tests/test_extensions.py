@@ -11,7 +11,8 @@ from architecture_suite.scenarios import (
     scenario_mermaid,
     scenario_scene,
 )
-from architecture_suite.distribution import package_hosts, install_host, HOSTS
+from architecture_suite.distribution import install_host, HOSTS
+from host_packaging import package_hosts
 from architecture_suite.renderers import browser_page, validate_png
 from architecture_suite.plan import compile_plan
 from architecture_suite.emit import render_scene_svg, render_scene_drawio
