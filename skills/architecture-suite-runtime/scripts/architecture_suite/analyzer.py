@@ -3,7 +3,9 @@
 from __future__ import annotations
 import ast
 from pathlib import Path, PurePosixPath
+import posixpath
 import re
+import sys
 from .aws import normalize_cloud_profile
 from .aws_analyzer import detect_aws
 from .gcp_analyzer import detect_gcp
@@ -69,6 +71,84 @@ def _source_roots(files: dict[str, str]) -> tuple[dict, list[str], list[str]]:
         group["files"].append(path)
         grouped.add(top)
     return roots, sorted(grouped), sorted(tests)
+
+
+JS_SUFFIXES = (".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx")
+# Line-anchored, so imports quoted in comments or strings do not count.
+JS_IMPORT = re.compile(
+    r"^\s*import\s*['\"]([^'\"\n]+)['\"]"
+    r"|^\s*(?:import|export)\b[^'\"\n;]*?\bfrom\s*['\"]([^'\"\n]+)['\"]"
+    r"|^\s*\}\s*from\s*['\"]([^'\"\n]+)['\"]"
+    r"|^[^/\n]*?\brequire\(\s*['\"]([^'\"\n]+)['\"]\s*\)",
+    re.M,
+)
+JVM_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+)", re.M)
+
+
+def _module_keys(path: str) -> set[str]:
+    """Names a module answers to: `pkg/mod` for pkg/mod.py, and `pkg` for pkg/__init__.py
+    or pkg/index.ts."""
+    stem = str(PurePosixPath(path).with_suffix(""))
+    keys = {stem}
+    for package in ("/__init__", "/index"):
+        if stem.endswith(package):
+            keys.add(stem[: -len(package)])
+    return keys
+
+
+def _imports(path: str, text: str) -> list[tuple[list[str], bool, int]]:
+    """(candidate module stems, exact match only, line) for each import in a source file.
+
+    Python imports are read with `ast` (comments and docstrings are ignored); standard
+    library modules are skipped so `import logging` never links to a local logging.py.
+    Relative imports resolve against the importing file and match exactly; absolute ones
+    may match any source root (`app.models` -> src/app/models.py).
+    """
+    suffix = PurePosixPath(path).suffix
+    folder = PurePosixPath(path).parent
+    found = []
+    if suffix == ".py":
+        try:
+            tree = ast.parse(text)
+        except (SyntaxError, ValueError):
+            return []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name.split(".")[0] not in sys.stdlib_module_names:
+                        found.append(([alias.name.replace(".", "/")], False, node.lineno))
+            elif isinstance(node, ast.ImportFrom):
+                module = (node.module or "").replace(".", "/")
+                if node.level == 0:
+                    if module.split("/")[0] in sys.stdlib_module_names:
+                        continue
+                    base, exact = module, False
+                else:
+                    package = folder
+                    for _ in range(node.level - 1):
+                        package = package.parent
+                    base = posixpath.normpath(posixpath.join(package.as_posix(), module))
+                    base, exact = ("" if base == "." else base), True
+                for alias in node.names:
+                    submodule = posixpath.join(base, alias.name) if base else alias.name
+                    found.append(([submodule, base] if base else [submodule], exact, node.lineno))
+    elif suffix in JS_SUFFIXES:
+        for match in JS_IMPORT.finditer(text):
+            specifier = next(group for group in match.groups() if group)
+            line = text.count("\n", 0, match.start()) + 1
+            relative = specifier.startswith(".")
+            if relative:
+                specifier = posixpath.normpath(posixpath.join(folder.as_posix(), specifier))
+            stem = specifier[: -len(PurePosixPath(specifier).suffix)] if (
+                PurePosixPath(specifier).suffix in JS_SUFFIXES
+            ) else specifier
+            found.append(([stem.lstrip("/")], relative, line))
+    elif suffix in {".java", ".kt"}:
+        for match in JVM_IMPORT.finditer(text):
+            line = text.count("\n", 0, match.start()) + 1
+            name = match.group(1).replace(".", "/")
+            found.append(([name], False, line))
+    return sorted(found, key=lambda item: item[2])
 
 
 def _declarations(text: str, suffix: str) -> list[dict]:
@@ -284,33 +364,33 @@ def draft_plan(
             "is not modeled as containers."
         )
     # Imports establish a source dependency, not an invented runtime request.
+    keys = {p: _module_keys(p) for p in modules}
     for path, component_name in modules.items():
         text = files[path]
-        imports = re.findall(
-            r"(?:from\s+|import\s+)([\w./]+)|(?:from|require\()\s*['\"]([^'\"]+)", text
-        )
-        for imported in sorted({a or b for a, b in imports}):
-            stem = imported.lstrip("./").replace(".", "/")
-            candidates = [
-                p
-                for p in modules
-                if str(PurePosixPath(p).with_suffix("")) == stem
-                or str(PurePosixPath(p).with_suffix("")).endswith("/" + stem)
-            ]
-            if len(candidates) == 1 and candidates[0] != path:
-                line = next(
-                    (i + 1 for i, ln in enumerate(text.splitlines()) if imported in ln), 1
-                )
-                plan["flows"].append(
-                    {
-                        "from": component_name,
-                        "to": modules[candidates[0]],
-                        "description": "Imports source module",
-                        "technology": "static dependency",
-                        "evidence": f"{path}:{line}",
-                        "status": "inferred",
-                    }
-                )
+        linked = set()
+        for stems, exact, line in _imports(path, getattr(text, "source", text)):
+            for stem in stems:
+                candidates = [
+                    p
+                    for p, names in keys.items()
+                    if stem in names
+                    or not exact and any(k.endswith("/" + stem) for k in names)
+                ]
+                if candidates:
+                    break
+            if len(candidates) != 1 or candidates[0] == path or candidates[0] in linked:
+                continue
+            linked.add(candidates[0])
+            plan["flows"].append(
+                {
+                    "from": component_name,
+                    "to": modules[candidates[0]],
+                    "description": "Imports source module",
+                    "technology": "static dependency",
+                    "evidence": f"{path}:{line}",
+                    "status": "inferred",
+                }
+            )
     provider = normalize_cloud_profile(cloud_profile)
     if provider:
         label = provider.upper()

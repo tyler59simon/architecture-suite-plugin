@@ -518,3 +518,48 @@ def test_plan_credential_finding_names_the_field(plan):
     assert [f.where for f in found] == ["containers.0.description"]
     plan["containers"][0]["description"] = "Stores the session token: Redis-backed cache"
     assert not [f for f in lint_plan(plan) if f.code == "credential"]
+
+
+def test_cloud_signals_count_declarations_not_references():
+    """One container per declared resource: references and attachment types are not resources."""
+    from architecture_suite.gcp_analyzer import detect_gcp
+
+    files = {
+        "main.tf": (
+            'resource "aws_s3_bucket" "logs" {}\n'
+            'resource "aws_s3_bucket_policy" "logs" {\n'
+            "  bucket = aws_s3_bucket.logs.id\n"
+            "}\n"
+            'resource "aws_lambda_function" "fn" {\n'
+            "  environment { variables = { BUCKET = aws_s3_bucket.logs.id } }\n"
+            "}\n"
+            'resource "aws_lambda_permission" "allow" {\n'
+            "  function_name = aws_lambda_function.fn.function_name\n"
+            "}\n"
+        ),
+        "template.yaml": (
+            "Resources:\n"
+            "  Bucket:\n    Type: AWS::S3::Bucket\n"
+            "  Policy:\n    Type: AWS::S3::BucketPolicy\n"
+            "  Fn:\n    Type: 'AWS::Lambda::Function'\n"
+            "  Allow:\n    Type: AWS::Lambda::Permission\n"
+        ),
+        "stack.json": '{"Resources": {"T": {"Type": "AWS::DynamoDB::Table"}}}',
+        "gcp.tf": (
+            'resource "google_storage_bucket" "b" {}\n'
+            'resource "google_storage_bucket_iam_member" "m" {\n'
+            "  bucket = google_storage_bucket.b.name\n"
+            "}\n"
+        ),
+    }
+    found = sorted(
+        (s["reference"], s["line"], s["kind"]) for s in detect_aws(files) if s["kind"] == "infrastructure"
+    )
+    assert found == [
+        ("main.tf", 1, "infrastructure"),
+        ("main.tf", 5, "infrastructure"),
+        ("stack.json", 1, "infrastructure"),
+        ("template.yaml", 3, "infrastructure"),
+        ("template.yaml", 7, "infrastructure"),
+    ]
+    assert [(s["reference"], s["line"]) for s in detect_gcp(files)] == [("gcp.tf", 1)]

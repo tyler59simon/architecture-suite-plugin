@@ -600,3 +600,74 @@ def test_infrastructure_evidence_does_not_leak_home_paths(tmp_path, monkeypatch)
     assert evidence_reference(inside) == "infra/compose.json"
     outside = tmp_path.parent / "elsewhere.json"
     assert evidence_reference(outside) == str(outside)
+
+
+def test_terraform_configuration_references_and_no_false_id_edges(tmp_path):
+    """Plan `configuration` references give edges; shared IDs and tag values do not."""
+    def resource(address, kind, values):
+        return {"address": address, "type": kind, "values": values}
+
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    resource("aws_s3_bucket.logs", "aws_s3_bucket", {"id": "logs", "bucket": "logs"}),
+                    resource("aws_s3_bucket_versioning.logs", "aws_s3_bucket_versioning",
+                             {"id": "logs", "bucket": "logs"}),
+                    resource("aws_iam_role.app", "aws_iam_role", {"id": "app"}),
+                    resource("aws_ecs_service.api", "aws_ecs_service",
+                             {"id": "svc-1", "tags": {"Team": "app"}}),
+                ]
+            }
+        },
+        "configuration": {
+            "root_module": {
+                "resources": [
+                    {"address": "aws_s3_bucket_versioning.logs",
+                     "expressions": {"bucket": {"references": ["aws_s3_bucket.logs.id", "aws_s3_bucket.logs"]}}},
+                    {"address": "aws_ecs_service.api",
+                     "expressions": {"tags": {"constant_value": {"Team": "app"}}}},
+                ]
+            }
+        },
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    edges = {
+        (e["source_id"], e["destination_id"], e["kind"])
+        for e in import_infrastructure([path])["relationships"]
+    }
+    assert edges == {
+        ("input-0-aws-s3-bucket-versioning-logs", "input-0-aws-s3-bucket-logs", "explicit-reference")
+    }
+
+
+def test_cloudformation_getatt_and_sub_references(tmp_path):
+    template = (
+        "Resources:\n"
+        "  Bucket:\n    Type: AWS::S3::Bucket\n"
+        "  Role:\n    Type: AWS::IAM::Role\n"
+        "  Queue:\n    Type: AWS::SQS::Queue\n"
+        "  Fn:\n    Type: AWS::Lambda::Function\n    Properties:\n"
+        "      Role: !GetAtt Role.Arn\n"
+        "      Environment:\n        Variables:\n"
+        "          BUCKET: !Sub 'arn:aws:s3:::${Bucket}/*'\n"
+        "          REGION: !Sub '${AWS::Region}'\n"
+        "  Fn2:\n    Type: AWS::Lambda::Function\n    Properties:\n"
+        "      Role: {'Fn::GetAtt': [Role, Arn]}\n"
+        "      Queue: {'Fn::Sub': ['${Q.Arn}', {Q: x}]}\n"
+        "      Target: {'Fn::Sub': '${Queue.Arn}'}\n"
+    )
+    path = tmp_path / "template.yaml"
+    path.write_text(template)
+    edges = {
+        (e["source_id"], e["destination_id"])
+        for e in import_infrastructure([path])["relationships"]
+        if e["kind"] == "explicit-reference"
+    }
+    assert edges == {
+        ("input-0-fn", "input-0-role"),
+        ("input-0-fn", "input-0-bucket"),
+        ("input-0-fn2", "input-0-role"),
+        ("input-0-fn2", "input-0-queue"),
+    }

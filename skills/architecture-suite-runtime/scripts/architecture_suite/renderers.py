@@ -29,7 +29,7 @@ from .overview_layout import (
     normalize_overview_styles,
 )
 from .readability import readability_findings, score_scene
-from .safety import SafetyError, contained_path, run_bounded
+from .safety import SafetyError, contained_path, run_bounded, safe_text
 from .style import box_style, claim_cue, element_visual
 from .scene import scene_collisions
 
@@ -194,7 +194,8 @@ def _puml_text(value) -> str:
         "\r": "",
         "\n": "\\n",
     }
-    return "".join(escapes.get(c, c) for c in str(value or ""))
+    # safe_text first, as every other format does: redact credentials, drop control chars.
+    return "".join(escapes.get(c, c) for c in safe_text(value or ""))
 
 
 # C4-PlantUML macros: (plain, cylinder, pill) per element type.
