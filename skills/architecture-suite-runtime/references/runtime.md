@@ -26,7 +26,7 @@ In a development checkout, `pip install -e .` provides the `architecture-suite` 
 | Choice | Browser | Lost compared with `playwright` |
 |---|---|---|
 | `playwright` | Playwright with its pinned Chromium (installed by bootstrap) | Nothing |
-| `chrome` | Playwright driving the installed Chrome or Edge | The pinned browser version: Chrome updates itself, so output can drift slightly, and a much newer Chrome may not work with the pinned Playwright |
+| `chrome` | Playwright driving the installed Chrome or Edge (not on Linux in 1.3.0: the screenshot hangs there, so use `chrome-cli`) | The pinned browser version: Chrome updates itself, so output can drift slightly, and a much newer Chrome may not work with the pinned Playwright |
 | `chrome-cli` | Chrome or Edge's own headless screenshot mode, without Playwright | As `chrome`, plus: the ELK browser layout (used only without Node.js); the wait for fonts and images (a fixed time budget instead); request blocking (the page's CSP and a DNS block instead); speed (a new browser per PNG and per Visio icon); detailed errors |
 | `auto` (default) | The first that works: `playwright` if its Chromium is installed, else `chrome`, else `chrome-cli` when Playwright is missing or cannot launch the installed browser | |
 
