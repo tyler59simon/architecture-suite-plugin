@@ -4,6 +4,7 @@ and Chrome's own headless mode when Playwright is missing."""
 import io
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -161,8 +162,46 @@ def test_chrome_cli_screenshot_failures(monkeypatch, tmp_path):
         cli.screenshot("<html></html>", 500, 500)
 
 
+def test_browser_flag_is_restored_after_the_call(monkeypatch):
+    monkeypatch.delenv("ARCHITECTURE_SUITE_BROWSER", raising=False)
+    seen = []
+    monkeypatch.setattr(
+        "architecture_suite.cli.cmd_doctor",
+        lambda args: seen.append(renderers.browser_choice()) or 0,
+    )
+    assert main(["--browser", "playwright", "doctor"]) == 0
+    assert seen == ["playwright"]
+    assert "ARCHITECTURE_SUITE_BROWSER" not in os.environ
+
+
+def test_remove_tree_waits_for_open_files(monkeypatch, tmp_path):
+    folder = tmp_path / "profile"
+    folder.mkdir()
+    real, calls = renderers.shutil.rmtree, []
+
+    def busy_once(path, **kw):
+        calls.append(kw)
+        if len(calls) == 1:
+            raise PermissionError("file in use")
+        return real(path, **kw)
+
+    monkeypatch.setattr(renderers.shutil, "rmtree", busy_once)
+    monkeypatch.setattr(renderers.time, "sleep", lambda seconds: None)
+    renderers._remove_tree(folder)
+    assert not folder.exists() and len(calls) == 2
+    renderers._remove_tree(folder)  # already gone
+    folder.mkdir()
+
+    def always_busy(path, **kw):
+        if not kw.get("ignore_errors"):
+            raise PermissionError("file in use")
+
+    monkeypatch.setattr(renderers.shutil, "rmtree", always_busy)
+    renderers._remove_tree(folder, attempts=3)  # gives up quietly after the retries
+
+
 @needs_chrome
-@pytest.mark.parametrize("size", [(80, 80), (660, 120), (500, 500)])
+@pytest.mark.parametrize("size",[(80, 80), (660, 120), (500, 500)])
 def test_chrome_cli_paints_the_whole_capture(size):
     # Headless Chrome paints only part of a short window; captures must still be full.
     width, height = size
@@ -198,4 +237,4 @@ def test_cli_browser_flag_reaches_doctor(monkeypatch, capsys):
     result = json.loads(capsys.readouterr().out)
     assert result["browser"] == "ok" and result["browser_engine"] == "chrome-cli"
     assert Path(result["browser_path"]) == SYSTEM_CHROME
-    assert renderers.browser_choice() == "chrome-cli"
+    assert renderers.browser_choice() == "auto"  # the flag applies to that call only

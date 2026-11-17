@@ -548,6 +548,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    previous = os.environ.get("ARCHITECTURE_SUITE_BROWSER")
     if args.browser:
         os.environ["ARCHITECTURE_SUITE_BROWSER"] = args.browser
     try:
@@ -558,3 +559,8 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, RecursionError) as exc:
         print(f"architecture-suite: error: {exc}", file=sys.stderr)
         return 2
+    finally:  # --browser applies to this call only, not to later in-process calls
+        if previous is None:
+            os.environ.pop("ARCHITECTURE_SUITE_BROWSER", None)
+        else:
+            os.environ["ARCHITECTURE_SUITE_BROWSER"] = previous

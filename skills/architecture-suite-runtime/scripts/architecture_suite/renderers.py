@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import sys
 import tempfile
+import time
 from PIL import Image, ImageChops
 
 try:  # optional: without Playwright, PNGs use an installed Chrome/Edge (ChromeCli)
@@ -519,10 +520,8 @@ class ChromeCli:
         self, html: str, width: int, height: int, *, transparent: bool = False
     ) -> bytes:
         window = (max(width, self.MIN_WINDOW), max(height, self.MIN_WINDOW))
-        with tempfile.TemporaryDirectory(
-            prefix="architecture-suite-chrome-", ignore_cleanup_errors=True
-        ) as tmp:
-            folder = Path(tmp)
+        folder = Path(tempfile.mkdtemp(prefix="architecture-suite-chrome-"))
+        try:
             page, output = folder / "page.html", folder / "page.png"
             page.write_text(html, encoding="utf-8")
             run_bounded(
@@ -558,6 +557,22 @@ class ChromeCli:
                 buffer = io.BytesIO()
                 image.crop((0, 0, width, height)).save(buffer, format="PNG")
                 return buffer.getvalue()
+        finally:
+            _remove_tree(folder)
+
+
+def _remove_tree(folder: Path, attempts: int = 10) -> None:
+    """Remove a ChromeCli temp folder, waiting briefly for browser processes to
+    release profile files (Windows refuses to delete files that are still open)."""
+    for _ in range(attempts - 1):
+        try:
+            shutil.rmtree(folder)
+            return
+        except FileNotFoundError:
+            return
+        except OSError:
+            time.sleep(0.2)
+    shutil.rmtree(folder, ignore_errors=True)
 
 
 def _chrome_cli(executable: Path | None = None) -> ChromeCli:
