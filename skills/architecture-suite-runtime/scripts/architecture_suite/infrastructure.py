@@ -119,9 +119,19 @@ def _sub(target, names):
             yield names[name]
 
 
+TERRAFORM_INDEX = re.compile(r"\[(?:\"[^\"]*\"|[^\]]*)\]")
+MODULE_INSTANCE = re.compile(r"^(?:module\.[^.\[]+(?:\[(?:\"[^\"]*\"|[^\]]*)\])?\.)*")
+
+
 def _config_address(address: str) -> str:
-    """`aws_instance.web[0]` -> `aws_instance.web`: the address in the configuration."""
-    return re.sub(r"\[[^\]]*\]$", "", address)
+    """`module.net["prod"].aws_subnet.a[0]` -> `module.net.aws_subnet.a`: the address
+    in the configuration, without count or for_each instance keys."""
+    return TERRAFORM_INDEX.sub("", address)
+
+
+def _module_instance(address: str) -> str:
+    """`module.net["prod"].aws_subnet.a[0]` -> `module.net["prod"].`; root module: ``."""
+    return MODULE_INSTANCE.match(address).group()
 
 
 def _terraform_references(module, prefix=""):
@@ -359,12 +369,15 @@ def import_infrastructure(paths, bindings=None):
                     {"depends_on"} if kind == "compose/service" else set()
                 )
                 # Terraform: references recorded in the plan's configuration section
-                # (`bucket = aws_s3_bucket.logs.id`), mapped to every planned instance.
+                # (`bucket = aws_s3_bucket.logs.id`), mapped to the planned instances in
+                # the same module instance (a reference never leaves its module).
                 configured = {
                     names[other]
                     for ref in terraform_refs.get(_config_address(name), ())
                     for other in names
-                    if _config_address(other) == ref and other != name
+                    if _config_address(other) == ref
+                    and _module_instance(other) == _module_instance(name)
+                    and other != name
                 }
                 for target in sorted(set(refs(props)) | configured):
                     edges.append(

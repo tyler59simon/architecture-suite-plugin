@@ -74,25 +74,34 @@ def _source_roots(files: dict[str, str]) -> tuple[dict, list[str], list[str]]:
 
 
 JS_SUFFIXES = (".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx")
-# Line-anchored, so imports quoted in comments or strings do not count.
+# Run on source with comments removed. An import or export declaration may span lines
+# (`import {\n a\n} from './x'`); a declaration without `from` stops at its first quote
+# or semicolon, so `export const label = 'store'` is not an import.
 JS_IMPORT = re.compile(
-    r"^\s*import\s*['\"]([^'\"\n]+)['\"]"
-    r"|^\s*(?:import|export)\b[^'\"\n;]*?\bfrom\s*['\"]([^'\"\n]+)['\"]"
-    r"|^\s*\}\s*from\s*['\"]([^'\"\n]+)['\"]"
-    r"|^[^/\n]*?\brequire\(\s*['\"]([^'\"\n]+)['\"]\s*\)",
-    re.M,
+    r"\bimport\s*['\"]([^'\"\n]+)['\"]"
+    r"|\b(?:import|export)\b[^'\";]*?\bfrom\s*['\"]([^'\"\n]+)['\"]"
+    r"|\brequire\(\s*['\"]([^'\"\n]+)['\"]\s*\)"
 )
+JS_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+JS_LINE_COMMENT = re.compile(r"(^|[^:'\"\\])//[^\n]*", re.M)  # not the // in http://
 JVM_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+)", re.M)
 
 
+def _language(path: str) -> str:
+    """Imports resolve only within one language: Python, JavaScript/TypeScript or JVM."""
+    suffix = PurePosixPath(path).suffix
+    return "js" if suffix in JS_SUFFIXES else "jvm" if suffix in {".java", ".kt"} else suffix
+
+
 def _module_keys(path: str) -> set[str]:
-    """Names a module answers to: `pkg/mod` for pkg/mod.py, and `pkg` for pkg/__init__.py
-    or pkg/index.ts."""
-    stem = str(PurePosixPath(path).with_suffix(""))
+    """Names a module answers to: `pkg/mod` for pkg/mod.py, plus `pkg` for a Python
+    pkg/__init__.py or a JavaScript/TypeScript pkg/index.ts."""
+    p = PurePosixPath(path)
+    stem = str(p.with_suffix(""))
     keys = {stem}
-    for package in ("/__init__", "/index"):
-        if stem.endswith(package):
-            keys.add(stem[: -len(package)])
+    package = "/__init__" if p.suffix == ".py" else "/index" if p.suffix in JS_SUFFIXES else None
+    if package and stem.endswith(package):
+        keys.add(stem[: -len(package)])
     return keys
 
 
@@ -133,9 +142,13 @@ def _imports(path: str, text: str) -> list[tuple[list[str], bool, int]]:
                     submodule = posixpath.join(base, alias.name) if base else alias.name
                     found.append(([submodule, base] if base else [submodule], exact, node.lineno))
     elif suffix in JS_SUFFIXES:
-        for match in JS_IMPORT.finditer(text):
-            specifier = next(group for group in match.groups() if group)
-            line = text.count("\n", 0, match.start()) + 1
+        # Blank comments out but keep their newlines, so line numbers stay true.
+        code = JS_BLOCK_COMMENT.sub(lambda m: "\n" * m.group().count("\n"), text)
+        code = JS_LINE_COMMENT.sub(r"\1", code)
+        for match in JS_IMPORT.finditer(code):
+            group = next(i for i, value in enumerate(match.groups(), 1) if value)
+            specifier = match.group(group)
+            line = code.count("\n", 0, match.start(group)) + 1  # the line naming the module
             relative = specifier.startswith(".")
             if relative:
                 specifier = posixpath.normpath(posixpath.join(folder.as_posix(), specifier))
@@ -368,13 +381,17 @@ def draft_plan(
     for path, component_name in modules.items():
         text = files[path]
         linked = set()
+        language = _language(path)
         for stems, exact, line in _imports(path, getattr(text, "source", text)):
             for stem in stems:
                 candidates = [
                     p
                     for p, names in keys.items()
-                    if stem in names
-                    or not exact and any(k.endswith("/" + stem) for k in names)
+                    if _language(p) == language
+                    and (
+                        stem in names
+                        or not exact and any(k.endswith("/" + stem) for k in names)
+                    )
                 ]
                 if candidates:
                     break

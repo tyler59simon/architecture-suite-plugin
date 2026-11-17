@@ -642,6 +642,46 @@ def test_terraform_configuration_references_and_no_false_id_edges(tmp_path):
     }
 
 
+def test_terraform_references_stay_inside_their_module_instance(tmp_path):
+    """for_each/count module instances: each subnet links to its own instance's VPC."""
+    def resource(address, kind):
+        return {"address": address, "type": kind, "values": {}}
+
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "child_modules": [
+                    {"resources": [
+                        resource(f'module.network["{env}"].aws_vpc.main', "aws_vpc"),
+                        resource(f'module.network["{env}"].aws_subnet.private[0]', "aws_subnet"),
+                    ]}
+                    for env in ("prod", "dev")
+                ]
+            }
+        },
+        "configuration": {
+            "root_module": {
+                "module_calls": {
+                    "network": {"module": {"resources": [
+                        {"address": "aws_subnet.private",
+                         "expressions": {"vpc_id": {"references": ["aws_vpc.main.id", "aws_vpc.main"]}}},
+                    ]}}
+                }
+            }
+        },
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    edges = {
+        (e["source_id"], e["destination_id"])
+        for e in import_infrastructure([path])["relationships"]
+    }
+    assert len(edges) == 2
+    for source, destination in edges:
+        env = "prod" if "prod" in source else "dev"
+        assert "subnet" in source and "vpc" in destination and env in destination
+
+
 def test_cloudformation_getatt_and_sub_references(tmp_path):
     template = (
         "Resources:\n"

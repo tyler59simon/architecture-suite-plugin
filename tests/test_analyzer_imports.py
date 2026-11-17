@@ -35,6 +35,20 @@ FILES = {
     "web/src/cache.ts": "export default {}\n",
     "web/src/store.ts": "export default {}\n",
     "web/src/helpers/index.ts": "export const helper = 1\n",
+    "web/src/other.ts": (
+        "import def\n"
+        "  from './utils2'\n"
+        "const a = require('./a'), b = require('./b');\n"
+        "/* import gone from './gone' */\n"
+        "const url = 'http://example.com/x'\n"
+    ),
+    "web/src/utils2.ts": "export default 1\n",
+    "web/src/a.js": "module.exports = 1\n",
+    "web/src/b.js": "module.exports = 2\n",
+    "web/src/gone.ts": "export default 1\n",
+    # A Python namespace folder: index.py is not the package, so `import helpers` stays unlinked.
+    "app/jobs.py": "import helpers\n",
+    "app/helpers/index.py": "X = 1\n",
 }
 
 
@@ -56,4 +70,7 @@ def test_import_flows_follow_real_imports(tmp_path):
         ("web/src/app.ts:5", "web/src/multi.ts"),  # the "} from" line
         ("web/src/app.ts:6", "web/src/util.js"),
         ("web/src/app.ts:9", "web/src/helpers/index.ts"),
+        ("web/src/other.ts:2", "web/src/utils2.ts"),  # declaration over two lines
+        ("web/src/other.ts:3", "web/src/a.js"),
+        ("web/src/other.ts:3", "web/src/b.js"),  # second require on the same line
     }
