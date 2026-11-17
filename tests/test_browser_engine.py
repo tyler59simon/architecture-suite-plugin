@@ -247,8 +247,9 @@ def test_chrome_cli_paints_the_whole_capture(size):
 @needs_chrome
 @pytest.mark.parametrize("choice", [
     pytest.param("chrome", marks=pytest.mark.skipif(
-        sys.platform.startswith("linux"),
-        reason="known limit in 1.3.0: Page.screenshot hangs with the installed Chrome on Linux",
+        bool(os.environ.get("CI")),
+        reason="known limit in 1.3.0: Page.screenshot times out with the installed Chrome "
+        "on CI runners (Linux and Windows); it works on a desktop",
     )),
     "chrome-cli",
 ])
