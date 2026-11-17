@@ -13,7 +13,7 @@ A real-time ride dispatch and fleet telemetry platform on Google Cloud.
 | Google Cloud deployment | [diagrams/06-gcp-deployment](diagrams/06-gcp-deployment) |
 | Ride request sequence | [diagrams/c4-dynamic.mmd](diagrams/c4-dynamic.mmd) |
 | Small-multiples and complete overviews (SVG/Draw.io) | [diagrams/large-overviews](diagrams/large-overviews) |
-| Modern vs legacy Google Cloud icons | [icon-styles/modern](icon-styles/modern), [icon-styles/legacy](icon-styles/legacy) |
+| Modern vs legacy Google Cloud icons | [icon-styles/modern](icon-styles/modern) (containers and deployment), [icon-styles/legacy](icon-styles/legacy) (deployment only); a file identical to its `diagrams/` twin is not repeated |
 | Reverse-engineered from source code | [from-source-code](from-source-code) |
 
 `from-source-code/` shows the `reverse-engineer-c4` workflow: a small fictional repository
