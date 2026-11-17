@@ -5,8 +5,15 @@
 ### Added
 
 - **Installed Chrome or Edge for PNG:** `architecture-suite --browser auto|playwright|chrome|chrome-cli` (or `ARCHITECTURE_SUITE_BROWSER`) picks the browser for PNG export and Visio icons. `chrome` drives an installed Google Chrome or Microsoft Edge through Playwright; `chrome-cli` uses that browser's own headless mode and needs no Playwright. `auto` (the default) uses Playwright's Chromium when installed, then the installed browser. `ARCHITECTURE_SUITE_CHROME` names a browser executable, and `doctor` reports `browser_engine` and `browser_path`. With an installed browser, `bootstrap.py --no-browser` skips the Chromium download.
+- **Skill rules file and sample plan:** `references/skill-rules.md` holds the full runtime and C4 rules text that every skill used to repeat. `samples/plan-example.md` is a complete small fictional plan (containers, components, code, flows with evidence, deployment placements) that a test keeps lint-clean under `--strict`.
 
 ### Changed
+
+- **Shorter skills, safer defaults:** each `SKILL.md` keeps a short Runtime and Rules block and links to `skill-rules.md`. `c4-diagrams` and `reverse-engineer-c4` use `--overview-style executive`, because `progressive` and `complete` can exceed PNG limits on large plans. Level skills run `plan-review` before `plan-lint`, `c4-aws`, `c4-gcp` and `c4-overview` dry-run before `--confirm-write`, and `c4-overview` covers `--emit-model`, scenarios, `diff` and `check`.
+- **Help text:** every subcommand and flag has a help line, defaults are shown, and `--format` lists its values and ignores case (`PNG` works). `doctor` prints `checking runtime...` to stderr first.
+- **Clearer errors:** a missing or oversized input exits 2 and reads `--model: no such file: <path>` (links still exit 3). A model that is not JSON names the file. Unknown scenario participants list the valid ids, invalid models print one finding per line, plan YAML errors give the line in the plan file, and the PNG size error suggests next steps.
+- **Output summaries:** `plan-render`, `render`, `analyze` and `examples` add `ok`, `dry_run` and, after a write, `written` and `write_confirmation_required: false`. `overview_styles` appears only for `--level all` and `overview`. No key was removed.
+- **Docs:** `runtime.md` no longer calls `architecture-model.json` a normal report (it needs `--emit-model`), `planning.md` links to the right section, and the launcher error text names the actual runtime path.
 
 - **Exit code 4 for internal errors:** an unexpected exception now exits 4 with `internal error: <type>: <message>` instead of a traceback with exit 1, which automation could not tell apart from lint findings.
 - **`plan-lint --strict` catches template placeholders:** `placeholder` (leftover `Replace with ...`, `TBD` or `Unspecified` text) is now a lint advisory, so an unedited template fails `--strict`; `plan-review` reports it with the same question as before.

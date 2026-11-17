@@ -54,7 +54,8 @@ def _mapping(loader, node):
 _Loader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _mapping)
 
 
-def parse_yaml(source: str) -> Any:
+def parse_yaml(source: str, line_offset: int = 0) -> Any:
+    """Parse YAML; `line_offset` is the number of file lines before the first line of `source`."""
     if len(source) > 2_000_000:
         raise PlanError("Plan exceeds 2 MB")
     try:
@@ -66,6 +67,12 @@ def parse_yaml(source: str) -> Any:
                 raise PlanError("YAML anchors, aliases, and tags are unsupported")
         return yaml.load(source, Loader=_Loader)
     except (yaml.YAMLError, RecursionError) as exc:
+        mark = getattr(exc, "problem_mark", None)
+        if mark is not None:
+            problem = getattr(exc, "problem", None) or str(exc)
+            raise PlanError(
+                f"Malformed YAML at line {line_offset + mark.line + 1}: {problem[:200]}"
+            ) from exc
         raise PlanError(f"Malformed YAML: {str(exc)[:200]}") from exc
 
 
@@ -75,21 +82,23 @@ def parse_plan_document(source: str) -> dict:
         raise PlanError("Plan exceeds 2 MB")
     blocks = []
     current = None
-    for line in source.splitlines():
+    start = 0
+    for number, line in enumerate(source.splitlines(), 1):
         if re.fullmatch(r"\s*```ya?ml\s*", line):
             if current is not None:
                 raise PlanError("Unclosed YAML fence")
             current = []
+            start = number  # the block's first line is the next file line
         elif current is not None and line.strip() == "```":
-            blocks.append("\n".join(current))
+            blocks.append(("\n".join(current), start))
             current = None
         elif current is not None:
             current.append(line)
     if current is not None or not blocks:
         raise PlanError("Expected closed fenced YAML blocks")
     result = {}
-    for block in blocks:
-        value = parse_yaml(block)
+    for block, offset in blocks:
+        value = parse_yaml(block, offset)
         if value in (None, {}, []):
             continue
         if not isinstance(value, dict):

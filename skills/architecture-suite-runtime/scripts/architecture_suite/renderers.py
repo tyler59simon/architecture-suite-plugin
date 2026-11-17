@@ -695,7 +695,7 @@ def render_svg_png(
         raise SafetyError(
             f"{Path(png_file).name} ({width}x{height}) exceeds PNG size limits "
             f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP); "
-            "choose narrower scopes or another format"
+            "try --overview-style executive or small-multiples, or --format mermaid,svg,drawio"
         )
 
     html = (

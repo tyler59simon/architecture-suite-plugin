@@ -34,10 +34,17 @@ def test_paths_and_authorization(tmp_path):
     assert (
         contained_path(source, "nested/artifact.svg") == source / "nested/artifact.svg"
     )
+    for function, path, text in (
+        (canonical_existing_directory, file, "no such directory"),
+        (canonical_existing_file, source, "no such file"),
+        (canonical_existing_file, source / "missing", "no such file"),
+    ):
+        # Missing input is an input error (ValueError, exit 2), not a safety error.
+        with pytest.raises(ValueError, match=text) as caught:
+            function(path, "--flag")
+        assert not isinstance(caught.value, SafetyError)
+        assert str(caught.value).startswith("--flag: ")
     for function, path in (
-        (canonical_existing_directory, file),
-        (canonical_existing_file, source),
-        (canonical_existing_file, source / "missing"),
         (canonical_output_directory, file),
         (canonical_output_directory, Path.cwd()),
         (canonical_output_directory, Path.home()),

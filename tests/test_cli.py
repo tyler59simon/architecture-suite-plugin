@@ -370,3 +370,104 @@ def test_internal_errors_exit_4(inputs, monkeypatch, capsys):
     assert main(["plan-lint", "--plan", str(plan_path)]) == 4
     err = capsys.readouterr().err
     assert "internal error: KeyError" in err and "please report" in err
+
+
+def _subparsers(parser):
+    import argparse
+
+    action = next(a for a in parser._actions if isinstance(a, argparse._SubParsersAction))
+    return action
+
+
+def test_every_subcommand_and_flag_has_help():
+    action = _subparsers(build_parser())
+    helped = {choice.dest for choice in action._choices_actions if choice.help}
+    assert helped == set(action.choices)
+    for name, sub in action.choices.items():
+        for option in sub._actions:
+            assert option.help, (name, option.option_strings)
+        assert "--format" not in sub.format_help() or "mermaid" in sub.format_help()
+
+
+def test_format_names_are_case_insensitive(inputs, tmp_path, capsys):
+    parser = build_parser()
+    args = parser.parse_args(["render", "--model", "x", "--output", "y", "--format", "PNG,Mermaid"])
+    assert args.format == {"png", "mermaid"}
+    assert parser.parse_args(
+        ["render", "--model", "x", "--output", "y", "--format", "ALL"]
+    ).format == {"mermaid", "drawio", "png", "svg", "visio", "plantuml"}
+
+
+def test_missing_input_names_flag_and_path_with_exit_2(tmp_path, capsys):
+    missing = tmp_path / "nope.json"
+    assert main(["verify", "--model", str(missing)]) == 2
+    err = capsys.readouterr().err
+    assert f"--model: no such file: {missing.resolve()}" in err
+    assert main(["plan-lint", "--plan", str(tmp_path / "p.md")]) == 2
+    assert "--plan: no such file" in capsys.readouterr().err
+    assert main(["plan-draft", "--repo", str(tmp_path / "r"), "--output", str(tmp_path / "o.md")]) == 2
+    assert "--repo: no such directory" in capsys.readouterr().err
+
+
+def test_oversized_input_is_an_input_error(tmp_path, capsys):
+    big = tmp_path / "big.json"
+    with big.open("wb") as stream:
+        stream.truncate(20_000_001)
+    assert main(["verify", "--model", str(big)]) == 2
+    assert "--model: file exceeds 20 MB" in capsys.readouterr().err
+
+
+def test_broken_model_json_names_file_and_hint(inputs, capsys):
+    inputs[0].write_text("{broken")
+    assert main(["verify", "--model", str(inputs[0])]) == 2
+    err = capsys.readouterr().err
+    assert str(inputs[0]) in err and "expected architecture-model.json from" in err
+
+
+def test_invalid_model_prints_one_finding_per_line(inputs, capsys):
+    inputs[0].write_text(json.dumps({"schema_version": "2.0", "elements": [], "views": []}))
+    assert main(["verify", "--model", str(inputs[0]), "--level", "container"]) == 3
+    err = capsys.readouterr().err
+    assert "Invalid architecture model:\n" in err
+    assert "[{" not in err and ": " in err.split("\n", 1)[1]
+
+
+def test_plan_yaml_error_reports_file_line(tmp_path, capsys):
+    plan = tmp_path / "plan.md"
+    lines = [
+        "# Plan", "", "```yaml", "system: {}", "```", "", "text", "",
+        "```yaml", "system:", "  name: a: b", "```",
+    ]
+    plan.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    assert main(["plan-lint", "--plan", str(plan)]) == 2
+    assert "Malformed YAML at line 11" in capsys.readouterr().err
+
+
+def test_envelope_keys_are_additive(inputs, tmp_path, capsys):
+    out = tmp_path / "env"
+    argv = ["plan-render", "--plan", str(inputs[1]), "--output", str(out), "--level", "container"]
+    assert main(argv + ["--dry-run"]) == 0
+    dry = json.loads(capsys.readouterr().out)
+    assert dry["ok"] is True and dry["dry_run"] is True
+    assert dry["write_confirmation_required"] is True
+    assert "overview_styles" not in dry
+    assert main(argv + ["--confirm-write"]) == 0
+    written = json.loads(capsys.readouterr().out)
+    assert written["dry_run"] is False and written["written"] is True
+    assert written["write_confirmation_required"] is False
+    assert {"files", "formats", "conflicts", "overwrites_edited", "removed"} <= set(written)
+    assert main(argv[:-2] + ["--level", "overview", "--dry-run"]) == 0
+    assert json.loads(capsys.readouterr().out)["overview_styles"]
+
+
+def test_examples_envelope(tmp_path, capsys):
+    out = tmp_path / "ex"
+    assert main(["examples", "--output", str(out), "--format", "mermaid", "--dry-run"]) == 0
+    dry = json.loads(capsys.readouterr().out)
+    assert dry["ok"] is True and dry["dry_run"] is True
+
+
+def test_doctor_announces_itself_on_stderr(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "verify_assets", lambda: None)
+    main(["doctor"])
+    assert "checking runtime..." in capsys.readouterr().err
