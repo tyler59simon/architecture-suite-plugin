@@ -1008,6 +1008,44 @@ def test_kubernetes_and_compose_environment_secrets_are_redacted(tmp_path):
     assert "pw1" not in payload and "API_TOKEN=[REDACTED]" in payload and "MODE=dev" in payload
 
 
+def test_url_query_token_is_not_an_assignment_key(tmp_path):
+    """`?token=` inside a URL is not a Compose `KEY=value`; the URL password is redacted."""
+    url = "redis://app:pw9secret@cache/0?token=x"
+    path = tmp_path / "compose.yaml"
+    path.write_text(
+        json.dumps({"services": {"api": {"environment": {"CACHE_URL": url}}}}), encoding="utf-8"
+    )
+    compose = import_infrastructure([path])
+    env = [{"name": "CACHE_URL", "value": url}]
+    pod = {"apiVersion": "v1", "kind": "Pod", "metadata": {"name": "api"},
+           "spec": {"containers": [{"name": "api", "env": env}]}}
+    for topology in (compose, _kubernetes(tmp_path, [pod])):
+        payload = json.dumps(topology) + json.dumps(topology_plan(topology))
+        assert "pw9secret" not in payload and "cache/0" in payload
+
+
+def test_env_value_rule_keeps_cloudformation_references(tmp_path):
+    """A `name`/`value` pair whose value is an expression is recursed into, not redacted."""
+    doc = {
+        "Resources": {
+            "SharedSetting": {"Type": "AWS::SSM::Parameter"},
+            "Provider": {
+                "Type": "Custom::Provider",
+                "Properties": {"name": "tokenProvider", "value": {"Ref": "SharedSetting"}},
+            },
+        }
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-provider", "input-0-sharedsetting")}
+    assert {
+        "resource": "input-0-provider",
+        "message": "Contains unresolved expression; no values or placement guessed",
+    } in topology["findings"]
+
+
 def test_kubernetes_pods_ingress_and_service_findings(tmp_path):
     topology = _kubernetes(
         tmp_path,

@@ -284,8 +284,11 @@ def import_infrastructure(paths, bindings=None):
 
         def scrub(value):
             if isinstance(value, dict):
-                # A Kubernetes env entry names the secret in `name` and holds it in `value`.
-                named = "value" in value and sensitive(value.get("name", ""))
+                # A Kubernetes env entry names the secret in `name` and holds it in a literal
+                # `value`; an expression (`Ref`, `valueFrom`) is recursed into as usual.
+                named = isinstance(value.get("value"), (str, int, float)) and sensitive(
+                    value.get("name", "")
+                )
                 return {
                     # Booleans are kept: they carry Terraform sensitivity masks, not secrets.
                     k: "[REDACTED]"
@@ -298,7 +301,7 @@ def import_infrastructure(paths, bindings=None):
                 return [scrub(v) for v in value]
             if isinstance(value, str):
                 # Compose list form `KEY=value`: redact misses values under 4 characters.
-                pair = re.fullmatch(r"([^=\s]+)=(.+)", value, re.S)
+                pair = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)=(.+)", value, re.S)
                 if pair and sensitive(pair[1]):
                     return pair[1] + "=[REDACTED]"
                 return redact(value)
