@@ -1395,3 +1395,16 @@ def test_getatt_with_a_dynamic_attribute_keeps_its_resource_under_a_secret_name(
     edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
     assert ("input-0-service", "input-0-database") in edges
     assert "s3cr3t" not in json.dumps(topology) + json.dumps(topology_plan(topology))
+
+
+def test_terraform_malformed_index_is_a_finding_for_its_resource(tmp_path):
+    """A rejected instance key gives no edge but one finding, so the plan has a gap."""
+    reference = "aws_subnet.app[bogus].id"
+    topology = _counted_subnets(tmp_path, [reference], subnets=("aws_subnet.app[0]",))
+    assert not topology["relationships"]
+    found = [f for f in topology["findings"] if reference in f["message"]]
+    assert len(found) == 1 and found[0]["resource"] == "input-0-aws-instance-web"
+    assert found[0]["message"] in topology_plan(topology)["gaps"]
+    # Non-resource roots such as `var.x[bogus]` are not resource references.
+    topology = _counted_subnets(tmp_path, ["var.names[bogus]"])
+    assert not any("var.names" in f["message"] for f in topology["findings"])

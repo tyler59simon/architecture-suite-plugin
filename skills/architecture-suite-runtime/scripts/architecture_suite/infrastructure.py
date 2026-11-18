@@ -138,45 +138,52 @@ def _module_instance(address: str) -> str:
     return MODULE_INSTANCE.match(address).group()
 
 
-def _terraform_references(module, prefix=""):
-    """{config address: referenced resource addresses} from a plan's `configuration`.
-    A referenced address keeps its instance key (`aws_subnet.app[0]`) when it has one."""
-    found = {}
+TERRAFORM_ROOTS = {"var", "local", "data", "module", "each", "count", "path", "self", "terraform"}
 
-    def collect(value, into):
+
+def _terraform_references(module, prefix=""):
+    """({config address: referenced resource addresses}, {config address: references
+    with a malformed instance key}) from a plan's `configuration`. A referenced address
+    keeps its instance key (`aws_subnet.app[0]`) when it has one."""
+    found, rejected = {}, {}
+
+    def collect(value, into, bad):
         if isinstance(value, dict):
             previous = None
             for ref in value.get("references", []) or []:
                 match = TERRAFORM_REFERENCE.match(ref) if isinstance(ref, str) else None
                 if match and ref.startswith("[", match.end()):
+                    if match.group(1) not in TERRAFORM_ROOTS:
+                        bad.add(ref)
                     match = None  # a malformed key (`app[bogus]`) stays unresolved
                 # Terraform lists `aws_subnet.app[0].id`, `aws_subnet.app[0]` and then
                 # `aws_subnet.app` for one reference; that last entry, right after its
                 # instance, is an alias. A dynamic index (`app[var.i]`) lists only
                 # `aws_subnet.app`, which stays a reference of its own.
-                if match and ref != previous and match.group(1) not in {
-                    "var", "local", "data", "module", "each", "count", "path", "self", "terraform"
-                }:
+                if match and ref != previous and match.group(1) not in TERRAFORM_ROOTS:
                     into.add(prefix + match.group())
                 # The resource of an entry that is exactly one instance, else None.
                 previous = (
                     ref[: match.start(3)] if match and match.group(3) and match.end() == len(ref) else None
                 )
             for child in value.values():
-                collect(child, into)
+                collect(child, into, bad)
         elif isinstance(value, list):
             for child in value:
-                collect(child, into)
+                collect(child, into, bad)
 
     for resource in module.get("resources", []) or []:
         if isinstance(resource, dict) and isinstance(resource.get("address"), str):
-            targets = set()
-            collect(resource.get("expressions", {}), targets)
+            targets, bad = set(), set()
+            collect(resource.get("expressions", {}), targets, bad)
             found[prefix + resource["address"]] = targets
+            rejected[prefix + resource["address"]] = bad
     for name, call in (module.get("module_calls") or {}).items():
         if isinstance(call, dict) and isinstance(call.get("module"), dict):
-            found.update(_terraform_references(call["module"], f"{prefix}module.{name}."))
-    return found
+            inner, inner_rejected = _terraform_references(call["module"], f"{prefix}module.{name}.")
+            found.update(inner)
+            rejected.update(inner_rejected)
+    return found, rejected
 
 
 def _mapping(value):
@@ -388,10 +395,11 @@ def import_infrastructure(paths, bindings=None):
                 raise ValueError("Infrastructure document must be a mapping")
             source = {"reference": evidence_reference(path), "document": doc_index + 1}
             entries, depends, terraform_refs, metadata = [], {}, {}, {}
+            terraform_rejected = {}
             if "planned_values" in doc:
                 configuration = doc.get("configuration")
                 if isinstance(configuration, dict):
-                    terraform_refs = _terraform_references(
+                    terraform_refs, terraform_rejected = _terraform_references(
                         configuration.get("root_module") or {}
                     )
                 changes = {
@@ -575,6 +583,14 @@ def import_infrastructure(paths, bindings=None):
                         )
                     else:
                         configured.update(names[other] for other in targets)
+                for ref in sorted(terraform_rejected.get(_config_address(name), ())):
+                    findings.append(
+                        {
+                            "resource": ident,
+                            "message": f"Reference {ref[:200]} has a malformed instance key; "
+                            "no edge guessed",
+                        }
+                    )
                 for target in sorted(set(refs(props)) | configured):
                     edges.append(
                         {
