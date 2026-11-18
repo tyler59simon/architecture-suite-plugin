@@ -152,6 +152,36 @@ def project_model(model: dict, profile: str) -> dict:
     return normalized_model(result)
 
 
+FLOW_FIELDS = ("id", "description", "technology", "status", "evidence_ids")
+
+
+def merge_flows(ident: str, src: str, dst: str, entries: list[dict]) -> dict:
+    """One arrow for these flows. A merged arrow keeps each flow's label data in
+    `flows` so a view that draws only some of them can merge just those."""
+    relationship = {
+        "id": ident,
+        "source_id": src,
+        "destination_id": dst,
+        "description": "; ".join(dict.fromkeys(e["description"] for e in entries)),
+        "evidence_ids": sorted({r for e in entries for r in e.get("evidence_ids", [])}),
+        "flow_ids": [e["id"] for e in entries],
+    }
+    technology = "; ".join(
+        dict.fromkeys(e["technology"] for e in entries if e.get("technology"))
+    )
+    if technology:
+        relationship["technology"] = technology
+    # A merged arrow is only as certain as its weakest stated flow.
+    declared = [e["status"] for e in entries if e.get("status") in CLAIM_STATUSES]
+    if declared:
+        relationship["status"] = min(declared, key=CLAIM_STATUSES.index)
+    if len(entries) > 1:
+        relationship["flows"] = [
+            {k: e[k] for k in FLOW_FIELDS if k in e} for e in entries
+        ]
+    return relationship
+
+
 def derive_views(
     elements: list[dict], flows: list[dict], layout: dict | None = None
 ) -> tuple[list[dict], list[dict], list[str]]:
@@ -235,27 +265,7 @@ def derive_views(
         view["relationship_ids"] = []
         for (src, dst), entries in pairs.items():
             ident = f"{view['id']}-r{len(view['relationship_ids']) + 1}"
-            relationship = {
-                "id": ident,
-                "source_id": src,
-                "destination_id": dst,
-                "description": "; ".join(
-                    dict.fromkeys(e["description"] for e in entries)
-                ),
-                "evidence_ids": sorted(
-                    {r for e in entries for r in e.get("evidence_ids", [])}
-                ),
-                "flow_ids": [e["id"] for e in entries],
-            }
-            technology = "; ".join(
-                dict.fromkeys(e["technology"] for e in entries if e.get("technology"))
-            )
-            if technology:
-                relationship["technology"] = technology
-            # A merged arrow is only as certain as its weakest stated flow.
-            declared = [e["status"] for e in entries if e.get("status") in CLAIM_STATUSES]
-            if declared:
-                relationship["status"] = min(declared, key=CLAIM_STATUSES.index)
+            relationship = merge_flows(ident, src, dst, entries)
             relationships.append(relationship)
             view["relationship_ids"].append(ident)
             used.update((src, dst))

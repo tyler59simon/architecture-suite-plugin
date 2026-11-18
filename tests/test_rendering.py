@@ -530,3 +530,31 @@ def test_embedded_font_covers_runtime_literals_and_stays_small(model):
     assert match
     assert len(match.group(1)) < 80 * 1024
     assert TTFont(io.BytesIO(base64.b64decode(match.group(1))))
+
+
+def test_overview_shows_each_flow_once_across_coarse_and_fine_arrows(plan):
+    from architecture_suite.overview_layout import overview_data
+    from architecture_suite.plan import compile_plan
+
+    # "Submits request" also folds into Customer -> API; its finer arrow is drawn instead.
+    plan["flows"].append(
+        {"from": "Customer", "to": "API", "description": "Opens portal", "evidence": "x"}
+    )
+    model, _ = compile_plan(plan)
+    for style in ("progressive", "complete"):
+        relationships = overview_data(model, style)[1]
+        flow_ids = [f for r in relationships for f in r["flow_ids"]]
+        assert len(flow_ids) == len(set(flow_ids))
+        descriptions = [
+            d for r in relationships for d in r["description"].split("; ")
+        ]
+        assert descriptions.count("Submits request") == 1
+        assert descriptions.count("Opens portal") == 1
+        scene = build_overview_scene(model, style)
+        labels = [
+            " ".join(line.text for line in e.label.label.lines)
+            for e in scene.edges
+            if e.label
+        ]
+        assert sum("Submits request" in text for text in labels) == 1
+        assert sum("Opens portal" in text for text in labels) == 1

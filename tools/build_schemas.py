@@ -58,6 +58,18 @@ def main():
             "technology": STRING,
             "evidence_ids": STRINGS,
             "flow_ids": STRINGS,
+            "flows": array(
+                obj(
+                    {
+                        "id": STRING,
+                        "description": STRING,
+                        "technology": STRING,
+                        "evidence_ids": STRINGS,
+                        "status": STATUS,
+                    },
+                    ("id", "description"),
+                )
+            ),
             "status": STATUS,
         },
         ("id", "source_id", "destination_id", "description"),

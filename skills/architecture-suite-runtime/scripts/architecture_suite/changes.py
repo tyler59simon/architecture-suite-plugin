@@ -53,7 +53,7 @@ def diff_models(before, after, identities=None):
                 if key in item:
                     item[key] = aliases.get(item[key], item[key])
     changes = []
-    ignored = {"evidence_ids", "confidence", "flow_ids"}
+    ignored = {"evidence_ids", "confidence", "flow_ids", "flows"}
     for section, old_items in _sections(before).items():
 
         def index(items):

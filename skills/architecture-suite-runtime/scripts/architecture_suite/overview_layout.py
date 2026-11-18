@@ -2,7 +2,7 @@
 
 from copy import deepcopy
 import math
-from .model import ELEMENT_TYPE_DEPTH
+from .model import ELEMENT_TYPE_DEPTH, merge_flows
 from .scene import Scene, build_view_scene_elk, choose_scene
 
 # Below the 6000 px PNG cap, leaving room for the page margin.
@@ -69,11 +69,19 @@ def overview_data(model: dict, style: str):
             for flow in r.get("flow_ids") or [r["id"]]:  # [] means none recorded
                 if flow not in selected or rank > selected[flow][0]:
                     selected[flow] = (rank, r)
-    relationships = (
-        list({r["id"]: r for _, r in selected.values()}.values())
-        if style != "hierarchy"
-        else []
-    )
+    # A merged arrow keeps only the flows assigned to it; the rest are drawn finer.
+    assigned: dict[str, list] = {}
+    for flow, (_, r) in selected.items():
+        assigned.setdefault(r["id"], []).append(flow)
+    relationships = []
+    for r in {r["id"]: r for _, r in selected.values()}.values():
+        details = {f["id"]: f for f in r.get("flows") or []}
+        keep = [details[f] for f in r.get("flow_ids") or [] if f in details and f in assigned[r["id"]]]
+        if keep and len(keep) < len(r["flow_ids"]):
+            r = merge_flows(r["id"], r["source_id"], r["destination_id"], keep)
+        relationships.append(r)
+    if style == "hierarchy":
+        relationships = []
     return (
         [e for e in elements if e["id"] not in frames],
         relationships,
