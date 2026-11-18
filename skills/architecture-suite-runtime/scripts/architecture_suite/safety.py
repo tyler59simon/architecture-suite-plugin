@@ -493,23 +493,29 @@ def scan_repository(
                 continue
             try:
                 _no_links(path)
-                info = path.stat()
-                if not stat.S_ISREG(info.st_mode):
-                    result.skipped_files += 1
-                    result.skipped.append(f"{relative}: not a regular file")
-                    continue
-                size = info.st_size
-                if size > max_file_bytes:
-                    result.skipped_files += 1
-                    result.skipped_bytes += size
-                    result.skipped.append(f"{relative}: file size limit")
-                    continue
-                if result.bytes_read + size > max_total_bytes:
-                    result.truncated = True
-                    return result
-                # Read one byte past the budget so a file that grew after stat() cannot exceed it.
-                budget = min(max_file_bytes, max_total_bytes - result.bytes_read)
-                with path.open("rb") as handle:
+                # Open first (non-blocking, so a FIFO swapped in for the file cannot hang the
+                # scan), then judge the opened file with fstat instead of a racy path stat().
+                fd = os.open(
+                    path,
+                    os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0),
+                )
+                with os.fdopen(fd, "rb") as handle:
+                    info = os.fstat(handle.fileno())
+                    if not stat.S_ISREG(info.st_mode):
+                        result.skipped_files += 1
+                        result.skipped.append(f"{relative}: not a regular file")
+                        continue
+                    size = info.st_size
+                    if size > max_file_bytes:
+                        result.skipped_files += 1
+                        result.skipped_bytes += size
+                        result.skipped.append(f"{relative}: file size limit")
+                        continue
+                    if result.bytes_read + size > max_total_bytes:
+                        result.truncated = True
+                        return result
+                    # Read one byte past the budget so a file that grew after fstat() cannot exceed it.
+                    budget = min(max_file_bytes, max_total_bytes - result.bytes_read)
                     data = handle.read(budget + 1)
                 if len(data) > max_file_bytes:
                     result.skipped_files += 1

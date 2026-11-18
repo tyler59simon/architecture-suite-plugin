@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import os
+import stat
 import subprocess
 import sys
 import time
@@ -243,25 +244,62 @@ def test_scan_skips_fifos(tmp_path):
     assert not result.timed_out
 
 
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="needs POSIX FIFOs")
+def test_scan_does_not_block_on_a_fifo_that_replaced_a_regular_file(tmp_path, monkeypatch):
+    import threading
+
+    (tmp_path / "ok.py").write_text("x = 1")
+    pipe = tmp_path / "pipe.py"
+    os.mkfifo(pipe)
+    real_stat = Path.stat
+
+    class Regular:
+        st_mode = stat.S_IFREG | 0o644
+        st_size = 1
+
+    # The path looked like a regular file when it was stat()ed, then became a FIFO.
+    monkeypatch.setattr(
+        Path,
+        "stat",
+        lambda self, *a, **k: Regular() if self.name == "pipe.py" else real_stat(self, *a, **k),
+    )
+    outcome = []
+    worker = threading.Thread(target=lambda: outcome.append(scan_repository(tmp_path)), daemon=True)
+    worker.start()
+    worker.join(5)
+    if worker.is_alive():
+        # Release a regression's blocked open() so the thread can end.
+        os.close(os.open(pipe, os.O_WRONLY | os.O_NONBLOCK))
+        pytest.fail("scan_repository blocked opening a FIFO")
+    assert set(outcome[0].texts) == {"ok.py"}
+    assert any(item.startswith("pipe.py:") for item in outcome[0].skipped)
+
+
 def test_scan_read_is_capped_when_file_outgrows_its_stat(tmp_path, monkeypatch):
     (tmp_path / "grow.json").write_text("x" * 500)
     (tmp_path / "ok.py").write_text("y = 1")
-    real_stat = Path.stat
+    import architecture_suite.safety as safety
+
+    real_open, real_fstat = os.open, os.fstat
+    grow_fds = set()
 
     class Stale:
         def __init__(self, info):
             self.st_mode = info.st_mode
             self.st_size = 10
 
-    monkeypatch.setattr(
-        Path,
-        "stat",
-        lambda self, *a, **k: (
-            Stale(real_stat(self, *a, **k))
-            if self.name == "grow.json" and k.get("follow_symlinks", True)
-            else real_stat(self, *a, **k)
-        ),
-    )
+    def recording_open(path, *a, **k):
+        fd = real_open(path, *a, **k)
+        if Path(path).name == "grow.json":
+            grow_fds.add(fd)
+        return fd
+
+    def stale_fstat(fd):
+        info = real_fstat(fd)
+        return Stale(info) if fd in grow_fds else info
+
+    monkeypatch.setattr(safety.os, "open", recording_open)
+    monkeypatch.setattr(safety.os, "fstat", stale_fstat)
     result = scan_repository(tmp_path, max_file_bytes=100)
     assert set(result.texts) == {"ok.py"}
     assert any(item.startswith("grow.json:") for item in result.skipped)
