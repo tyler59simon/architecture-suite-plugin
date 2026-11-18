@@ -324,6 +324,27 @@ def test_level_all_renders_a_container_only_plan(plan):
             cli._selected_model({**model, "views": views}, "all", ("progressive",))
 
 
+@pytest.mark.parametrize(
+    "styles",
+    [("executive",), ("executive", "hierarchy"), ("complete",), ("progressive",)],
+)
+def test_level_overview_renders_a_container_only_plan(plan, styles):
+    model = compile_plan(_container_only(plan))[0]
+    selected = cli._selected_model(model, "overview", styles)
+    assert {v["type"] for v in selected["views"]} == {"context", "container"}
+
+
+def test_overview_dry_run_accepts_a_container_only_plan(plan, tmp_path, capsys):
+    from architecture_suite.plan import render_plan
+
+    source = tmp_path / "plan.md"
+    source.write_text(render_plan(_container_only(plan)), encoding="utf-8")
+    argv = ["plan-render", "--plan", str(source), "--output", str(tmp_path / "out")]
+    argv += ["--level", "overview", "--overview-style", "executive,hierarchy", "--dry-run"]
+    assert cli.main(argv) == 0
+    assert json.loads(capsys.readouterr().out)["overview_styles"] == ["executive", "hierarchy"]
+
+
 def test_self_call_labels_stay_inside_nested_frames(model):
     first = next(e["id"] for e in model["elements"] if e["type"] == "person")
     last = next(e["id"] for e in model["elements"] if e["type"] == "container")
