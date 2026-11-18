@@ -92,6 +92,20 @@ def test_atomic_publication_and_rollback(tmp_path, monkeypatch):
     assert (output / "keep").read_text() == "original"
     assert not list(tmp_path.glob(".architecture-stage-*"))
 
+    def fail_promotion_and_restore(self, target):
+        if self.name.startswith(".architecture-stage-"):
+            raise OSError("simulated rename failure")
+        return original(self, target)
+
+    # When the backup cannot be put back it is the only copy: keep it and name it.
+    monkeypatch.setattr(Path, "rename", fail_promotion_and_restore)
+    with pytest.raises(OSError) as failed:
+        with atomic_output_directory(output) as stage:
+            (stage / "keep").write_text("bad")
+    [backup] = tmp_path.glob(".architecture-stage-*-backup")
+    assert (backup / "keep").read_text() == "original"
+    assert str(backup) in str(failed.value)
+
 
 def test_publish_survives_read_only_files(tmp_path):
     """A read-only file in the old output must not turn a good publish into a failure."""

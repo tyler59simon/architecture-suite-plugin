@@ -307,6 +307,7 @@ def atomic_output_directory(
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=".architecture-stage-", dir=output.parent))
     backup = stage.with_name(stage.name + "-backup")
+    keep_backup = False  # the backup is the only copy when it cannot be restored
     try:
         if seed_existing and output.exists():
             shutil.copytree(output, stage, dirs_exist_ok=True)
@@ -320,12 +321,19 @@ def atomic_output_directory(
             stage.rename(output)
         except OSError:
             if backup.exists():
-                backup.rename(output)
+                try:
+                    backup.rename(output)
+                except OSError as exc:
+                    keep_backup = True
+                    raise OSError(
+                        f"Could not restore the previous output; it is kept at {backup}"
+                    ) from exc
             raise
     finally:
         for temp in (stage, backup):
             if (
-                temp.exists()
+                not (temp == backup and keep_backup)
+                and temp.exists()
                 and temp.parent.resolve() == output.parent.resolve()
                 and temp.name.startswith(".architecture-stage-")
             ):
