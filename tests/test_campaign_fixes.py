@@ -65,6 +65,30 @@ def test_mermaid_escapes_hash_and_scenario_semicolons(model):
         ).replace("#62;", "")
 
 
+def test_scenario_mermaid_redacts_like_every_other_format(model):
+    """Messages and conditions pass through safe_text, as in the PlantUML scenario."""
+    api = next(e for e in model["elements"] if e["type"] == "container")
+    person = next(e for e in model["elements"] if e["type"] == "person")
+    probe = "postgres://app:hunter2@db/orders and token=abcd1234\x0b\x08"
+    scenario = {
+        "schema_version": "architecture-scenario/v1",
+        "name": "Credentials",
+        "participants": [person["id"], api["id"]],
+        "steps": [
+            {"from": person["id"], "to": api["id"], "description": probe},
+            {
+                "type": "alt",
+                "condition": probe,
+                "steps": [{"from": api["id"], "to": person["id"], "description": "ok"}],
+            },
+        ],
+    }
+    source = scenario_mermaid(scenario, model)
+    assert "hunter2" not in source and "abcd1234" not in source
+    assert source.count("#91;REDACTED#93;") == 4
+    assert "\x0b" not in source and "\x08" not in source
+
+
 def test_json_output_survives_a_non_utf8_console(monkeypatch):
     raw = io.BytesIO()
     stream = io.TextIOWrapper(raw, encoding="cp1252")

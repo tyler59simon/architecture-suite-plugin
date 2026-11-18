@@ -1,5 +1,6 @@
 """Structured scenarios independent of canonical C4 views."""
 
+from .safety import safe_text
 from .scene import Scene, Box, Edge
 from .style import Label, TextLine, wrap_to_width
 
@@ -87,7 +88,7 @@ def scenario_mermaid(scenario, model):
     def clean(text):
         # ";" ends a sequence statement; encode it between quoted parts so the entity
         # codes _quoted emits keep their own semicolons.
-        return "#59;".join(_quoted(part)[1:-1] for part in str(text).split(";"))
+        return "#59;".join(_quoted(part)[1:-1] for part in safe_text(text).split(";"))
 
     lines = ["sequenceDiagram"] + [
         f"  participant {aliases[p]} as {clean(names[p])}" for p in aliases
