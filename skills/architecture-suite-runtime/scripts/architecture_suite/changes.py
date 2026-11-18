@@ -73,25 +73,42 @@ def diff_models(before, after, identities=None):
                     if k not in ignored
                     and not (section == "relationships" and k == "id")
                 }
-                if key in result and result[key] != clean:
-                    key = str(key) + " " + json.dumps(clean, sort_keys=True)
-                result[key] = clean
+                result.setdefault(key, []).append(clean)
             return result
+
+        def payload(value):
+            return json.dumps(value, sort_keys=True, default=str)
 
         old, new = index(old_items), index(_sections(after)[section])
         for key in sorted(set(old) | set(new), key=str):
-            if old.get(key) != new.get(key):
+            # Identical entries cancel, so reordering parallel arrows is not a change.
+            removed, added = list(old.get(key, [])), list(new.get(key, []))
+            for value in list(removed):
+                if value in added:
+                    removed.remove(value)
+                    added.remove(value)
+            removed.sort(key=payload)
+            added.sort(key=payload)
+            for i in range(max(len(removed), len(added))):
+                before_value = removed[i] if i < len(removed) else None
+                after_value = added[i] if i < len(added) else None
+                paired = before_value is not None and after_value is not None
+                # A lone first entry keeps the bare key; entries beside others add their payload.
+                crowded = i > 0 or not paired and (key in old and key in new)
+                label = str(key)
+                if crowded:
+                    label += " " + payload(after_value if after_value is not None else before_value)
                 changes.append(
                     {
                         "section": section,
-                        "id": str(key),
-                        "kind": "added"
-                        if key not in old
-                        else "removed"
-                        if key not in new
-                        else "changed",
-                        "before": old.get(key),
-                        "after": new.get(key),
+                        "id": label,
+                        "kind": "changed"
+                        if paired
+                        else "added"
+                        if after_value is not None
+                        else "removed",
+                        "before": before_value,
+                        "after": after_value,
                     }
                 )
     return {

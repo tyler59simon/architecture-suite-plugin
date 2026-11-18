@@ -1350,3 +1350,20 @@ def test_reference_shaped_data_under_a_secret_name_is_masked(tmp_path, value):
     path.write_text(json.dumps(doc), encoding="utf-8")
     topology = import_infrastructure([path])
     assert "s3cr3tpart" not in json.dumps(topology) + json.dumps(topology_plan(topology))
+
+
+def test_diff_ignores_reordered_parallel_relationships(model):
+    base = model["relationships"][0]
+    reads = {**base, "id": "rel-reads", "description": "reads orders"}
+    writes = {**base, "id": "rel-writes", "description": "writes orders"}
+    before = deepcopy(model)
+    before["relationships"] = [reads, writes]
+    swapped = deepcopy(before)
+    swapped["relationships"] = [writes, reads]
+    assert not diff_models(before, swapped)["changed"]
+    edited = deepcopy(before)
+    edited["relationships"][1] = {**writes, "description": "updates orders"}
+    changes = diff_models(before, edited)["changes"]
+    assert [(c["section"], c["kind"]) for c in changes] == [("relationships", "changed")]
+    assert changes[0]["before"]["description"] == "writes orders"
+    assert changes[0]["after"]["description"] == "updates orders"
