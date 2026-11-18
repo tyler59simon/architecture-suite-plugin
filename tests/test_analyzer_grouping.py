@@ -7,10 +7,11 @@ hooks/ and the entry points were dropped.
 """
 
 import json
+import time
 
 from architecture_suite.analyzer import _is_manifest, analyze_repository, draft_plan
 from architecture_suite.inventory import dependency_inventory
-from architecture_suite.safety import scan_repository
+from architecture_suite.safety import redact, scan_repository
 
 INSTALLER = (
     '"""Adapter setup."""\nimport argparse\nfrom core.repository import read\n'
@@ -162,18 +163,54 @@ def test_secret_line_does_not_break_parsing(tmp_path):
         assert SECRET not in text and "hunter2secret" not in text
 
 
-def test_credentialed_broker_urls_stay_out_of_the_inventory(tmp_path):
+def test_credentialed_broker_urls_are_inventoried_with_the_password_masked(tmp_path):
     config = (
         'CACHE = "redis://:cachepass9@cache:6379/0"\n'
         'QUEUE = "amqp://guest:queuepass9@mq:5672/"\n'
     )
     repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.py": config})
     scan = scan_repository(repo)
-    # Raw texts too: the recorded target is redacted even when the caller did not scan.
-    # A credentialed address may drop out of the connections; its password never shows.
+    # Raw texts too: the recorded target is masked even when the caller did not scan.
     for texts in (scan.texts, {"app/settings.py": config}):
-        text = json.dumps(dependency_inventory(texts))
+        report = dependency_inventory(texts)
+        assert [(c["target"], c["line"]) for c in report["connections"]] == [
+            ("redis://[REDACTED]@cache:6379/0", 1),
+            ("amqp://[REDACTED]@mq:5672/", 2),
+        ]
+        text = json.dumps(report)
         assert "cachepass9" not in text and "queuepass9" not in text
+
+
+def test_secret_assigned_and_odd_userinfo_urls_never_leak_through_the_inventory(tmp_path):
+    config = (
+        "PASSWORD=redis://u:assignpw1@host:6379\n"
+        "token: amqp://u:colonpw12@mq:5672\n"
+        "A=redis://u:apo'strophe1@cache:6379\n"
+        "B=redis://u:at@sign9tail@cache:6379\n"
+    )
+    repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.txt": config})
+    for texts in (scan_repository(repo).texts, {"app/settings.txt": config}):
+        text = json.dumps(dependency_inventory(texts))
+        for leaked in ("assignpw1", "colonpw12", "apo", "strophe1", "at@sign9", "sign9tail"):
+            assert leaked not in text, leaked
+
+
+def test_uri_redaction_is_linear_on_adversarial_input():
+    cases = (
+        "a:" * 50_000,
+        "@" * 50_000,
+        "http://" + "a:" * 25_000,
+        "http://a:" + "@" * 50_000,
+        "redis://" + "a:" * 25_000 + "x",
+        "http://a:" * 6_000,
+        "http://" * 8_000,
+        "password" + " " * 50_000,
+    )
+    for case in cases:
+        started = time.perf_counter()
+        redact(case)
+        assert time.perf_counter() - started < 0.5, case[:20]
+    assert redact("redis://u:pw@cache:6379/0") == "redis://[REDACTED]@cache:6379/0"
 
 
 def test_url_assigned_to_a_secret_name_stays_out_of_the_inventory(tmp_path):

@@ -381,3 +381,26 @@ def test_report_evidence_lines_omit_empty_parts(model):
         {**model, "evidence": [{"id": "ev-1", "reference": "brief"}]}
     )
     assert "- ev-1: brief\n" in report + "\n"
+
+
+def test_credentialed_urls_keep_scheme_and_host_but_hide_the_password_in_every_output(model):
+    probe = "reads redis://svc:cachepw77@cache:6379/0"
+    model = deepcopy(model)
+    container = next(e for e in model["elements"] if e["type"] == "container")
+    container["description"] = probe
+    model["evidence"] = [{"id": "ev-1", "reference": "a.py", "line": 1, "excerpt": probe}]
+    view = next(v for v in model["views"] if v["type"] == "container")
+    scenario = {
+        "schema_version": "architecture-scenario/v1",
+        "name": "Probe",
+        "participants": [container["id"]],
+        "steps": [{"from": container["id"], "to": container["id"], "description": probe}],
+    }
+    outputs = (
+        render_mermaid(model, view),
+        render_architecture_report(model),
+        scenario_mermaid(scenario, model),
+    )
+    for text in outputs:
+        assert "cachepw77" not in text and "svc:" not in text
+    assert "redis://[REDACTED]@cache:6379/0" in outputs[1]

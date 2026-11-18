@@ -31,7 +31,7 @@ SECRET = re.compile(
     r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
     r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
     r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
-    r"|(?:https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?)://[^/\s:@?#]*:[^@\s/?#]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|(?P<scheme>https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?)://[^/\s:@?#]*+:[^\s/?#]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 )
 PROMPT_INJECTION = re.compile(
     r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|(?:reveal|print|exfiltrate).{0,40}(?:secret|token|password)|(?:system|developer)\s+prompt|run\s+(?:this|the following)\s+(?:command|script)",
@@ -79,9 +79,15 @@ EXTENSIONS = {
 }
 
 
+def _mask(match: re.Match[str]) -> str:
+    """A credentialed URI keeps its scheme and host; everything else is replaced whole."""
+    scheme = match["scheme"]
+    return f"{scheme}://[REDACTED]@" if scheme else "[REDACTED]"
+
+
 def redact(value: str) -> str:
     """Remove credential-like values before persisting evidence."""
-    return SECRET.sub("[REDACTED]", value)
+    return SECRET.sub(_mask, value)
 
 
 def detect_prompt_injection(value: str) -> bool:
@@ -397,6 +403,11 @@ def run_bounded(
                 process.wait()
 
 
+def redact_lines(value: str) -> str:
+    """`redact`, but each replacement keeps the newlines it removes (line numbers stay valid)."""
+    return SECRET.sub(lambda m: _mask(m) + "\n" * m[0].count("\n"), value)
+
+
 class _RedactedText(str):
     """Redacted file text; `source` keeps the original for in-memory parsing only.
 
@@ -405,9 +416,7 @@ class _RedactedText(str):
     """
 
     def __new__(cls, source: str):
-        text = super().__new__(
-            cls, SECRET.sub(lambda m: "[REDACTED]" + "\n" * m[0].count("\n"), source)
-        )
+        text = super().__new__(cls, redact_lines(source))
         text.source = source
         return text
 
