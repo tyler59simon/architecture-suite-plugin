@@ -194,7 +194,7 @@ def test_secret_assigned_and_odd_userinfo_urls_never_leak_through_the_inventory(
     repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.txt": config})
     for texts in (scan_repository(repo).texts, {"app/settings.txt": config}):
         text = json.dumps(dependency_inventory(texts))
-        for leaked in ("assignpw1", "colonpw12", "apo", "strophe1", "at@sign9", "sign9tail"):
+        for leaked in ("assignpw1", "colonpw12", "apo", "strophe1", "at@sign9", "sign9tail", "ss9slash"):
             assert leaked not in text, leaked
 
 
@@ -207,6 +207,8 @@ def test_uri_redaction_is_linear_on_adversarial_input():
         "redis://" + "a:" * 25_000 + "x",
         "http://a:" * 6_000,
         "http://" * 8_000,
+        "http://a:" + "/" * 20_000,
+        "http://a:" + "/@" * 20_000,
         "password" + " " * 50_000,
     )
     for case in cases:

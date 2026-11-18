@@ -555,6 +555,8 @@ def test_output_manifest_rollback_and_missing_outputs(tmp_path, monkeypatch):
         "rediss://:pw@cache:6380",
         "amqp://guest:pw@mq:5672/",
         "amqps://:pw@mq",
+        "redis://u:pa/ss@cache:6379/0",
+        "redis://u:@cache:6379",
         "AKIA" + "A" * 16,
     ],
 )

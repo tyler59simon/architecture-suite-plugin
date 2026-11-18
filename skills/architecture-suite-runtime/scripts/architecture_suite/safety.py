@@ -28,14 +28,15 @@ class SafetyError(ValueError):
 # and prose ("session token: Redis-backed cache") do not match.
 # Connection URI schemes: masked here and listed by the dependency inventory.
 URI_SCHEMES = r"https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?"
-# A URI password ends at the last `@` before `/`, whitespace, `?`, `#` or an unescaped
-# `"`, so a credentialed URL in compact JSON never runs into the next field.
+# A URI password may be empty or contain `/`; it ends at the last `@` before whitespace,
+# `?`, `#` or an unescaped `"`, so a credentialed URL in compact JSON never runs into the
+# next field. It is capped at 256 characters to keep matching linear.
 SECRET = re.compile(
     r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"
     r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
     r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
     r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
-    rf"|(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:(?:[^\s/?#\"\\]|\\.)+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    rf"|(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:(?:[^\s?#\"\\]|\\.){{0,256}}@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 )
 PROMPT_INJECTION = re.compile(
     r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|(?:reveal|print|exfiltrate).{0,40}(?:secret|token|password)|(?:system|developer)\s+prompt|run\s+(?:this|the following)\s+(?:command|script)",
