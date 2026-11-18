@@ -1,10 +1,3 @@
-# Architecture report
+# Architecture check
 
-```json
-{
-  "schema_version": "architecture-check/v1",
-  "findings": [],
-  "fingerprints": [],
-  "new_errors": 0
-}
-```
+No rule findings.

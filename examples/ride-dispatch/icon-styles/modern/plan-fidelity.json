@@ -6,7 +6,7 @@
   },
   "compiled": {
     "elements": 26,
-    "flows": 42,
+    "flows": 45,
     "views": 8
   },
   "merged": [
@@ -46,18 +46,18 @@
       },
       "03-components/component-dispatch-service": {
         "findings": [],
-        "crossings": 0,
-        "bends": 6,
-        "aspect_ratio": 1.147,
-        "score": 19.147119767923748,
+        "crossings": 1,
+        "bends": 14,
+        "aspect_ratio": 1.004,
+        "score": 143.00414593698176,
         "advisories": []
       },
       "03-components/component-rider-gateway": {
         "findings": [],
         "crossings": 0,
-        "bends": 4,
-        "aspect_ratio": 1.039,
-        "score": 13.039323046291688,
+        "bends": 6,
+        "aspect_ratio": 1.36,
+        "score": 19.359880537580885,
         "advisories": []
       },
       "04-code/code-auth-middleware": {

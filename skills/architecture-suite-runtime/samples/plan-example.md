@@ -86,7 +86,7 @@ flows:
   technology: HTTPS
   evidence: design brief section 2
 - from: Station Operator
-  to: Booking API
+  to: Reservation Controller
   description: Views bike availability
   technology: HTTPS
   evidence: design brief section 2

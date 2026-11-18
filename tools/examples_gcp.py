@@ -40,8 +40,8 @@ def _container(name, description, technology, service, *components):
 
 
 FLOWS = [
-    ("Rider", "Rider Gateway", "Requests trips and tracks arrival", "HTTPS"),
-    ("Driver", "Rider Gateway", "Accepts offers and reports trip status", "gRPC"),
+    ("Rider", "Trip Controller", "Requests trips and tracks arrival", "HTTPS"),
+    ("Driver", "Trip Controller", "Accepts offers and reports trip status", "gRPC"),
     ("Driver", "Location Ingest", "Streams GPS pings", "HTTPS"),
     ("Operations Analyst", "Telemetry Lake", "Runs fleet reports", "SQL"),
     ("AuthMiddleware", "Trip Store", "Verifies rider accounts", "Spanner API"),
@@ -52,7 +52,7 @@ FLOWS = [
     ("MatchingEngine", "ETA Model", "Requests arrival estimates", "HTTPS"),
     ("MatchingEngine", "Maps Provider", "Fetches road routes", "HTTPS"),
     ("FarePricer", "Trip Store", "Records quoted fare and assignment", "Spanner API"),
-    ("Dispatch Service", "Event Bus", "Publishes driver assignments", "Pub/Sub"),
+    ("Matching Engine", "Event Bus", "Publishes driver assignments", "Pub/Sub"),
     ("Location Ingest", "Location Cache", "Updates driver position", "Redis"),
     ("Location Ingest", "Fleet Time Series", "Appends telemetry samples", "Bigtable API"),
     ("Location Ingest", "Event Bus", "Publishes location samples", "Pub/Sub"),

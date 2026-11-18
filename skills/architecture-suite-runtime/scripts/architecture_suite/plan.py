@@ -268,7 +268,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
     for section in ("containers", "flows"):
         if section not in plan:
             add("section-required", f"{section} is required", section)
-    names, ids, groups = {}, set(), {}
+    names, ids, groups, decomposed = {}, set(), {}, set()
     entries = list(_entries(plan))
     for item, typ, parent in entries:
         if not isinstance(item, dict):
@@ -298,6 +298,10 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             )
         ids.add(ident)
         names[name] = ident
+        # Component-level flows to components with code are normal (code views are a
+        # selection); only a container-level flow on a decomposed container is flagged.
+        if typ == "container" and isinstance(item.get("components"), list) and item["components"]:
+            decomposed.add(name)
         if typ != "code" and (
             not isinstance(item.get("description"), str)
             or not item["description"].strip()
@@ -406,6 +410,16 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                 )
         if flow.get("from") == flow.get("to"):
             add("self-flow", "Flow endpoints must differ", str(i))
+        for key in ("from", "to"):
+            # The scope's own view shows its parts, not the scope, so the arrow is dropped there.
+            if isinstance(flow.get(key), str) and flow[key] in decomposed:
+                add(
+                    "hidden-flow",
+                    f"Flow {key} {flow[key]!r} names a container that has components, so "
+                    "this flow is missing from its component view; name the component instead",
+                    str(i),
+                    ADVISORY,
+                )
         if (
             not isinstance(flow.get("description"), str)
             or not flow["description"].strip()

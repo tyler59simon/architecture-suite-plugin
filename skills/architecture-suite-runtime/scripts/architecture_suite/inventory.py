@@ -119,6 +119,7 @@ def dependency_inventory(files):
                     "import_from_statement",
                     "using_directive",
                     "import_spec",
+                    "import_header",  # Kotlin
                 }:
                     references.append(
                         {
@@ -143,17 +144,21 @@ def dependency_inventory(files):
             # A server registration: a router-like receiver and a path. Client calls such as
             # client.get("https://...") or dict.get("key") are not routes (URLs are
             # recorded under connections).
+            # `verb` is the HTTP method when the registration names one (route, Route,
+            # RequestMapping and Go handlers do not).
             r"(?<![\w.])(?i:\w*(?:app|router|api|server|bp|blueprint|routes?))"
-            r"\.(?:get|post|put|delete|patch)\(\s*[\"\'](/[^\"\']*)",
-            r'\[Http(?:Get|Post|Put|Delete)\(\s*"([^"]+)"',
-            r'@(?:Get|Post|Request)Mapping\(\s*"([^"]+)"',
-            r'http\.HandleFunc\(\s*"([^"]+)"',
+            r"\.(?P<verb>get|post|put|delete|patch|route)\(\s*[\"\'](?P<path>/[^\"\']*)",
+            r'\[(?:Http(?P<verb>Get|Post|Put|Delete|Patch)|Route)\(\s*"(?P<path>[^"]+)"',
+            r'@(?P<verb>Get|Post|Put|Delete|Patch|Request)Mapping\(\s*"(?P<path>[^"]+)"',
+            r'\b\w+\.Handle(?:Func)?\(\s*"(?:(?P<verb>GET|POST|PUT|DELETE|PATCH) )?(?P<path>/[^"]*)"',
         ]
         for pattern in patterns:
             for match in re.finditer(pattern, text):
+                verb = (match.groupdict().get("verb") or "").upper()
                 routes.append(
                     {
-                        "path": redact(match[1]),
+                        "path": redact(match["path"]),
+                        "method": verb if verb not in {"", "ROUTE", "REQUEST"} else None,
                         "reference": path,
                         "line": text.count("\n", 0, match.start()) + 1,
                         "kind": "explicit-route",

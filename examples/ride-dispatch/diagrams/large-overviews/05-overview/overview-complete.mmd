@@ -48,15 +48,15 @@ flowchart LR
   n20 -->|"Fetches road routes #91;HTTPS#93;"| n1
   n25 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n8
   n25 -->|"Charges completed trips #91;HTTPS#93;"| n3
-  n4 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n21
-  n16 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n8
+  n19 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n8
+  n4 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n24
+  n0 -->|"Accepts offers and reports trip status #91;gRPC#93;"| n24
   n12 -->|"Updates driver position #91;Redis#93;"| n11
   n12 -->|"Appends telemetry samples #91;Bigtable API#93;"| n9
   n12 -->|"Publishes location samples #91;Pub/Sub#93;"| n8
   n8 -->|"Delivers assignment events #91;event#93;"| n13
   n13 -->|"Sends rider and driver alerts #91;HTTPS#93;"| n5
   n8 -->|"Streams events for analytics #91;BigQuery subscription#93;"| n14
-  n0 -->|"Accepts offers and reports trip status #91;gRPC#93;"| n21
   n9 -->|"Exports daily snapshots #91;Dataflow template#93;"| n10
   n0 -->|"Streams GPS pings #91;HTTPS#93;"| n12
   n2 -->|"Runs fleet reports #91;SQL#93;"| n14

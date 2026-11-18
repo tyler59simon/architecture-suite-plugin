@@ -50,44 +50,46 @@ flowchart LR
     n35["Fare Pricer#10;«component»#10;Quotes surge-aware fares"]
   end
   n36["Rider Gateway — Component"]
-  n37["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
-  n38(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n38 fill:#fff3e6,stroke:#e65100
-  n39[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n39 fill:#eaf6ec,stroke:#2e7d32
-  subgraph n40["Rider Gateway"]
-    n41["Auth Middleware#10;«component»#10;Authenticates callers and enforces#10;quotas"]
-    n42["Trip Controller#10;«component»#10;Accepts trip requests and publishes#10;events"]
+  n37["Rider#10;«person»#10;Requests and takes trips"]
+  n38["Driver#10;«person»#10;Accepts offers and drives trips"]
+  n39["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n40(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n40 fill:#fff3e6,stroke:#e65100
+  n41[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n41 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n42["Rider Gateway"]
+    n43["Auth Middleware#10;«component»#10;Authenticates callers and enforces#10;quotas"]
+    n44["Trip Controller#10;«component»#10;Accepts trip requests and publishes#10;events"]
   end
-  n43["Auth Middleware — Code"]
-  n44[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n44 fill:#eaf6ec,stroke:#2e7d32
-  subgraph n45["Auth Middleware"]
-    n46["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
+  n45["Auth Middleware — Code"]
+  n46[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n46 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n47["Auth Middleware"]
+    n48["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
   end
-  n47["Fare Pricer — Code"]
-  n48[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n48 fill:#eaf6ec,stroke:#2e7d32
-  subgraph n49["Fare Pricer"]
-    n50["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
+  n49["Fare Pricer — Code"]
+  n50[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+  style n50 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n51["Fare Pricer"]
+    n52["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
   end
-  n51["Matching Engine — Code"]
-  n52["Maps Provider#10;«software_system»#10;Routing and geocoding"]
-  n53(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n53 fill:#fff3e6,stroke:#e65100
-  n54[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
-  style n54 fill:#eaf6ec,stroke:#2e7d32
-  n55["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
-  style n55 fill:#f5eafa,stroke:#7b1fa2
-  subgraph n56["Matching Engine"]
-    n57["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
+  n53["Matching Engine — Code"]
+  n54["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+  n55(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n55 fill:#fff3e6,stroke:#e65100
+  n56[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+  style n56 fill:#eaf6ec,stroke:#2e7d32
+  n57["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+  style n57 fill:#f5eafa,stroke:#7b1fa2
+  subgraph n58["Matching Engine"]
+    n59["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
   end
-  n58["Trip Controller — Code"]
-  n59["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
-  n60(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n60 fill:#fff3e6,stroke:#e65100
-  subgraph n61["Trip Controller"]
-    n62["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
+  n60["Trip Controller — Code"]
+  n61["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+  n62(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+  style n62 fill:#fff3e6,stroke:#e65100
+  subgraph n63["Trip Controller"]
+    n64["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
   end
   n2 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n1
   n3 -->|"Accepts offers and reports trip status; Streams GPS pings#10;#91;gRPC; HTTPS#93;"| n1
@@ -120,15 +122,18 @@ flowchart LR
   n34 -->|"Requests arrival estimates #91;HTTPS#93;"| n32
   n34 -->|"Fetches road routes #91;HTTPS#93;"| n28
   n35 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n30
-  n41 -->|"Verifies rider accounts #91;Spanner API#93;"| n39
-  n42 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n38
-  n42 -->|"Charges completed trips #91;HTTPS#93;"| n37
-  n46 -->|"Verifies rider accounts #91;Spanner API#93;"| n44
-  n50 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n48
-  n53 -->|"Delivers trip events #91;push subscription#93;"| n57
-  n57 -->|"Finds nearby drivers #91;Redis#93;"| n54
-  n57 -->|"Requests arrival estimates #91;HTTPS#93;"| n55
-  n57 -->|"Fetches road routes #91;HTTPS#93;"| n52
-  n62 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n60
-  n62 -->|"Charges completed trips #91;HTTPS#93;"| n59
+  n34 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n29
+  n37 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n44
+  n38 -->|"Accepts offers and reports trip status #91;gRPC#93;"| n44
+  n43 -->|"Verifies rider accounts #91;Spanner API#93;"| n41
+  n44 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n40
+  n44 -->|"Charges completed trips #91;HTTPS#93;"| n39
+  n48 -->|"Verifies rider accounts #91;Spanner API#93;"| n46
+  n52 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n50
+  n55 -->|"Delivers trip events #91;push subscription#93;"| n59
+  n59 -->|"Finds nearby drivers #91;Redis#93;"| n56
+  n59 -->|"Requests arrival estimates #91;HTTPS#93;"| n57
+  n59 -->|"Fetches road routes #91;HTTPS#93;"| n54
+  n64 -->|"Publishes trip requested events #91;Pub/Sub#93;"| n62
+  n64 -->|"Charges completed trips #91;HTTPS#93;"| n61
   notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]
