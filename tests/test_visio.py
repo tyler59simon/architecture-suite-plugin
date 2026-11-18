@@ -147,6 +147,28 @@ def test_vsdx_without_icons_needs_no_browser(model, monkeypatch):
     assert render_scene_vsdx(scene) == renderers.scene_vsdx(scene)
 
 
+def _no_browser(monkeypatch):
+    def unavailable():
+        raise AssertionError("an icon-free Visio export must not open a browser")
+
+    monkeypatch.setattr(renderers, "browser_page", unavailable)
+
+
+def test_cli_publishes_icon_free_visio_without_a_browser(model, tmp_path, monkeypatch, capsys):
+    for element in model["elements"]:
+        element.pop("cloud", None)
+    source = tmp_path / "model.json"
+    source.write_text(json.dumps(model), encoding="utf-8")
+    _no_browser(monkeypatch)
+    output = tmp_path / "out"
+    argv = ["render", "--model", str(source), "--output", str(output)]
+    argv += ["--format", "visio", "--level", "container", "--confirm-write"]
+    assert main(argv) == 0
+    capsys.readouterr()
+    drawing = (output / "02-containers/containers.vsdx").read_bytes()
+    assert "visio/pages/page1.xml" in _package(drawing)
+
+
 @pytest.mark.browser
 @pytest.mark.slow
 def test_cli_publishes_visio_on_request(inputs, tmp_path, capsys):

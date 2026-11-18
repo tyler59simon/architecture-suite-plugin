@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 import base64
-from contextlib import contextmanager, nullcontext
+from contextlib import ExitStack, contextmanager
 import io
 import math
 import os
@@ -700,14 +700,17 @@ def write_rendered_artifacts(
         raise SafetyError(
             "Layout verification failed; inspect verify findings before publishing"
         )
-    needs_browser = {"png", "visio"} & set(formats)
-    with browser_page() if needs_browser else nullcontext(None) as page:
+    with ExitStack() as stack:
+        page = stack.enter_context(browser_page()) if "png" in formats else None
         for base, view in diagram_specs(model, overview_styles, level):
             scene = _scene(model, view)
             for fmt in sorted(formats):
                 path = contained_path(output, base + "." + EXTENSIONS[fmt])
                 path.parent.mkdir(parents=True, exist_ok=True)
                 if fmt == "visio":
+                    # Icon-free drawings need no rasterizing; share one browser otherwise.
+                    if page is None and any(b.label.icon for b in scene.boxes):
+                        page = stack.enter_context(browser_page())
                     path.write_bytes(scene_vsdx(scene, page=page))
                 elif fmt == "png":
                     render_svg_png(
