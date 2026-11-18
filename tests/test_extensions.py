@@ -982,6 +982,32 @@ def _kubernetes(tmp_path, docs):
     return import_infrastructure([path])
 
 
+def test_kubernetes_and_compose_environment_secrets_are_redacted(tmp_path):
+    env = [{"name": "DB_PASSWORD", "value": "hunter2"}, {"name": "MODE", "value": "prod"}]
+    topology = _kubernetes(
+        tmp_path,
+        [
+            {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "metadata": {"name": "api"},
+                "spec": {"template": {"spec": {"containers": [{"name": "api", "env": env}]}}},
+            }
+        ],
+    )
+    payload = json.dumps(topology) + json.dumps(topology_plan(topology))
+    assert "hunter2" not in payload and "prod" in payload
+    # Compose list form: values under 4 characters slip past redact().
+    path = tmp_path / "compose.yaml"
+    path.write_text(
+        json.dumps({"services": {"api": {"environment": ["API_TOKEN=pw1", "MODE=dev"]}}}),
+        encoding="utf-8",
+    )
+    topology = import_infrastructure([path])
+    payload = json.dumps(topology) + json.dumps(topology_plan(topology))
+    assert "pw1" not in payload and "API_TOKEN=[REDACTED]" in payload and "MODE=dev" in payload
+
+
 def test_kubernetes_pods_ingress_and_service_findings(tmp_path):
     topology = _kubernetes(
         tmp_path,

@@ -279,19 +279,30 @@ def import_infrastructure(paths, bindings=None):
         prefix = f"input-{file_index}-"
         declared = {}  # name -> id across this file's documents
 
+        def sensitive(key):
+            return re.search(r"password|secret|token|api.?key", str(key), re.I)
+
         def scrub(value):
             if isinstance(value, dict):
+                # A Kubernetes env entry names the secret in `name` and holds it in `value`.
+                named = "value" in value and sensitive(value.get("name", ""))
                 return {
                     # Booleans are kept: they carry Terraform sensitivity masks, not secrets.
                     k: "[REDACTED]"
-                    if re.search(r"password|secret|token|api.?key", str(k), re.I)
+                    if (sensitive(k) or (named and k == "value"))
                     and not isinstance(v, bool)
                     else scrub(v)
                     for k, v in value.items()
                 }
             if isinstance(value, list):
                 return [scrub(v) for v in value]
-            return redact(value) if isinstance(value, str) else value
+            if isinstance(value, str):
+                # Compose list form `KEY=value`: redact misses values under 4 characters.
+                pair = re.fullmatch(r"([^=\s]+)=(.+)", value, re.S)
+                if pair and sensitive(pair[1]):
+                    return pair[1] + "=[REDACTED]"
+                return redact(value)
+            return value
 
         try:
             # CloudFormation short tags are converted to data, never evaluated.
