@@ -1657,6 +1657,56 @@ def test_declared_references_under_a_secret_name_stay_readable(tmp_path):
     ]
 
 
+def test_json_infrastructure_with_a_duplicate_key_is_rejected(tmp_path):
+    path = tmp_path / "stack.json"
+    path.write_text('{"services": {"api": {}, "api": {}}}', encoding="utf-8")
+    with pytest.raises(ValueError, match="Malformed infrastructure document"):
+        import_infrastructure([path])
+    path.write_text('{"services": {"api": {}}, "services": {}}', encoding="utf-8")
+    with pytest.raises(ValueError, match="Malformed infrastructure document"):
+        import_infrastructure([path])
+
+
+def test_yaml_anchors_and_aliases_in_infrastructure_are_rejected(tmp_path):
+    path = tmp_path / "stack.yaml"
+    for text in ("services:\n  api: &a {}\n  web: *a\n", "services:\n  api: &a {}\n"):
+        path.write_text(text, encoding="utf-8")
+        with pytest.raises(ValueError, match="Malformed infrastructure document") as caught:
+            import_infrastructure([path])
+        assert "anchors and aliases" in str(caught.value.__cause__)
+
+
+def _kubernetes_stream(tmp_path, count):
+    """`count` Services, each selecting its own Deployment by label, as separate documents."""
+    docs = []
+    for i in range(count):
+        docs.append(
+            f"apiVersion: v1\nkind: Service\nmetadata: {{name: s{i}}}\n"
+            f"spec: {{selector: {{app: a{i}}}}}\n"
+        )
+        docs.append(
+            f"apiVersion: apps/v1\nkind: Deployment\nmetadata: {{name: d{i}}}\n"
+            f"spec: {{template: {{metadata: {{labels: {{app: a{i}}}}}}}}}\n"
+        )
+    path = tmp_path / f"k8s-{count}.yaml"
+    path.write_text("---\n".join(docs), encoding="utf-8")
+    return path
+
+
+@pytest.mark.slow
+def test_many_kubernetes_documents_import_in_seconds(tmp_path):
+    """Service selectors scanned every resource and each document rebuilt the set of taken
+    IDs: 5 times the resources took about 25 times as long. The ratio bound, not a wall time."""
+    small = _kubernetes_stream(tmp_path, 300)
+    path = _kubernetes_stream(tmp_path, 1500)
+    _, base = _timed_import(small)
+    topology, seconds = _timed_import(path)
+    assert len(topology["resources"]) == 3000
+    selector = [r for r in topology["relationships"] if r["kind"] == "selector"]
+    assert len(selector) == 1500
+    assert seconds / base < 12
+
+
 def test_getatt_under_a_secret_name_masks_a_name_that_declares_nothing(tmp_path):
     """Only a declared resource name survives masking; other text in a sensitive value does not."""
     doc = {

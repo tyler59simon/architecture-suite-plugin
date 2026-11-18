@@ -5,7 +5,7 @@ from pathlib import Path
 import json
 import re
 import yaml
-from .plan import _Loader
+from .plan import PlanError, _Loader, _mapping as _unique_mapping
 from .safety import canonical_existing_file, redact
 from .model import slugify
 
@@ -39,16 +39,46 @@ def _intrinsic(loader, suffix, node):
 _InfraLoader.add_multi_constructor("!", _intrinsic)
 
 
+_CSafeLoader = getattr(yaml, "CSafeLoader", None)
+if _CSafeLoader:
+    # libyaml parser with the same constructors; the pure-Python loader is the fallback.
+    class _CInfraLoader(_CSafeLoader):
+        """C-based _InfraLoader."""
+
+    _CInfraLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _unique_mapping)
+    _CInfraLoader.add_multi_constructor("!", _intrinsic)
+    _LOADER = _CInfraLoader
+else:
+    _LOADER = _InfraLoader
+
+
+def _unique_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        if not isinstance(key, str) or key in result:
+            raise PlanError("Mapping keys must be unique strings")
+        result[key] = value
+    return result
+
+
 def _documents(text: str) -> list:
     """Every non-empty YAML/JSON document; anchors and aliases stay unsupported."""
     if len(text) > 2_000_000:
         raise ValueError("Infrastructure document exceeds 2 MB")
+    if text.lstrip()[:1] in ("{", "["):
+        try:
+            doc = json.loads(text, object_pairs_hook=_unique_pairs)
+            return [] if doc is None else [doc]
+        except json.JSONDecodeError:
+            pass  # flow-style YAML, or several documents: the YAML loader decides
+        except RecursionError as exc:
+            raise ValueError(str(exc)[:200]) from exc
     try:
-        for token in yaml.scan(text):
-            if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken)):
+        for event in yaml.parse(text, Loader=_LOADER):
+            if isinstance(event, yaml.AliasEvent) or getattr(event, "anchor", None) is not None:
                 raise ValueError("YAML anchors and aliases are unsupported")
         # Empty documents (a Helm template that rendered nothing) are skipped.
-        return [doc for doc in yaml.load_all(text, Loader=_InfraLoader) if doc is not None]
+        return [doc for doc in yaml.load_all(text, Loader=_LOADER) if doc is not None]
     except (yaml.YAMLError, RecursionError) as exc:
         raise ValueError(str(exc)[:200]) from exc
 
@@ -224,29 +254,47 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
             }
         )
 
+    # (namespace, label key, label value) -> candidate resources in resource order.
+    # A Pod carries its own labels; a workload labels the Pods of its template.
+    by_label = {}
+    for target in resources:
+        if not target["type"].startswith("kubernetes/"):
+            continue
+        labels = (
+            kubernetes.get(target["id"], ("", {}))[1]
+            if target["type"] == "kubernetes/Pod"
+            else _mapping(
+                _mapping(_mapping(target["properties"].get("template")).get("metadata")).get(
+                    "labels"
+                )
+            )
+        )
+        for key, value in labels.items():
+            try:
+                by_label.setdefault((target["parent_id"], key, value), []).append((target, labels))
+            except TypeError:  # a list or mapping value: only an equal unhashable one matches it
+                by_label.setdefault((target["parent_id"], key, None, "unhashable"), []).append(
+                    (target, labels)
+                )
+
     for resource in resources:
         props = resource["properties"]
         if resource["type"] == "kubernetes/Service":
             selector = _mapping(props.get("selector"))
             matched = []
-            for target in resources:
-                if (
-                    target["id"] == resource["id"]
-                    or not target["type"].startswith("kubernetes/")
-                    or target["parent_id"] != resource["parent_id"]
-                ):
-                    continue
-                # A Pod carries its own labels; a workload labels the Pods of its template.
-                labels = (
-                    kubernetes.get(target["id"], ("", {}))[1]
-                    if target["type"] == "kubernetes/Pod"
-                    else _mapping(
-                        _mapping(_mapping(target["properties"].get("template")).get("metadata")).get(
-                            "labels"
-                        )
+            first = next(iter(selector.items()), None)
+            candidates = ()
+            if first:
+                try:
+                    candidates = by_label.get((resource["parent_id"], *first), ())
+                except TypeError:
+                    candidates = by_label.get(
+                        (resource["parent_id"], first[0], None, "unhashable"), ()
                     )
-                )
-                if selector and all(labels.get(k) == v for k, v in selector.items()):
+            for target, labels in candidates:
+                if target["id"] != resource["id"] and all(
+                    labels.get(k) == v for k, v in selector.items()
+                ):
                     edge(resource, target["id"], "selector")
                     matched.append(target["id"])
             text = ", ".join(f"{k}={v}" for k, v in selector.items())
@@ -535,7 +583,7 @@ def import_infrastructure(paths, bindings=None):
                     "Expected Terraform plan, CloudFormation/CDK template, Kubernetes/rendered Helm or Compose"
                 )
             names = {}
-            taken = {r["id"] for r in resources}
+            pending = set()  # IDs chosen for this document; `add` records them in known_ids
             for name, _, _, _ in entries:
                 if name in names or name in declared:
                     # A repeated declaration keeps its ID and fails as a duplicate below.
@@ -544,10 +592,10 @@ def import_infrastructure(paths, bindings=None):
                 # Distinct names may share a slug (app.config, app-config): number them.
                 ident = base = prefix + slugify(name)
                 suffix = 2
-                while ident in taken:
+                while ident in known_ids or ident in pending:
                     ident, suffix = f"{base}-{suffix}", suffix + 1
                 names[name] = declared[name] = ident
-                taken.add(ident)
+                pending.add(ident)
             # Terraform instances by (module instance, address as a reference names it):
             # `aws_subnet.app[0]` names one instance, `aws_subnet.app` every instance.
             instances = {}
