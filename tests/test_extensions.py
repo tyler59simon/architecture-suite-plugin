@@ -1592,8 +1592,11 @@ def test_large_plan_import_is_not_quadratic(tmp_path):
 @pytest.mark.slow
 def test_plan_of_2500_resources_imports_in_seconds(tmp_path):
     """Matching resolved IDs and checking duplicates used to scan every resource for each
-    reference: about 8 s here at 2500 resources, now about 1.5 s."""
+    reference: 6.25 times the resources took about 26 times as long (0.3 s to 8 s); now
+    about 6 times. The ratio holds under coverage and parallel runs, a wall time does not."""
+    small, _ = _resolved_id_plan(tmp_path, 200)
     path, _ = _resolved_id_plan(tmp_path, 1250)
+    _, base = _timed_import(small)
     topology, seconds = _timed_import(path)
     assert len(topology["resources"]) == 2500 and len(topology["relationships"]) > 500
-    assert seconds < 5
+    assert seconds / base < 15
