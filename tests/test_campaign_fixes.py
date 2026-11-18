@@ -295,6 +295,9 @@ def test_level_all_renders_a_container_only_plan(plan):
     assert {v["type"] for v in model["views"]} <= {"context", "container"}
     selected = cli._selected_model(model, "all", ("progressive",))
     assert {v["type"] for v in selected["views"]} == {"context", "container"}
+    for views in ([None], None, {"a": 1}):
+        with pytest.raises(SafetyError, match="Invalid architecture model"):
+            cli._selected_model({**model, "views": views}, "all", ("progressive",))
 
 
 def test_self_call_labels_stay_inside_nested_frames(model):

@@ -79,7 +79,9 @@ def parse_overview_styles(values: list[str] | None) -> tuple[str, ...]:
 
 
 def _view_types(model):
-    return {v.get("type") for v in model.get("views", [])}
+    # Malformed views are reported by validate_model, not here.
+    views = model.get("views")
+    return {v.get("type") for v in views if isinstance(v, dict)} if isinstance(views, list) else set()
 
 
 def _selected_model(model, level, styles):
