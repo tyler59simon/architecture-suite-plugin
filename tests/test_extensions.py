@@ -1000,12 +1000,15 @@ def test_kubernetes_and_compose_environment_secrets_are_redacted(tmp_path):
     # Compose list form: values under 4 characters slip past redact().
     path = tmp_path / "compose.yaml"
     path.write_text(
-        json.dumps({"services": {"api": {"environment": ["API_TOKEN=pw1", "MODE=dev"]}}}),
+        json.dumps(
+            {"services": {"api": {"environment": ["API_TOKEN=pw1", "auth.token=xyz", "MODE=dev"]}}}
+        ),
         encoding="utf-8",
     )
     topology = import_infrastructure([path])
     payload = json.dumps(topology) + json.dumps(topology_plan(topology))
     assert "pw1" not in payload and "API_TOKEN=[REDACTED]" in payload and "MODE=dev" in payload
+    assert "xyz" not in payload and "auth.token=[REDACTED]" in payload
 
 
 def test_url_query_token_is_not_an_assignment_key(tmp_path):
@@ -1044,6 +1047,41 @@ def test_env_value_rule_keeps_cloudformation_references(tmp_path):
         "resource": "input-0-provider",
         "message": "Contains unresolved expression; no values or placement guessed",
     } in topology["findings"]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"Fn::Join": ["", ["s3cr3tpart-", {"Ref": "SharedSetting"}]]},
+        {
+            "intrinsic": "Join",
+            "expression": ["", ["s3cr3tpart-", {"intrinsic": "Ref", "expression": "SharedSetting"}]],
+        },
+        {"Fn::Sub": "s3cr3tpart-${SharedSetting}"},
+        {"Fn::Sub": ["s3cr3tpart-${Other}", {"Other": {"Ref": "SharedSetting"}}]},
+        {"intrinsic": "Sub", "expression": "s3cr3tpart-${SharedSetting}"},
+        {"Fn::Join": ["", ["s3cr3tpart-", {"Fn::GetAtt": ["SharedSetting", "Value"]}]]},
+    ],
+)
+def test_env_value_expression_under_a_secret_name_hides_literals(tmp_path, value):
+    """Literal operands are redacted; reference targets stay, so the edge and finding survive."""
+    doc = {
+        "Resources": {
+            "SharedSetting": {"Type": "AWS::SSM::Parameter"},
+            "Provider": {
+                "Type": "Custom::Provider",
+                "Properties": {"name": "clientSecret", "value": value},
+            },
+        }
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    payload = json.dumps(topology) + json.dumps(topology_plan(topology))
+    assert "s3cr3tpart" not in payload
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-provider", "input-0-sharedsetting")}
+    assert any(f.get("resource") == "input-0-provider" for f in topology["findings"])
 
 
 def test_kubernetes_pods_ingress_and_service_findings(tmp_path):

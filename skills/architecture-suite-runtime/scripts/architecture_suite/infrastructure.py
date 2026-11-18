@@ -255,6 +255,41 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
                 )
 
 
+# Keys whose values import_infrastructure reads as reference targets; kept when masking.
+REFERENCE_KEYS = {"Ref", "Fn::GetAtt", "DependsOn", "depends_on", "depends_on_resource"}
+
+
+def _masked(value):
+    """A value under a sensitive name: every literal is redacted, references stay."""
+    if isinstance(value, dict):
+        if value.get("intrinsic") in {"Ref", "GetAtt"}:  # YAML short forms
+            return value
+        if value.get("intrinsic") == "Sub":
+            return {**value, "expression": _sub_masked(value.get("expression"))}
+        return {
+            k: v
+            if k in REFERENCE_KEYS or k == "intrinsic"
+            else _sub_masked(v)
+            if k == "Fn::Sub"
+            else _masked(v)
+            for k, v in value.items()
+        }
+    if isinstance(value, list):
+        return [_masked(v) for v in value]
+    if isinstance(value, (str, int, float)) and not isinstance(value, bool):
+        return "[REDACTED]"
+    return value
+
+
+def _sub_masked(target):
+    """Fn::Sub without its literal text: only the `${Name}` references remain."""
+    if isinstance(target, str):
+        return "".join(m[0] for m in SUB_VARIABLE.finditer(target))
+    if isinstance(target, list) and target:
+        return [_sub_masked(target[0])] + [_masked(v) for v in target[1:]]
+    return _masked(target)
+
+
 def import_infrastructure(paths, bindings=None):
     resources, edges, findings = [], [], []
     bindings = bindings or {}
@@ -284,16 +319,15 @@ def import_infrastructure(paths, bindings=None):
 
         def scrub(value):
             if isinstance(value, dict):
-                # A Kubernetes env entry names the secret in `name` and holds it in a literal
-                # `value`; an expression (`Ref`, `valueFrom`) is recursed into as usual.
-                named = isinstance(value.get("value"), (str, int, float)) and sensitive(
-                    value.get("name", "")
-                )
+                # A Kubernetes env entry names the secret in `name` and holds it in `value`;
+                # an expression there keeps its references (edges) but no literal text.
+                named = "value" in value and sensitive(value.get("name", ""))
                 return {
                     # Booleans are kept: they carry Terraform sensitivity masks, not secrets.
                     k: "[REDACTED]"
-                    if (sensitive(k) or (named and k == "value"))
-                    and not isinstance(v, bool)
+                    if sensitive(k) and not isinstance(v, bool)
+                    else _masked(v)
+                    if named and k == "value"
                     else scrub(v)
                     for k, v in value.items()
                 }
@@ -301,7 +335,8 @@ def import_infrastructure(paths, bindings=None):
                 return [scrub(v) for v in value]
             if isinstance(value, str):
                 # Compose list form `KEY=value`: redact misses values under 4 characters.
-                pair = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)=(.+)", value, re.S)
+                # A key with URL characters (`redis://h/0?token=x`) is not an assignment.
+                pair = re.fullmatch(r"([^\s=/:?#@]+)=(.+)", value, re.S)
                 if pair and sensitive(pair[1]):
                     return pair[1] + "=[REDACTED]"
                 return redact(value)
