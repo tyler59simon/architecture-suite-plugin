@@ -1367,3 +1367,31 @@ def test_diff_ignores_reordered_parallel_relationships(model):
     assert [(c["section"], c["kind"]) for c in changes] == [("relationships", "changed")]
     assert changes[0]["before"]["description"] == "writes orders"
     assert changes[0]["after"]["description"] == "updates orders"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"Fn::GetAtt": ["Database", {"Ref": "AttrName"}]},
+        {"Fn::GetAtt": ["Database", {"Fn::Join": ["", ["s3cr3t", {"Ref": "AttrName"}]]}]},
+        {"intrinsic": "GetAtt", "expression": ["Database", {"Ref": "AttrName"}]},
+    ],
+)
+def test_getatt_with_a_dynamic_attribute_keeps_its_resource_under_a_secret_name(tmp_path, value):
+    """The resource name of a GetAtt stays an edge; only the attribute expression is masked."""
+    doc = {
+        "Parameters": {"AttrName": {"Type": "String"}},
+        "Resources": {
+            "Database": {"Type": "AWS::RDS::DBInstance"},
+            "Service": {
+                "Type": "Custom::Service",
+                "Properties": {"env": [{"name": "DB_PASSWORD", "value": value}]},
+            },
+        },
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert ("input-0-service", "input-0-database") in edges
+    assert "s3cr3t" not in json.dumps(topology) + json.dumps(topology_plan(topology))

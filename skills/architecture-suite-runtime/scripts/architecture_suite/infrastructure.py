@@ -289,6 +289,8 @@ def _masked(value):
             # YAML short forms, exactly as _intrinsic builds them
             if value["intrinsic"] in {"Ref", "GetAtt"} and _reference_operand(value["expression"]):
                 return value
+            if value["intrinsic"] == "GetAtt":
+                return {**value, "expression": _getatt_masked(value["expression"])}
             if value["intrinsic"] == "Sub":
                 return {**value, "expression": _sub_masked(value["expression"])}
         return {
@@ -296,6 +298,8 @@ def _masked(value):
             if k in REFERENCE_KEYS and _reference_operand(v)
             else _sub_masked(v)
             if k == "Fn::Sub"
+            else _getatt_masked(v)
+            if k == "Fn::GetAtt"
             else _masked(v)
             for k, v in value.items()
         }
@@ -304,6 +308,13 @@ def _masked(value):
     if isinstance(value, (str, int, float)) and not isinstance(value, bool):
         return "[REDACTED]"
     return value
+
+
+def _getatt_masked(target):
+    """GetAtt `[Name, <expression>]`: the resource name stays, the attribute is masked."""
+    if isinstance(target, list) and target and isinstance(target[0], str):
+        return [target[0]] + [_masked(v) for v in target[1:]]
+    return _masked(target)
 
 
 def _sub_masked(target):
