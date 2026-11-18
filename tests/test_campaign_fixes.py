@@ -2,20 +2,29 @@
 
 import io
 import json
+import xml.etree.ElementTree as ET
 from copy import deepcopy
 
 import pytest
-from PIL import ImageFont
+from PIL import Image, ImageFont
 
 from architecture_suite import cli
-from architecture_suite.emit import render_scene_svg
+from architecture_suite.emit import render_scene_drawio, render_scene_svg
 from architecture_suite.infrastructure import import_infrastructure
 from architecture_suite.model import SLUG_MAX, slugify, validate_model
 from architecture_suite.overview_layout import build_overview_scene
-from architecture_suite.plan import compile_plan, lint_plan
-from architecture_suite.renderers import _quoted, _scene, render_mermaid
+from architecture_suite.plan import compile_plan, errors, lint_plan
+from architecture_suite.renderers import (
+    MAX_PNG_PIXELS,
+    MAX_PNG_WIDTH,
+    _quoted,
+    _scene,
+    render_mermaid,
+    render_svg_png,
+)
 from architecture_suite.report import render_architecture_report
-from architecture_suite.scenarios import scenario_mermaid
+from architecture_suite.safety import SafetyError
+from architecture_suite.scenarios import scenario_mermaid, scenario_scene
 from architecture_suite.style import _font
 
 
@@ -250,6 +259,89 @@ def test_frame_titles_draw_over_edges_and_mermaid_keeps_direction(model):
     for v in down["views"]:
         v["direction"] = "down"
     assert "flowchart TB" in render_mermaid(down, next(v for v in down["views"] if v["type"] == "container"))
+
+
+def test_drawio_frame_titles_draw_over_edges(model):
+    view = next(v for v in model["views"] if v["type"] == "container")
+    scene = _scene(model, view)
+    cells = ET.fromstring(render_scene_drawio(scene)).find(".//root")
+    order = [c.get("id") for c in cells]
+    frame_index = next(i for i, b in enumerate(scene.boxes) if b.role == "frame")
+    frame = scene.boxes[frame_index]
+    title = cells[order.index(f"n{frame_index}-text-0")]
+    last_edge = max(i for i, c in enumerate(cells) if c.get("edge") == "1")
+    assert order.index(title.get("id")) > last_edge
+    assert title.get("parent") == "1" and "labelBackgroundColor=#ffffff" in title.get("style")
+    geometry = title.find("mxGeometry")
+    assert frame.x <= float(geometry.get("x")) < frame.x + frame.width
+    assert frame.y <= float(geometry.get("y")) < frame.y + frame.height
+
+
+def _container_only(plan):
+    plan = deepcopy(plan)
+    for container in plan["containers"]:
+        container.pop("components", None)
+    names = {c["name"] for c in plan["containers"]} | {
+        e["name"] for key in ("people", "external_systems") for e in plan.get(key, [])
+    }
+    plan["flows"] = [f for f in plan["flows"] if f["from"] in names and f["to"] in names]
+    plan.pop("deployment", None)
+    return plan
+
+
+def test_level_all_renders_a_container_only_plan(plan):
+    assert not errors(lint_plan(_container_only(plan)))
+    model = compile_plan(_container_only(plan))[0]
+    assert {v["type"] for v in model["views"]} <= {"context", "container"}
+    selected = cli._selected_model(model, "all", ("progressive",))
+    assert {v["type"] for v in selected["views"]} == {"context", "container"}
+    for views in ([None], None, {"a": 1}):
+        with pytest.raises(SafetyError, match="Invalid architecture model"):
+            cli._selected_model({**model, "views": views}, "all", ("progressive",))
+
+
+def test_self_call_labels_stay_inside_nested_frames(model):
+    first = next(e["id"] for e in model["elements"] if e["type"] == "person")
+    last = next(e["id"] for e in model["elements"] if e["type"] == "container")
+    steps = [
+        {"from": first, "to": first, "description": "checks itself"},
+        {"from": last, "to": last, "description": "retries locally"},
+    ]
+    for depth in range(4):
+        steps = [{"type": "loop", "condition": f"level {depth}", "steps": steps}]
+    scenario = {
+        "schema_version": "architecture-scenario/v1",
+        "name": "Deep loops",
+        "participants": [first, last],
+        "steps": steps,
+    }
+    scene = scenario_scene(scenario, model)
+    inner = max((b for b in scene.boxes if b.role == "frame"), key=lambda b: b.x)
+    labels = [e.label for e in scene.edges if e.label]
+    assert len(labels) == 2
+    for label in labels:
+        assert inner.x < label.x and label.x + label.width < inner.x + inner.width
+
+
+def test_png_cap_hint_does_not_suggest_the_failing_style(tmp_path):
+    with pytest.raises(SafetyError) as error:
+        render_svg_png("<svg/>", tmp_path / "huge.png", 30000, 30000)
+    assert "small-multiples" not in str(error.value)
+
+
+@pytest.mark.browser
+def test_oversized_png_is_downscaled_to_fit(tmp_path):
+    width, height = 9000, 4000
+    svg = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+        f'viewBox="0 0 {width} {height}"><rect width="{width}" height="{height}" '
+        'fill="white"/><rect x="100" y="100" width="8800" height="3800" fill="#526580"/></svg>'
+    )
+    path = tmp_path / "big.png"
+    render_svg_png(svg, path, width, height)
+    with Image.open(path) as image:
+        assert image.width <= MAX_PNG_WIDTH and image.width * image.height <= MAX_PNG_PIXELS
+        assert abs(image.width / image.height - width / height) < 0.01
 
 
 @pytest.mark.browser

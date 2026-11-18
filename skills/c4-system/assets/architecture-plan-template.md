@@ -1,6 +1,6 @@
 # Architecture plan
 
-Replace names and cite the actual brief or source. Add components/code only when established. This intentionally supports a container-only request: render it with `--level container` (the default `--level all` also needs component and code evidence).
+Replace names and cite the actual brief or source. Add components/code only when established. This intentionally supports a container-only request: the default `--level all` renders the levels the plan has evidence for.
 
 ```yaml
 schema_version: architecture-plan/v1

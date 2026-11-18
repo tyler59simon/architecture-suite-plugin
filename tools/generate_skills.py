@@ -70,7 +70,7 @@ Use when the source is a brief, spec, document set, or this conversation (for co
 2. Write `plan.md` from `assets/architecture-plan-template.md` in this skill. Declare each fact once by nesting (containers > components > code) and give flows at the most specific known level; the compiler derives coarser arrows. Cite the source for each element; put judgment under `assumptions` and render with `--augmented`. Mark individual elements or flows that are not yet true with `status: proposed` (or `inferred`/`unknown`); diagrams then show them dotted with a «status» tag, so a forwarded image keeps the distinction.
 3. `architecture-suite plan-review --plan plan.md` shows which levels are ready and what is missing; resolve or report its findings. Then `architecture-suite plan-lint --plan plan.md --strict`, fix findings.
 4. `architecture-suite plan-render --plan plan.md --output <out> --level all --overview-style executive --dry-run`, then `--confirm-write`. The `progressive` and `complete` overview styles can exceed PNG size limits on large plans.
-5. Use `--level all` only if L1-L4 all have evidence; otherwise render the evidenced prefix (see `c4-system`, `c4-container`, `c4-component`, `c4-code`).
+5. `--level all` renders every level the plan has evidence for (a container-only plan gives L1-L2); to publish one level, use its skill (`c4-system`, `c4-container`, `c4-component`, `c4-code`).
 6. For request flows, author an `architecture-scenario/v1` file and run `scenario-lint` / `scenario-render` (see `../architecture-suite-runtime/references/extensions.md`).
 """,
         "template": True,

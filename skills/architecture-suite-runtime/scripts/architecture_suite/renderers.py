@@ -47,6 +47,7 @@ ARTIFACT_VIEW_TYPES = {
 }
 MAX_PNG_WIDTH = 6000
 MAX_PNG_PIXELS = 24_000_000
+MIN_PNG_SCALE = 0.5
 EXTENSIONS = {"mermaid": "mmd", "drawio": "drawio", "png": "png", "svg": "svg", "visio": "vsdx", "plantuml": "puml"}
 
 
@@ -590,19 +591,26 @@ def render_svg_png(
     )
     path = png_file
     width, height = math.ceil(width), math.ceil(height)
-    if (
-        width > MAX_PNG_WIDTH
-        or width * height > MAX_PNG_PIXELS
-        or min(width, height) <= 0
-    ):
+    # Large overviews are shrunk to fit the caps, but not below half size (text gets unreadable).
+    scale = min(
+        1, MAX_PNG_WIDTH / max(width, 1), math.sqrt(MAX_PNG_PIXELS / max(width * height, 1))
+    )
+    if min(width, height) <= 0 or scale < MIN_PNG_SCALE:
         raise SafetyError(
             f"{Path(png_file).name} ({width}x{height}) exceeds PNG size limits "
-            f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP); "
-            "try --overview-style executive or small-multiples, or --format mermaid,svg,drawio"
+            f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP) even at half size; "
+            "use --format mermaid,svg,drawio for this view, or a smaller --overview-style "
+            "such as executive"
         )
+    fit = ""
+    if scale < 1:
+        width, height = math.floor(width * scale), math.floor(height * scale)
+        fit = f"<style>body>svg{{display:block;width:{width}px;height:{height}px}}</style>"
 
     html = (
-        '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'"></head><body style="margin:0">'
+        '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'">'
+        + fit
+        + '</head><body style="margin:0">'
         + svg
         + "</body></html>"
     )

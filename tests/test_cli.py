@@ -78,7 +78,9 @@ def test_deployment_level_needs_no_component_or_code_views(tmp_path, capsys):
     base = ["plan-render", "--plan", str(source), "--output", str(output)]
     base += ["--format", "mermaid,drawio,svg"]
     assert main(["plan-lint", "--plan", str(source), "--strict"]) == 0
-    assert main(base + ["--level", "all", "--dry-run"]) == 3  # still needs L1-L4 evidence
+    capsys.readouterr()
+    assert main(base + ["--level", "all", "--dry-run"]) == 0  # renders the levels it has
+    assert json.loads(capsys.readouterr().out)["levels_skipped"] == ["component", "code"]
     assert main(base + ["--level", "deployment", "--confirm-write"]) == 0
     capsys.readouterr()
     diagrams = sorted(

@@ -180,7 +180,7 @@ def scenario_scene(scenario, model):
     # a gap, so frames, branch dividers and message labels never share a line.
     y = max(b.y + b.height for b in scene.boxes)
 
-    def walk(steps, depth=0, parent=None):
+    def walk(steps, depth=0, parent=None, bounds=(0, width)):
         nonlocal y
         previous = None
         for step in steps:
@@ -207,7 +207,8 @@ def scenario_scene(scenario, model):
                 box = Box(ident, "frame", left, top, inner, 0, title, parent)
                 scene.boxes.append(box)
                 y = top + 10 + title.height
-                walk(step["steps"], depth + 1, ident)
+                inside = (left, left + inner)
+                walk(step["steps"], depth + 1, ident, inside)
                 for branch in step.get("branches", []):
                     y += FRAME_PAD
                     scene.edges.append(
@@ -242,7 +243,7 @@ def scenario_scene(scenario, model):
                         )
                     )
                     y += lab.height + 28
-                    walk(branch["steps"], depth + 1, ident)
+                    walk(branch["steps"], depth + 1, ident, inside)
                 y += FRAME_PAD
                 box.height = y - top
             else:
@@ -253,10 +254,12 @@ def scenario_scene(scenario, model):
                         for t in wrap_to_width(step["description"], 240, 11)
                     ]
                 )
+                # Keep the label inside the innermost frame so it never covers a border.
+                low, high = bounds
                 box = Box(
                     "message-label-" + str(len(scene.edges)),
                     "edge-label",
-                    (x1 + x2) / 2 - 130,
+                    max(low + 8, min((x1 + x2) / 2 - 130, high - 268)),
                     y,
                     260,
                     lab.height + 10,
