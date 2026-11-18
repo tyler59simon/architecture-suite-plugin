@@ -1369,6 +1369,25 @@ def test_kubernetes_null_fields_are_not_attribute_errors(tmp_path):
     assert any(f["message"].endswith("matched no workload in namespace default") for f in topology["findings"])
 
 
+def test_kubernetes_null_selector_value_matches_a_missing_label(tmp_path):
+    pod = lambda name, labels: {  # noqa: E731
+        "apiVersion": "v1", "kind": "Pod", "metadata": {"name": name, "labels": labels}
+    }
+    topology = _kubernetes(
+        tmp_path,
+        [
+            pod("bare", {}),
+            pod("nulled", {"app": None}),
+            pod("labeled", {"app": "x"}),
+            {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "svc"},
+             "spec": {"selector": {"app": None}}},
+        ],
+    )
+    targets = [e["destination_id"] for e in topology["relationships"] if e["kind"] == "selector"]
+    assert len(targets) == 2
+    assert not any("labeled" in t for t in targets)
+
+
 def test_inventory_route_methods_and_registrations():
     report = dependency_inventory(
         {

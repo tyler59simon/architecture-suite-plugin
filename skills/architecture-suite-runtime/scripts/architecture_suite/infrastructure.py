@@ -249,7 +249,7 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
 
     # (namespace, label key, label value) -> candidate resources in resource order.
     # A Pod carries its own labels; a workload labels the Pods of its template.
-    by_label = {}
+    by_label, by_namespace = {}, {}
     for target in resources:
         if not target["type"].startswith("kubernetes/"):
             continue
@@ -262,6 +262,7 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
                 )
             )
         )
+        by_namespace.setdefault(target["parent_id"], []).append((target, labels))
         for key, value in labels.items():
             try:
                 by_label.setdefault((target["parent_id"], key, value), []).append((target, labels))
@@ -275,7 +276,9 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
         if resource["type"] == "kubernetes/Service":
             selector = _mapping(props.get("selector"))
             matched = []
-            first = next(iter(selector.items()), None)
+            # A null selector value also matches a missing label, which the index cannot
+            # look up, so look up by a non-null pair or scan the namespace.
+            first = next(((k, v) for k, v in selector.items() if v is not None), None)
             candidates = ()
             if first:
                 try:
@@ -284,6 +287,8 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
                     candidates = by_label.get(
                         (resource["parent_id"], first[0], None, "unhashable"), ()
                     )
+            elif selector:
+                candidates = by_namespace.get(resource["parent_id"], ())
             for target, labels in candidates:
                 if target["id"] != resource["id"] and all(
                     labels.get(k) == v for k, v in selector.items()
