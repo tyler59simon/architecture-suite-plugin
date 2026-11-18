@@ -238,6 +238,10 @@ def test_duplicate_code_overloads_get_a_merge_hint_other_duplicates_stay_plain(p
     (finding,) = [f for f in errors(lint_plan(plan)) if f.code == "duplicate-name"]
     assert "overloads" in finding.message and "members" in finding.message
     assert "plan-draft" in finding.message and finding.severity == "error"
+    first.pop("kind", None)
+    component["code"][-1]["kind"] = "class"  # an omitted kind means class
+    (finding,) = [f for f in errors(lint_plan(plan)) if f.code == "duplicate-name"]
+    assert "overloads" in finding.message
     plan["containers"][0]["components"][0]["code"].pop()
     plan["containers"][0]["components"][1]["code"].append({**deepcopy(first), "kind": "interface"})
     (plain,) = [f for f in errors(lint_plan(plan)) if f.code == "duplicate-name"]

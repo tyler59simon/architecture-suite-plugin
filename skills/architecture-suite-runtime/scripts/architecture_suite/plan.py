@@ -294,7 +294,8 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         message = f"Names must slugify to unique IDs ({ident!r} is already used)"
         if ident in ids:
             first = firsts[ident]
-            if typ == "code" and first[:3] == (typ, parent, item.get("kind")) and first[3] == name:
+            kind = item.get("kind", "class")
+            if typ == "code" and first == (typ, parent, kind, name):
                 message += (
                     "; these look like overloads of one declaration saved before analyze merged them."
                     " Merge them into one code element: combine their members, list every evidence"
@@ -302,7 +303,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                 )
             add("duplicate-name", message, name)
         else:
-            firsts[ident] = (typ, parent, item.get("kind"), name)
+            firsts[ident] = (typ, parent, item.get("kind", "class"), name)
         ids.add(ident)
         names[name] = ident
         # Component-level flows to components with code are normal (code views are a
