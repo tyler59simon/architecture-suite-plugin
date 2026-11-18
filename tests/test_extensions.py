@@ -1046,6 +1046,23 @@ def test_scenario_frame_ids_stay_out_of_the_element_id_namespace(model, nested):
     assert len(frames) == 4 and all(f.parent_id != "group-4" for f in frames)
 
 
+def test_scenario_cards_clear_a_long_title_and_lifelines_start_at_the_card(model, scenario):
+    model["elements"][1]["name"] = "A participant name long enough to wrap " * 4
+    scenario["name"] = "A long scenario title that wraps over three lines " * 4
+    scene = scenario_scene(scenario, model)
+    assert len(scene.title_lines) >= 3
+    cards = [b for b in scene.boxes if b.role == "card"]
+    assert len({b.height for b in cards}) > 1 or cards[0].height > 80
+    # The last title baseline sits at 65 + 33 * (lines - 1); cards start below its descent.
+    title_bottom = 65 + 33 * (len(scene.title_lines) - 1) + 8
+    assert all(b.y >= title_bottom and b.y >= scene.content_top for b in cards)
+    for card in cards:
+        lifeline = next(e for e in scene.edges if e.id == "lifeline-" + card.id)
+        assert lifeline.points[0][1] == card.y + card.height
+    short = scenario_scene({**scenario, "name": "Submit"}, model)
+    assert min(b.y for b in short.boxes if b.role == "card") == 120
+
+
 def test_baseline_and_rules_are_validated(model, tmp_path):
     result = check_rules(model, RULES)
     baseline = {"schema_version": "architecture-baseline/v1", "fingerprints": result["fingerprints"]}
