@@ -663,6 +663,10 @@ def test_ordinary_text_is_not_a_credential(text):
 
 def test_a_slash_free_password_keeps_its_shorter_reading():
     assert redact("http://u:p@h/x@y") == "http://[REDACTED]@h/x@y"
+    assert (
+        redact("http://u:p@h,https://alice:private/part@db.example")
+        == "http://[REDACTED]@h,https://[REDACTED]@db.example"
+    )
     assert redact_lines("a\nhttp://u:p@h\nb") == "a\nhttp://[REDACTED]@h\nb"
 
 

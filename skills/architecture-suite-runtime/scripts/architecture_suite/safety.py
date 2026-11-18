@@ -105,8 +105,15 @@ def _redact(value: str, keep_newlines: bool) -> str:
     match can cut another short and leave part of a secret in clear text."""
     first = list(_SECRET_FIRST.finditer(value))
     uri_starts = {m.start() for m in first if m["scheme"]}
-    # Where the `/`-stopping URI form matched, its shorter reading of the password stands.
-    matches = first + [m for m in _SLASH_URI.finditer(value) if m.start() not in uri_starts]
+    # Where the `/`-stopping URI form matched, its shorter reading of the password stands;
+    # the search then resumes one character later so a URI after it gets its own match.
+    matches, pos = list(first), 0
+    while match := _SLASH_URI.search(value, pos):
+        if match.start() in uri_starts:
+            pos = match.start() + 1
+        else:
+            matches.append(match)
+            pos = match.end()
     matches.sort(key=lambda m: (m.start(), -m.end()))
     out, pos, i = [], 0, 0
     while i < len(matches):
