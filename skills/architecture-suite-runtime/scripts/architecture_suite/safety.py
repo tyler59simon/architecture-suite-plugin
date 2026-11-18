@@ -513,7 +513,12 @@ def scan_repository(
                     path,
                     os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0),
                 )
-                with os.fdopen(fd, "rb") as handle:
+                try:
+                    handle = os.fdopen(fd, "rb")
+                except BaseException:
+                    os.close(fd)
+                    raise
+                with handle:
                     info = os.fstat(handle.fileno())
                     if not stat.S_ISREG(info.st_mode):
                         result.skipped_files += 1

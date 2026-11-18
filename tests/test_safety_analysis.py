@@ -309,6 +309,30 @@ def test_scan_read_is_capped_when_file_outgrows_its_stat(tmp_path, monkeypatch):
     assert result.bytes_read <= 100
 
 
+def test_scan_closes_the_descriptor_when_wrapping_it_fails(tmp_path, monkeypatch):
+    (tmp_path / "ok.py").write_text("y = 1")
+    import architecture_suite.safety as safety
+
+    real_open = os.open
+    opened = []
+
+    def recording_open(path, *a, **k):
+        opened.append(real_open(path, *a, **k))
+        return opened[-1]
+
+    def failing_fdopen(*a, **k):
+        raise OSError("no file object")
+
+    monkeypatch.setattr(safety.os, "open", recording_open)
+    monkeypatch.setattr(safety.os, "fdopen", failing_fdopen)
+    result = scan_repository(tmp_path)
+    monkeypatch.undo()
+    assert opened and "ok.py" not in result.texts
+    for fd in opened:
+        with pytest.raises(OSError):
+            os.fstat(fd)
+
+
 @pytest.mark.parametrize(
     "manifest,source,code,stack",
     [
