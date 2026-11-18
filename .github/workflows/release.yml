@@ -53,26 +53,14 @@ jobs:
       - name: Checksums
         working-directory: dist/hosts
         run: sha256sum *.zip > SHA256SUMS
-      # A rerun after a late failure finds the release already there: refresh its assets
-      # instead of creating it again.
-      - name: GitHub release with host archives
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "Release $GITHUB_REF_NAME already exists; refreshing its assets."
-            gh release upload "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS --clobber
-          else
-            gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
-              --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
-          fi
       # latest and architecture-suite-* are protected by a ruleset: no updates except through a
       # reviewed pull request, no force-pushes, no deletions. Creating a new branch is allowed,
       # so the versioned branch (and latest, on the first release) is created by push; later
       # updates to latest arrive as a pull request for the maintainer to approve and merge.
       # The steps below can be rerun after a late failure: an existing versioned branch is
       # reused only when its tree is identical to the tree just built, so a branch is never
-      # silently replaced or left holding other content.
+      # silently replaced or left holding other content. It is checked before the release
+      # step, so a mismatched rerun stops before any published asset is touched.
       - name: Publish the versioned branch
         run: |
           git config user.name "github-actions[bot]"
@@ -90,6 +78,28 @@ jobs:
           else
             git push origin "$PLUGIN_BRANCH"
           fi
+      # A rerun after a late failure finds the release already there. Its assets are left
+      # alone when they match this build (SHA256SUMS), completed when the first run stopped
+      # before uploading SHA256SUMS, and never replaced by a different build.
+      - name: GitHub release with host archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            if gh release download "$GITHUB_REF_NAME" --pattern SHA256SUMS --output published-SHA256SUMS 2>/dev/null; then
+              if cmp -s published-SHA256SUMS dist/hosts/SHA256SUMS; then
+                echo "Release $GITHUB_REF_NAME already has these assets; leaving them."
+              else
+                echo "Release $GITHUB_REF_NAME holds a different build; not replacing its assets."; exit 1
+              fi
+            else
+              echo "Release $GITHUB_REF_NAME has no SHA256SUMS yet; uploading its assets."
+              gh release upload "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS --clobber
+            fi
+          else
+            gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
+              --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
+          fi
       - name: Create latest, or open the pull request that updates it
         env:
           GH_TOKEN: ${{ github.token }}
@@ -102,6 +112,13 @@ jobs:
           git fetch origin latest
           if [ "$(git rev-parse "$PLUGIN_BRANCH^{tree}")" = "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
             echo "latest already holds $GITHUB_REF_NAME; nothing to do."
+            exit 0
+          fi
+          # A rerun of an older release must not propose moving latest back.
+          held=$(git show FETCH_HEAD:.claude-plugin/plugin.json | python -c "import json, sys; print(json.load(sys.stdin)['version'])")
+          ours=${PLUGIN_BRANCH#architecture-suite-}
+          if [ "$held" != "$ours" ] && [ "$(printf '%s\n%s\n' "$held" "$ours" | sort -V | tail -n 1)" = "$held" ]; then
+            echo "latest holds $held, newer than $ours; nothing to do."
             exit 0
           fi
           staging="plugin-staging/latest-$GITHUB_REF_NAME"
