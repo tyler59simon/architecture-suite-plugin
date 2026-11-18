@@ -731,6 +731,77 @@ def test_terraform_unindexed_reference_to_counted_resource_is_a_finding(tmp_path
     assert finding["message"] in topology_plan(topology)["gaps"]
 
 
+@pytest.mark.parametrize(
+    "references",
+    [
+        # `[aws_subnet.app[var.index].id, aws_subnet.app[0].id]`, in either order: a
+        # dynamic index gives only `aws_subnet.app`, a literal one the full chain.
+        ["aws_subnet.app", "var.index", "aws_subnet.app[0].id", "aws_subnet.app[0]", "aws_subnet.app"],
+        ["aws_subnet.app[0].id", "aws_subnet.app[0]", "aws_subnet.app", "aws_subnet.app", "var.index"],
+    ],
+)
+def test_terraform_dynamic_and_literal_index_in_one_expression(tmp_path, references):
+    topology = _counted_subnets(tmp_path, references)
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-aws-instance-web", "input-0-aws-subnet-app-0")}
+    assert any(
+        f["resource"] == "input-0-aws-instance-web" and "aws_subnet.app fits 2" in f["message"]
+        for f in topology["findings"]
+    )
+
+
+def test_terraform_reference_matching_is_linear_in_plan_size(tmp_path, monkeypatch):
+    """Each instance reference is looked up, not matched against every planned address
+    or every other reference in its expression."""
+    from architecture_suite import infrastructure
+
+    count = 200
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    {"address": f"aws_subnet.app[{i}]", "type": "aws_subnet", "values": {}}
+                    for i in range(count)
+                ]
+                + [
+                    {"address": f"aws_instance.web{i}", "type": "aws_instance", "values": {}}
+                    for i in range(count)
+                ]
+                + [{"address": "aws_lb.web", "type": "aws_lb", "values": {}}]
+            }
+        },
+        "configuration": {
+            "root_module": {
+                "resources": [
+                    {"address": f"aws_instance.web{i}",
+                     "expressions": {"subnet_id": {"references": [
+                         f"aws_subnet.app[{i}].id", f"aws_subnet.app[{i}]", "aws_subnet.app"
+                     ]}}}
+                    for i in range(count)
+                ]
+                + [
+                    {"address": "aws_lb.web",
+                     "expressions": {"subnets": {"references": [
+                         ref
+                         for i in range(count)
+                         for ref in (f"aws_subnet.app[{i}].id", f"aws_subnet.app[{i}]", "aws_subnet.app")
+                     ]}}}
+                ]
+            }
+        },
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    calls = []
+    original = infrastructure._config_address
+    monkeypatch.setattr(
+        infrastructure, "_config_address", lambda address: calls.append(1) or original(address)
+    )
+    topology = import_infrastructure([path])
+    assert len(topology["relationships"]) == 2 * count
+    assert len(calls) < 10 * count
+
+
 def test_cloudformation_getatt_and_sub_references(tmp_path):
     template = (
         "Resources:\n"

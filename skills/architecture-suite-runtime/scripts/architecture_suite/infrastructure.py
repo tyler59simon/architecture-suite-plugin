@@ -143,20 +143,23 @@ def _terraform_references(module, prefix=""):
 
     def collect(value, into):
         if isinstance(value, dict):
-            listed = set()
+            previous = None
             for ref in value.get("references", []) or []:
                 match = TERRAFORM_REFERENCE.match(ref) if isinstance(ref, str) else None
-                if match and match.group(1) not in {
+                # Terraform lists `aws_subnet.app[0].id`, `aws_subnet.app[0]` and then
+                # `aws_subnet.app` for one reference; that last entry, right after its
+                # instance, is an alias. A dynamic index (`app[var.i]`) lists only
+                # `aws_subnet.app`, which stays a reference of its own.
+                alias = (
+                    isinstance(previous, str)
+                    and previous != ref
+                    and TERRAFORM_INDEX.sub("", previous) == ref
+                )
+                if match and not alias and match.group(1) not in {
                     "var", "local", "data", "module", "each", "count", "path", "self", "terraform"
                 }:
-                    listed.add(match.group())
-            # Terraform lists `aws_subnet.app[0].id`, `aws_subnet.app[0]` and `aws_subnet.app`
-            # for one reference: keep the instance, not the whole resource.
-            into.update(
-                prefix + ref
-                for ref in listed
-                if not any(other != ref and _config_address(other) == ref for other in listed)
-            )
+                    into.add(prefix + match.group())
+                previous = ref
             for child in value.values():
                 collect(child, into)
         elif isinstance(value, list):
@@ -483,6 +486,15 @@ def import_infrastructure(paths, bindings=None):
                     ident, suffix = f"{base}-{suffix}", suffix + 1
                 names[name] = declared[name] = ident
                 taken.add(ident)
+            # Terraform instances by (module instance, address as a reference names it):
+            # `aws_subnet.app[0]` names one instance, `aws_subnet.app` every instance.
+            instances = {}
+            for other in names if terraform_refs else ():
+                module = _module_instance(other)
+                local = _config_address(module) + other[len(module):]
+                instances.setdefault((module, local), []).append(other)
+                if _config_address(local) != local:
+                    instances.setdefault((module, _config_address(local)), []).append(other)
             for name, kind, props, parent in entries:
                 ident = names[name]
                 add(ident, kind, props, source, parent)
@@ -539,13 +551,7 @@ def import_infrastructure(paths, bindings=None):
                 module = _module_instance(name)
                 configured = set()
                 for ref in sorted(terraform_refs.get(_config_address(name), ())):
-                    targets = [
-                        other
-                        for other in names
-                        if ref in {_config_address(other), _config_address(module) + other[len(module):]}
-                        and _module_instance(other) == module
-                        and other != name
-                    ]
+                    targets = [other for other in instances.get((module, ref), ()) if other != name]
                     if len(targets) > 1:
                         findings.append(
                             {
