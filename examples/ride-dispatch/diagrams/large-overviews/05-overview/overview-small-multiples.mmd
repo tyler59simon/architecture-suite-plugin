@@ -1,95 +1,103 @@
 %% Architecture Suite schema 2.0; portable layout is independent of ELK
 flowchart LR
-  n0["RidePulse — Context"]
-  n1["RidePulse#10;«software_system»#10;Real-time ride dispatch and fleet telemetry#10;platform"]
-  n2["Rider#10;«person»#10;Requests and takes trips"]
-  n3["Driver#10;«person»#10;Accepts offers and drives trips"]
-  n4["Operations Analyst#10;«person»#10;Monitors fleet health and demand"]
-  n5["Maps Provider#10;«software_system»#10;Routing and geocoding"]
-  n6["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
-  n7["SMS Gateway#10;«software_system»#10;Text message delivery"]
-  n8["RidePulse — Container"]
-  n9["Rider#10;«person»#10;Requests and takes trips"]
-  n10["Driver#10;«person»#10;Accepts offers and drives trips"]
-  n11["Operations Analyst#10;«person»#10;Monitors fleet health and demand"]
-  n12["Maps Provider#10;«software_system»#10;Routing and geocoding"]
-  n13["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
-  n14["SMS Gateway#10;«software_system»#10;Text message delivery"]
-  subgraph n15["RidePulse"]
-    n16["Rider Gateway#10;«container»#10;Go gRPC and HTTPS#10;Terminates rider and driver mobile traffic"]
-    n17["Dispatch Service#10;«container»#10;Java on Cloud Run#10;Matches riders with nearby drivers and#10;prices fares"]
-    n18["Location Ingest#10;«container»#10;Rust on Cloud Run#10;Accepts driver GPS pings at high volume"]
-    n19["Notification Worker#10;«container»#10;Node.js#10;Sends push and SMS alerts"]
-    n20(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-    style n20 fill:#fff3e6,stroke:#e65100
-    n21[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-    style n21 fill:#eaf6ec,stroke:#2e7d32
-    n22[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
-    style n22 fill:#eaf6ec,stroke:#2e7d32
-    n23[("Fleet Time Series#10;«container»#10;Bigtable#10;High-rate telemetry history")]
-    style n23 fill:#eaf6ec,stroke:#2e7d32
-    n24[("Telemetry Lake#10;«container»#10;BigQuery#10;Analytics warehouse")]
-    style n24 fill:#eaf6ec,stroke:#2e7d32
-    n25[("Location Archive#10;«container»#10;Object storage#10;Daily telemetry snapshots")]
-    style n25 fill:#e4f5f7,stroke:#00838f
-    n26["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
-    style n26 fill:#f5eafa,stroke:#7b1fa2
+  subgraph panel_0["RidePulse — Context"]
+    n1["RidePulse#10;«software_system»#10;Real-time ride dispatch and fleet telemetry#10;platform"]
+    n2["Rider#10;«person»#10;Requests and takes trips"]
+    n3["Driver#10;«person»#10;Accepts offers and drives trips"]
+    n4["Operations Analyst#10;«person»#10;Monitors fleet health and demand"]
+    n5["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+    n6["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+    n7["SMS Gateway#10;«software_system»#10;Text message delivery"]
   end
-  n27["Dispatch Service — Component"]
-  n28["Maps Provider#10;«software_system»#10;Routing and geocoding"]
-  n29(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n29 fill:#fff3e6,stroke:#e65100
-  n30[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n30 fill:#eaf6ec,stroke:#2e7d32
-  n31[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
-  style n31 fill:#eaf6ec,stroke:#2e7d32
-  n32["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
-  style n32 fill:#f5eafa,stroke:#7b1fa2
-  subgraph n33["Dispatch Service"]
-    n34["Matching Engine#10;«component»#10;Scores candidate drivers"]
-    n35["Fare Pricer#10;«component»#10;Quotes surge-aware fares"]
+  subgraph panel_1["RidePulse — Container"]
+    n9["Rider#10;«person»#10;Requests and takes trips"]
+    n10["Driver#10;«person»#10;Accepts offers and drives trips"]
+    n11["Operations Analyst#10;«person»#10;Monitors fleet health and demand"]
+    n12["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+    n13["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+    n14["SMS Gateway#10;«software_system»#10;Text message delivery"]
+    subgraph n15["RidePulse"]
+      n16["Rider Gateway#10;«container»#10;Go gRPC and HTTPS#10;Terminates rider and driver mobile traffic"]
+      n17["Dispatch Service#10;«container»#10;Java on Cloud Run#10;Matches riders with nearby drivers and#10;prices fares"]
+      n18["Location Ingest#10;«container»#10;Rust on Cloud Run#10;Accepts driver GPS pings at high volume"]
+      n19["Notification Worker#10;«container»#10;Node.js#10;Sends push and SMS alerts"]
+      n20(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+      style n20 fill:#fff3e6,stroke:#e65100
+      n21[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+      style n21 fill:#eaf6ec,stroke:#2e7d32
+      n22[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+      style n22 fill:#eaf6ec,stroke:#2e7d32
+      n23[("Fleet Time Series#10;«container»#10;Bigtable#10;High-rate telemetry history")]
+      style n23 fill:#eaf6ec,stroke:#2e7d32
+      n24[("Telemetry Lake#10;«container»#10;BigQuery#10;Analytics warehouse")]
+      style n24 fill:#eaf6ec,stroke:#2e7d32
+      n25[("Location Archive#10;«container»#10;Object storage#10;Daily telemetry snapshots")]
+      style n25 fill:#e4f5f7,stroke:#00838f
+      n26["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+      style n26 fill:#f5eafa,stroke:#7b1fa2
+    end
   end
-  n36["Rider Gateway — Component"]
-  n37["Rider#10;«person»#10;Requests and takes trips"]
-  n38["Driver#10;«person»#10;Accepts offers and drives trips"]
-  n39["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
-  n40(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n40 fill:#fff3e6,stroke:#e65100
-  n41[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n41 fill:#eaf6ec,stroke:#2e7d32
-  subgraph n42["Rider Gateway"]
-    n43["Auth Middleware#10;«component»#10;Authenticates callers and enforces#10;quotas"]
-    n44["Trip Controller#10;«component»#10;Accepts trip requests and publishes#10;events"]
+  subgraph panel_2["Dispatch Service — Component"]
+    n28["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+    n29(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+    style n29 fill:#fff3e6,stroke:#e65100
+    n30[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+    style n30 fill:#eaf6ec,stroke:#2e7d32
+    n31[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+    style n31 fill:#eaf6ec,stroke:#2e7d32
+    n32["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+    style n32 fill:#f5eafa,stroke:#7b1fa2
+    subgraph n33["Dispatch Service"]
+      n34["Matching Engine#10;«component»#10;Scores candidate drivers"]
+      n35["Fare Pricer#10;«component»#10;Quotes surge-aware fares"]
+    end
   end
-  n45["Auth Middleware — Code"]
-  n46[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n46 fill:#eaf6ec,stroke:#2e7d32
-  subgraph n47["Auth Middleware"]
-    n48["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
+  subgraph panel_3["Rider Gateway — Component"]
+    n37["Rider#10;«person»#10;Requests and takes trips"]
+    n38["Driver#10;«person»#10;Accepts offers and drives trips"]
+    n39["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+    n40(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+    style n40 fill:#fff3e6,stroke:#e65100
+    n41[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+    style n41 fill:#eaf6ec,stroke:#2e7d32
+    subgraph n42["Rider Gateway"]
+      n43["Auth Middleware#10;«component»#10;Authenticates callers and enforces#10;quotas"]
+      n44["Trip Controller#10;«component»#10;Accepts trip requests and publishes#10;events"]
+    end
   end
-  n49["Fare Pricer — Code"]
-  n50[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
-  style n50 fill:#eaf6ec,stroke:#2e7d32
-  subgraph n51["Fare Pricer"]
-    n52["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
+  subgraph panel_4["Auth Middleware — Code"]
+    n46[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+    style n46 fill:#eaf6ec,stroke:#2e7d32
+    subgraph n47["Auth Middleware"]
+      n48["AuthMiddleware#10;«class»#10;Illustrative implementation#10;+authenticate(token): Principal"]
+    end
   end
-  n53["Matching Engine — Code"]
-  n54["Maps Provider#10;«software_system»#10;Routing and geocoding"]
-  n55(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n55 fill:#fff3e6,stroke:#e65100
-  n56[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
-  style n56 fill:#eaf6ec,stroke:#2e7d32
-  n57["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
-  style n57 fill:#f5eafa,stroke:#7b1fa2
-  subgraph n58["Matching Engine"]
-    n59["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
+  subgraph panel_5["Fare Pricer — Code"]
+    n50[("Trip Store#10;«container»#10;Spanner#10;Transactional trip and account records")]
+    style n50 fill:#eaf6ec,stroke:#2e7d32
+    subgraph n51["Fare Pricer"]
+      n52["FarePricer#10;«class»#10;Illustrative implementation#10;+quote(trip): Fare"]
+    end
   end
-  n60["Trip Controller — Code"]
-  n61["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
-  n62(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
-  style n62 fill:#fff3e6,stroke:#e65100
-  subgraph n63["Trip Controller"]
-    n64["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
+  subgraph panel_6["Matching Engine — Code"]
+    n54["Maps Provider#10;«software_system»#10;Routing and geocoding"]
+    n55(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+    style n55 fill:#fff3e6,stroke:#e65100
+    n56[("Location Cache#10;«container»#10;Redis#10;Latest driver positions")]
+    style n56 fill:#eaf6ec,stroke:#2e7d32
+    n57["ETA Model#10;«container»#10;Vertex AI endpoint#10;Arrival time predictions"]
+    style n57 fill:#f5eafa,stroke:#7b1fa2
+    subgraph n58["Matching Engine"]
+      n59["MatchingEngine#10;«class»#10;Illustrative implementation#10;+match(trip): Assignment"]
+    end
+  end
+  subgraph panel_7["Trip Controller — Code"]
+    n61["Payment Gateway#10;«software_system»#10;Card authorization and capture"]
+    n62(["Event Bus#10;«container»#10;Pub/Sub#10;Carries trip and location events"])
+    style n62 fill:#fff3e6,stroke:#e65100
+    subgraph n63["Trip Controller"]
+      n64["TripController#10;«class»#10;Illustrative implementation#10;+requestTrip(request): TripId"]
+    end
   end
   n2 -->|"Requests trips and tracks arrival #91;HTTPS#93;"| n1
   n3 -->|"Accepts offers and reports trip status; Streams GPS pings#10;#91;gRPC; HTTPS#93;"| n1

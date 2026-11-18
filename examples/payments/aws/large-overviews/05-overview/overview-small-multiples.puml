@@ -2,139 +2,158 @@
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Component>
 LAYOUT_LEFT_RIGHT()
-rectangle "PayStream — Context" as n0
-System(n1, "PayStream", "Online payments platform: checkout, card processing, ledger and payouts")
-Person(n2, "Shopper", "Pays for orders at merchant checkouts")
-Person(n3, "Merchant", "Accepts payments and receives payouts")
-Person(n4, "Risk Analyst", "Reviews flagged payments and fraud rules")
-Person(n5, "Finance Operations", "Reconciles settlements and payouts")
-System_Ext(n6, "Acquirer Processor", "Card authorization, capture and settlement")
-System_Ext(n7, "3-D Secure Directory Server", "Card network cardholder authentication")
-System_Ext(n8, "Bank Payout Rail", "Bank transfers for merchant payouts")
-System_Ext(n9, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
-rectangle "PayStream — Container" as n10
-Person(n11, "Shopper", "Pays for orders at merchant checkouts")
-Person(n12, "Merchant", "Accepts payments and receives payouts")
-Person(n13, "Risk Analyst", "Reviews flagged payments and fraud rules")
-Person(n14, "Finance Operations", "Reconciles settlements and payouts")
-System_Ext(n15, "Acquirer Processor", "Card authorization, capture and settlement")
-System_Ext(n16, "3-D Secure Directory Server", "Card network cardholder authentication")
-System_Ext(n17, "Bank Payout Rail", "Bank transfers for merchant payouts")
-System_Ext(n18, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
-System_Boundary(n19, "PayStream") {
-  Container(n20, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
-  Container(n21, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
-  Container(n22, "Payments API", "Go", "Public REST API for payment intents, captures and refunds")
-  Container(n23, "Card Vault", "Rust", "Tokenizes card numbers inside the cardholder data environment")
-  Container(n24, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
-  Container(n25, "Fraud Scoring", "Python ML model", "Scores each payment for fraud risk before authorization")
-  Container(n26, "Ledger Service", "Kotlin", "Double-entry ledger of balances, fees and payouts")
-  Container(n27, "Webhook Dispatcher", "Node.js", "Signs and delivers payment events to merchants, with retries")
-  Container(n28, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
-  ContainerDb(n29, "Payments Database", "PostgreSQL", "Payment intents, merchants and API keys")
-  ContainerDb(n30, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
-  ContainerDb(n31, "Idempotency Cache", "Redis", "Short-lived idempotency keys and responses")
-  ContainerQueue(n32, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
-  ContainerDb(n33, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
-  ContainerDb(n34, "Reporting Warehouse", "Columnar warehouse", "Reconciliation and finance analytics")
-  ContainerDb(n35, "Settlement Archive", "Object storage", "Raw acquirer settlement files")
+rectangle "PayStream — Context" as panel_0 {
+  System(n1, "PayStream", "Online payments platform: checkout, card processing, ledger and payouts")
+  Person(n2, "Shopper", "Pays for orders at merchant checkouts")
+  Person(n3, "Merchant", "Accepts payments and receives payouts")
+  Person(n4, "Risk Analyst", "Reviews flagged payments and fraud rules")
+  Person(n5, "Finance Operations", "Reconciles settlements and payouts")
+  System_Ext(n6, "Acquirer Processor", "Card authorization, capture and settlement")
+  System_Ext(n7, "3-D Secure Directory Server", "Card network cardholder authentication")
+  System_Ext(n8, "Bank Payout Rail", "Bank transfers for merchant payouts")
+  System_Ext(n9, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
 }
-rectangle "Card Vault — Component" as n36
-Container(n37, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
-Container(n38, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
-ContainerDb(n39, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
-Container_Boundary(n40, "Card Vault") {
-  Component(n41, "Card Tokenizer", "Rust", "Swaps card numbers for single-purpose tokens")
-  Component(n42, "Envelope Encryptor", "Rust", "Encrypts card data with per-record data keys")
+rectangle "PayStream — Container" as panel_1 {
+  Person(n11, "Shopper", "Pays for orders at merchant checkouts")
+  Person(n12, "Merchant", "Accepts payments and receives payouts")
+  Person(n13, "Risk Analyst", "Reviews flagged payments and fraud rules")
+  Person(n14, "Finance Operations", "Reconciles settlements and payouts")
+  System_Ext(n15, "Acquirer Processor", "Card authorization, capture and settlement")
+  System_Ext(n16, "3-D Secure Directory Server", "Card network cardholder authentication")
+  System_Ext(n17, "Bank Payout Rail", "Bank transfers for merchant payouts")
+  System_Ext(n18, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
+  System_Boundary(n19, "PayStream") {
+    Container(n20, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
+    Container(n21, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
+    Container(n22, "Payments API", "Go", "Public REST API for payment intents, captures and refunds")
+    Container(n23, "Card Vault", "Rust", "Tokenizes card numbers inside the cardholder data environment")
+    Container(n24, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
+    Container(n25, "Fraud Scoring", "Python ML model", "Scores each payment for fraud risk before authorization")
+    Container(n26, "Ledger Service", "Kotlin", "Double-entry ledger of balances, fees and payouts")
+    Container(n27, "Webhook Dispatcher", "Node.js", "Signs and delivers payment events to merchants, with retries")
+    Container(n28, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
+    ContainerDb(n29, "Payments Database", "PostgreSQL", "Payment intents, merchants and API keys")
+    ContainerDb(n30, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
+    ContainerDb(n31, "Idempotency Cache", "Redis", "Short-lived idempotency keys and responses")
+    ContainerQueue(n32, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
+    ContainerDb(n33, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
+    ContainerDb(n34, "Reporting Warehouse", "Columnar warehouse", "Reconciliation and finance analytics")
+    ContainerDb(n35, "Settlement Archive", "Object storage", "Raw acquirer settlement files")
+  }
 }
-rectangle "Fraud Scoring — Component" as n43
-Person(n44, "Risk Analyst", "Reviews flagged payments and fraud rules")
-Container(n45, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
-Container_Boundary(n46, "Fraud Scoring") {
-  Component(n47, "Risk Scorer", "Python", "Returns a risk score from the hosted model")
-  Component(n48, "Rules Engine", "Python", "Applies merchant and platform block rules")
+rectangle "Card Vault — Component" as panel_2 {
+  Container(n37, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
+  Container(n38, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
+  ContainerDb(n39, "Vault Key Store", "Managed KMS", "Key-encryption keys for the card vault")
+  Container_Boundary(n40, "Card Vault") {
+    Component(n41, "Card Tokenizer", "Rust", "Swaps card numbers for single-purpose tokens")
+    Component(n42, "Envelope Encryptor", "Rust", "Encrypts card data with per-record data keys")
+  }
 }
-rectangle "Ledger Service — Component" as n49
-Container(n50, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
-ContainerDb(n51, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
-ContainerQueue(n52, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
-ContainerDb(n53, "Reporting Warehouse", "Columnar warehouse", "Reconciliation and finance analytics")
-Container_Boundary(n54, "Ledger Service") {
-  Component(n55, "Journal Writer", "Kotlin", "Posts balanced journal entries for money movements")
-  Component(n56, "Balance Calculator", "Kotlin", "Computes available and pending merchant balances")
+rectangle "Fraud Scoring — Component" as panel_3 {
+  Person(n44, "Risk Analyst", "Reviews flagged payments and fraud rules")
+  Container(n45, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
+  Container_Boundary(n46, "Fraud Scoring") {
+    Component(n47, "Risk Scorer", "Python", "Returns a risk score from the hosted model")
+    Component(n48, "Rules Engine", "Python", "Applies merchant and platform block rules")
+  }
 }
-rectangle "Payment Orchestrator — Component" as n57
-System_Ext(n58, "Acquirer Processor", "Card authorization, capture and settlement")
-System_Ext(n59, "3-D Secure Directory Server", "Card network cardholder authentication")
-Container(n60, "Payments API", "Go", "Public REST API for payment intents, captures and refunds")
-Container(n61, "Card Vault", "Rust", "Tokenizes card numbers inside the cardholder data environment")
-Container(n62, "Fraud Scoring", "Python ML model", "Scores each payment for fraud risk before authorization")
-ContainerQueue(n63, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
-Container_Boundary(n64, "Payment Orchestrator") {
-  Component(n65, "Payment State Machine", "Java", "Owns payment state transitions and retries")
-  Component(n66, "Acquirer Router", "Java", "Chooses the acquiring connection by card and region")
-  Component(n67, "3DS Handler", "Java", "Runs 3-D Secure cardholder authentication")
+rectangle "Ledger Service — Component" as panel_4 {
+  Container(n50, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
+  ContainerDb(n51, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
+  ContainerQueue(n52, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
+  ContainerDb(n53, "Reporting Warehouse", "Columnar warehouse", "Reconciliation and finance analytics")
+  Container_Boundary(n54, "Ledger Service") {
+    Component(n55, "Journal Writer", "Kotlin", "Posts balanced journal entries for money movements")
+    Component(n56, "Balance Calculator", "Kotlin", "Computes available and pending merchant balances")
+  }
 }
-rectangle "Payments API — Component" as n68
-System_Ext(n69, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
-Container(n70, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
-Container(n71, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
-Container(n72, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
-ContainerDb(n73, "Payments Database", "PostgreSQL", "Payment intents, merchants and API keys")
-ContainerDb(n74, "Idempotency Cache", "Redis", "Short-lived idempotency keys and responses")
-Container_Boundary(n75, "Payments API") {
-  Component(n76, "Merchant Authenticator", "Go", "Validates secret API keys and scopes")
-  Component(n77, "Idempotency Guard", "Go", "Makes retried requests return the original result")
-  Component(n78, "Payment Intents Controller", "Go", "Creates and confirms payment intents")
+rectangle "Payment Orchestrator — Component" as panel_5 {
+  System_Ext(n58, "Acquirer Processor", "Card authorization, capture and settlement")
+  System_Ext(n59, "3-D Secure Directory Server", "Card network cardholder authentication")
+  Container(n60, "Payments API", "Go", "Public REST API for payment intents, captures and refunds")
+  Container(n61, "Card Vault", "Rust", "Tokenizes card numbers inside the cardholder data environment")
+  Container(n62, "Fraud Scoring", "Python ML model", "Scores each payment for fraud risk before authorization")
+  ContainerQueue(n63, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")
+  Container_Boundary(n64, "Payment Orchestrator") {
+    Component(n65, "Payment State Machine", "Java", "Owns payment state transitions and retries")
+    Component(n66, "Acquirer Router", "Java", "Chooses the acquiring connection by card and region")
+    Component(n67, "3DS Handler", "Java", "Runs 3-D Secure cardholder authentication")
+  }
 }
-rectangle "3DS Handler — Code" as n79
-Boundary(n80, "3DS Handler", "component") {
-  Component(n81, "ThreeDSecureClient", "class", "Illustrative implementation\n+authenticate(payment): AuthenticationResult")
+rectangle "Payments API — Component" as panel_6 {
+  System_Ext(n69, "Merchant Webhook Endpoint", "Merchant back-end that calls the API and receives events")
+  Container(n70, "Checkout Web SDK", "TypeScript in the shopper's browser", "Hosted payment fields embedded in merchant checkout pages")
+  Container(n71, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
+  Container(n72, "Payment Orchestrator", "Java", "Drives each payment through authorization, capture and refund")
+  ContainerDb(n73, "Payments Database", "PostgreSQL", "Payment intents, merchants and API keys")
+  ContainerDb(n74, "Idempotency Cache", "Redis", "Short-lived idempotency keys and responses")
+  Container_Boundary(n75, "Payments API") {
+    Component(n76, "Merchant Authenticator", "Go", "Validates secret API keys and scopes")
+    Component(n77, "Idempotency Guard", "Go", "Makes retried requests return the original result")
+    Component(n78, "Payment Intents Controller", "Go", "Creates and confirms payment intents")
+  }
 }
-rectangle "Acquirer Router — Code" as n82
-Boundary(n83, "Acquirer Router", "component") {
-  Component(n84, "AcquirerRouter", "class", "Illustrative implementation\n+route(payment): AcquirerConnection")
+rectangle "3DS Handler — Code" as panel_7 {
+  Boundary(n80, "3DS Handler", "component") {
+    Component(n81, "ThreeDSecureClient", "class", "Illustrative implementation\n+authenticate(payment): AuthenticationResult")
+  }
 }
-rectangle "Balance Calculator — Code" as n85
-Boundary(n86, "Balance Calculator", "component") {
-  Component(n87, "BalanceCalculator", "class", "Illustrative implementation\n+balance(merchantId, currency): Balance")
+rectangle "Acquirer Router — Code" as panel_8 {
+  Boundary(n83, "Acquirer Router", "component") {
+    Component(n84, "AcquirerRouter", "class", "Illustrative implementation\n+route(payment): AcquirerConnection")
+  }
 }
-rectangle "Card Tokenizer — Code" as n88
-Boundary(n89, "Card Tokenizer", "component") {
-  Component(n90, "CardTokenizer", "class", "Illustrative implementation\n+tokenize(pan, expiry): CardToken\n+detokenize(token): CardData")
+rectangle "Balance Calculator — Code" as panel_9 {
+  Boundary(n86, "Balance Calculator", "component") {
+    Component(n87, "BalanceCalculator", "class", "Illustrative implementation\n+balance(merchantId, currency): Balance")
+  }
 }
-rectangle "Envelope Encryptor — Code" as n91
-Boundary(n92, "Envelope Encryptor", "component") {
-  Component(n93, "EnvelopeEncryptor", "class", "Illustrative implementation\n+encrypt(plaintext, keyId): Ciphertext\n+decrypt(ciphertext): Bytes")
+rectangle "Card Tokenizer — Code" as panel_10 {
+  Boundary(n89, "Card Tokenizer", "component") {
+    Component(n90, "CardTokenizer", "class", "Illustrative implementation\n+tokenize(pan, expiry): CardToken\n+detokenize(token): CardData")
+  }
 }
-rectangle "Idempotency Guard — Code" as n94
-Boundary(n95, "Idempotency Guard", "component") {
-  Component(n96, "IdempotencyGuard", "class", "Illustrative implementation\n+reserve(key, requestHash): Reservation\n+complete(key, response)")
+rectangle "Envelope Encryptor — Code" as panel_11 {
+  Boundary(n92, "Envelope Encryptor", "component") {
+    Component(n93, "EnvelopeEncryptor", "class", "Illustrative implementation\n+encrypt(plaintext, keyId): Ciphertext\n+decrypt(ciphertext): Bytes")
+  }
 }
-rectangle "Journal Writer — Code" as n97
-Boundary(n98, "Journal Writer", "component") {
-  Component(n99, "JournalWriter", "class", "Illustrative implementation\n+post(entries): JournalId")
+rectangle "Idempotency Guard — Code" as panel_12 {
+  Boundary(n95, "Idempotency Guard", "component") {
+    Component(n96, "IdempotencyGuard", "class", "Illustrative implementation\n+reserve(key, requestHash): Reservation\n+complete(key, response)")
+  }
 }
-rectangle "Merchant Authenticator — Code" as n100
-Boundary(n101, "Merchant Authenticator", "component") {
-  Component(n102, "ApiKeyAuthenticator", "class", "Illustrative implementation\n+authenticate(apiKey): Merchant\n+requireScope(merchant, scope)")
+rectangle "Journal Writer — Code" as panel_13 {
+  Boundary(n98, "Journal Writer", "component") {
+    Component(n99, "JournalWriter", "class", "Illustrative implementation\n+post(entries): JournalId")
+  }
 }
-rectangle "Payment Intents Controller — Code" as n103
-Boundary(n104, "Payment Intents Controller", "component") {
-  Component(n105, "PaymentIntentController", "class", "Illustrative implementation\n+create(request): PaymentIntent\n+confirm(id, cardToken): PaymentIntent\n+refund(id, amount): Refund")
+rectangle "Merchant Authenticator — Code" as panel_14 {
+  Boundary(n101, "Merchant Authenticator", "component") {
+    Component(n102, "ApiKeyAuthenticator", "class", "Illustrative implementation\n+authenticate(apiKey): Merchant\n+requireScope(merchant, scope)")
+  }
 }
-rectangle "Payment State Machine — Code" as n106
-Boundary(n107, "Payment State Machine", "component") {
-  Component(n108, "PaymentStateMachine", "class", "Illustrative implementation\n+authorize(payment): Authorization\n+capture(payment, amount): Capture\n+refund(payment, amount): Refund")
-  Component(n109, "PaymentState", "interface", "Illustrative implementation\n+next(event): PaymentState")
+rectangle "Payment Intents Controller — Code" as panel_15 {
+  Boundary(n104, "Payment Intents Controller", "component") {
+    Component(n105, "PaymentIntentController", "class", "Illustrative implementation\n+create(request): PaymentIntent\n+confirm(id, cardToken): PaymentIntent\n+refund(id, amount): Refund")
+  }
 }
-rectangle "Risk Scorer — Code" as n110
-Boundary(n111, "Risk Scorer", "component") {
-  Component(n112, "RiskScorer", "class", "Illustrative implementation\n+score(payment): RiskScore")
+rectangle "Payment State Machine — Code" as panel_16 {
+  Boundary(n107, "Payment State Machine", "component") {
+    Component(n108, "PaymentStateMachine", "class", "Illustrative implementation\n+authorize(payment): Authorization\n+capture(payment, amount): Capture\n+refund(payment, amount): Refund")
+    Component(n109, "PaymentState", "interface", "Illustrative implementation\n+next(event): PaymentState")
+  }
 }
-rectangle "Rules Engine — Code" as n113
-Boundary(n114, "Rules Engine", "component") {
-  Component(n115, "RuleSet", "class", "Illustrative implementation\n+evaluate(payment, score): Decision")
+rectangle "Risk Scorer — Code" as panel_17 {
+  Boundary(n111, "Risk Scorer", "component") {
+    Component(n112, "RiskScorer", "class", "Illustrative implementation\n+score(payment): RiskScore")
+  }
+}
+rectangle "Rules Engine — Code" as panel_18 {
+  Boundary(n114, "Rules Engine", "component") {
+    Component(n115, "RuleSet", "class", "Illustrative implementation\n+evaluate(payment, score): Decision")
+  }
 }
 Rel(n2, n1, "Enters card details at checkout [HTTPS]")
 Rel(n3, n1, "Reviews payments, refunds and payouts [HTTPS]")
