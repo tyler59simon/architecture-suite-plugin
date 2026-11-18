@@ -283,11 +283,26 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
 REFERENCE_KEYS = {"Ref", "Fn::GetAtt", "DependsOn", "depends_on", "depends_on_resource"}
 
 
-def _reference_operand(value):
-    """A reference target: a resource name, or a list of names and attributes."""
-    return isinstance(value, str) or (
-        isinstance(value, list) and all(isinstance(v, str) for v in value)
-    )
+class _Declared(frozenset):
+    """Declared resource names; `.parameters` adds the CloudFormation Parameters keys a
+    Ref (never a GetAtt) may also name."""
+
+    parameters = frozenset()
+
+
+def _declared_operand(value, known, every=False, ref=False):
+    """A reference operand that names something declared: a string or list whose first
+    name (the part before `.` of a GetAtt string) is in `known`; with `every`, all items."""
+    if ref:
+        if isinstance(value, str) and (
+            value.startswith("AWS::") or value in getattr(known, "parameters", ())
+        ):
+            return True
+    if isinstance(value, str):
+        return value.split(".", 1)[0] in known
+    if isinstance(value, list) and all(isinstance(v, str) for v in value) and value:
+        return all(v in known for v in value) if every else value[0] in known
+    return False
 
 
 def _masked(value, known=frozenset()):
@@ -296,7 +311,9 @@ def _masked(value, known=frozenset()):
     if isinstance(value, dict):
         if set(value) == {"intrinsic", "expression"} and isinstance(value["intrinsic"], str):
             # YAML short forms, exactly as _intrinsic builds them
-            if value["intrinsic"] in {"Ref", "GetAtt"} and _reference_operand(value["expression"]):
+            if value["intrinsic"] in {"Ref", "GetAtt"} and _declared_operand(
+                value["expression"], known, ref=value["intrinsic"] == "Ref"
+            ):
                 return value
             if value["intrinsic"] == "GetAtt":
                 return {**value, "expression": _getatt_masked(value["expression"], known)}
@@ -304,7 +321,10 @@ def _masked(value, known=frozenset()):
                 return {**value, "expression": _sub_masked(value["expression"], known)}
         return {
             k: v
-            if k in REFERENCE_KEYS and _reference_operand(v)
+            if k in REFERENCE_KEYS
+            and _declared_operand(
+                v, known, every=k in {"DependsOn", "depends_on", "depends_on_resource"}, ref=k == "Ref"
+            )
             else _sub_masked(v, known)
             if k == "Fn::Sub"
             else _getatt_masked(v, known)
@@ -394,13 +414,20 @@ def import_infrastructure(paths, bindings=None):
             # CloudFormation short tags are converted to data, never evaluated.
             raw = _documents(text)
             # CloudFormation logical IDs a sensitive GetAtt may keep (see _getatt_masked).
-            known = {
+            known = _Declared(
                 name
                 for doc in raw
                 if isinstance(doc, dict) and isinstance(doc.get("Resources"), dict)
                 for name in doc["Resources"]
                 if isinstance(name, str)
-            }
+            )
+            known.parameters = frozenset(
+                name
+                for doc in raw
+                if isinstance(doc, dict) and isinstance(doc.get("Parameters"), dict)
+                for name in doc["Parameters"]
+                if isinstance(name, str)
+            )
             docs = [scrub(doc) for doc in raw]
         except ValueError as exc:
             raise ValueError("Malformed infrastructure document") from exc

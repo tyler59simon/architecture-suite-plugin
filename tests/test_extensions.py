@@ -1602,6 +1602,61 @@ def test_plan_of_2500_resources_imports_in_seconds(tmp_path):
     assert seconds / base < 15
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"Ref": "hunter2"},
+        {"Fn::GetAtt": ["hunter2", "Arn"]},
+        {"Fn::GetAtt": "hunter2.Arn"},
+        {"intrinsic": "Ref", "expression": "hunter2"},
+        {"intrinsic": "GetAtt", "expression": "hunter2.Arn"},
+        {"DependsOn": ["hunter2"]},
+        {"DependsOn": ["Db", "hunter2"]},
+    ],
+)
+def test_reference_to_an_undeclared_name_under_a_secret_name_is_masked(tmp_path, value):
+    doc = {
+        "Resources": {
+            "Db": {"Type": "AWS::RDS::DBInstance"},
+            "Service": {
+                "Type": "Custom::Service",
+                "Properties": {"env": [{"name": "DB_PASSWORD", "value": value}]},
+            },
+        }
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    assert "hunter2" not in json.dumps(topology) + json.dumps(topology_plan(topology))
+
+
+def test_declared_references_under_a_secret_name_stay_readable(tmp_path):
+    doc = {
+        "Parameters": {"DbPassword": {"Type": "String"}},
+        "Resources": {
+            "Db": {"Type": "AWS::RDS::DBInstance"},
+            "Service": {
+                "Type": "Custom::Service",
+                "Properties": {
+                    "env": [
+                        {"name": "DB_PASSWORD", "value": {"Ref": "DbPassword"}},
+                        {"name": "DB_TOKEN", "value": {"Ref": "AWS::Region"}},
+                        {"name": "DB_SECRET", "value": {"Ref": "Db"}},
+                    ]
+                },
+            },
+        },
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    text = json.dumps(topology)
+    assert '"Ref": "DbPassword"' in text and '"Ref": "AWS::Region"' in text
+    assert [(e["source_id"][8:], e["destination_id"][8:]) for e in topology["relationships"]] == [
+        ("service", "db")
+    ]
+
+
 def test_getatt_under_a_secret_name_masks_a_name_that_declares_nothing(tmp_path):
     """Only a declared resource name survives masking; other text in a sensitive value does not."""
     doc = {
