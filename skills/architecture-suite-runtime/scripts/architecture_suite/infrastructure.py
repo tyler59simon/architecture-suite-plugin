@@ -121,6 +121,8 @@ def _sub(target, names):
 
 TERRAFORM_INDEX = re.compile(r"\[(?:\"[^\"]*\"|[^\]]*)\]")
 MODULE_INSTANCE = re.compile(r"^(?:module\.[^.\[]+(?:\[(?:\"[^\"]*\"|[^\]]*)\])?\.)*")
+# `aws_subnet.app[0].id` -> `aws_subnet.app[0]`: type, name and instance key, if any.
+TERRAFORM_REFERENCE = re.compile(r"([^.\[\]]+)\.([^.\[\]]+)(?:\[(?:\"[^\"]*\"|[^\]]*)\])?")
 
 
 def _config_address(address: str) -> str:
@@ -135,17 +137,26 @@ def _module_instance(address: str) -> str:
 
 
 def _terraform_references(module, prefix=""):
-    """{config address: referenced resource addresses} from a plan's `configuration`."""
+    """{config address: referenced resource addresses} from a plan's `configuration`.
+    A referenced address keeps its instance key (`aws_subnet.app[0]`) when it has one."""
     found = {}
 
     def collect(value, into):
         if isinstance(value, dict):
+            listed = set()
             for ref in value.get("references", []) or []:
-                parts = ref.split(".") if isinstance(ref, str) else []
-                if len(parts) >= 2 and parts[0] not in {
+                match = TERRAFORM_REFERENCE.match(ref) if isinstance(ref, str) else None
+                if match and match.group(1) not in {
                     "var", "local", "data", "module", "each", "count", "path", "self", "terraform"
                 }:
-                    into.add(prefix + _config_address(".".join(parts[:2])))
+                    listed.add(match.group())
+            # Terraform lists `aws_subnet.app[0].id`, `aws_subnet.app[0]` and `aws_subnet.app`
+            # for one reference: keep the instance, not the whole resource.
+            into.update(
+                prefix + ref
+                for ref in listed
+                if not any(other != ref and _config_address(other) == ref for other in listed)
+            )
             for child in value.values():
                 collect(child, into)
         elif isinstance(value, list):
@@ -522,15 +533,29 @@ def import_infrastructure(paths, bindings=None):
                 )
                 # Terraform: references recorded in the plan's configuration section
                 # (`bucket = aws_s3_bucket.logs.id`), mapped to the planned instances in
-                # the same module instance (a reference never leaves its module).
-                configured = {
-                    names[other]
-                    for ref in terraform_refs.get(_config_address(name), ())
-                    for other in names
-                    if _config_address(other) == ref
-                    and _module_instance(other) == _module_instance(name)
-                    and other != name
-                }
+                # the same module instance (a reference never leaves its module). An
+                # indexed reference names one instance; an unindexed one that fits
+                # several count or for_each instances is a finding, not an edge to each.
+                module = _module_instance(name)
+                configured = set()
+                for ref in sorted(terraform_refs.get(_config_address(name), ())):
+                    targets = [
+                        other
+                        for other in names
+                        if ref in {_config_address(other), _config_address(module) + other[len(module):]}
+                        and _module_instance(other) == module
+                        and other != name
+                    ]
+                    if len(targets) > 1:
+                        findings.append(
+                            {
+                                "resource": ident,
+                                "message": f"Unindexed reference to {ref} fits {len(targets)} "
+                                "instances; no edge guessed",
+                            }
+                        )
+                    else:
+                        configured.update(names[other] for other in targets)
                 for target in sorted(set(refs(props)) | configured):
                     edges.append(
                         {

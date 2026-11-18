@@ -688,6 +688,49 @@ def test_terraform_references_stay_inside_their_module_instance(tmp_path):
         assert "subnet" in source and "vpc" in destination and env in destination
 
 
+def _counted_subnets(tmp_path, references):
+    """Two count instances of aws_subnet.app and an instance that references them."""
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    {"address": address, "type": address.split(".")[0], "values": {}}
+                    for address in ("aws_subnet.app[0]", "aws_subnet.app[1]", "aws_instance.web")
+                ]
+            }
+        },
+        "configuration": {
+            "root_module": {
+                "resources": [
+                    {"address": "aws_instance.web",
+                     "expressions": {"subnet_id": {"references": references}}},
+                ]
+            }
+        },
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc))
+    return import_infrastructure([path])
+
+
+def test_terraform_indexed_reference_links_only_that_instance(tmp_path):
+    # Terraform lists the attribute, the instance and the whole resource.
+    topology = _counted_subnets(
+        tmp_path, ["aws_subnet.app[0].id", "aws_subnet.app[0]", "aws_subnet.app"]
+    )
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-aws-instance-web", "input-0-aws-subnet-app-0")}
+    assert not any("aws_subnet.app" in f["message"] for f in topology["findings"])
+
+
+def test_terraform_unindexed_reference_to_counted_resource_is_a_finding(tmp_path):
+    topology = _counted_subnets(tmp_path, ["aws_subnet.app"])
+    assert not topology["relationships"]
+    finding = next(f for f in topology["findings"] if "aws_subnet.app" in f["message"])
+    assert finding["resource"] == "input-0-aws-instance-web"
+    assert finding["message"] in topology_plan(topology)["gaps"]
+
+
 def test_cloudformation_getatt_and_sub_references(tmp_path):
     template = (
         "Resources:\n"
