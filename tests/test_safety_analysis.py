@@ -14,6 +14,7 @@ from architecture_suite.safety import (
     canonical_output_directory,
     contained_path,
     redact,
+    redact_lines,
     require_write_authorization,
     run_bounded,
     safe_text,
@@ -333,6 +334,23 @@ def test_scan_closes_the_descriptor_when_wrapping_it_fails(tmp_path, monkeypatch
             os.fstat(fd)
 
 
+def test_scan_never_closes_a_descriptor_twice(tmp_path, monkeypatch):
+    # CPython's os.fdopen can close the descriptor itself before raising.
+    (tmp_path / "ok.py").write_text("y = 1")
+    import architecture_suite.safety as safety
+
+    real_close = os.close
+
+    def fdopen_that_closes(fd, *a, closefd=True, **k):
+        if closefd:
+            real_close(fd)
+        raise RuntimeError("wrapper failed")
+
+    monkeypatch.setattr(safety.os, "fdopen", fdopen_that_closes)
+    with pytest.raises(RuntimeError, match="wrapper failed"):
+        scan_repository(tmp_path)
+
+
 @pytest.mark.parametrize(
     "manifest,source,code,stack",
     [
@@ -641,6 +659,11 @@ def test_credentials_are_detected(text):
 )
 def test_ordinary_text_is_not_a_credential(text):
     assert redact(text) == text
+
+
+def test_a_slash_free_password_keeps_its_shorter_reading():
+    assert redact("http://u:p@h/x@y") == "http://[REDACTED]@h/x@y"
+    assert redact_lines("a\nhttp://u:p@h\nb") == "a\nhttp://[REDACTED]@h\nb"
 
 
 def test_plan_credential_finding_names_the_field(plan):

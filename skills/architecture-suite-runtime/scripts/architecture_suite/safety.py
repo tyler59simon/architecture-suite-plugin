@@ -45,8 +45,7 @@ _PRIVATE_KEY = r"-----BEGIN [A-Z ]*PRIVATE KEY-----"
 SECRET = re.compile(
     rf"{_TOKENS}|{_URI_USER}(?:{_URI_PASSWORD}|{_URI_SLASH_PASSWORD})|{_PRIVATE_KEY}"
 )
-# Redaction masks everything else first, so a slash-aware URI match can never swallow
-# part of a `token=...` value and leave the rest of it in clear text.
+# Redaction masks the union of both patterns' matches (see _redact).
 _SECRET_FIRST = re.compile(rf"{_TOKENS}|{_URI_USER}{_URI_PASSWORD}|{_PRIVATE_KEY}")
 _SLASH_URI = re.compile(rf"(?i){_URI_USER}{_URI_SLASH_PASSWORD}")
 PROMPT_INJECTION = re.compile(
@@ -101,9 +100,32 @@ def _mask(match: re.Match[str]) -> str:
     return f"{scheme}://[REDACTED]@" if scheme else "[REDACTED]"
 
 
+def _redact(value: str, keep_newlines: bool) -> str:
+    """Mask the union of every match: overlapping matches become one masked span, so no
+    match can cut another short and leave part of a secret in clear text."""
+    first = list(_SECRET_FIRST.finditer(value))
+    uri_starts = {m.start() for m in first if m["scheme"]}
+    # Where the `/`-stopping URI form matched, its shorter reading of the password stands.
+    matches = first + [m for m in _SLASH_URI.finditer(value) if m.start() not in uri_starts]
+    matches.sort(key=lambda m: (m.start(), -m.end()))
+    out, pos, i = [], 0, 0
+    while i < len(matches):
+        lead, end = matches[i], matches[i].end()
+        i += 1
+        while i < len(matches) and matches[i].start() < end:
+            end = max(end, matches[i].end())
+            i += 1
+        out += [value[pos : lead.start()], _mask(lead)]
+        if keep_newlines:
+            out.append("\n" * value.count("\n", lead.start(), end))
+        pos = end
+    out.append(value[pos:])
+    return "".join(out)
+
+
 def redact(value: str) -> str:
     """Remove credential-like values before persisting evidence."""
-    return _SLASH_URI.sub(_mask, _SECRET_FIRST.sub(_mask, value))
+    return _redact(value, keep_newlines=False)
 
 
 def detect_prompt_injection(value: str) -> bool:
@@ -421,10 +443,7 @@ def run_bounded(
 
 def redact_lines(value: str) -> str:
     """`redact`, but each replacement keeps the newlines it removes (line numbers stay valid)."""
-    def keep(match):
-        return _mask(match) + "\n" * match[0].count("\n")
-
-    return _SLASH_URI.sub(keep, _SECRET_FIRST.sub(keep, value))
+    return _redact(value, keep_newlines=True)
 
 
 class _RedactedText(str):
@@ -514,28 +533,29 @@ def scan_repository(
                     os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0),
                 )
                 try:
-                    handle = os.fdopen(fd, "rb")
-                except BaseException:
+                    # The descriptor is closed here, never by the file object, so a failing
+                    # os.fdopen cannot leak it or close it twice.
+                    with os.fdopen(fd, "rb", closefd=False) as handle:
+                        info = os.fstat(fd)
+                        if not stat.S_ISREG(info.st_mode):
+                            result.skipped_files += 1
+                            result.skipped.append(f"{relative}: not a regular file")
+                            continue
+                        size = info.st_size
+                        if size > max_file_bytes:
+                            result.skipped_files += 1
+                            result.skipped_bytes += size
+                            result.skipped.append(f"{relative}: file size limit")
+                            continue
+                        if result.bytes_read + size > max_total_bytes:
+                            result.truncated = True
+                            return result
+                        # Read one byte past the budget so a file that grew after fstat()
+                        # cannot exceed it.
+                        budget = min(max_file_bytes, max_total_bytes - result.bytes_read)
+                        data = handle.read(budget + 1)
+                finally:
                     os.close(fd)
-                    raise
-                with handle:
-                    info = os.fstat(handle.fileno())
-                    if not stat.S_ISREG(info.st_mode):
-                        result.skipped_files += 1
-                        result.skipped.append(f"{relative}: not a regular file")
-                        continue
-                    size = info.st_size
-                    if size > max_file_bytes:
-                        result.skipped_files += 1
-                        result.skipped_bytes += size
-                        result.skipped.append(f"{relative}: file size limit")
-                        continue
-                    if result.bytes_read + size > max_total_bytes:
-                        result.truncated = True
-                        return result
-                    # Read one byte past the budget so a file that grew after fstat() cannot exceed it.
-                    budget = min(max_file_bytes, max_total_bytes - result.bytes_read)
-                    data = handle.read(budget + 1)
                 if len(data) > max_file_bytes:
                     result.skipped_files += 1
                     result.skipped_bytes += len(data)

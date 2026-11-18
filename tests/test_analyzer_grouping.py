@@ -192,12 +192,13 @@ def test_secret_assigned_and_odd_userinfo_urls_never_leak_through_the_inventory(
         "B=redis://u:at@sign9tail@cache:6379\n"
         "C=redis://u:pa/ss9slash@cache:6379/0\n"
         "D=https://host:8443/users/token=abc@secretTail9?x=1\n"
+        "E=https://alice:private9/part/token=abcd7q@db.example\n"
     )
     repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.txt": config})
     for texts in (scan_repository(repo).texts, {"app/settings.txt": config}):
         text = json.dumps(dependency_inventory(texts))
         for leaked in ("assignpw1", "colonpw12", "apo", "strophe1", "at@sign9", "sign9tail", "ss9slash",
-                       "secretTail9"):
+                       "secretTail9", "private9", "abcd7q"):
             assert leaked not in text, leaked
 
 
