@@ -48,26 +48,31 @@ jobs:
           version=$(python -c "import architecture_suite; print(architecture_suite.__version__)")
           test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
           echo "PLUGIN_BRANCH=architecture-suite-$version" >> "$GITHUB_ENV"
-      - name: Versioned plugin branch does not exist yet
-        run: |
-          if git ls-remote --exit-code --heads origin "$PLUGIN_BRANCH" >/dev/null; then
-            echo "Branch $PLUGIN_BRANCH already exists; each release branch is published once."; exit 1
-          fi
       - name: Build host archives and the release plugin tree
         run: python tools/package_hosts.py
       - name: Checksums
         working-directory: dist/hosts
         run: sha256sum *.zip > SHA256SUMS
+      # A rerun after a late failure finds the release already there: refresh its assets
+      # instead of creating it again.
       - name: GitHub release with host archives
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
-            --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; refreshing its assets."
+            gh release upload "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/hosts/*.zip dist/hosts/SHA256SUMS \
+              --title "Architecture Suite $GITHUB_REF_NAME" --notes-file CHANGELOG.md --verify-tag
+          fi
       # latest and architecture-suite-* are protected by a ruleset: no updates except through a
       # reviewed pull request, no force-pushes, no deletions. Creating a new branch is allowed,
       # so the versioned branch (and latest, on the first release) is created by push; later
       # updates to latest arrive as a pull request for the maintainer to approve and merge.
+      # The steps below can be rerun after a late failure: an existing versioned branch is
+      # reused only when its tree is identical to the tree just built, so a branch is never
+      # silently replaced or left holding other content.
       - name: Publish the versioned branch
         run: |
           git config user.name "github-actions[bot]"
@@ -76,7 +81,15 @@ jobs:
           rsync -a --delete --exclude .git dist/plugin/ version-tree/
           git -C version-tree add -A
           git -C version-tree commit -m "Architecture Suite $GITHUB_REF_NAME"
-          git push origin "$PLUGIN_BRANCH"
+          if git ls-remote --exit-code --heads origin "$PLUGIN_BRANCH" >/dev/null; then
+            git fetch origin "$PLUGIN_BRANCH"
+            if [ "$(git rev-parse "$PLUGIN_BRANCH^{tree}")" != "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+              echo "Branch $PLUGIN_BRANCH already exists with different content; each release branch is published once."; exit 1
+            fi
+            echo "Branch $PLUGIN_BRANCH already exists with identical content; reusing it."
+          else
+            git push origin "$PLUGIN_BRANCH"
+          fi
       - name: Create latest, or open the pull request that updates it
         env:
           GH_TOKEN: ${{ github.token }}
@@ -86,13 +99,29 @@ jobs:
             echo "Created latest at $GITHUB_REF_NAME."
             exit 0
           fi
-          staging="plugin-staging/latest-$GITHUB_REF_NAME"
           git fetch origin latest
-          git worktree add -b "$staging" latest-tree origin/latest
-          rsync -a --delete --exclude .git dist/plugin/ latest-tree/
-          git -C latest-tree add -A
-          git -C latest-tree commit -m "Architecture Suite $GITHUB_REF_NAME"
-          git push origin "$staging"
+          if [ "$(git rev-parse "$PLUGIN_BRANCH^{tree}")" = "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+            echo "latest already holds $GITHUB_REF_NAME; nothing to do."
+            exit 0
+          fi
+          staging="plugin-staging/latest-$GITHUB_REF_NAME"
+          if git ls-remote --exit-code --heads origin "$staging" >/dev/null; then
+            git fetch origin "$staging"
+            if [ "$(git rev-parse "$PLUGIN_BRANCH^{tree}")" != "$(git rev-parse 'FETCH_HEAD^{tree}')" ]; then
+              echo "Branch $staging already exists with different content."; exit 1
+            fi
+            echo "Branch $staging already pushed; checking for its pull request."
+          else
+            git worktree add -b "$staging" latest-tree origin/latest
+            rsync -a --delete --exclude .git dist/plugin/ latest-tree/
+            git -C latest-tree add -A
+            git -C latest-tree commit -m "Architecture Suite $GITHUB_REF_NAME"
+            git push origin "$staging"
+          fi
+          if [ -n "$(gh pr list --base latest --head "$staging" --state open --json number --jq '.[].number')" ]; then
+            echo "A pull request from $staging is already open."
+            exit 0
+          fi
           body="Updates the latest plugin branch to $GITHUB_REF_NAME, built by the release workflow"
           body="$body from the $GITHUB_REF_NAME tag and identical to $PLUGIN_BRANCH."
           body="$body Users on #latest receive the update once this is merged."
