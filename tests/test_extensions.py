@@ -1063,6 +1063,21 @@ def test_scenario_cards_clear_a_long_title_and_lifelines_start_at_the_card(model
     assert min(b.y for b in short.boxes if b.role == "card") == 120
 
 
+def test_scenario_branch_ids_stay_out_of_the_element_id_namespace(model, nested):
+    """A participant whose ID matches a synthetic branch ID keeps a box of its own."""
+    probe = scenario_scene(nested, model)
+    # One more participant shifts every later box count by one.
+    first = next(b.id for b in probe.boxes if b.role == "panel-title")
+    branch = "branch-" + str(int(first.split("-")[1]) + 1)
+    model["elements"].append({"id": branch, "name": "Branch", "type": "container"})
+    nested["participants"].append(branch)
+    scene = scenario_scene(nested, model)
+    ids = [b.id for b in scene.boxes]
+    assert len(ids) == len(set(ids))
+    assert next(b for b in scene.boxes if b.id == branch).role == "card"
+    assert len([b for b in scene.boxes if b.role == "panel-title"]) == 2
+
+
 def test_baseline_and_rules_are_validated(model, tmp_path):
     result = check_rules(model, RULES)
     baseline = {"schema_version": "architecture-baseline/v1", "fingerprints": result["fingerprints"]}

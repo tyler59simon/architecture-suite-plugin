@@ -245,7 +245,7 @@ def scenario_scene(scenario, model):
                     )
                     scene.boxes.append(
                         Box(
-                            "branch-" + str(len(scene.boxes)),
+                            free("branch-" + str(len(scene.boxes))),
                             "panel-title",
                             left + 20,
                             y + 4,
