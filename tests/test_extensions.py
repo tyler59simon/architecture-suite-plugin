@@ -474,6 +474,52 @@ def test_packages_and_install(tmp_path):
             install_host(skills, args[0], args[1], args[2])
 
 
+def test_dry_runs_list_files_without_building_diagrams(
+    inputs, tmp_path, scenario, monkeypatch, capsys
+):
+    from architecture_suite import extensions, renderers, scene
+
+    scenario_file = tmp_path / "scenario.json"
+    scenario_file.write_text(json.dumps(scenario))
+    scenario_args = [
+        "scenario-render",
+        "--model",
+        str(inputs[0]),
+        "--scenario",
+        str(scenario_file),
+        "--format",
+        "mermaid,plantuml,svg,drawio",
+    ]
+    explore_args = ["explore", "--model", str(inputs[0]), "--scenario", str(scenario_file)]
+    real = {}
+    for name, command in (("scenario", scenario_args), ("explore", explore_args)):
+        out = tmp_path / ("real-" + name)
+        assert main(command + ["--output", str(out), "--confirm-write"]) == 0
+        real[name] = sorted(
+            p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file()
+        )
+        capsys.readouterr()
+
+    def unavailable(*args, **kwargs):
+        raise AssertionError("a dry run must not build diagrams")
+
+    for owner, names in (
+        (extensions, ("scenario_scene", "explorer_html", "render_scene_svg", "scene_vsdx")),
+        (scene, ("layout_graph",)),
+        (renderers, ("browser_page",)),
+    ):
+        for name in names:
+            monkeypatch.setattr(owner, name, unavailable)
+    for name, command in (("scenario", scenario_args), ("explore", explore_args)):
+        out = tmp_path / ("dry-" + name)
+        assert main(command + ["--output", str(out), "--dry-run"]) == 0
+        listed = json.loads(capsys.readouterr().out)["files"]
+        assert not out.exists()
+        assert sorted(f for f in listed if not f.startswith(".")) == [
+            f for f in real[name] if not f.startswith(".")
+        ]
+
+
 def test_failure_controls_and_bindings(inputs, tmp_path, scenario):
     path = tmp_path / "infra.yaml"
     path.write_text(

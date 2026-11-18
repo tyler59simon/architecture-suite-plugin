@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from functools import cache
 from pathlib import Path
 from .model import format_findings, load_model, validate_model
 from .safety import (
@@ -150,7 +151,6 @@ def _cmd_extension(args):
         if args.command == "scenario-lint":
             print(json.dumps({"ok": True, "name": scenario["name"]}))
             return 0
-        scene = scenario_scene(scenario, model)
         formats = (
             {x.strip().lower() for x in args.format.split(",") if x.strip()}
             if args.format.strip().lower() != "all"
@@ -160,38 +160,40 @@ def _cmd_extension(args):
             raise ValueError(
                 "Invalid scenario format: use all or " + ",".join(sorted(EXTENSIONS))
             )
+        scene = cache(lambda: scenario_scene(scenario, model))
+        # Built at write time: a dry run only needs the file names.
         for fmt in formats:
             name = "scenario." + EXTENSIONS[fmt]
             files[name] = (
-                scenario_mermaid(scenario, model)
+                (lambda: scenario_mermaid(scenario, model))
                 if fmt == "mermaid"
-                else scenario_plantuml(scenario, model)
+                else (lambda: scenario_plantuml(scenario, model))
                 if fmt == "plantuml"
-                else render_scene_svg(scene)
+                else (lambda: render_scene_svg(scene()))
                 if fmt == "svg"
-                else render_scene_drawio(scene)
+                else (lambda: render_scene_drawio(scene()))
                 if fmt == "drawio"
-                else scene_vsdx(scene)
+                else (lambda: scene_vsdx(scene()))
                 if fmt == "visio"
                 else None
             )
         binary = scene
     else:
         model = _model(args.model, "--model")
-        files = {
-            "explorer.html": explorer_html(
-                model,
-                [_read(p, "--scenario") for p in args.scenario],
-                _document(
-                    args.diff,
-                    "architecture-diff/v1",
-                    {"changes": list, "changed": bool},
-                    "--diff",
-                )
-                if args.diff
-                else None,
+        scenarios = [_read(p, "--scenario") for p in args.scenario]
+        for item in scenarios:
+            validate_scenario(item, model)
+        diff = (
+            _document(
+                args.diff,
+                "architecture-diff/v1",
+                {"changes": list, "changed": bool},
+                "--diff",
             )
-        }
+            if args.diff
+            else None
+        )
+        files = {"explorer.html": lambda: explorer_html(model, scenarios, diff)}
     output = canonical_output_directory(Path(args.output))
     changes = ownership_changes(output, args.command, list(files))
     summary = {
@@ -211,9 +213,12 @@ def _cmd_extension(args):
     ) as stage:
         for name, value in files.items():
             path = contained_path(stage, name)
+            if callable(value):
+                value = value()
             if value is None:
+                drawing = binary()
                 render_svg_png(
-                    render_scene_svg(binary), path, binary.width, binary.height
+                    render_scene_svg(drawing), path, drawing.width, drawing.height
                 )
             elif isinstance(value, bytes):
                 path.write_bytes(value)
