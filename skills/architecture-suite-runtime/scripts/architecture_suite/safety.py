@@ -32,13 +32,23 @@ URI_SCHEMES = r"https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?"
 # so a credentialed URL in compact JSON never runs into the next field. When that finds no
 # `@`, a password that is empty or contains `/` (up to 256 characters, to keep matching
 # linear) ends at the last `@` before whitespace, `?`, `#` or an unescaped `"`.
-SECRET = re.compile(
+_TOKENS = (
     r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"
     r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
     r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
     r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
-    rf"|(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:(?:(?:[^\s/?#\"\\]|\\.)+@|(?:[^\s?#\"\\]|\\.){{0,256}}@)|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 )
+_URI_USER = rf"(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:"
+_URI_PASSWORD = r"(?:[^\s/?#\"\\]|\\.)+@"
+_URI_SLASH_PASSWORD = r"(?:[^\s?#\"\\]|\\.){0,256}@"
+_PRIVATE_KEY = r"-----BEGIN [A-Z ]*PRIVATE KEY-----"
+SECRET = re.compile(
+    rf"{_TOKENS}|{_URI_USER}(?:{_URI_PASSWORD}|{_URI_SLASH_PASSWORD})|{_PRIVATE_KEY}"
+)
+# Redaction masks everything else first, so a slash-aware URI match can never swallow
+# part of a `token=...` value and leave the rest of it in clear text.
+_SECRET_FIRST = re.compile(rf"{_TOKENS}|{_URI_USER}{_URI_PASSWORD}|{_PRIVATE_KEY}")
+_SLASH_URI = re.compile(rf"(?i){_URI_USER}{_URI_SLASH_PASSWORD}")
 PROMPT_INJECTION = re.compile(
     r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|(?:reveal|print|exfiltrate).{0,40}(?:secret|token|password)|(?:system|developer)\s+prompt|run\s+(?:this|the following)\s+(?:command|script)",
     re.I,
@@ -93,7 +103,7 @@ def _mask(match: re.Match[str]) -> str:
 
 def redact(value: str) -> str:
     """Remove credential-like values before persisting evidence."""
-    return SECRET.sub(_mask, value)
+    return _SLASH_URI.sub(_mask, _SECRET_FIRST.sub(_mask, value))
 
 
 def detect_prompt_injection(value: str) -> bool:
@@ -411,7 +421,10 @@ def run_bounded(
 
 def redact_lines(value: str) -> str:
     """`redact`, but each replacement keeps the newlines it removes (line numbers stay valid)."""
-    return SECRET.sub(lambda m: _mask(m) + "\n" * m[0].count("\n"), value)
+    def keep(match):
+        return _mask(match) + "\n" * match[0].count("\n")
+
+    return _SLASH_URI.sub(keep, _SECRET_FIRST.sub(keep, value))
 
 
 class _RedactedText(str):
