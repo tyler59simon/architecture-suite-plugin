@@ -31,7 +31,7 @@ SECRET = re.compile(
     r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
     r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
     r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
-    r"|(?:https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?)://[^/\s:@]*:[^@\s/]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|(?:https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?)://[^/\s:@?#]*:[^@\s/?#]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 )
 PROMPT_INJECTION = re.compile(
     r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|(?:reveal|print|exfiltrate).{0,40}(?:secret|token|password)|(?:system|developer)\s+prompt|run\s+(?:this|the following)\s+(?:command|script)",

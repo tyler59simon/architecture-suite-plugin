@@ -530,6 +530,8 @@ def test_credentials_are_detected(text):
         "Stores the session token: Redis-backed cache",
         "Reset password: email link",
         "secret: none",
+        "redis://cache:6379?client_name=ops@example.com",
+        "https://example.com:8443#contact@example.com",
     ],
 )
 def test_ordinary_text_is_not_a_credential(text):
