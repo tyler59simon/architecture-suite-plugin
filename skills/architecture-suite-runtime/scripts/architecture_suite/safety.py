@@ -401,10 +401,13 @@ class _RedactedText(str):
     """Redacted file text; `source` keeps the original for in-memory parsing only.
 
     Redaction can break syntax, so parsers read `source` and redact what they record.
+    A redaction keeps the newlines it removes so line numbers match the file.
     """
 
     def __new__(cls, source: str):
-        text = super().__new__(cls, redact(source))
+        text = super().__new__(
+            cls, SECRET.sub(lambda m: "[REDACTED]" + "\n" * m[0].count("\n"), source)
+        )
         text.source = source
         return text
 

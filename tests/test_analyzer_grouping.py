@@ -185,6 +185,21 @@ def test_url_assigned_to_a_secret_name_stays_out_of_the_inventory(tmp_path):
     assert "abc123secret" not in text and "hooks.example.com" not in text
 
 
+def test_connection_lines_survive_a_redaction_that_spans_a_newline(tmp_path):
+    config = (
+        '{\n  "password":\n    "hunter2",\n  "name": "app",\n'
+        '  "api": "https://api.example.com/v1"\n}\n'
+    )
+    repo = write(tmp_path / "repo", {"pyproject.toml": "", "config.json": config})
+    scan = scan_repository(repo)
+    assert scan.texts["config.json"].count("\n") == config.count("\n")
+    report = dependency_inventory(scan.texts)
+    assert [(c["target"], c["line"]) for c in report["connections"]] == [
+        ("https://api.example.com/v1", 5)
+    ]
+    assert "hunter2" not in json.dumps(report)
+
+
 def test_python_syntax_error_is_a_plan_gap(tmp_path):
     repo = write(tmp_path / "repo", {"pyproject.toml": "", "broken.py": "x = 1\ndef f(:\n"})
     scan = scan_repository(repo)
