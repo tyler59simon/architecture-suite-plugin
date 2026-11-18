@@ -290,48 +290,50 @@ def _reference_operand(value):
     )
 
 
-def _masked(value):
-    """A value under a sensitive name: every literal is redacted, references stay."""
+def _masked(value, known=frozenset()):
+    """A value under a sensitive name: every literal is redacted, references stay.
+    `known` holds the file's declared resource names (see _getatt_masked)."""
     if isinstance(value, dict):
         if set(value) == {"intrinsic", "expression"} and isinstance(value["intrinsic"], str):
             # YAML short forms, exactly as _intrinsic builds them
             if value["intrinsic"] in {"Ref", "GetAtt"} and _reference_operand(value["expression"]):
                 return value
             if value["intrinsic"] == "GetAtt":
-                return {**value, "expression": _getatt_masked(value["expression"])}
+                return {**value, "expression": _getatt_masked(value["expression"], known)}
             if value["intrinsic"] == "Sub":
-                return {**value, "expression": _sub_masked(value["expression"])}
+                return {**value, "expression": _sub_masked(value["expression"], known)}
         return {
             k: v
             if k in REFERENCE_KEYS and _reference_operand(v)
-            else _sub_masked(v)
+            else _sub_masked(v, known)
             if k == "Fn::Sub"
-            else _getatt_masked(v)
+            else _getatt_masked(v, known)
             if k == "Fn::GetAtt"
-            else _masked(v)
+            else _masked(v, known)
             for k, v in value.items()
         }
     if isinstance(value, list):
-        return [_masked(v) for v in value]
+        return [_masked(v, known) for v in value]
     if isinstance(value, (str, int, float)) and not isinstance(value, bool):
         return "[REDACTED]"
     return value
 
 
-def _getatt_masked(target):
-    """GetAtt `[Name, <expression>]`: the resource name stays, the attribute is masked."""
-    if isinstance(target, list) and target and isinstance(target[0], str):
-        return [target[0]] + [_masked(v) for v in target[1:]]
-    return _masked(target)
+def _getatt_masked(target, known):
+    """GetAtt `[Name, <expression>]`: a declared resource name stays, the attribute is
+    masked. A name that declares nothing is text from a sensitive value and is masked."""
+    if isinstance(target, list) and target and isinstance(target[0], str) and target[0] in known:
+        return [target[0]] + [_masked(v, known) for v in target[1:]]
+    return _masked(target, known)
 
 
-def _sub_masked(target):
+def _sub_masked(target, known=frozenset()):
     """Fn::Sub without its literal text: only the `${Name}` references remain."""
     if isinstance(target, str):
         return "".join(m[0] for m in SUB_VARIABLE.finditer(target))
     if isinstance(target, list) and target:
-        return [_sub_masked(target[0])] + [_masked(v) for v in target[1:]]
-    return _masked(target)
+        return [_sub_masked(target[0], known)] + [_masked(v, known) for v in target[1:]]
+    return _masked(target, known)
 
 
 def import_infrastructure(paths, bindings=None):
@@ -372,7 +374,7 @@ def import_infrastructure(paths, bindings=None):
                     # Booleans are kept: they carry Terraform sensitivity masks, not secrets.
                     k: "[REDACTED]"
                     if sensitive(k) and not isinstance(v, bool)
-                    else _masked(v)
+                    else _masked(v, known)
                     if named and k == "value"
                     else scrub(v)
                     for k, v in value.items()
@@ -390,7 +392,16 @@ def import_infrastructure(paths, bindings=None):
 
         try:
             # CloudFormation short tags are converted to data, never evaluated.
-            docs = [scrub(doc) for doc in _documents(text)]
+            raw = _documents(text)
+            # CloudFormation logical IDs a sensitive GetAtt may keep (see _getatt_masked).
+            known = {
+                name
+                for doc in raw
+                if isinstance(doc, dict) and isinstance(doc.get("Resources"), dict)
+                for name in doc["Resources"]
+                if isinstance(name, str)
+            }
+            docs = [scrub(doc) for doc in raw]
         except ValueError as exc:
             raise ValueError("Malformed infrastructure document") from exc
         for doc_index, doc in enumerate(docs):
@@ -653,10 +664,13 @@ def import_infrastructure(paths, bindings=None):
     resource_ids = {r["id"] for r in resources}
     # A Terraform ID that several resources share (a bucket and its versioning both use
     # the bucket name) identifies none of them.
+    # Only string IDs identify anything; an object or list ID is ignored, not counted.
     terraform_ids = Counter(
         r["properties"].get("id")
         for r in resources
-        if r["type"].startswith(("aws_", "google_")) and isinstance(r["properties"], dict)
+        if r["type"].startswith(("aws_", "google_"))
+        and isinstance(r["properties"], dict)
+        and isinstance(r["properties"].get("id"), str)
     )
     shared_ids = {v for v, count in terraform_ids.items() if count > 1}
     linked = {(e["source_id"], e["destination_id"]) for e in edges}

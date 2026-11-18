@@ -1600,3 +1600,48 @@ def test_plan_of_2500_resources_imports_in_seconds(tmp_path):
     topology, seconds = _timed_import(path)
     assert len(topology["resources"]) == 2500 and len(topology["relationships"]) > 500
     assert seconds / base < 15
+
+
+def test_getatt_under_a_secret_name_masks_a_name_that_declares_nothing(tmp_path):
+    """Only a declared resource name survives masking; other text in a sensitive value does not."""
+    doc = {
+        "Parameters": {"AttrName": {"Type": "String"}},
+        "Resources": {
+            "Service": {
+                "Type": "Custom::Service",
+                "Properties": {
+                    "env": [
+                        {
+                            "name": "DB_PASSWORD",
+                            "value": {"Fn::GetAtt": ["hunter2literal", {"Ref": "AttrName"}]},
+                        }
+                    ]
+                },
+            },
+        },
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    assert "hunter2literal" not in json.dumps(topology) + json.dumps(topology_plan(topology))
+
+
+def test_terraform_object_ids_are_ignored_for_resolved_id_matching(tmp_path):
+    """An object or list in `values.id` neither aborts the import nor identifies anything."""
+    doc = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    {"address": "aws_thing.a", "type": "aws_thing", "values": {"id": {"x": 1}}},
+                    {"address": "aws_thing.b", "type": "aws_thing", "values": {"id": ["y"]}},
+                    {"address": "aws_subnet.s", "type": "aws_subnet", "values": {"id": "subnet-1"}},
+                    {"address": "aws_instance.i", "type": "aws_instance", "values": {"subnet_id": "subnet-1"}},
+                ]
+            }
+        }
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert ("input-0-aws-instance-i", "input-0-aws-subnet-s") in edges
