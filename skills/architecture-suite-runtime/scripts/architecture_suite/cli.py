@@ -144,11 +144,13 @@ def _selected_model(model, level, styles):
     findings = validate_model(selected, profile)
     if findings:
         raise SafetyError("Invalid architecture model:\n" + format_findings(findings))
-    if level in {"all", "deployment"}:
-        # The rule plan-review applies: a deployment with no workloads is not drawn.
-        problem = deployment_placement_problem(selected.get("deployment"))
-        if problem:
-            raise SafetyError(f"Deployment is blocked: {problem}; add placements")
+    # The rule plan-review applies: a deployment with no workloads is not drawn.
+    problem = deployment_placement_problem(selected.get("deployment"))
+    if problem and level == "deployment":
+        raise SafetyError(f"Deployment is blocked: {problem}; add placements")
+    if problem and level == "all":
+        # Like a missing component or code level, an unplaced deployment is skipped.
+        selected = {k: v for k, v in selected.items() if k != "deployment"}
     return normalized_model(selected)
 
 
@@ -353,6 +355,7 @@ def cmd_publish(args) -> int:
         model = load_model(input_path, "--model")
     if input_path.is_relative_to(output):
         raise SafetyError("Output must not contain its input")
+    unplaced = deployment_placement_problem(model.get("deployment")) is not None
     model = _selected_model(model, args.level, styles)
     formats = args.format
     paths = expected_artifact_paths(model, formats, styles, args.level)
@@ -380,7 +383,7 @@ def cmd_publish(args) -> int:
     if args.level == "all":
         summary["levels_skipped"] = [
             t for t in ("component", "code") if t not in _view_types(model)
-        ]
+        ] + (["deployment"] if unplaced else [])
     if args.dry_run:
         _json_print({**summary, "would_remove": changes["remove"]})
         return 0

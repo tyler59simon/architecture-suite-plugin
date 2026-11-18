@@ -56,16 +56,21 @@ def test_container_only_plan_reports_the_evidenced_prefix(plan):
     assert review["levels"]["component"]["reasons"]
 
 
-@pytest.mark.parametrize("level", ["deployment", "all"])
-def test_publish_refuses_the_empty_placements_that_review_blocks(plan, tmp_path, capsys, level):
+def test_publish_handles_the_empty_placements_that_review_blocks(plan, tmp_path, capsys):
     plan["deployment"]["placements"] = []
     reasons = review_plan(plan)["levels"]["deployment"]["reasons"]
     assert reasons == ["deployment has no placements"]
     source = tmp_path / "plan.md"
     source.write_text(render_plan(plan), encoding="utf-8")
     argv = ["plan-render", "--plan", str(source), "--output", str(tmp_path / "out")]
-    assert main(argv + ["--level", level, "--dry-run"]) == 3
+    # Asked for directly, the deployment is refused with the review's reason.
+    assert main(argv + ["--level", "deployment", "--dry-run"]) == 3
     assert reasons[0] in capsys.readouterr().err
+    # Under all, it is skipped like a missing level and no deployment file is planned.
+    assert main(argv + ["--level", "all", "--dry-run"]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    assert "deployment" in summary["levels_skipped"]
+    assert not any("deployment" in f for f in summary["files"])
 
 
 def mutate_people(p):
