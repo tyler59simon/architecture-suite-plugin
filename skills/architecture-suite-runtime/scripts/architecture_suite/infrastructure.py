@@ -5,7 +5,7 @@ from pathlib import Path
 import json
 import re
 import yaml
-from .plan import PlanError, _Loader, _mapping as _unique_mapping
+from .plan import _Loader, _mapping as _unique_mapping
 from .safety import canonical_existing_file, redact
 from .model import slugify
 
@@ -52,33 +52,26 @@ else:
     _LOADER = _InfraLoader
 
 
-def _unique_pairs(pairs):
-    result = {}
-    for key, value in pairs:
-        if not isinstance(key, str) or key in result:
-            raise PlanError("Mapping keys must be unique strings")
-        result[key] = value
-    return result
+def _load(text: str, loader) -> list:
+    for event in yaml.parse(text, Loader=loader):
+        if isinstance(event, yaml.AliasEvent) or getattr(event, "anchor", None) is not None:
+            raise ValueError("YAML anchors and aliases are unsupported")
+    # Empty documents (a Helm template that rendered nothing) are skipped.
+    return [doc for doc in yaml.load_all(text, Loader=loader) if doc is not None]
 
 
 def _documents(text: str) -> list:
     """Every non-empty YAML/JSON document; anchors and aliases stay unsupported."""
     if len(text) > 2_000_000:
         raise ValueError("Infrastructure document exceeds 2 MB")
-    if text.lstrip()[:1] in ("{", "["):
-        try:
-            doc = json.loads(text, object_pairs_hook=_unique_pairs)
-            return [] if doc is None else [doc]
-        except json.JSONDecodeError:
-            pass  # flow-style YAML, or several documents: the YAML loader decides
-        except RecursionError as exc:
-            raise ValueError(str(exc)[:200]) from exc
     try:
-        for event in yaml.parse(text, Loader=_LOADER):
-            if isinstance(event, yaml.AliasEvent) or getattr(event, "anchor", None) is not None:
-                raise ValueError("YAML anchors and aliases are unsupported")
-        # Empty documents (a Helm template that rendered nothing) are skipped.
-        return [doc for doc in yaml.load_all(text, Loader=_LOADER) if doc is not None]
+        try:
+            return _load(text, _LOADER)
+        except yaml.YAMLError:
+            if _LOADER is _InfraLoader:
+                raise
+            # libyaml rejects a few inputs the pure-Python parser accepts (`{api:{}}`).
+            return _load(text, _InfraLoader)
     except (yaml.YAMLError, RecursionError) as exc:
         raise ValueError(str(exc)[:200]) from exc
 
@@ -338,19 +331,35 @@ class _Declared(frozenset):
     parameters = frozenset()
 
 
-def _declared_operand(value, known, every=False, ref=False):
-    """A reference operand that names something declared: a string or list whose first
-    name (the part before `.` of a GetAtt string) is in `known`; with `every`, all items."""
-    if ref:
-        if isinstance(value, str) and (
-            value.startswith("AWS::") or value in getattr(known, "parameters", ())
-        ):
-            return True
+AWS_PSEUDO_PARAMETERS = {
+    "AWS::AccountId", "AWS::NotificationARNs", "AWS::NoValue", "AWS::Partition",
+    "AWS::Region", "AWS::StackId", "AWS::StackName", "AWS::URLSuffix",
+}
+
+
+def _declared_operand(value, known, operator):
+    """A reference operand that names only declared things. Ref: one resource, Parameter
+    or pseudo-parameter. GetAtt: `Name.Attr` or `[Name, Attr]` with a declared Name.
+    DependsOn: one declared resource or a list of them."""
+    if operator == "Ref":
+        return isinstance(value, str) and (
+            value in known
+            or value in getattr(known, "parameters", ())
+            or value in AWS_PSEUDO_PARAMETERS
+        )
+    if operator == "GetAtt":
+        if isinstance(value, str):
+            return value.split(".", 1)[0] in known
+        return (
+            isinstance(value, list) and bool(value)
+            and all(isinstance(v, str) for v in value) and value[0] in known
+        )
     if isinstance(value, str):
-        return value.split(".", 1)[0] in known
-    if isinstance(value, list) and all(isinstance(v, str) for v in value) and value:
-        return all(v in known for v in value) if every else value[0] in known
-    return False
+        return value in known
+    return (
+        isinstance(value, list) and bool(value)
+        and all(isinstance(v, str) and v in known for v in value)
+    )
 
 
 def _masked(value, known=frozenset()):
@@ -360,7 +369,7 @@ def _masked(value, known=frozenset()):
         if set(value) == {"intrinsic", "expression"} and isinstance(value["intrinsic"], str):
             # YAML short forms, exactly as _intrinsic builds them
             if value["intrinsic"] in {"Ref", "GetAtt"} and _declared_operand(
-                value["expression"], known, ref=value["intrinsic"] == "Ref"
+                value["expression"], known, value["intrinsic"]
             ):
                 return value
             if value["intrinsic"] == "GetAtt":
@@ -370,9 +379,7 @@ def _masked(value, known=frozenset()):
         return {
             k: v
             if k in REFERENCE_KEYS
-            and _declared_operand(
-                v, known, every=k in {"DependsOn", "depends_on", "depends_on_resource"}, ref=k == "Ref"
-            )
+            and _declared_operand(v, known, {"Ref": "Ref", "Fn::GetAtt": "GetAtt"}.get(k, "DependsOn"))
             else _sub_masked(v, known)
             if k == "Fn::Sub"
             else _getatt_masked(v, known)

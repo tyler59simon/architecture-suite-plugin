@@ -1612,6 +1612,11 @@ def test_plan_of_2500_resources_imports_in_seconds(tmp_path):
         {"intrinsic": "GetAtt", "expression": "hunter2.Arn"},
         {"DependsOn": ["hunter2"]},
         {"DependsOn": ["Db", "hunter2"]},
+        {"Ref": ["Db", "hunter2"]},
+        {"Ref": "AWS::hunter2"},
+        {"Ref": "Db.hunter2"},
+        {"DependsOn": "Db.hunter2"},
+        {"intrinsic": "Ref", "expression": "Db.hunter2"},
     ],
 )
 def test_reference_to_an_undeclared_name_under_a_secret_name_is_masked(tmp_path, value):
@@ -1674,6 +1679,18 @@ def test_yaml_anchors_and_aliases_in_infrastructure_are_rejected(tmp_path):
         with pytest.raises(ValueError, match="Malformed infrastructure document") as caught:
             import_infrastructure([path])
         assert "anchors and aliases" in str(caught.value.__cause__)
+
+
+@pytest.mark.parametrize(
+    "text",
+    ['{"a": 1e3, "b": NaN, "c": 1.5, "d": 1.5e3}', "services: {api:{}}\n"],
+)
+def test_infrastructure_documents_parse_as_the_pure_python_loader_does(text):
+    from architecture_suite import infrastructure
+
+    expected = infrastructure._load(text, infrastructure._InfraLoader)
+    assert infrastructure._documents(text) == expected
+    assert expected[0].get("a", "1e3") == "1e3"
 
 
 def _kubernetes_stream(tmp_path, count):
