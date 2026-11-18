@@ -163,9 +163,102 @@ def _terraform_references(module, prefix=""):
     return found
 
 
+def _mapping(value):
+    return value if isinstance(value, dict) else {}
+
+
+def _ingress_backends(spec):
+    """Service names an Ingress routes to (networking.k8s.io/v1 and v1beta1)."""
+    backends = [spec.get("defaultBackend"), spec.get("backend")]
+    rules = spec.get("rules")
+    for rule in rules if isinstance(rules, list) else []:
+        paths = _mapping(_mapping(rule).get("http")).get("paths")
+        backends += [_mapping(p).get("backend") for p in (paths if isinstance(paths, list) else [])]
+    names = []
+    for backend in map(_mapping, backends):
+        name = _mapping(backend.get("service")).get("name") or backend.get("serviceName")
+        if isinstance(name, str) and name not in names:
+            names.append(name)
+    return names
+
+
+def _kubernetes_edges(resources, kubernetes, edges, findings):
+    """Service selectors to Pods and workload templates, and Ingress backends to Services."""
+    services = {
+        (r["parent_id"], kubernetes[r["id"]][0]): r["id"]
+        for r in resources
+        if r["type"] == "kubernetes/Service" and r["id"] in kubernetes
+    }
+
+    def edge(resource, target, kind):
+        edges.append(
+            {
+                "source_id": resource["id"],
+                "destination_id": target,
+                "kind": kind,
+                "evidence": resource["evidence"],
+            }
+        )
+
+    for resource in resources:
+        props = resource["properties"]
+        if resource["type"] == "kubernetes/Service":
+            selector = _mapping(props.get("selector"))
+            matched = []
+            for target in resources:
+                if (
+                    target["id"] == resource["id"]
+                    or not target["type"].startswith("kubernetes/")
+                    or target["parent_id"] != resource["parent_id"]
+                ):
+                    continue
+                # A Pod carries its own labels; a workload labels the Pods of its template.
+                labels = (
+                    kubernetes.get(target["id"], ("", {}))[1]
+                    if target["type"] == "kubernetes/Pod"
+                    else _mapping(
+                        _mapping(_mapping(target["properties"].get("template")).get("metadata")).get(
+                            "labels"
+                        )
+                    )
+                )
+                if selector and all(labels.get(k) == v for k, v in selector.items()):
+                    edge(resource, target["id"], "selector")
+                    matched.append(target["id"])
+            text = ", ".join(f"{k}={v}" for k, v in selector.items())
+            findings.append(
+                {
+                    "resource": resource["id"],
+                    "message": "Service has no selector; its endpoints are managed elsewhere"
+                    if not selector
+                    else f"Service selector {text} matched: " + ", ".join(matched)
+                    if matched
+                    else f"Service selector {text} matched no workload in namespace "
+                    + str(resource["parent_id"]),
+                }
+            )
+        if resource["type"] == "kubernetes/Ingress":
+            missing = []
+            for backend in _ingress_backends(props):
+                target = services.get((resource["parent_id"], backend))
+                if target:
+                    edge(resource, target, "ingress-backend")
+                else:
+                    missing.append(backend)
+            if missing:
+                findings.append(
+                    {
+                        "resource": resource["id"],
+                        "message": "Ingress backends are not declared Services: "
+                        + ", ".join(missing),
+                    }
+                )
+
+
 def import_infrastructure(paths, bindings=None):
     resources, edges, findings = [], [], []
     bindings = bindings or {}
+    kubernetes = {}  # resource id -> (metadata name, metadata labels)
 
     def add(ident, kind, properties, source, parent=None):
         if any(r["id"] == ident for r in resources):
@@ -209,7 +302,7 @@ def import_infrastructure(paths, bindings=None):
             if not isinstance(doc, dict):
                 raise ValueError("Infrastructure document must be a mapping")
             source = {"reference": evidence_reference(path), "document": doc_index + 1}
-            entries, depends, terraform_refs = [], {}, {}
+            entries, depends, terraform_refs, metadata = [], {}, {}, {}
             if "planned_values" in doc:
                 configuration = doc.get("configuration")
                 if isinstance(configuration, dict):
@@ -275,21 +368,20 @@ def import_infrastructure(paths, bindings=None):
                         )
                     )
             elif "apiVersion" in doc and "kind" in doc:
-                items = doc.get("items", []) if doc["kind"] == "List" else [doc]
+                items = (doc.get("items") or []) if doc["kind"] == "List" else [doc]
                 for item in items:
-                    meta = item.get("metadata", {})
-                    namespace = meta.get("namespace", "default")
-                    entries.append(
-                        (
-                            namespace
-                            + "/"
-                            + item["kind"]
-                            + "/"
-                            + meta.get("name", "unnamed"),
-                            "kubernetes/" + item["kind"],
-                            item.get("spec", {}),
-                            namespace,
+                    if not isinstance(item, dict):
+                        findings.append(
+                            {"source": source, "message": "Kubernetes item is not a mapping; skipped"}
                         )
+                        continue
+                    # null metadata, spec or labels read as empty, never as an error.
+                    meta = _mapping(item.get("metadata"))
+                    namespace = meta.get("namespace", "default")
+                    entry = namespace + "/" + item["kind"] + "/" + meta.get("name", "unnamed")
+                    metadata[entry] = (meta.get("name", "unnamed"), _mapping(meta.get("labels")))
+                    entries.append(
+                        (entry, "kubernetes/" + item["kind"], _mapping(item.get("spec")), namespace)
                     )
             elif "services" in doc:
                 for section in ("networks", "volumes"):
@@ -325,6 +417,8 @@ def import_infrastructure(paths, bindings=None):
             for name, kind, props, parent in entries:
                 ident = names[name]
                 add(ident, kind, props, source, parent)
+                if name in metadata:
+                    kubernetes[ident] = metadata[name]
                 serialized = json.dumps(props)
                 if (
                     "${" in serialized
@@ -435,13 +529,6 @@ def import_infrastructure(paths, bindings=None):
                                     "evidence": source,
                                 }
                             )
-                if kind == "kubernetes/Service":
-                    findings.append(
-                        {
-                            "resource": ident,
-                            "message": "Service selector requires workload label resolution; review before binding",
-                        }
-                    )
     resource_ids = {r["id"] for r in resources}
     # A Terraform ID that several resources share (a bucket and its versioning both use
     # the bucket name) identifies none of them.
@@ -487,26 +574,7 @@ def import_infrastructure(paths, bindings=None):
                             "evidence": resource["evidence"],
                         }
                     )
-            if (
-                resource["type"] == "kubernetes/Service"
-                and target["parent_id"] == resource["parent_id"]
-            ):
-                selector = props.get("selector", {})
-                labels = (
-                    target["properties"]
-                    .get("template", {})
-                    .get("metadata", {})
-                    .get("labels", {})
-                )
-                if selector and selector.items() <= labels.items():
-                    edges.append(
-                        {
-                            "source_id": resource["id"],
-                            "destination_id": target["id"],
-                            "kind": "selector",
-                            "evidence": resource["evidence"],
-                        }
-                    )
+    _kubernetes_edges(resources, kubernetes, edges, findings)
     if set(bindings) - resource_ids:
         raise ValueError("Binding refers to unknown resource")
     by_id = {r["id"]: r for r in resources}

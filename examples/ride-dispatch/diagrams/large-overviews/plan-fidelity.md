@@ -9,7 +9,7 @@
   },
   "compiled": {
     "elements": 26,
-    "flows": 42,
+    "flows": 45,
     "views": 8
   },
   "merged": [
@@ -33,20 +33,20 @@
     "diagrams": {
       "05-overview/overview-small-multiples": {
         "findings": [],
-        "crossings": 3,
-        "bends": 52,
-        "aspect_ratio": 1.549,
-        "score": 457.5493570173004,
+        "crossings": 4,
+        "bends": 62,
+        "aspect_ratio": 1.531,
+        "score": 587.5312514457553,
         "advisories": [
           "Dense view; split by scope or use small-multiples"
         ]
       },
       "05-overview/overview-complete": {
         "findings": [],
-        "crossings": 9,
+        "crossings": 10,
         "bends": 36,
-        "aspect_ratio": 1.379,
-        "score": 1009.3786188579018,
+        "aspect_ratio": 1.835,
+        "score": 1109.8354236769653,
         "advisories": []
       }
     }

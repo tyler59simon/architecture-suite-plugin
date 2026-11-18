@@ -18,4 +18,5 @@ flowchart LR
   n6 -->|"Requests arrival estimates #91;HTTPS#93;"| n4
   n6 -->|"Fetches road routes #91;HTTPS#93;"| n0
   n7 -->|"Records quoted fare and assignment #91;Spanner API#93;"| n2
+  n6 -->|"Publishes driver assignments #91;Pub/Sub#93;"| n1
   notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

@@ -130,12 +130,12 @@ containers:
   evidence: fictional brief
 flows:
 - from: Rider
-  to: Rider Gateway
+  to: Trip Controller
   description: Requests trips and tracks arrival
   technology: HTTPS
   evidence: fictional brief
 - from: Driver
-  to: Rider Gateway
+  to: Trip Controller
   description: Accepts offers and reports trip status
   technology: gRPC
   evidence: fictional brief
@@ -189,7 +189,7 @@ flows:
   description: Records quoted fare and assignment
   technology: Spanner API
   evidence: fictional brief
-- from: Dispatch Service
+- from: Matching Engine
   to: Event Bus
   description: Publishes driver assignments
   technology: Pub/Sub

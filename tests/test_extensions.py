@@ -3,7 +3,7 @@ import zipfile
 from copy import deepcopy
 import pytest
 from architecture_suite.cli import main
-from architecture_suite.changes import diff_models, check_rules
+from architecture_suite.changes import diff_models, check_rules, markdown_report
 from architecture_suite.infrastructure import import_infrastructure, topology_plan
 from architecture_suite.inventory import dependency_inventory
 from architecture_suite.scenarios import (
@@ -14,7 +14,7 @@ from architecture_suite.scenarios import (
 from architecture_suite.distribution import install_host, HOSTS
 from host_packaging import package_hosts
 from architecture_suite.renderers import browser_page, validate_png
-from architecture_suite.plan import compile_plan
+from architecture_suite.plan import compile_plan, lint_plan
 from architecture_suite.emit import render_scene_svg, render_scene_drawio
 
 
@@ -409,6 +409,8 @@ def test_new_cli(inputs, tmp_path, scenario, model):
         page.locator("#search").fill("API")
         page.locator("#elements button").first.click()
         assert page.locator("#details").inner_text()
+        page.locator("#search").fill("parent_id")  # a JSON key, not text in any element
+        assert page.locator("#elements summary, #elements button").count() == 0
         assert not errors and not [r for r in requests if r.startswith("http")]
         script = (
             __import__("pathlib").Path(__file__).resolve().parents[1]
@@ -926,3 +928,139 @@ def test_scenario_key_describes_messages(model, nested):
     lines = _key(scenario_scene(nested, model))
     assert any(line.startswith("Arrow = message") for line in lines)
     assert not any("directed dependency" in line for line in lines)
+
+
+def test_check_reports_each_flow_once_per_rule(model):
+    rules = {"rules": [{"id": "no-store", "effect": "deny", "destination": {"ids": ["order-store"]}}]}
+    findings = check_rules(model, rules)["findings"]
+    # One flow, projected into container, component and code views, is one finding at
+    # its most specific level.
+    assert [(f["source"], f["destination"]) for f in findings] == [("fulfillmentjob", "order-store")]
+    flows = {f for r in model["relationships"] for f in r["flow_ids"]}
+    assert len(check_rules(model, {"rules": [{"id": "all", "effect": "deny"}]})["findings"]) == len(flows)
+
+
+def test_check_tag_selectors_need_every_listed_tag(model):
+    tagged = deepcopy(model)
+    next(e for e in tagged["elements"] if e["id"] == "api")["tags"] = ["pci"]
+
+    def found(tags):
+        rule = {"id": "pci", "effect": "deny", "source": {"tags": tags}}
+        return check_rules(tagged, {"rules": [rule]})["findings"]
+
+    assert found(["pci"]) and not found(["pci", "public"])
+
+
+def test_markdown_reports_are_readable_tables(model):
+    after = deepcopy(model)
+    next(e for e in after["elements"] if e["id"] == "api")["technology"] = "Go | HTTPS"
+    diff = markdown_report(diff_models(model, after))
+    assert "```" not in diff and diff.startswith("# Architecture diff\n")
+    assert "| elements | api | changed | technology: Python HTTPS -> Go \\| HTTPS |" in diff
+    assert "No architecture changes." in markdown_report(diff_models(model, model))
+    rules = {"rules": [{"id": "no-store", "effect": "deny", "destination": {"ids": ["order-store"]}}]}
+    check = markdown_report(check_rules(model, rules))
+    assert "```" not in check and check.startswith("# Architecture check\n")
+    assert "| no-store | fulfillmentjob | order-store | error | new |" in check
+    assert "No rule findings." in markdown_report(check_rules(model, {"rules": []}))
+
+
+def test_lint_flags_flows_hidden_in_a_decomposed_scope(plan):
+    hidden = deepcopy(plan)
+    hidden["flows"].append(
+        {"from": "API", "to": "Payment Provider", "description": "Refunds", "evidence": "brief"}
+    )
+    found = [f for f in lint_plan(hidden) if f.code == "hidden-flow"]
+    assert [f.where for f in found] == [str(len(hidden["flows"]) - 1)]
+    assert "API" in found[0].message and found[0].severity == "advisory"
+    assert not [f for f in lint_plan(plan) if f.code == "hidden-flow"]
+
+
+def _kubernetes(tmp_path, docs):
+    path = tmp_path / "k8s.yaml"
+    path.write_text("\n---\n".join(json.dumps(d) for d in docs), encoding="utf-8")
+    return import_infrastructure([path])
+
+
+def test_kubernetes_pods_ingress_and_service_findings(tmp_path):
+    topology = _kubernetes(
+        tmp_path,
+        [
+            {"apiVersion": "v1", "kind": "Pod", "metadata": {"name": "web", "labels": {"app": "web"}}, "spec": {}},
+            {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "web-svc"}, "spec": {"selector": {"app": "web"}}},
+            {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "lonely"}, "spec": {"selector": {"app": "none"}}},
+            {
+                "apiVersion": "networking.k8s.io/v1",
+                "kind": "Ingress",
+                "metadata": {"name": "front"},
+                "spec": {
+                    "defaultBackend": {"service": {"name": "web-svc", "port": {"number": 80}}},
+                    "rules": [{"http": {"paths": [{"path": "/", "backend": {"service": {"name": "lonely"}}}]}}],
+                },
+            },
+        ],
+    )
+    edges = sorted(
+        (e["source_id"][16:], e["destination_id"][16:], e["kind"]) for e in topology["relationships"]
+    )
+    assert edges == [
+        ("ingress-front", "service-lonely", "ingress-backend"),
+        ("ingress-front", "service-web-svc", "ingress-backend"),
+        ("service-web-svc", "pod-web", "selector"),
+    ]
+    messages = {f["message"] for f in topology["findings"]}
+    assert "Service selector app=web matched: input-0-default-pod-web" in messages
+    assert "Service selector app=none matched no workload in namespace default" in messages
+    assert not any("requires workload label resolution" in m for m in messages)
+
+
+def test_kubernetes_null_fields_are_not_attribute_errors(tmp_path):
+    topology = _kubernetes(
+        tmp_path,
+        [
+            {"apiVersion": "apps/v1", "kind": "Deployment", "metadata": {"name": "api"}, "spec": {"template": None}},
+            {"apiVersion": "apps/v1", "kind": "Deployment", "metadata": {"name": "jobs"},
+             "spec": {"template": {"metadata": {"labels": None}}}},
+            {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "api", "labels": None}, "spec": {"selector": {"app": "api"}}},
+            {"apiVersion": "v1", "kind": "Pod", "metadata": None, "spec": None},
+            {"apiVersion": "v1", "kind": "List", "items": [None]},
+            {"apiVersion": "networking.k8s.io/v1", "kind": "Ingress", "metadata": {"name": "bare"},
+             "spec": {"rules": [{"host": "a.example"}, {"http": {"paths": None}}, None]}},
+        ],
+    )
+    assert not [e for e in topology["relationships"] if e["kind"] == "selector"]
+    assert any(f["message"].endswith("matched no workload in namespace default") for f in topology["findings"])
+
+
+def test_inventory_route_methods_and_registrations():
+    report = dependency_inventory(
+        {
+            "Users.java": '@RequestMapping("/api/users")\nclass Users {\n @GetMapping("/{id}")\n'
+            ' User get() {}\n @DeleteMapping("/{id}")\n void remove() {}\n @PutMapping("/{id}")\n void put() {}\n}',
+            "app.py": '@app.route("/health")\ndef health(): pass\n@router.post("/items")\ndef create(): pass\n',
+            "Orders.cs": '[Route("api/orders")]\npublic class Orders {\n [HttpPatch("{id}")]\n public void Patch() {}\n}',
+            "main.go": 'package main\nfunc main(){\n http.Handle("/static/", fs)\n mux.HandleFunc("/mux", h)\n'
+            ' mux.HandleFunc("POST /orders", h)\n http.HandleFunc("example.com/health", h)\n'
+            ' http.HandleFunc("HEAD /ping", h)\n}',
+            "App.kt": "import com.example.Worker\nfun run() { Worker() }",
+            "Worker.kt": "class Worker",
+        }
+    )
+    routes = sorted((r["reference"], r["path"], r["method"] or "") for r in report["routes"])
+    assert routes == [
+        ("Orders.cs", "api/orders", ""),
+        ("Orders.cs", "{id}", "PATCH"),
+        ("Users.java", "/api/users", ""),
+        ("Users.java", "/{id}", "DELETE"),
+        ("Users.java", "/{id}", "GET"),
+        ("Users.java", "/{id}", "PUT"),
+        ("app.py", "/health", ""),
+        ("app.py", "/items", "POST"),
+        ("main.go", "/mux", ""),
+        ("main.go", "/orders", "POST"),
+        ("main.go", "/ping", "HEAD"),
+        ("main.go", "/static/", ""),
+        ("main.go", "example.com/health", ""),
+    ]
+    kotlin = [r for r in report["references"] if r["kind"] == "import" and r["reference"] == "App.kt"]
+    assert kotlin and kotlin[0].get("resolved_file") == "Worker.kt"
