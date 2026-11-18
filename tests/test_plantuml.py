@@ -40,7 +40,7 @@ def test_each_view_type_includes_the_matching_library(model):
         assert f"!include <C4/{library}>" in renderers.render_plantuml(model, _view(model, kind))
     overview = renderers.render_plantuml(model, {"type": "overview", "style": "small-multiples"})
     assert "!include <C4/C4_Component>" in overview
-    assert re.search(r'^rectangle ".+" as n\d+$', overview, re.M)  # panel titles
+    assert re.search(r'^rectangle ".+" as panel_\d+ \{$', overview, re.M)  # panels
     deployment = renderers.render_plantuml(model, {"type": "deployment"})
     assert "!include <C4/C4_Deployment>" in deployment
     assert re.search(r"^Deployment_Node\(n\d+, ", deployment, re.M)

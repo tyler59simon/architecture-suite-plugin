@@ -25,6 +25,7 @@ from .overview_layout import (
     build_cloud_scene,
     build_overview_scene,
     normalize_overview_styles,
+    panel_groups,
 )
 from .readability import readability_findings, score_scene
 from .safety import SafetyError, contained_path, run_bounded, safe_text
@@ -127,13 +128,13 @@ def render_mermaid(model: dict, view: dict) -> str:
         "flowchart TB" if view.get("direction") == "down" else "flowchart LR",
     ]
 
-    def emit(parent, indent):
-        for b in children.get(parent, []):
+    def emit(boxes, indent):
+        for b in boxes:
             if b.role == "frame":
                 lines.append(
                     indent + f"subgraph {ids[b.id]}[{_quoted(b.label.plain())}]"
                 )
-                emit(b.id, indent + "  ")
+                emit(children.get(b.id, []), indent + "  ")
                 # Mermaid requires a member for an otherwise empty frame.
                 if not children.get(b.id):
                     lines.append(
@@ -155,7 +156,15 @@ def render_mermaid(model: dict, view: dict) -> str:
                         indent + f"style {ids[b.id]} fill:{fill},stroke:{stroke}"
                     )
 
-    emit(None, "  ")
+    panels = panel_groups(scene)
+    if panels:
+        # Small multiples: one subgraph per panel (generated IDs never match a node ID).
+        for number, (title, roots) in enumerate(panels):
+            lines.append(f"  subgraph panel_{number}[{_quoted(title.label.plain())}]")
+            emit(roots, "    ")
+            lines.append("  end")
+    else:
+        emit(children.get(None, []), "  ")
     for edge in scene.edges:
         text = edge.label.label.plain() if edge.label else "depends on"
         lines.append(
@@ -238,8 +247,8 @@ def render_plantuml(model: dict, view: dict) -> str:
         quoted = ", ".join(f'"{_puml_text(v)}"' for v in values)
         return quoted + (', $tags="claim"' if tagged else "")
 
-    def emit(parent, indent):
-        for b in children.get(parent, []):
+    def emit(boxes, indent):
+        for b in boxes:
             element = b.element or {}
             alias = ids[b.id]
             name = element.get("name") or b.label.plain()
@@ -254,14 +263,10 @@ def render_plantuml(model: dict, view: dict) -> str:
                 else:
                     opening = f"Boundary({alias}, {args(name, kind or '')})"
                 lines.append(indent + opening + " {")
-                emit(b.id, indent + "  ")
+                emit(children.get(b.id, []), indent + "  ")
                 lines.append(indent + "}")
                 continue
             kind = element.get("type")
-            if not element:
-                # Small-multiples panel titles carry no element.
-                lines.append(indent + f'rectangle "{_puml_text(b.label.plain())}" as {alias}')
-                continue
             cue = claim_cue(element.get("status"))
             description = "\n".join(
                 x
@@ -280,7 +285,15 @@ def render_plantuml(model: dict, view: dict) -> str:
                 body = args(name, description, tagged=tagged)
             lines.append(indent + f"{macro}({alias}, {body})")
 
-    emit(None, "")
+    panels = panel_groups(scene)
+    if panels:
+        # Small multiples: one rectangle per panel (generated IDs never match a node alias).
+        for number, (title, roots) in enumerate(panels):
+            lines.append(f'rectangle "{_puml_text(title.label.plain())}" as panel_{number} {{')
+            emit(roots, "  ")
+            lines.append("}")
+    else:
+        emit(children.get(None, []), "")
     for edge in scene.edges:
         text = edge.label.label.plain() if edge.label else "depends on"
         lines.append(

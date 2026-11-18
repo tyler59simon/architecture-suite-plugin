@@ -2,11 +2,14 @@
 
 from copy import deepcopy
 import math
+import re
 from .model import ELEMENT_TYPE_DEPTH, merge_flows
-from .scene import Scene, build_view_scene_elk, choose_scene
+from .scene import Box, Scene, build_view_scene_elk, choose_scene
 
 # Below the 6000 px PNG cap, leaving room for the page margin.
 SMALL_MULTIPLES_MAX_WIDTH = 5600
+
+PANEL_PREFIX = re.compile(r"panel-(\d+)-")
 
 OVERVIEW_STYLES = (
     "executive",
@@ -146,12 +149,16 @@ def build_overview_scene(model: dict, style: str = "progressive") -> Scene:
                 edge.label.y += y
                 edge.label.x += x_offset
         # Panel titles are measured labels and live in the panel's reserved title area.
-        from .scene import Box
+        # Their ID never reuses a box ID (an element may be called `title`).
         from .style import Label, TextLine, wrap_to_width
 
+        title_id, suffix = prefix + "title", 2
+        taken = {box.id for box in scene.boxes}
+        while title_id in taken:
+            title_id, suffix = f"{prefix}title-{suffix}", suffix + 1
         result.boxes.append(
             Box(
-                prefix + "title",
+                title_id,
                 "panel-title",
                 48 + x_offset,
                 y + 12,
@@ -171,6 +178,23 @@ def build_overview_scene(model: dict, style: str = "progressive") -> Scene:
             y += row_end[index]
     result.key_y = y + 30
     return result
+
+
+def panel_groups(scene: Scene) -> list[tuple[Box, list[Box]]]:
+    """Small-multiples panels in order: each title box with the panel's top-level boxes.
+
+    Every box of a small-multiples scene has a `panel-<n>-` ID prefix; other scenes
+    have no panel-title boxes and return an empty list.
+    """
+    groups: dict[str, tuple[Box, list[Box]]] = {
+        PANEL_PREFIX.match(b.id).group(1): (b, [])
+        for b in scene.boxes
+        if b.role == "panel-title"
+    }
+    for b in scene.boxes if groups else ():
+        if b.role != "panel-title" and b.parent_id is None:
+            groups[PANEL_PREFIX.match(b.id).group(1)][1].append(b)
+    return list(groups.values())
 
 
 DEPLOYMENT_TITLES = {"aws": "AWS deployment", "gcp": "Google Cloud deployment"}

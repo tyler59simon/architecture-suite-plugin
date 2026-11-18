@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from pathlib import Path
 import re
@@ -558,3 +559,47 @@ def test_overview_shows_each_flow_once_across_coarse_and_fine_arrows(plan):
         ]
         assert sum("Submits request" in text for text in labels) == 1
         assert sum("Opens portal" in text for text in labels) == 1
+
+
+def _small_multiples_model(model):
+    # An element called `title` once collided with the panel title box (`panel-0-title`).
+    return json.loads(json.dumps(model).replace('"api"', '"title"'))
+
+
+def test_small_multiples_scene_ids_stay_unique(model):
+    scene = build_overview_scene(_small_multiples_model(model), "small-multiples")
+    ids = [b.id for b in scene.boxes]
+    assert len(ids) == len(set(ids))
+
+
+def test_small_multiples_mermaid_has_one_subgraph_per_panel(model):
+    model = _small_multiples_model(model)
+    view = {"type": "overview", "style": "small-multiples"}
+    lines = renderers.render_mermaid(model, view).splitlines()
+    panels = [i for i, line in enumerate(lines) if line.startswith("  subgraph panel_")]
+    assert len(panels) == len(model["views"])
+    inside, depth = set(), 0
+    for index, line in enumerate(lines):
+        text = line.strip()
+        depth += text.startswith("subgraph ") - (text == "end")
+        node = re.match(r"(n\d+)[\[(]", text)
+        if node and depth:
+            inside.add(node.group(1))
+        elif node:
+            pytest.fail("node outside its panel: " + text)
+    scene = build_overview_scene(model, "small-multiples")
+    assert len(inside) == len([b for b in scene.boxes if b.role not in {"panel-title", "frame"}])
+
+
+def test_small_multiples_plantuml_has_one_container_per_panel(model):
+    model = _small_multiples_model(model)
+    view = {"type": "overview", "style": "small-multiples"}
+    lines = renderers.render_plantuml(model, view).splitlines()
+    panels = [line for line in lines if re.match(r'rectangle ".+" as panel_\d+ \{$', line)]
+    assert len(panels) == len(model["views"])
+    depth, outside = 0, []
+    for line in lines:
+        if re.match(r"\s*(Container|Component|Person|System)\w*\(n\d+,", line) and not depth:
+            outside.append(line)
+        depth += line.rstrip().endswith("{") - (line.strip() == "}")
+    assert not outside
