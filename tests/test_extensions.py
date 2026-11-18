@@ -1408,3 +1408,114 @@ def test_terraform_malformed_index_is_a_finding_for_its_resource(tmp_path):
     # Non-resource roots such as `var.x[bogus]` are not resource references.
     topology = _counted_subnets(tmp_path, ["var.names[bogus]"])
     assert not any("var.names" in f["message"] for f in topology["findings"])
+
+
+def _resolved_id_plan(tmp_path, count):
+    """`count` subnets (every seventh shares an ID with its neighbour) and `count`
+    instances that name the subnet ID `(i * 7) % count`, plus one in a tag."""
+    subnet_id = lambda i: f"subnet-{i // 2 * 2:06d}" if i % 7 == 0 else f"subnet-{i:06d}"  # noqa: E731
+    resources = [
+        {"address": f"aws_subnet.s{i}", "type": "aws_subnet", "values": {"id": subnet_id(i)}}
+        for i in range(count)
+    ] + [
+        {
+            "address": f"aws_instance.w{i}",
+            "type": "aws_instance",
+            "values": {
+                "id": f"i-{i:06d}",
+                "subnet_id": subnet_id((i * 7) % count),
+                "tags": {"note": subnet_id(i)},
+            },
+        }
+        for i in range(count)
+    ]
+    path = tmp_path / f"plan-{count}.json"
+    path.write_text(json.dumps({"planned_values": {"root_module": {"resources": resources}}}))
+    return path, subnet_id
+
+
+def test_resolved_id_edges_match_a_brute_force_search(tmp_path):
+    count = 120
+    path, subnet_id = _resolved_id_plan(tmp_path, count)
+    edges = import_infrastructure([path])["relationships"]
+    ids = [subnet_id(i) for i in range(count)]
+    expected = [
+        (f"input-0-aws-instance-w{i}", f"input-0-aws-subnet-s{j}")
+        for i in range(count)
+        for j in range(count)
+        if ids[j] == subnet_id((i * 7) % count) and ids.count(ids[j]) == 1
+    ]
+    assert [(e["source_id"], e["destination_id"]) for e in edges] == expected
+    assert expected and {e["kind"] for e in edges} == {"resolved-resource-id"}
+
+
+def test_resolved_id_edges_skip_placeholders_shared_ids_and_links(tmp_path):
+    def resource(name, values):
+        return {"address": name, "type": name.split(".")[0], "values": values}
+
+    plan = {
+        "planned_values": {
+            "root_module": {
+                "resources": [
+                    resource("aws_vpc.main", {"id": "vpc-1"}),
+                    resource("aws_subnet.a", {"id": "subnet-a", "vpc_id": "vpc-1"}),
+                    resource("aws_subnet.b", {"id": "subnet-b", "vpc_id": "vpc-1"}),
+                    resource("aws_bucket.one", {"id": "shared"}),
+                    resource("aws_bucket.two", {"id": "shared"}),
+                    resource("aws_instance.web", {"id": "i-1", "subnet": "subnet-a", "bucket": "shared"}),
+                    resource("aws_instance.db", {"id": "[UNKNOWN AFTER APPLY]", "peer": "[UNKNOWN AFTER APPLY]"}),
+                    resource("aws_instance.tagged", {"id": "i-2", "tags": {"vpc": "vpc-1"}, "self": "i-2"}),
+                ]
+            }
+        },
+        "configuration": {
+            "root_module": {
+                "resources": [
+                    {"address": "aws_subnet.b", "expressions": {"vpc_id": {"references": ["aws_vpc.main.id", "aws_vpc.main"]}}}
+                ]
+            }
+        },
+    }
+    path = tmp_path / "plan.json"
+    path.write_text(json.dumps(plan))
+    edges = import_infrastructure([path])["relationships"]
+    assert [(e["source_id"][8:], e["destination_id"][8:], e["kind"]) for e in edges] == [
+        ("aws-subnet-b", "aws-vpc-main", "explicit-reference"),
+        ("aws-subnet-a", "aws-vpc-main", "resolved-resource-id"),
+        ("aws-instance-web", "aws-subnet-a", "resolved-resource-id"),
+    ]
+
+
+def test_duplicate_infrastructure_resource_is_still_rejected(tmp_path):
+    path = tmp_path / "stack.yaml"
+    path.write_text(chr(10).join(["services:", "  api: {}", "---", "services:", "  api: {}"]))
+    with pytest.raises(ValueError, match="Duplicate infrastructure resource: input-0-api"):
+        import_infrastructure([path])
+    path.write_text(chr(10).join(["services:", "  api: {}", "  web: {}"]))
+    assert [r["id"] for r in import_infrastructure([path])["resources"]] == ["input-0-api", "input-0-web"]
+
+
+def _timed_import(path):
+    import time
+
+    start = time.perf_counter()
+    topology = import_infrastructure([path])
+    return topology, time.perf_counter() - start
+
+
+def test_large_plan_import_is_not_quadratic(tmp_path):
+    """400 resources with resolved-ID references import quickly (about 0.3 s)."""
+    path, _ = _resolved_id_plan(tmp_path, 200)
+    topology, seconds = _timed_import(path)
+    assert len(topology["resources"]) == 400 and topology["relationships"]
+    assert seconds < 5
+
+
+@pytest.mark.slow
+def test_plan_of_2500_resources_imports_in_seconds(tmp_path):
+    """Matching resolved IDs and checking duplicates used to scan every resource for each
+    reference: about 8 s here at 2500 resources, now about 1.5 s."""
+    path, _ = _resolved_id_plan(tmp_path, 1250)
+    topology, seconds = _timed_import(path)
+    assert len(topology["resources"]) == 2500 and len(topology["relationships"]) > 500
+    assert seconds < 5

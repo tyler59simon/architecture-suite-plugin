@@ -1,5 +1,6 @@
 """Offline import of exported infrastructure. Unresolved values remain findings."""
 
+from collections import Counter
 from pathlib import Path
 import json
 import re
@@ -337,10 +338,12 @@ def import_infrastructure(paths, bindings=None):
     resources, edges, findings = [], [], []
     bindings = bindings or {}
     kubernetes = {}  # resource id -> (metadata name, metadata labels)
+    known_ids = set()
 
     def add(ident, kind, properties, source, parent=None):
-        if any(r["id"] == ident for r in resources):
+        if ident in known_ids:
             raise ValueError("Duplicate infrastructure resource: " + ident)
+        known_ids.add(ident)
         resources.append(
             {
                 "id": ident,
@@ -650,14 +653,30 @@ def import_infrastructure(paths, bindings=None):
     resource_ids = {r["id"] for r in resources}
     # A Terraform ID that several resources share (a bucket and its versioning both use
     # the bucket name) identifies none of them.
-    terraform_ids = [
+    terraform_ids = Counter(
         r["properties"].get("id")
         for r in resources
         if r["type"].startswith(("aws_", "google_")) and isinstance(r["properties"], dict)
-    ]
-    shared_ids = {v for v in terraform_ids if terraform_ids.count(v) > 1}
+    )
+    shared_ids = {v for v, count in terraform_ids.items() if count > 1}
     linked = {(e["source_id"], e["destination_id"]) for e in edges}
+    # Resolved IDs by value: positions of the resources that carry each one.
+    by_resolved_id = {}
+    for position, target in enumerate(resources):
+        value = target["properties"].get("id") if isinstance(target["properties"], dict) else None
+        # A masked or unknown ID is a shared placeholder, not an identity.
+        if (
+            isinstance(value, str)
+            and value
+            and value not in {SENSITIVE, UNKNOWN}
+            and value not in shared_ids
+            and "[REDACTED]" not in value
+        ):
+            by_resolved_id.setdefault(value, []).append(position)
     for resource in resources:
+        # Terraform resolved IDs are matched only against declared resource IDs.
+        if not resource["type"].startswith(("aws_", "google_")):
+            continue
         props = resource["properties"]
         # Exact values only: "vpc-1" must not match "vpc-123" or free text containing it.
         # Tags and labels are free text, not references.
@@ -668,30 +687,17 @@ def import_infrastructure(paths, bindings=None):
                 else props
             )
         )
-        for target in resources:
-            if resource["id"] == target["id"]:
-                continue
-            if resource["type"].startswith(("aws_", "google_")):
-                # Terraform resolved IDs are matched only against declared resource IDs.
-                value = target["properties"].get("id")
-                # A masked or unknown ID is a shared placeholder, not an identity.
-                if (
-                    isinstance(value, str)
-                    and value
-                    and value not in {SENSITIVE, UNKNOWN}
-                    and value not in shared_ids
-                    and "[REDACTED]" not in value
-                    and value in scalars
-                    and (resource["id"], target["id"]) not in linked
-                ):
-                    edges.append(
-                        {
-                            "source_id": resource["id"],
-                            "destination_id": target["id"],
-                            "kind": "resolved-resource-id",
-                            "evidence": resource["evidence"],
-                        }
-                    )
+        for position in sorted({p for v in scalars for p in by_resolved_id.get(v, ())}):
+            target = resources[position]
+            if resource["id"] != target["id"] and (resource["id"], target["id"]) not in linked:
+                edges.append(
+                    {
+                        "source_id": resource["id"],
+                        "destination_id": target["id"],
+                        "kind": "resolved-resource-id",
+                        "evidence": resource["evidence"],
+                    }
+                )
     _kubernetes_edges(resources, kubernetes, edges, findings)
     if set(bindings) - resource_ids:
         raise ValueError("Binding refers to unknown resource")
