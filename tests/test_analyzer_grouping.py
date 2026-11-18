@@ -9,8 +9,11 @@ hooks/ and the entry points were dropped.
 import json
 import time
 
+import pytest
 from architecture_suite.analyzer import _is_manifest, analyze_repository, draft_plan
 from architecture_suite.inventory import dependency_inventory
+from architecture_suite.model import validate_model
+from architecture_suite.plan import errors, lint_plan
 from architecture_suite.safety import redact, scan_repository
 
 INSTALLER = (
@@ -260,3 +263,36 @@ def test_kotlin_declarations_have_names_scope_and_parameters(tmp_path):
     assert found["ReconcileJob.run"]["members"] == ["+run(batch: Int)"]
     assert found["Store.load"]["members"] == ["+load(id: String)"]
     assert found["Registry.ping"]["members"] == ["+ping()"]
+
+
+OVERLOADS = {
+    "pom.xml": (
+        "App.java",
+        "public class App {\n"
+        "    public void process(int x) {}\n"
+        "    public void process(String s) {}\n"
+        "    public void other() {}\n"
+        "}\n",
+    ),
+    "app.csproj": (
+        "App.cs",
+        "public class App {\n"
+        "    public void Process(int x) {}\n"
+        "    public void Process(string s) {}\n"
+        "}\n",
+    ),
+}
+
+
+@pytest.mark.parametrize("manifest", sorted(OVERLOADS))
+def test_overloaded_methods_become_one_code_element(tmp_path, manifest):
+    source, text = OVERLOADS[manifest]
+    repo = write(tmp_path / "repo", {manifest: "", source: text})
+    plan = draft_plan(repo, scan_repository(repo), "Internal")
+    assert not errors(lint_plan(plan))
+    name = "App.process" if source.endswith(".java") else "App.Process"
+    element = code(plan)[name]
+    assert len(element["members"]) == 2
+    assert element["evidence"] == [f"{source}:2", f"{source}:3"]
+    model, _ = analyze_repository(repo)
+    assert not validate_model(model)
