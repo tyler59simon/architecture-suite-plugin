@@ -78,10 +78,17 @@ def parse_overview_styles(values: list[str] | None) -> tuple[str, ...]:
     return normalize_overview_styles(values)
 
 
+def _view_types(model):
+    return {v.get("type") for v in model.get("views", [])}
+
+
 def _selected_model(model, level, styles):
     if level == "all":
         selected = model
-        profile = "code"
+        # Every evidenced level: a container-only plan is complete at container depth.
+        profile = next(
+            (t for t in ("code", "component") if t in _view_types(model)), "container"
+        )
     elif level == "deployment":
         # Deployment needs only the placed containers/components, never code-level detail.
         has_components = any(v.get("type") == "component" for v in model.get("views", []))
@@ -346,6 +353,10 @@ def cmd_publish(args) -> int:
     }
     if args.level in {"all", "overview"}:
         summary["overview_styles"] = list(styles)
+    if args.level == "all":
+        summary["levels_skipped"] = [
+            t for t in ("component", "code") if t not in _view_types(model)
+        ]
     if args.dry_run:
         _json_print({**summary, "would_remove": changes["remove"]})
         return 0
