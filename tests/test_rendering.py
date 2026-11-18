@@ -603,3 +603,24 @@ def test_small_multiples_plantuml_has_one_container_per_panel(model):
             outside.append(line)
         depth += line.rstrip().endswith("{") - (line.strip() == "}")
     assert not outside
+
+
+def test_overview_keeps_a_stored_arrow_whose_flow_details_are_incomplete(plan):
+    from architecture_suite.overview_layout import overview_data
+    from architecture_suite.plan import compile_plan
+
+    # Two flows share Customer -> API; only one of them keeps its details.
+    plan["flows"].append(
+        {"from": "Customer", "to": "API", "description": "Opens portal", "evidence": "x"}
+    )
+    plan["flows"].append(
+        {"from": "Customer", "to": "API", "description": "Views orders", "evidence": "x"}
+    )
+    model, _ = compile_plan(plan)
+    for r in model["relationships"]:
+        if len(r.get("flows") or []) > 1:
+            r["flows"] = [f for f in r["flows"] if f["description"] == "Opens portal"]
+    descriptions = [
+        d for r in overview_data(model, "complete")[1] for d in r["description"].split("; ")
+    ]
+    assert "Opens portal" in descriptions and "Views orders" in descriptions

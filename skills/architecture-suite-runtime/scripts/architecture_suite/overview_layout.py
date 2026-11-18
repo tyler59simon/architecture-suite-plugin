@@ -78,10 +78,11 @@ def overview_data(model: dict, style: str):
         assigned.setdefault(r["id"], []).append(flow)
     relationships = []
     for r in {r["id"]: r for _, r in selected.values()}.values():
-        details = {f["id"]: f for f in r.get("flows") or []}
-        keep = [details[f] for f in r.get("flow_ids") or [] if f in details and f in assigned[r["id"]]]
-        if keep and len(keep) < len(r["flow_ids"]):
-            r = merge_flows(r["id"], r["source_id"], r["destination_id"], keep)
+        details = {f["id"]: f for f in r.get("flows") or [] if isinstance(f, dict)}
+        mine = [f for f in r.get("flow_ids") or [] if f in assigned[r["id"]]]
+        # Rebuilt only when every kept flow has its details; otherwise drawn as stored.
+        if mine and len(mine) < len(r["flow_ids"]) and all(f in details for f in mine):
+            r = merge_flows(r["id"], r["source_id"], r["destination_id"], [details[f] for f in mine])
         relationships.append(r)
     if style == "hierarchy":
         relationships = []
