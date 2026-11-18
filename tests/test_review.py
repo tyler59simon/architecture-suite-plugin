@@ -56,6 +56,18 @@ def test_container_only_plan_reports_the_evidenced_prefix(plan):
     assert review["levels"]["component"]["reasons"]
 
 
+@pytest.mark.parametrize("level", ["deployment", "all"])
+def test_publish_refuses_the_empty_placements_that_review_blocks(plan, tmp_path, capsys, level):
+    plan["deployment"]["placements"] = []
+    reasons = review_plan(plan)["levels"]["deployment"]["reasons"]
+    assert reasons == ["deployment has no placements"]
+    source = tmp_path / "plan.md"
+    source.write_text(render_plan(plan), encoding="utf-8")
+    argv = ["plan-render", "--plan", str(source), "--output", str(tmp_path / "out")]
+    assert main(argv + ["--level", level, "--dry-run"]) == 3
+    assert reasons[0] in capsys.readouterr().err
+
+
 def mutate_people(p):
     p["people"] = []
     p["flows"] = [f for f in p["flows"] if "Customer" not in (f["from"], f["to"])]

@@ -41,7 +41,12 @@ from .renderers import (
     write_rendered_artifacts,
 )
 from .report import render_architecture_report
-from .review import render_review_markdown, review_exit_code, review_plan
+from .review import (
+    deployment_placement_problem,
+    render_review_markdown,
+    review_exit_code,
+    review_plan,
+)
 from .runtime_env import check_stamp
 from .safety import (
     OUTPUT_MANIFEST,
@@ -139,6 +144,11 @@ def _selected_model(model, level, styles):
     findings = validate_model(selected, profile)
     if findings:
         raise SafetyError("Invalid architecture model:\n" + format_findings(findings))
+    if level in {"all", "deployment"}:
+        # The rule plan-review applies: a deployment with no workloads is not drawn.
+        problem = deployment_placement_problem(selected.get("deployment"))
+        if problem:
+            raise SafetyError(f"Deployment is blocked: {problem}; add placements")
     return normalized_model(selected)
 
 

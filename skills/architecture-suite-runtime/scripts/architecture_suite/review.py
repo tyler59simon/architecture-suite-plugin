@@ -22,6 +22,13 @@ ELEMENT_LEVELS = {
 CROWDED_VIEW = 35  # boxes; matches the layout readability advisory
 
 
+def deployment_placement_problem(deployment) -> str | None:
+    """Why a deployment section cannot be drawn, shared by plan-review and publication."""
+    if isinstance(deployment, dict) and not deployment.get("placements"):
+        return "deployment has no placements"
+    return None
+
+
 def _percent(part: int, whole: int) -> int | None:
     return round(100 * part / whole) if whole else None
 
@@ -103,8 +110,8 @@ def review_plan(plan: dict, gcp_icon_style: str | None = None) -> dict:
             "reasons": [p["message"] for p in problems[:5]],
         }
     if "deployment" in model:
-        placed = model["deployment"].get("placements", [])
-        reasons = [] if placed else ["deployment has no placements"]
+        problem = deployment_placement_problem(model["deployment"])
+        reasons = [problem] if problem else []
         if review["levels"]["container"]["status"] != "ready":
             reasons.append("the container level must be ready first")
         review["levels"]["deployment"] = {
