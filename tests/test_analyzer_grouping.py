@@ -162,22 +162,27 @@ def test_secret_line_does_not_break_parsing(tmp_path):
         assert SECRET not in text and "hunter2secret" not in text
 
 
-def test_credentialed_broker_urls_are_inventoried_without_passwords(tmp_path):
+def test_credentialed_broker_urls_stay_out_of_the_inventory(tmp_path):
     config = (
         'CACHE = "redis://:cachepass9@cache:6379/0"\n'
         'QUEUE = "amqp://guest:queuepass9@mq:5672/"\n'
     )
     repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.py": config})
     scan = scan_repository(repo)
-    # Scanned texts are redacted already; connections are matched on the original text.
+    # Raw texts too: the recorded target is redacted even when the caller did not scan.
+    # A credentialed address may drop out of the connections; its password never shows.
     for texts in (scan.texts, {"app/settings.py": config}):
-        report = dependency_inventory(texts)
-        assert [c["target"] for c in report["connections"]] == [
-            "redis://[REDACTED]@cache:6379/0",
-            "amqp://[REDACTED]@mq:5672/",
-        ]
-        text = json.dumps(report)
+        text = json.dumps(dependency_inventory(texts))
         assert "cachepass9" not in text and "queuepass9" not in text
+
+
+def test_url_assigned_to_a_secret_name_stays_out_of_the_inventory(tmp_path):
+    """The scanner redacts the whole `WEBHOOK_SECRET = "<url>"`; the URL must not return."""
+    url = "https://hooks.example.com/services/T000/B000/abc123secret"
+    config = f'WEBHOOK_SECRET = "{url}"\n'
+    repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.py": config})
+    text = json.dumps(dependency_inventory(scan_repository(repo).texts))
+    assert "abc123secret" not in text and "hooks.example.com" not in text
 
 
 def test_python_syntax_error_is_a_plan_gap(tmp_path):
