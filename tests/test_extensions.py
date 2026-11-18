@@ -886,6 +886,18 @@ def test_scenario_frames_have_clear_geometry(model, nested):
     assert render_scene_drawio(again) == render_scene_drawio(scene)
 
 
+def test_scenario_frame_ids_stay_out_of_the_element_id_namespace(model, nested):
+    """A participant whose ID matches a synthetic frame ID keeps a box of its own."""
+    model["elements"].append({"id": "group-4", "name": "Group 4", "type": "container"})
+    nested["participants"].append("group-4")
+    scene = scenario_scene(nested, model)
+    ids = [b.id for b in scene.boxes]
+    assert len(ids) == len(set(ids))
+    assert next(b for b in scene.boxes if b.id == "group-4").role == "card"
+    frames = [b for b in scene.boxes if b.role == "frame"]
+    assert len(frames) == 4 and all(f.parent_id != "group-4" for f in frames)
+
+
 def test_baseline_and_rules_are_validated(model, tmp_path):
     result = check_rules(model, RULES)
     baseline = {"schema_version": "architecture-baseline/v1", "fingerprints": result["fingerprints"]}

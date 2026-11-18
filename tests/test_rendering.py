@@ -128,6 +128,27 @@ def test_empty_cycles_disconnected_long_labels_and_groups(model):
     assert not scene_collisions(scene)
 
 
+@pytest.mark.browser
+def test_group_frame_ids_stay_out_of_the_element_id_namespace(model):
+    """An element whose ID matches a synthetic group ID keeps its own box and label."""
+    model["elements"].append(
+        {"id": "group-1", "name": "Group 1", "type": "container", "parent_id": "order-platform"}
+    )
+    for e in model["elements"]:
+        if e["id"] in {"order-queue", "order-store"}:
+            e["group"] = "Data"
+    view = next(v for v in model["views"] if v["type"] == "container")
+    view["element_ids"].append("group-1")
+    scene = build_view_scene_elk(model, view)
+    ids = [b.id for b in scene.boxes]
+    assert len(ids) == len(set(ids))
+    by_id = {b.id: b for b in scene.boxes}
+    assert by_id["group-1"].label.lines[0].text == "Group 1"
+    frame = next(b for b in scene.boxes if b.element and b.element.get("type") == "group")
+    assert frame.label.plain() == "Data" and frame.id != "group-1"
+    assert by_id["order-queue"].parent_id == frame.id
+
+
 def test_collision_detection_identifies_actual_failures():
     lab = Label([TextLine("some content")])
     parent = Box("p", "frame", 40, 100, 300, 240, lab)

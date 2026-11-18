@@ -180,6 +180,8 @@ def scenario_scene(scenario, model):
     # y is the bottom of the content placed so far; every step starts below it with
     # a gap, so frames, branch dividers and message labels never share a line.
     y = max(b.y + b.height for b in scene.boxes)
+    # Frame IDs never reuse an element ID (a participant may be called `group-2`).
+    taken = set(names)
 
     def walk(steps, depth=0, parent=None, bounds=(0, width)):
         nonlocal y
@@ -194,7 +196,11 @@ def scenario_scene(scenario, model):
                 y += STEP_GAP
             previous = kind
             if kind in GROUPS:
-                ident = "group-" + str(len(scene.boxes))
+                ident = base = "group-" + str(len(scene.boxes))
+                suffix = 2
+                while ident in taken:
+                    ident, suffix = f"{base}-{suffix}", suffix + 1
+                taken.add(ident)
                 # Nested frames are inset per depth so every level stays visible.
                 left = 55 + depth * FRAME_INSET
                 inner = width - 2 * left

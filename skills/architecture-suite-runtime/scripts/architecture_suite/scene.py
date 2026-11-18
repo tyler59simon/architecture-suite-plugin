@@ -341,9 +341,15 @@ def build_view_scene_elk(model: dict, view: dict):
     for e in elements:
         if e.get("group"):
             groups.setdefault((parents.get(e["id"]), e["group"]), []).append(e["id"])
+    # Synthetic group IDs never reuse an element ID (an element may be called `group-1`).
+    taken = set(by_id)
     for (parent, name), ids in groups.items():
         if len(ids) > 1:
-            ident = f"group-{len(frames)}"
+            ident = base = f"group-{len(frames)}"
+            suffix = 2
+            while ident in taken:
+                ident, suffix = f"{base}-{suffix}", suffix + 1
+            taken.add(ident)
             frames[ident] = {"id": ident, "name": name, "type": "group"}
             if parent:
                 parents[ident] = parent
