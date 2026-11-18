@@ -148,6 +148,8 @@ def _terraform_references(module, prefix=""):
             previous = None
             for ref in value.get("references", []) or []:
                 match = TERRAFORM_REFERENCE.match(ref) if isinstance(ref, str) else None
+                if match and ref.startswith("[", match.end()):
+                    match = None  # a malformed key (`app[bogus]`) stays unresolved
                 # Terraform lists `aws_subnet.app[0].id`, `aws_subnet.app[0]` and then
                 # `aws_subnet.app` for one reference; that last entry, right after its
                 # instance, is an alias. A dynamic index (`app[var.i]`) lists only

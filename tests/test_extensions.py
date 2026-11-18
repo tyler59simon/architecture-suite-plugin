@@ -772,6 +772,15 @@ def test_terraform_malformed_reference_is_not_an_instance(tmp_path):
         assert any("aws_subnet.app fits 2" in f["message"] for f in topology["findings"])
 
 
+def test_terraform_malformed_index_links_nothing(tmp_path):
+    """`app[bogus]` is not a valid key, so it stays unresolved instead of falling back
+    to the bare resource and linking its only instance."""
+    topology = _counted_subnets(
+        tmp_path, ["aws_subnet.app[bogus].id"], subnets=("aws_subnet.app[0]",)
+    )
+    assert not topology["relationships"]
+
+
 def test_terraform_reference_matching_is_linear_in_plan_size(tmp_path, monkeypatch):
     """Each instance reference is looked up, not matched against every planned address
     or every other reference in its expression."""
