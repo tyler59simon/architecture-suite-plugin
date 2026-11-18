@@ -115,9 +115,9 @@ def _quoted(value):
     )
 
 
-def render_mermaid(model: dict, view: dict) -> str:
+def render_mermaid(model: dict, view: dict, *, scene=None) -> str:
     """A portable flowchart preserves C4 stereotypes, scopes, members, and arrows."""
-    scene = _scene(model, view)
+    scene = scene or _scene(model, view)
     ids = {b.id: f"n{i}" for i, b in enumerate(scene.boxes)}
     children = {}
     for b in scene.boxes:
@@ -213,9 +213,9 @@ PLANTUML_CARDS = {
 }
 
 
-def render_plantuml(model: dict, view: dict) -> str:
+def render_plantuml(model: dict, view: dict, *, scene=None) -> str:
     """C4-PlantUML text from the shared scene; PlantUML computes its own layout."""
-    scene = _scene(model, view)
+    scene = scene or _scene(model, view)
     ids = {b.id: f"n{i}" for i, b in enumerate(scene.boxes)}
     children = {}
     for b in scene.boxes:
@@ -327,9 +327,18 @@ def layout_measurements(model: dict, overview_styles=None, level: str = "all") -
 
 
 def layout_report(model: dict, overview_styles=None, level: str = "all") -> dict:
+    return _layout_report(
+        [
+            (base, view, _scene(model, view))
+            for base, view in diagram_specs(model, overview_styles, level)
+        ]
+    )
+
+
+def _layout_report(built) -> dict:
+    """Verification for already-built (base, view, scene) triples."""
     results = {}
-    for base, view in diagram_specs(model, overview_styles, level):
-        scene = _scene(model, view)
+    for base, view, scene in built:
         results[base] = {
             "findings": scene_collisions(scene) + readability_findings(scene),
             **score_scene(scene),
@@ -706,7 +715,7 @@ def scene_vsdx(scene, *, page=None) -> bytes:
     return render_scene_vsdx(scene, rasterize_icons(scene, page))
 
 
-def write_rendered_artifacts(
+def render_artifacts(
     model: dict,
     output: Path,
     formats: set[str],
@@ -714,18 +723,22 @@ def write_rendered_artifacts(
     level: str = "all",
     *,
     allow_layout_findings: bool = False,
-) -> list[str]:
+) -> dict:
+    """Write the artifacts, building each scene once; returns the layout verification."""
     verify_assets()
     expected_artifact_paths(model, formats, overview_styles, level)
-    verification = layout_report(model, overview_styles, level)
+    built = [
+        (base, view, _scene(model, view))
+        for base, view in diagram_specs(model, overview_styles, level)
+    ]
+    verification = _layout_report(built)
     if not verification["ok"] and not allow_layout_findings:
         raise SafetyError(
             "Layout verification failed; inspect verify findings before publishing"
         )
     with ExitStack() as stack:
         page = stack.enter_context(browser_page()) if "png" in formats else None
-        for base, view in diagram_specs(model, overview_styles, level):
-            scene = _scene(model, view)
+        for base, view, scene in built:
             for fmt in sorted(formats):
                 path = contained_path(output, base + "." + EXTENSIONS[fmt])
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -744,15 +757,20 @@ def write_rendered_artifacts(
                     )
                 else:
                     content = (
-                        render_mermaid(model, view)
+                        render_mermaid(model, view, scene=scene)
                         if fmt == "mermaid"
-                        else render_plantuml(model, view)
+                        else render_plantuml(model, view, scene=scene)
                         if fmt == "plantuml"
                         else render_scene_drawio(scene)
                         if fmt == "drawio"
                         else render_scene_svg(scene)
                     )
                     path.write_text(content, encoding="utf-8", newline="\n")
+    return verification
+
+
+def write_rendered_artifacts(*args, **kwargs) -> list[str]:
+    verification = render_artifacts(*args, **kwargs)
     return [
         f"{base}: {finding['code']}: {', '.join(finding.get('elements', []))}"
         for base, value in verification["diagrams"].items()

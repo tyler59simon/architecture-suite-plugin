@@ -359,7 +359,7 @@ def test_export_write_and_failure_gate(model, tmp_path, monkeypatch):
     assert not result
     assert len(list(tmp_path.rglob("*.*"))) == 4
     monkeypatch.setattr(
-        renderers, "layout_report", lambda *a, **kw: {"ok": False, "diagrams": {}}
+        renderers, "_layout_report", lambda *a, **kw: {"ok": False, "diagrams": {}}
     )
     with pytest.raises(SafetyError):
         renderers.write_rendered_artifacts(

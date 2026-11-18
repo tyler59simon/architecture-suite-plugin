@@ -38,6 +38,7 @@ from .renderers import (
     expected_artifact_paths,
     find_browser,
     layout_report,
+    render_artifacts,
     write_rendered_artifacts,
 )
 from .report import render_architecture_report
@@ -392,7 +393,7 @@ def cmd_publish(args) -> int:
     with atomic_output_directory(
         output, owner="c4", command=args.command, files=paths
     ) as stage:
-        write_rendered_artifacts(
+        verification = render_artifacts(
             model,
             stage,
             formats,
@@ -400,7 +401,6 @@ def cmd_publish(args) -> int:
             args.level,
             allow_layout_findings=getattr(args, "allow_layout_findings", False),
         )
-        verification = layout_report(model, styles, args.level)
         (stage / "architecture-report.md").write_text(
             render_architecture_report(model, verification=verification),
             encoding="utf-8", newline="\n",

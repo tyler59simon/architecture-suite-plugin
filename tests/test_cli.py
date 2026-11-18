@@ -488,3 +488,26 @@ def test_doctor_announces_itself_on_stderr(monkeypatch, capsys):
     monkeypatch.setattr(cli, "verify_assets", lambda: None)
     main(["doctor"])
     assert "checking runtime..." in capsys.readouterr().err
+
+
+@pytest.mark.slow
+def test_publish_builds_each_scene_once(inputs, tmp_path, monkeypatch):
+    from architecture_suite import renderers
+
+    real = renderers._scene
+    built = []
+
+    def counting(model, view):
+        built.append(view["type"] + ":" + str(view.get("style", view.get("level", ""))))
+        return real(model, view)
+
+    monkeypatch.setattr(renderers, "_scene", counting)
+    argv = [
+        "plan-render", "--plan", str(inputs[1]), "--output", str(tmp_path / "out"),
+        "--format", "mermaid,plantuml,svg", "--level", "container", "--confirm-write",
+    ]
+    assert main(argv) == 0
+    specs = renderers.diagram_specs(
+        json.loads(inputs[0].read_text()), parse_overview_styles(None), "container"
+    )
+    assert len(built) == len(specs) > 0
