@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import pytest
 from architecture_suite.safety import (
     SafetyError,
@@ -229,6 +230,45 @@ def test_scan_limits_encoding_secrets(tmp_path, monkeypatch):
     ticks = iter([0, 100])
     monkeypatch.setattr(safety.time, "monotonic", lambda: next(ticks))
     assert scan_repository(tmp_path, timeout_seconds=1).truncated
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="needs POSIX FIFOs")
+def test_scan_skips_fifos(tmp_path):
+    (tmp_path / "ok.py").write_text("x = 1")
+    os.mkfifo(tmp_path / "pipe.py")
+    started = time.monotonic()
+    result = scan_repository(tmp_path, timeout_seconds=5)
+    assert time.monotonic() - started < 5
+    assert set(result.texts) == {"ok.py"}
+    assert not result.timed_out
+
+
+def test_scan_read_is_capped_when_file_outgrows_its_stat(tmp_path, monkeypatch):
+    (tmp_path / "grow.json").write_text("x" * 500)
+    (tmp_path / "ok.py").write_text("y = 1")
+    real_stat = Path.stat
+
+    class Stale:
+        def __init__(self, info):
+            self.st_mode = info.st_mode
+            self.st_size = 10
+
+    monkeypatch.setattr(
+        Path,
+        "stat",
+        lambda self, *a, **k: (
+            Stale(real_stat(self, *a, **k))
+            if self.name == "grow.json" and k.get("follow_symlinks", True)
+            else real_stat(self, *a, **k)
+        ),
+    )
+    result = scan_repository(tmp_path, max_file_bytes=100)
+    assert set(result.texts) == {"ok.py"}
+    assert any(item.startswith("grow.json:") for item in result.skipped)
+    assert result.bytes_read <= 100 + 5
+    result = scan_repository(tmp_path, max_total_bytes=100)
+    assert result.truncated
+    assert result.bytes_read <= 100
 
 
 @pytest.mark.parametrize(

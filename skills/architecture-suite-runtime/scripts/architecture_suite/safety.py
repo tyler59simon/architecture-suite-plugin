@@ -476,7 +476,12 @@ def scan_repository(
                 continue
             try:
                 _no_links(path)
-                size = path.stat().st_size
+                info = path.stat()
+                if not stat.S_ISREG(info.st_mode):
+                    result.skipped_files += 1
+                    result.skipped.append(f"{relative}: not a regular file")
+                    continue
+                size = info.st_size
                 if size > max_file_bytes:
                     result.skipped_files += 1
                     result.skipped_bytes += size
@@ -485,7 +490,18 @@ def scan_repository(
                 if result.bytes_read + size > max_total_bytes:
                     result.truncated = True
                     return result
-                data = path.read_bytes()
+                # Read one byte past the budget so a file that grew after stat() cannot exceed it.
+                budget = min(max_file_bytes, max_total_bytes - result.bytes_read)
+                with path.open("rb") as handle:
+                    data = handle.read(budget + 1)
+                if len(data) > max_file_bytes:
+                    result.skipped_files += 1
+                    result.skipped_bytes += len(data)
+                    result.skipped.append(f"{relative}: file size limit")
+                    continue
+                if len(data) > budget:
+                    result.truncated = True
+                    return result
                 result.bytes_read += len(data)
                 text = data.decode("utf-8-sig")
                 if detect_prompt_injection(text):
