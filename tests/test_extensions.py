@@ -1636,6 +1636,8 @@ def test_plan_of_2500_resources_imports_in_seconds(tmp_path):
         {"Ref": "Db.hunter2"},
         {"DependsOn": "Db.hunter2"},
         {"intrinsic": "Ref", "expression": "Db.hunter2"},
+        {"Fn::GetAtt": ["Db", "Arn", "hunter2"]},
+        {"intrinsic": "GetAtt", "expression": ["Db", "Arn", "hunter2"]},
     ],
 )
 def test_reference_to_an_undeclared_name_under_a_secret_name_is_masked(tmp_path, value):

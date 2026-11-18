@@ -356,7 +356,7 @@ def _declared_operand(value, known, operator):
         if isinstance(value, str):
             return value.split(".", 1)[0] in known
         return (
-            isinstance(value, list) and bool(value)
+            isinstance(value, list) and len(value) == 2
             and all(isinstance(v, str) for v in value) and value[0] in known
         )
     if isinstance(value, str):
