@@ -425,3 +425,25 @@ def test_credentialed_urls_keep_scheme_and_host_but_hide_the_password_in_every_o
     for text in outputs:
         assert "cachepw77" not in text and "svc:" not in text
     assert "redis://[REDACTED]@cache:6379/0" in outputs[1]
+
+
+def test_drawio_title_wraps_like_the_svg_and_clears_the_content(model):
+    view = next(v for v in model["views"] if v["type"] == "container")
+    view = {**view, "title": "A very long container view title that has to wrap over several lines " * 3}
+    scenario = {
+        "schema_version": "architecture-scenario/v1",
+        "name": "A long scenario title that wraps over three lines " * 4,
+        "participants": [e["id"] for e in model["elements"][:2]],
+        "steps": [{"from": model["elements"][0]["id"], "to": model["elements"][1]["id"], "description": "Go"}],
+    }
+    scenes = [_scene(model, view), scenario_scene(scenario, model)]
+    for scene in scenes:
+        assert len(scene.title_lines) >= 2
+        cells = ET.fromstring(render_scene_drawio(scene)).find(".//root")
+        title = next(c for c in cells if c.get("id") == "title")
+        assert title.get("value").count("<br>") == len(scene.title_lines) - 1
+        assert "verticalAlign=top" in title.get("style")
+        geometry = title.find("mxGeometry")
+        bottom = float(geometry.get("y")) + float(geometry.get("height"))
+        assert bottom <= min(b.y for b in scene.boxes if b.parent_id is None and b.role != "frame") + 0.01
+        assert bottom <= scene.content_top

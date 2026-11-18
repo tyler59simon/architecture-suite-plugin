@@ -183,14 +183,15 @@ def render_scene_drawio(scene: Scene) -> str:
             attrib={"as": "geometry"},
         )
 
+    title_lines = scene.title_lines or [scene.title]
     vertex(
         "title",
-        html.escape(scene.title),
+        "<br>".join(html.escape(line) for line in title_lines),
         48,
         35,
         scene.width - 96,
-        55,
-        "text;html=1;fontSize=22;align=left;fontFamily=Roboto;",
+        max(55, 33 * len(title_lines) + 10),
+        "text;html=1;fontSize=22;align=left;verticalAlign=top;fontFamily=Roboto;",
     )
     titles = []
     for box in scene.boxes:
