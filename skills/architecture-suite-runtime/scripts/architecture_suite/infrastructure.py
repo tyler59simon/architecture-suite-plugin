@@ -119,10 +119,12 @@ def _sub(target, names):
             yield names[name]
 
 
-TERRAFORM_INDEX = re.compile(r"\[(?:\"[^\"]*\"|[^\]]*)\]")
-MODULE_INSTANCE = re.compile(r"^(?:module\.[^.\[]+(?:\[(?:\"[^\"]*\"|[^\]]*)\])?\.)*")
+# An instance key: `[0]`, or `["key"]` with quotes and backslashes escaped inside.
+TERRAFORM_KEY = r'\[(?:\d+|"(?:[^"\\]|\\.)*")\]'
+TERRAFORM_INDEX = re.compile(TERRAFORM_KEY)
+MODULE_INSTANCE = re.compile(rf"^(?:module\.[^.\[]+(?:{TERRAFORM_KEY})?\.)*")
 # `aws_subnet.app[0].id` -> `aws_subnet.app[0]`: type, name and instance key, if any.
-TERRAFORM_REFERENCE = re.compile(r"([^.\[\]]+)\.([^.\[\]]+)(?:\[(?:\"[^\"]*\"|[^\]]*)\])?")
+TERRAFORM_REFERENCE = re.compile(rf"([^.\[\]]+)\.([^.\[\]]+)({TERRAFORM_KEY})?")
 
 
 def _config_address(address: str) -> str:
@@ -150,16 +152,14 @@ def _terraform_references(module, prefix=""):
                 # `aws_subnet.app` for one reference; that last entry, right after its
                 # instance, is an alias. A dynamic index (`app[var.i]`) lists only
                 # `aws_subnet.app`, which stays a reference of its own.
-                alias = (
-                    isinstance(previous, str)
-                    and previous != ref
-                    and TERRAFORM_INDEX.sub("", previous) == ref
-                )
-                if match and not alias and match.group(1) not in {
+                if match and ref != previous and match.group(1) not in {
                     "var", "local", "data", "module", "each", "count", "path", "self", "terraform"
                 }:
                     into.add(prefix + match.group())
-                previous = ref
+                # The resource of an entry that is exactly one instance, else None.
+                previous = (
+                    ref[: match.start(3)] if match and match.group(3) and match.end() == len(ref) else None
+                )
             for child in value.values():
                 collect(child, into)
         elif isinstance(value, list):

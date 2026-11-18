@@ -688,14 +688,14 @@ def test_terraform_references_stay_inside_their_module_instance(tmp_path):
         assert "subnet" in source and "vpc" in destination and env in destination
 
 
-def _counted_subnets(tmp_path, references):
-    """Two count instances of aws_subnet.app and an instance that references them."""
+def _counted_subnets(tmp_path, references, subnets=("aws_subnet.app[0]", "aws_subnet.app[1]")):
+    """Two instances of aws_subnet.app and an instance that references them."""
     doc = {
         "planned_values": {
             "root_module": {
                 "resources": [
                     {"address": address, "type": address.split(".")[0], "values": {}}
-                    for address in ("aws_subnet.app[0]", "aws_subnet.app[1]", "aws_instance.web")
+                    for address in (*subnets, "aws_instance.web")
                 ]
             }
         },
@@ -748,6 +748,28 @@ def test_terraform_dynamic_and_literal_index_in_one_expression(tmp_path, referen
         f["resource"] == "input-0-aws-instance-web" and "aws_subnet.app fits 2" in f["message"]
         for f in topology["findings"]
     )
+
+
+def test_terraform_escaped_for_each_key_links_its_own_instance(tmp_path):
+    # for_each = jsonencode(["a", "b"]): the key holds escaped quotes and a "]".
+    key = 'aws_subnet.app["[\\"a\\",\\"b\\"]"]'
+    topology = _counted_subnets(
+        tmp_path, [key + ".id", key, "aws_subnet.app"], (key, 'aws_subnet.app["c"]')
+    )
+    subnets = [r["id"] for r in topology["resources"] if "subnet" in r["id"]]
+    escaped = next(i for i in subnets if not i.endswith("app-c"))
+    edges = {(e["source_id"], e["destination_id"]) for e in topology["relationships"]}
+    assert edges == {("input-0-aws-instance-web", escaped)}
+    assert not any("aws_subnet.app" in f["message"] for f in topology["findings"])
+
+
+def test_terraform_malformed_reference_is_not_an_instance(tmp_path):
+    """A malformed entry is parsed once and is no instance, so the bare `aws_subnet.app`
+    after it is a reference of its own (and a finding), not an alias."""
+    for malformed in ("aws_subnet[0].app", "aws_subnet.app" + "[" * 20000):
+        topology = _counted_subnets(tmp_path, [malformed, "aws_subnet.app"])
+        assert not topology["relationships"]
+        assert any("aws_subnet.app fits 2" in f["message"] for f in topology["findings"])
 
 
 def test_terraform_reference_matching_is_linear_in_plan_size(tmp_path, monkeypatch):
