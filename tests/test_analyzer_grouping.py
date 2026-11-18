@@ -162,16 +162,21 @@ def test_secret_line_does_not_break_parsing(tmp_path):
         assert SECRET not in text and "hunter2secret" not in text
 
 
-def test_credentialed_broker_urls_stay_out_of_the_inventory(tmp_path):
+def test_credentialed_broker_urls_are_inventoried_without_passwords(tmp_path):
     config = (
         'CACHE = "redis://:cachepass9@cache:6379/0"\n'
         'QUEUE = "amqp://guest:queuepass9@mq:5672/"\n'
     )
     repo = write(tmp_path / "repo", {"pyproject.toml": "", "app/settings.py": config})
     scan = scan_repository(repo)
-    # Raw texts too: the recorded target is redacted even when the caller did not scan.
+    # Scanned texts are redacted already; connections are matched on the original text.
     for texts in (scan.texts, {"app/settings.py": config}):
-        text = json.dumps(dependency_inventory(texts))
+        report = dependency_inventory(texts)
+        assert [c["target"] for c in report["connections"]] == [
+            "redis://[REDACTED]@cache:6379/0",
+            "amqp://[REDACTED]@mq:5672/",
+        ]
+        text = json.dumps(report)
         assert "cachepass9" not in text and "queuepass9" not in text
 
 

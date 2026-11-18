@@ -181,6 +181,8 @@ def dependency_inventory(files):
             ref["unresolved"] = True
     connections = []
     for path, text in files.items():
+        # Scanned text has credentialed URLs redacted away; match the original.
+        text = getattr(text, "source", text)
         for match in re.finditer(
             r'(?:https?://[^\s"\x27<>]+|(?:postgres|mysql|mongodb|amqp|redis)://[^\s"\x27<>]+)',
             text,
@@ -189,7 +191,10 @@ def dependency_inventory(files):
                 {
                     "reference": path,
                     "line": text.count("\n", 0, match.start()) + 1,
-                    "target": redact(match[0]),
+                    # Replace only the userinfo so the scheme and host:port stay.
+                    "target": redact(
+                        re.sub(r"(?<=://)[^/\s@?#]*:[^/\s@?#]*@", "[REDACTED]@", match[0])
+                    ),
                     "kind": "configuration-address",
                     "confidence": 0.6,
                     "unresolved": True,
