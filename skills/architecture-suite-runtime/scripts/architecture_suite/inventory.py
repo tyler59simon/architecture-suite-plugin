@@ -4,7 +4,7 @@ import ast
 import re
 from pathlib import PurePosixPath
 from tree_sitter_language_pack import get_parser
-from .safety import redact, redact_lines
+from .safety import URI_SCHEMES, redact, redact_lines
 
 LANGUAGES = {
     ".cs": "csharp",
@@ -184,7 +184,7 @@ def dependency_inventory(files):
         # Scanned text is redacted already; redacting again is a no-op and covers raw input.
         text = redact_lines(text)
         for match in re.finditer(
-            r'(?:https?://[^\s"\x27<>]+|(?:postgres|mysql|mongodb|amqp|redis)://[^\s"\x27<>]+)',
+            rf'(?:{URI_SCHEMES})://[^\s"\x27<>]+',
             text,
         ):
             connections.append(

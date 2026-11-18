@@ -296,3 +296,20 @@ def test_overloaded_methods_become_one_code_element(tmp_path, manifest):
     assert element["evidence"] == [f"{source}:2", f"{source}:3"]
     model, _ = analyze_repository(repo)
     assert not validate_model(model)
+
+
+def test_inventory_keeps_the_host_of_a_compact_json_url_and_lists_tls_schemes():
+    config = (
+        '{"cache":"redis://u:pw9@cache:6379","owner":"ops@example.com"}\n'
+        "DB = postgresql://app:s3cret9@db:5432/orders\n"
+        "TLS_CACHE = rediss://u:pw9@tls-cache:6380\n"
+        "TLS_QUEUE = amqps://u:pw9@mq:5671\n"
+    )
+    targets = [c["target"] for c in dependency_inventory({"app.cfg": config})["connections"]]
+    assert targets == [
+        "redis://[REDACTED]@cache:6379",
+        "postgresql://[REDACTED]@db:5432/orders",
+        "rediss://[REDACTED]@tls-cache:6380",
+        "amqps://[REDACTED]@mq:5671",
+    ]
+    assert "pw9" not in json.dumps(targets) and "s3cret9" not in json.dumps(targets)
