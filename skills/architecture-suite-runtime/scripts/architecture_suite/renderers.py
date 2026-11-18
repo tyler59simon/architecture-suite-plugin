@@ -242,6 +242,12 @@ def render_plantuml(model: dict, view: dict) -> str:
             'AddRelTag("claim", $lineStyle=DashedLine(), '
             '$legendText="claim not observed (inferred, proposed or unknown)")',
         ]
+        if any(b.role == "frame" and _claimed(b) for b in scene.boxes):
+            # Boundaries take their own tag kind.
+            lines.append(
+                'AddBoundaryTag("claim", $borderStyle=DashedLine(), '
+                '$legendText="claim not observed (inferred, proposed or unknown)")'
+            )
 
     def args(*values, tagged=False):
         quoted = ", ".join(f'"{_puml_text(v)}"' for v in values)
@@ -254,14 +260,17 @@ def render_plantuml(model: dict, view: dict) -> str:
             name = element.get("name") or b.label.plain()
             if b.role == "frame":
                 kind = element.get("type")
+                tagged = _claimed(b)
+                # A claim that is not observed keeps its status text and dashed tag.
+                label = " ".join(x for x in (name, claim_cue(element.get("status"))) if x)
                 if deployment:
-                    opening = f"Deployment_Node({alias}, {args(name, kind or '')})"
+                    opening = f"Deployment_Node({alias}, {args(label, kind or '', tagged=tagged)})"
                 elif kind == "software_system":
-                    opening = f"System_Boundary({alias}, {args(name)})"
+                    opening = f"System_Boundary({alias}, {args(label, tagged=tagged)})"
                 elif kind == "container":
-                    opening = f"Container_Boundary({alias}, {args(name)})"
+                    opening = f"Container_Boundary({alias}, {args(label, tagged=tagged)})"
                 else:
-                    opening = f"Boundary({alias}, {args(name, kind or '')})"
+                    opening = f"Boundary({alias}, {args(label, kind or '', tagged=tagged)})"
                 lines.append(indent + opening + " {")
                 emit(children.get(b.id, []), indent + "  ")
                 lines.append(indent + "}")

@@ -172,3 +172,18 @@ def test_scenario_render_plantuml(model, inputs, tmp_path, capsys):
     spaced = tmp_path / "spaced"
     assert main(argv + ["--output", str(spaced), "--format", "plantuml, mermaid", "--dry-run"]) == 0
     assert "scenario.mmd" in json.loads(capsys.readouterr().out)["files"]
+
+
+def test_claimed_boundary_keeps_its_status_cue_and_tag(plan):
+    # A proposed container expanded in a component view is drawn as a boundary.
+    claimed = deepcopy(plan)
+    claimed["containers"][0]["status"] = "proposed"
+    model, _ = compile_plan(claimed)
+    view = next(v for v in model["views"] if v["type"] == "component")
+    text = renderers.render_plantuml(model, view)
+    boundary = re.search(r'^Container_Boundary\(n\d+, (.*)\) \{$', text, re.M)
+    assert boundary, text
+    assert "«proposed»" in boundary.group(1) and '$tags="claim"' in boundary.group(1)
+    assert 'AddBoundaryTag("claim", $borderStyle=DashedLine()' in text
+    plain = renderers.render_plantuml(compile_plan(plan)[0], view)
+    assert "AddBoundaryTag" not in plain and "«" not in plain
