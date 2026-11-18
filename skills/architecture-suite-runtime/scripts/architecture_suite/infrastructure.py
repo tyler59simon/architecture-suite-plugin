@@ -173,7 +173,7 @@ def _ingress_backends(spec):
     rules = spec.get("rules")
     for rule in rules if isinstance(rules, list) else []:
         paths = _mapping(_mapping(rule).get("http")).get("paths")
-        backends += [_mapping(p).get("backend") for p in paths if isinstance(paths, list)]
+        backends += [_mapping(p).get("backend") for p in (paths if isinstance(paths, list) else [])]
     names = []
     for backend in map(_mapping, backends):
         name = _mapping(backend.get("service")).get("name") or backend.get("serviceName")

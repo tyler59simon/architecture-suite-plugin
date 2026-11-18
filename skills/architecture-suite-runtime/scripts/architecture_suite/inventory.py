@@ -150,7 +150,8 @@ def dependency_inventory(files):
             r"\.(?P<verb>get|post|put|delete|patch|route)\(\s*[\"\'](?P<path>/[^\"\']*)",
             r'\[(?:Http(?P<verb>Get|Post|Put|Delete|Patch)|Route)\(\s*"(?P<path>[^"]+)"',
             r'@(?P<verb>Get|Post|Put|Delete|Patch|Request)Mapping\(\s*"(?P<path>[^"]+)"',
-            r'\b\w+\.Handle(?:Func)?\(\s*"(?:(?P<verb>GET|POST|PUT|DELETE|PATCH) )?(?P<path>/[^"]*)"',
+            # Go ServeMux patterns: "[METHOD ][HOST]/[PATH]".
+            r'\b\w+\.Handle(?:Func)?\(\s*"(?:(?P<verb>[A-Z]+) +)?(?P<path>[^"\s/]*/[^"]*)"',
         ]
         for pattern in patterns:
             for match in re.finditer(pattern, text):

@@ -1024,6 +1024,8 @@ def test_kubernetes_null_fields_are_not_attribute_errors(tmp_path):
             {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "api", "labels": None}, "spec": {"selector": {"app": "api"}}},
             {"apiVersion": "v1", "kind": "Pod", "metadata": None, "spec": None},
             {"apiVersion": "v1", "kind": "List", "items": [None]},
+            {"apiVersion": "networking.k8s.io/v1", "kind": "Ingress", "metadata": {"name": "bare"},
+             "spec": {"rules": [{"host": "a.example"}, {"http": {"paths": None}}, None]}},
         ],
     )
     assert not [e for e in topology["relationships"] if e["kind"] == "selector"]
@@ -1038,7 +1040,8 @@ def test_inventory_route_methods_and_registrations():
             "app.py": '@app.route("/health")\ndef health(): pass\n@router.post("/items")\ndef create(): pass\n',
             "Orders.cs": '[Route("api/orders")]\npublic class Orders {\n [HttpPatch("{id}")]\n public void Patch() {}\n}',
             "main.go": 'package main\nfunc main(){\n http.Handle("/static/", fs)\n mux.HandleFunc("/mux", h)\n'
-            ' mux.HandleFunc("POST /orders", h)\n}',
+            ' mux.HandleFunc("POST /orders", h)\n http.HandleFunc("example.com/health", h)\n'
+            ' http.HandleFunc("HEAD /ping", h)\n}',
             "App.kt": "import com.example.Worker\nfun run() { Worker() }",
             "Worker.kt": "class Worker",
         }
@@ -1055,7 +1058,9 @@ def test_inventory_route_methods_and_registrations():
         ("app.py", "/items", "POST"),
         ("main.go", "/mux", ""),
         ("main.go", "/orders", "POST"),
+        ("main.go", "/ping", "HEAD"),
         ("main.go", "/static/", ""),
+        ("main.go", "example.com/health", ""),
     ]
     kotlin = [r for r in report["references"] if r["kind"] == "import" and r["reference"] == "App.kt"]
     assert kotlin and kotlin[0].get("resolved_file") == "Worker.kt"
