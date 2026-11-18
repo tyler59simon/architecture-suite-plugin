@@ -231,6 +231,23 @@ def test_lint_rejects_lossy_inputs(plan, mutate):
         compile_plan(plan)
 
 
+def test_duplicate_code_overloads_get_a_merge_hint_other_duplicates_stay_plain(plan):
+    component = plan["containers"][0]["components"][0]
+    first = component["code"][0]
+    component["code"].append(deepcopy(first))
+    (finding,) = [f for f in errors(lint_plan(plan)) if f.code == "duplicate-name"]
+    assert "overloads" in finding.message and "members" in finding.message
+    assert "plan-draft" in finding.message and finding.severity == "error"
+    plan["containers"][0]["components"][0]["code"].pop()
+    plan["containers"][0]["components"][1]["code"].append({**deepcopy(first), "kind": "interface"})
+    (plain,) = [f for f in errors(lint_plan(plan)) if f.code == "duplicate-name"]
+    assert "overloads" not in plain.message and "already used" in plain.message
+    plan["containers"][0]["components"][1]["code"].pop()
+    plan["people"].append({**deepcopy(plan["people"][0])})
+    (plain,) = [f for f in errors(lint_plan(plan)) if f.code == "duplicate-name"]
+    assert "overloads" not in plain.message
+
+
 def test_claim_status_lint_compile_and_conservative_merge(plan):
     # A second customer flow projects onto the same container-level arrow as flow 1.
     plan["flows"].append(

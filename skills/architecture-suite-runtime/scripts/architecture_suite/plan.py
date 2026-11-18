@@ -269,6 +269,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
         if section not in plan:
             add("section-required", f"{section} is required", section)
     names, ids, groups, decomposed = {}, set(), {}, set()
+    firsts = {}
     entries = list(_entries(plan))
     for item, typ, parent in entries:
         if not isinstance(item, dict):
@@ -290,12 +291,18 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             add("element-name", "Element name is required", typ)
             continue
         ident = slugify(name)
+        message = f"Names must slugify to unique IDs ({ident!r} is already used)"
         if ident in ids:
-            add(
-                "duplicate-name",
-                f"Names must slugify to unique IDs ({ident!r} is already used)",
-                name,
-            )
+            first = firsts[ident]
+            if typ == "code" and first[:3] == (typ, parent, item.get("kind")) and first[3] == name:
+                message += (
+                    "; these look like overloads of one declaration saved before analyze merged them."
+                    " Merge them into one code element: combine their members, list every evidence"
+                    " reference, or re-run plan-draft"
+                )
+            add("duplicate-name", message, name)
+        else:
+            firsts[ident] = (typ, parent, item.get("kind"), name)
         ids.add(ident)
         names[name] = ident
         # Component-level flows to components with code are normal (code views are a
