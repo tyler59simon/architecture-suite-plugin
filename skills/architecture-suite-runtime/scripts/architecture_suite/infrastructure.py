@@ -259,16 +259,25 @@ def _kubernetes_edges(resources, kubernetes, edges, findings):
 REFERENCE_KEYS = {"Ref", "Fn::GetAtt", "DependsOn", "depends_on", "depends_on_resource"}
 
 
+def _reference_operand(value):
+    """A reference target: a resource name, or a list of names and attributes."""
+    return isinstance(value, str) or (
+        isinstance(value, list) and all(isinstance(v, str) for v in value)
+    )
+
+
 def _masked(value):
     """A value under a sensitive name: every literal is redacted, references stay."""
     if isinstance(value, dict):
-        if value.get("intrinsic") in {"Ref", "GetAtt"}:  # YAML short forms
-            return value
-        if value.get("intrinsic") == "Sub":
-            return {**value, "expression": _sub_masked(value.get("expression"))}
+        if set(value) == {"intrinsic", "expression"} and isinstance(value["intrinsic"], str):
+            # YAML short forms, exactly as _intrinsic builds them
+            if value["intrinsic"] in {"Ref", "GetAtt"} and _reference_operand(value["expression"]):
+                return value
+            if value["intrinsic"] == "Sub":
+                return {**value, "expression": _sub_masked(value["expression"])}
         return {
             k: v
-            if k in REFERENCE_KEYS or k == "intrinsic"
+            if k in REFERENCE_KEYS and _reference_operand(v)
             else _sub_masked(v)
             if k == "Fn::Sub"
             else _masked(v)

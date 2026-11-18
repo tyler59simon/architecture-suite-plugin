@@ -1166,3 +1166,30 @@ def test_inventory_route_methods_and_registrations():
     ]
     kotlin = [r for r in report["references"] if r["kind"] == "import" and r["reference"] == "App.kt"]
     assert kotlin and kotlin[0].get("resolved_file") == "Worker.kt"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"intrinsic": "Ref", "expression": "SharedSetting", "password": "s3cr3tpart"},
+        {"intrinsic": {"nested": "s3cr3tpart"}, "expression": "SharedSetting"},
+        {"intrinsic": ["s3cr3tpart"], "data": "s3cr3tpart"},
+        {"Ref": {"password": "s3cr3tpart"}},
+        {"intrinsic": "Ref", "expression": {"password": "s3cr3tpart"}},
+    ],
+)
+def test_reference_shaped_data_under_a_secret_name_is_masked(tmp_path, value):
+    """Only exact short forms and plain reference operands are kept; other data is masked."""
+    doc = {
+        "Resources": {
+            "SharedSetting": {"Type": "AWS::SSM::Parameter"},
+            "Provider": {
+                "Type": "Custom::Provider",
+                "Properties": {"name": "clientSecret", "value": value},
+            },
+        }
+    }
+    path = tmp_path / "stack.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    topology = import_infrastructure([path])
+    assert "s3cr3tpart" not in json.dumps(topology) + json.dumps(topology_plan(topology))
