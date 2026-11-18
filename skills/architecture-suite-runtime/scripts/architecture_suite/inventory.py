@@ -189,7 +189,7 @@ def dependency_inventory(files):
                 {
                     "reference": path,
                     "line": text.count("\n", 0, match.start()) + 1,
-                    "target": match[0],
+                    "target": redact(match[0]),
                     "kind": "configuration-address",
                     "confidence": 0.6,
                     "unresolved": True,

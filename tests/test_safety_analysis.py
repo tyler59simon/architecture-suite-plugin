@@ -496,6 +496,11 @@ def test_output_manifest_rollback_and_missing_outputs(tmp_path, monkeypatch):
         "secret: Zx81kQp0wLm3",
         "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6",
         "postgres://app:pw@db/orders",
+        "redis://app:pw@cache:6379/0",
+        "redis://:pw@cache:6379",
+        "rediss://:pw@cache:6380",
+        "amqp://guest:pw@mq:5672/",
+        "amqps://:pw@mq",
         "AKIA" + "A" * 16,
     ],
 )
