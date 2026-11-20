@@ -140,6 +140,41 @@
               "type": "string"
             }
           },
+          "flows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "technology": {
+                  "type": "string"
+                },
+                "evidence_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "enum": [
+                    "observed",
+                    "inferred",
+                    "proposed",
+                    "unknown"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "description"
+              ]
+            }
+          },
           "status": {
             "enum": [
               "observed",

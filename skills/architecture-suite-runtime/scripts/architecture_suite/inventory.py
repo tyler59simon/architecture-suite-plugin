@@ -4,7 +4,7 @@ import ast
 import re
 from pathlib import PurePosixPath
 from tree_sitter_language_pack import get_parser
-from .safety import redact
+from .safety import URI_SCHEMES, redact, redact_lines
 
 LANGUAGES = {
     ".cs": "csharp",
@@ -119,6 +119,7 @@ def dependency_inventory(files):
                     "import_from_statement",
                     "using_directive",
                     "import_spec",
+                    "import_header",  # Kotlin
                 }:
                     references.append(
                         {
@@ -143,17 +144,22 @@ def dependency_inventory(files):
             # A server registration: a router-like receiver and a path. Client calls such as
             # client.get("https://...") or dict.get("key") are not routes (URLs are
             # recorded under connections).
+            # `verb` is the HTTP method when the registration names one (route, Route,
+            # RequestMapping and Go handlers do not).
             r"(?<![\w.])(?i:\w*(?:app|router|api|server|bp|blueprint|routes?))"
-            r"\.(?:get|post|put|delete|patch)\(\s*[\"\'](/[^\"\']*)",
-            r'\[Http(?:Get|Post|Put|Delete)\(\s*"([^"]+)"',
-            r'@(?:Get|Post|Request)Mapping\(\s*"([^"]+)"',
-            r'http\.HandleFunc\(\s*"([^"]+)"',
+            r"\.(?P<verb>get|post|put|delete|patch|route)\(\s*[\"\'](?P<path>/[^\"\']*)",
+            r'\[(?:Http(?P<verb>Get|Post|Put|Delete|Patch)|Route)\(\s*"(?P<path>[^"]+)"',
+            r'@(?P<verb>Get|Post|Put|Delete|Patch|Request)Mapping\(\s*"(?P<path>[^"]+)"',
+            # Go ServeMux patterns: "[METHOD ][HOST]/[PATH]".
+            r'\b\w+\.Handle(?:Func)?\(\s*"(?:(?P<verb>[A-Z]+) +)?(?P<path>[^"\s/]*/[^"]*)"',
         ]
         for pattern in patterns:
             for match in re.finditer(pattern, text):
+                verb = (match.groupdict().get("verb") or "").upper()
                 routes.append(
                     {
-                        "path": redact(match[1]),
+                        "path": redact(match["path"]),
+                        "method": verb if verb not in {"", "ROUTE", "REQUEST"} else None,
                         "reference": path,
                         "line": text.count("\n", 0, match.start()) + 1,
                         "kind": "explicit-route",
@@ -175,15 +181,17 @@ def dependency_inventory(files):
             ref["unresolved"] = True
     connections = []
     for path, text in files.items():
+        # Scanned text is redacted already; redacting again is a no-op and covers raw input.
+        text = redact_lines(text)
         for match in re.finditer(
-            r'(?:https?://[^\s"\x27<>]+|(?:postgres|mysql|mongodb|amqp|redis)://[^\s"\x27<>]+)',
+            rf'(?:{URI_SCHEMES})://[^\s"\x27<>]+',
             text,
         ):
             connections.append(
                 {
                     "reference": path,
                     "line": text.count("\n", 0, match.start()) + 1,
-                    "target": match[0],
+                    "target": redact(match[0]),
                     "kind": "configuration-address",
                     "confidence": 0.6,
                     "unresolved": True,

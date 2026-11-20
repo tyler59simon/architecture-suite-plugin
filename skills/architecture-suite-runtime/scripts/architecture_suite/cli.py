@@ -13,7 +13,14 @@ from .analyzer import analyze_repository, draft_plan
 from .aws import gcp_icon_status, verify_assets
 from .examples import SCENARIOS, example_model, example_plan
 from .layout_host import layout_graph
-from .model import format_findings, load_model, normalized_model, project_model, validate_model
+from .model import (
+    VIEW_TYPE_DEPTH,
+    format_findings,
+    load_model,
+    normalized_model,
+    project_model,
+    validate_model,
+)
 from .overview_layout import normalize_overview_styles
 from .plan import (
     compile_plan,
@@ -31,10 +38,16 @@ from .renderers import (
     expected_artifact_paths,
     find_browser,
     layout_report,
+    render_artifacts,
     write_rendered_artifacts,
 )
 from .report import render_architecture_report
-from .review import render_review_markdown, review_exit_code, review_plan
+from .review import (
+    deployment_placement_problem,
+    render_review_markdown,
+    review_exit_code,
+    review_plan,
+)
 from .runtime_env import check_stamp
 from .safety import (
     OUTPUT_MANIFEST,
@@ -78,10 +91,21 @@ def parse_overview_styles(values: list[str] | None) -> tuple[str, ...]:
     return normalize_overview_styles(values)
 
 
+def _view_types(model):
+    # Malformed views are reported by validate_model, not here.
+    views = model.get("views")
+    return {v.get("type") for v in views if isinstance(v, dict)} if isinstance(views, list) else set()
+
+
+def _deepest_profile(model):
+    # Every evidenced level: a container-only plan is complete at container depth.
+    return next((t for t in ("code", "component") if t in _view_types(model)), "container")
+
+
 def _selected_model(model, level, styles):
     if level == "all":
         selected = model
-        profile = "code"
+        profile = _deepest_profile(model)
     elif level == "deployment":
         # Deployment needs only the placed containers/components, never code-level detail.
         has_components = any(v.get("type") == "component" for v in model.get("views", []))
@@ -102,13 +126,16 @@ def _selected_model(model, level, styles):
             "code": "code",
         }.get(level, "code")
         if level == "overview":
-            profile = (
+            wanted = (
                 "container"
                 if set(styles) <= {"executive"}
                 else "component"
                 if set(styles) <= {"executive", "progressive"}
                 else "code"
             )
+            # The styles ask for a depth; the plan may stop short of it, as under "all".
+            deepest = _deepest_profile(model)
+            profile = min(wanted, deepest, key=VIEW_TYPE_DEPTH.__getitem__)
         try:
             selected = project_model(model, profile)
         except (KeyError, TypeError, AttributeError) as exc:
@@ -118,6 +145,13 @@ def _selected_model(model, level, styles):
     findings = validate_model(selected, profile)
     if findings:
         raise SafetyError("Invalid architecture model:\n" + format_findings(findings))
+    # The rule plan-review applies: a deployment with no workloads is not drawn.
+    problem = deployment_placement_problem(selected.get("deployment"))
+    if problem and level == "deployment":
+        raise SafetyError(f"Deployment is blocked: {problem}; add placements")
+    if problem and level == "all":
+        # Like a missing component or code level, an unplaced deployment is skipped.
+        selected = {k: v for k, v in selected.items() if k != "deployment"}
     return normalized_model(selected)
 
 
@@ -322,6 +356,7 @@ def cmd_publish(args) -> int:
         model = load_model(input_path, "--model")
     if input_path.is_relative_to(output):
         raise SafetyError("Output must not contain its input")
+    unplaced = deployment_placement_problem(model.get("deployment")) is not None
     model = _selected_model(model, args.level, styles)
     formats = args.format
     paths = expected_artifact_paths(model, formats, styles, args.level)
@@ -346,6 +381,10 @@ def cmd_publish(args) -> int:
     }
     if args.level in {"all", "overview"}:
         summary["overview_styles"] = list(styles)
+    if args.level == "all":
+        summary["levels_skipped"] = [
+            t for t in ("component", "code") if t not in _view_types(model)
+        ] + (["deployment"] if unplaced else [])
     if args.dry_run:
         _json_print({**summary, "would_remove": changes["remove"]})
         return 0
@@ -354,7 +393,7 @@ def cmd_publish(args) -> int:
     with atomic_output_directory(
         output, owner="c4", command=args.command, files=paths
     ) as stage:
-        write_rendered_artifacts(
+        verification = render_artifacts(
             model,
             stage,
             formats,
@@ -362,7 +401,6 @@ def cmd_publish(args) -> int:
             args.level,
             allow_layout_findings=getattr(args, "allow_layout_findings", False),
         )
-        verification = layout_report(model, styles, args.level)
         (stage / "architecture-report.md").write_text(
             render_architecture_report(model, verification=verification),
             encoding="utf-8", newline="\n",

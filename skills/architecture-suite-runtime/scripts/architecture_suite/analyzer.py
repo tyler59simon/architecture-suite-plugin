@@ -345,6 +345,10 @@ def _declarations(text: str, suffix: str) -> list[dict]:
     return result
 
 
+def _as_list(value: str | list[str]) -> list[str]:
+    return [value] if isinstance(value, str) else value
+
+
 def draft_plan(
     root: Path, scan: ScanResult, classification: str, cloud_profile: str | None = None
 ) -> dict:
@@ -439,19 +443,27 @@ def draft_plan(
                     f"{path}:{exc.lineno or 1}: Python syntax error; declarations not inventoried."
                 )
                 declarations = []
+            overload_sets = {}
             for declaration in declarations:
                 declared = safe_text(declaration["name"])
-                component["code"].append(
-                    {
-                        "name": f"{component_name} {declared}",
-                        "description": f"Declared {declaration['kind']} {declared}",
-                        "kind": declaration["kind"],
-                        "members": [safe_text(m) for m in declaration["members"]],
-                        "evidence": f"{path}:{declaration['line']}",
-                        # The declaration itself was read from source.
-                        "status": "observed",
-                    }
-                )
+                reference = f"{path}:{declaration['line']}"
+                members = [safe_text(m) for m in declaration["members"]]
+                # Overloads share one name, so they share one element and keep each declaration.
+                existing = overload_sets.get(declared)
+                if existing:
+                    existing["members"].extend(members)
+                    existing["evidence"] = [*_as_list(existing["evidence"]), reference]
+                    continue
+                overload_sets[declared] = {
+                    "name": f"{component_name} {declared}",
+                    "description": f"Declared {declaration['kind']} {declared}",
+                    "kind": declaration["kind"],
+                    "members": members,
+                    "evidence": reference,
+                    # The declaration itself was read from source.
+                    "status": "observed",
+                }
+                component["code"].append(overload_sets[declared])
             container["components"].append(component)
             modules[path] = component_name
         plan["containers"].append(container)

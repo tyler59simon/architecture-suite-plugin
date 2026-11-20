@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.4.0 - safer redaction, infrastructure import fixes and clearer diagrams
+
+Fixes from an 18-system test campaign and three rounds of code review: credential redaction covers more inputs and formats, infrastructure import keeps the right edges, and overviews, scenarios and Draw.io titles draw more cleanly.
+
+### Changed
+
+- **`--level all` renders what the plan has:** a plan with evidence only for some levels renders those levels with the default `--level all` and lists the rest under `levels_skipped`. A deployment without placements is skipped the same way; `--level deployment` still refuses it with the `plan-review` reason. `--level overview` accepts a container-only plan.
+- **Oversized PNGs are shrunk:** a diagram over the 6,000 px or 24 MP cap is scaled down to fit, to at most half size, instead of failing the whole publish.
+- **Overloaded methods are one code element:** `analyze` and `plan-draft` merge overloads of a method into one code element with evidence for each declaration. `plan-lint` explains duplicate code names in older plans that look like unmerged overloads.
+- **Overview arrows carry only their own flows:** a merged container arrow no longer repeats the label of a flow that is drawn on a finer arrow. Merged relationships keep per-flow label data in `flows`.
+- **Small-multiples panels keep their boundaries:** in Mermaid each panel is a subgraph and in PlantUML a rectangle holding its nodes.
+- **`check` reports each flow once per rule,** at its most specific view, instead of once per container, component and code view. `diff` and `check` Markdown reports are a summary and a table instead of a JSON dump, and the explorer search matches element text, not JSON keys.
+- **`plan-lint` hidden-flow advisory:** a flow that names a container with components is missing from that container's component view; lint now says so.
+- **Inventory routes:** routes record the HTTP method and are found for Spring `@PutMapping`, `@DeleteMapping` and `@PatchMapping`, Flask and FastAPI `.route`, C# `[HttpPatch]` and `[Route]`, and Go `Handle` and `HandleFunc` patterns (including Go 1.22 method and host patterns). Kotlin imports are recorded.
+- **Faster publishing and import:** each diagram is laid out once per publish, including the panels of the small-multiples overview, and infrastructure import uses the libyaml loader when present and indexes resources instead of rescanning them (a 2,500-resource Terraform plan went from about 8 s to about 1.5 s).
+- **Visio without a browser:** `--format visio` opens a browser only when a drawing has icons to rasterize.
+- **Release workflow can be rerun:** after a late failure, a rerun reuses a versioned branch and release assets that match the build, refuses a different build, and never proposes moving `latest` back to an older version.
+
+### Fixed
+
+- **Credential redaction:**
+  - Scenario Mermaid text is redacted like every other format.
+  - Credentials in redis, rediss, amqp and amqps URIs are masked, including an empty user (`redis://:pw@host`), an empty password and passwords that contain `/`. A query or fragment no longer counts as part of the password, and a credentialed URL in compact JSON stops at the closing quote.
+  - Credentialed connections stay in the dependency inventory with the password masked (`redis://[REDACTED]@cache:6379`) instead of dropping out.
+  - A credentialed URI or another credential key inside a secret's value is still found and masked.
+  - Redaction stays linear on adversarial input such as repeated `token:` text, which took seconds before.
+  - Scan redaction keeps newlines, so connection line numbers after a multi-line secret are right.
+- **Infrastructure import:**
+  - Kubernetes `env` values under a sensitive name and short Compose `KEY=value` secrets are masked. CloudFormation `Ref`, `GetAtt` and `DependsOn` operands under a sensitive name stay only when they name a declared resource, a parameter or an AWS pseudo-parameter; everything else is masked.
+  - Terraform indexed references (`aws_subnet.app[0]`) link only that instance, including escaped `for_each` keys. An unindexed reference that fits several instances, or a malformed key, is a finding instead of an edge to every instance.
+  - Kubernetes Service selectors match Pod labels as well as workload templates, Ingress backends link to their Services, each Service gets a finding naming what it matched, and `null` metadata, labels or Ingress rules read as empty instead of failing.
+  - JSON with an escaped emoji (a surrogate pair such as `😀`) no longer makes `import-infra` fail writing `topology.json`.
+- **Repository scan:** FIFOs and other non-regular files are skipped, even when a file is swapped after it was listed, and reads stop at the byte budget when a file grows during the scan.
+- **`diff` ignores reordered parallel relationships** instead of reporting them as changes.
+- **Output backup is kept** when restoring it over a failed publish fails, and the error names its path.
+- **Dry runs:** `scenario-render` and `explore` list their files without building the diagrams first.
+- **Diagram drawing:**
+  - Draw.io frame titles sit above edges, and Draw.io diagram titles wrap and size like the SVG instead of overflowing onto the first card.
+  - Scenario message labels stay inside the innermost frame, cards start below a multi-line title, and each lifeline starts at the bottom of its own card.
+  - Group frames, scenario branch boxes and small-multiples panel titles no longer take an ID an element already uses, which replaced that element's box.
+  - PlantUML boundaries keep claim status: a proposed or inferred container drawn as a boundary shows its status cue and a dashed border.
+- **Invalid views under `--level all`** (`"views": [null]`) are reported as a validation error instead of an internal error.
+
 ## 1.3.0 - review fixes, smaller output and faster checks
 
 Fixes from a full code review, an installed-browser option for PNG, shorter skills, smaller SVG files and examples, and a faster development loop.

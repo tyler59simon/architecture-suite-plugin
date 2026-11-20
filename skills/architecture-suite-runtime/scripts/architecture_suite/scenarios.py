@@ -1,5 +1,6 @@
 """Structured scenarios independent of canonical C4 views."""
 
+from .safety import safe_text
 from .scene import Scene, Box, Edge
 from .style import Label, TextLine, wrap_to_width
 
@@ -87,7 +88,7 @@ def scenario_mermaid(scenario, model):
     def clean(text):
         # ";" ends a sequence statement; encode it between quoted parts so the entity
         # codes _quoted emits keep their own semicolons.
-        return "#59;".join(_quoted(part)[1:-1] for part in str(text).split(";"))
+        return "#59;".join(_quoted(part)[1:-1] for part in safe_text(text).split(";"))
 
     lines = ["sequenceDiagram"] + [
         f"  participant {aliases[p]} as {clean(names[p])}" for p in aliases
@@ -162,25 +163,37 @@ def scenario_scene(scenario, model):
     validate_scenario(scenario, model)
     names = {e["id"]: e["name"] for e in model["elements"]}
     width = max(660, 320 * len(scenario["participants"]) + 96)
+    title_lines = wrap_to_width(scenario["name"], width - 96, 22)
+    # Title baselines sit at 65 + 33 * n (see render_scene_svg); cards start below the last.
+    top = max(120, 33 * len(title_lines) + 54)
     scene = Scene(
         scenario["name"],
         width,
         400,
-        title_lines=wrap_to_width(scenario["name"], width - 96, 22),
-        content_top=120,
+        title_lines=title_lines,
+        content_top=top,
         sequence=True,
     )
     positions = {p: 208 + i * 320 for i, p in enumerate(scenario["participants"])}
     for p, x in positions.items():
         lab = Label([TextLine(t) for t in wrap_to_width(names[p], 230)])
         scene.boxes.append(
-            Box(p, "card", x - 130, 120, 260, max(80, lab.height + 32), lab)
+            Box(p, "card", x - 130, top, 260, max(80, lab.height + 32), lab)
         )
     # y is the bottom of the content placed so far; every step starts below it with
     # a gap, so frames, branch dividers and message labels never share a line.
     y = max(b.y + b.height for b in scene.boxes)
+    # Frame and branch IDs never reuse an element ID (a participant may be called `group-2`).
+    taken = set(names)
 
-    def walk(steps, depth=0, parent=None):
+    def free(base):
+        ident, suffix = base, 2
+        while ident in taken:
+            ident, suffix = f"{base}-{suffix}", suffix + 1
+        taken.add(ident)
+        return ident
+
+    def walk(steps, depth=0, parent=None, bounds=(0, width)):
         nonlocal y
         previous = None
         for step in steps:
@@ -193,7 +206,7 @@ def scenario_scene(scenario, model):
                 y += STEP_GAP
             previous = kind
             if kind in GROUPS:
-                ident = "group-" + str(len(scene.boxes))
+                ident = free("group-" + str(len(scene.boxes)))
                 # Nested frames are inset per depth so every level stays visible.
                 left = 55 + depth * FRAME_INSET
                 inner = width - 2 * left
@@ -207,7 +220,8 @@ def scenario_scene(scenario, model):
                 box = Box(ident, "frame", left, top, inner, 0, title, parent)
                 scene.boxes.append(box)
                 y = top + 10 + title.height
-                walk(step["steps"], depth + 1, ident)
+                inside = (left, left + inner)
+                walk(step["steps"], depth + 1, ident, inside)
                 for branch in step.get("branches", []):
                     y += FRAME_PAD
                     scene.edges.append(
@@ -231,7 +245,7 @@ def scenario_scene(scenario, model):
                     )
                     scene.boxes.append(
                         Box(
-                            "branch-" + str(len(scene.boxes)),
+                            free("branch-" + str(len(scene.boxes))),
                             "panel-title",
                             left + 20,
                             y + 4,
@@ -242,7 +256,7 @@ def scenario_scene(scenario, model):
                         )
                     )
                     y += lab.height + 28
-                    walk(branch["steps"], depth + 1, ident)
+                    walk(branch["steps"], depth + 1, ident, inside)
                 y += FRAME_PAD
                 box.height = y - top
             else:
@@ -253,10 +267,12 @@ def scenario_scene(scenario, model):
                         for t in wrap_to_width(step["description"], 240, 11)
                     ]
                 )
+                # Keep the label inside the innermost frame so it never covers a border.
+                low, high = bounds
                 box = Box(
                     "message-label-" + str(len(scene.edges)),
                     "edge-label",
-                    (x1 + x2) / 2 - 130,
+                    max(low + 8, min((x1 + x2) / 2 - 130, high - 268)),
                     y,
                     260,
                     lab.height + 10,
@@ -282,9 +298,11 @@ def scenario_scene(scenario, model):
     walk(scenario["steps"])
     y += STEP_GAP
     # Lifelines are separate visual strokes and never dependencies in the model.
+    cards = {b.id: b for b in scene.boxes if b.role == "card"}
     for p, x in positions.items():
+        start = cards[p].y + cards[p].height  # a tall card pushes its lifeline down
         scene.edges.insert(
-            0, Edge("lifeline-" + p, p, p, [(x, 200), (x, y)], kind="lifeline")
+            0, Edge("lifeline-" + p, p, p, [(x, start), (x, y)], kind="lifeline")
         )
     scene.height = y + 180
     scene.key_y = y + 50

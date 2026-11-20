@@ -183,15 +183,17 @@ def render_scene_drawio(scene: Scene) -> str:
             attrib={"as": "geometry"},
         )
 
+    title_lines = scene.title_lines or [scene.title]
     vertex(
         "title",
-        html.escape(scene.title),
+        "<br>".join(html.escape(line) for line in title_lines),
         48,
         35,
         scene.width - 96,
-        55,
-        "text;html=1;fontSize=22;align=left;fontFamily=Roboto;",
+        max(55, 33 * len(title_lines) + 10),
+        "text;html=1;fontSize=22;align=left;verticalAlign=top;fontFamily=Roboto;",
     )
+    titles = []
     for box in scene.boxes:
         parent = by_id.get(box.parent_id)
         x, y = box.x - (parent.x if parent else 0), box.y - (parent.y if parent else 0)
@@ -216,16 +218,33 @@ def render_scene_drawio(scene: Scene) -> str:
             cell_ids.get(box.parent_id, "1"),
         )
         for index, (tx, ty, line) in enumerate(_placements(box)):
-            vertex(
-                cell_ids[box.id] + f"-text-{index}",
-                html.escape(line.text),
-                tx - box.x - box.width / 2,
-                ty - box.y - line.font,
-                box.width,
-                line.height,
-                f"text;html=1;align=center;fontSize={line.font};fontFamily=Roboto;spacing=0;",
-                cell_ids[box.id],
-            )
+            ident = cell_ids[box.id] + f"-text-{index}"
+            style = f"text;html=1;align=center;fontSize={line.font};fontFamily=Roboto;spacing=0;"
+            if box.role == "frame":
+                # Edges enter frames across their titles: add titles after the edges, at
+                # page coordinates and with a background, so they draw on top.
+                titles.append(
+                    (
+                        ident,
+                        html.escape(line.text),
+                        tx - box.width / 2,
+                        ty - line.font,
+                        box.width,
+                        line.height,
+                        style + "labelBackgroundColor=#ffffff;",
+                    )
+                )
+            else:
+                vertex(
+                    ident,
+                    html.escape(line.text),
+                    tx - box.x - box.width / 2,
+                    ty - box.y - line.font,
+                    box.width,
+                    line.height,
+                    style,
+                    cell_ids[box.id],
+                )
         if box.label.icon:
             uri = "data:image/svg+xml," + quote(
                 icon_bytes(box.label.icon).decode(), safe=""
@@ -293,6 +312,8 @@ def render_scene_drawio(scene: Scene) -> str:
                 b.height,
                 "text;html=1;fillColor=#ffffff;fontSize=11;fontFamily=Roboto;spacing=0;",
             )
+    for title in titles:
+        vertex(*title)
     vertex(
         "key",
         "<br>".join(html.escape(ln) for ln in _key(scene)),

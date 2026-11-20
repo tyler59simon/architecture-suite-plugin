@@ -53,7 +53,7 @@ def diff_models(before, after, identities=None):
                 if key in item:
                     item[key] = aliases.get(item[key], item[key])
     changes = []
-    ignored = {"evidence_ids", "confidence", "flow_ids"}
+    ignored = {"evidence_ids", "confidence", "flow_ids", "flows"}
     for section, old_items in _sections(before).items():
 
         def index(items):
@@ -73,25 +73,42 @@ def diff_models(before, after, identities=None):
                     if k not in ignored
                     and not (section == "relationships" and k == "id")
                 }
-                if key in result and result[key] != clean:
-                    key = str(key) + " " + json.dumps(clean, sort_keys=True)
-                result[key] = clean
+                result.setdefault(key, []).append(clean)
             return result
+
+        def payload(value):
+            return json.dumps(value, sort_keys=True, default=str)
 
         old, new = index(old_items), index(_sections(after)[section])
         for key in sorted(set(old) | set(new), key=str):
-            if old.get(key) != new.get(key):
+            # Identical entries cancel, so reordering parallel arrows is not a change.
+            removed, added = list(old.get(key, [])), list(new.get(key, []))
+            for value in list(removed):
+                if value in added:
+                    removed.remove(value)
+                    added.remove(value)
+            removed.sort(key=payload)
+            added.sort(key=payload)
+            for i in range(max(len(removed), len(added))):
+                before_value = removed[i] if i < len(removed) else None
+                after_value = added[i] if i < len(added) else None
+                paired = before_value is not None and after_value is not None
+                # A lone first entry keeps the bare key; entries beside others add their payload.
+                crowded = i > 0 or not paired and (key in old and key in new)
+                label = str(key)
+                if crowded:
+                    label += " " + payload(after_value if after_value is not None else before_value)
                 changes.append(
                     {
                         "section": section,
-                        "id": str(key),
-                        "kind": "added"
-                        if key not in old
-                        else "removed"
-                        if key not in new
-                        else "changed",
-                        "before": old.get(key),
-                        "after": new.get(key),
+                        "id": label,
+                        "kind": "changed"
+                        if paired
+                        else "added"
+                        if after_value is not None
+                        else "removed",
+                        "before": before_value,
+                        "after": after_value,
                     }
                 )
     return {
@@ -146,6 +163,15 @@ def check_rules(model, config, baseline=None):
 
     findings, seen = [], set()
     ids = set()
+    # A flow is projected into every view (container, component, code). Visit the most
+    # specific views first and report each flow once per rule, at its finest level.
+    depth = {"code": 0, "component": 1, "container": 2, "context": 3}
+    level = {
+        rid: depth.get(view.get("type"), 4)
+        for view in model.get("views", [])
+        for rid in view.get("relationship_ids", [])
+    }
+    relationships = sorted(model["relationships"], key=lambda r: level.get(r.get("id"), 4))
     for rule in config["rules"]:
         if (
             not isinstance(rule, dict)
@@ -159,7 +185,8 @@ def check_rules(model, config, baseline=None):
         ids.add(rule["id"])
         matches({}, rule.get("source", {}))
         matches({}, rule.get("destination", {}))
-        for rel in model["relationships"]:
+        reported = set()
+        for rel in relationships:
             source, dest = elements[rel["source_id"]], elements[rel["destination_id"]]
             if matches(source, rule.get("source", {})):
                 allowed = matches(dest, rule.get("destination", {}))
@@ -167,9 +194,11 @@ def check_rules(model, config, baseline=None):
                     rule["effect"] == "allow" and not allowed
                 ):
                     identity = (rule["id"], source["id"], dest["id"])
-                    if identity in seen:
+                    flows = set(rel.get("flow_ids") or [])
+                    if identity in seen or (flows and flows <= reported):
                         continue
                     seen.add(identity)
+                    reported |= flows
                     fingerprint = hashlib.sha256(
                         json.dumps(identity).encode()
                     ).hexdigest()
@@ -193,9 +222,56 @@ def check_rules(model, config, baseline=None):
     }
 
 
+def _text(value):
+    text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
+    return " ".join(text.split())
+
+
+def _table(header, rows):
+    lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
+    lines += ["| " + " | ".join(_text(v).replace("|", "\\|") for v in row) + " |" for row in rows]
+    return "\n".join(lines)
+
+
+def _count(n, noun):
+    return f"{n} {noun}" + ("" if n == 1 else "s")
+
+
 def markdown_report(report):
+    """A readable summary of a diff or check report; the JSON file holds every field."""
+    if report["schema_version"] == "architecture-diff/v1":
+        changes = report["changes"]
+        if not changes:
+            return "# Architecture diff\n\nNo architecture changes.\n"
+        counts = {k: sum(c["kind"] == k for c in changes) for k in ("added", "changed", "removed")}
+        rows = []
+        for c in changes:
+            before, after = c["before"] or {}, c["after"] or {}
+            fields = sorted(k for k in set(before) | set(after) if before.get(k) != after.get(k))
+            details = (
+                "; ".join(f"{k}: {_text(before.get(k))} -> {_text(after.get(k))}" for k in fields)
+                if c["kind"] == "changed"
+                else ""
+            )
+            rows.append((c["section"], c["id"], c["kind"], details))
+        return (
+            "# Architecture diff\n\n"
+            + f"{_count(len(changes), 'change')}: {counts['added']} added, {counts['changed']} changed, "
+            + f"{counts['removed']} removed.\n\n"
+            + _table(("Section", "ID", "Change", "Details"), rows)
+            + "\n"
+        )
+    findings = report["findings"]
+    if not findings:
+        return "# Architecture check\n\nNo rule findings.\n"
+    rows = [
+        (f["rule"], f["source"], f["destination"], f["severity"],
+         "accepted" if f["existing"] else "new")
+        for f in findings
+    ]
     return (
-        "# Architecture report\n\n```json\n"
-        + json.dumps(report, indent=2, ensure_ascii=False)
-        + "\n```\n"
+        "# Architecture check\n\n"
+        + f"{_count(len(findings), 'finding')}, {_count(report['new_errors'], 'new error')}.\n\n"
+        + _table(("Rule", "Source", "Destination", "Severity", "Status"), rows)
+        + "\n"
     )
