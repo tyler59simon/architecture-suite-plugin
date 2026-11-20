@@ -497,9 +497,9 @@ def test_publish_builds_each_scene_once(inputs, tmp_path, monkeypatch):
     real = renderers._scene
     built = []
 
-    def counting(model, view):
+    def counting(model, view, view_scenes=None):
         built.append(view["type"] + ":" + str(view.get("style", view.get("level", ""))))
-        return real(model, view)
+        return real(model, view, view_scenes)
 
     monkeypatch.setattr(renderers, "_scene", counting)
     argv = [
@@ -511,3 +511,25 @@ def test_publish_builds_each_scene_once(inputs, tmp_path, monkeypatch):
         json.loads(inputs[0].read_text()), parse_overview_styles(None), "container"
     )
     assert len(built) == len(specs) > 0
+
+
+@pytest.mark.slow
+def test_small_multiples_publish_lays_out_each_view_once(inputs, tmp_path, monkeypatch):
+    from architecture_suite import overview_layout, renderers
+
+    real = renderers.build_view_scene_elk
+    laid_out = []
+
+    def counting(model, view):
+        laid_out.append(view["id"])
+        return real(model, view)
+
+    monkeypatch.setattr(renderers, "build_view_scene_elk", counting)
+    monkeypatch.setattr(overview_layout, "build_view_scene_elk", counting)
+    argv = [
+        "plan-render", "--plan", str(inputs[1]), "--output", str(tmp_path / "out"),
+        "--format", "mermaid", "--overview-style", "small-multiples", "--confirm-write",
+    ]
+    assert main(argv) == 0
+    views = [v["id"] for v in json.loads(inputs[0].read_text())["views"]]
+    assert sorted(laid_out) == sorted(views)

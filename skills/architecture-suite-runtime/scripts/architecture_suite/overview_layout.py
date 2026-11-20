@@ -94,14 +94,24 @@ def overview_data(model: dict, style: str):
     )
 
 
-def build_overview_scene(model: dict, style: str = "progressive") -> Scene:
+def build_overview_scene(
+    model: dict, style: str = "progressive", view_scenes: dict | None = None
+) -> Scene:
+    """`view_scenes` maps view IDs to scenes already built for this model; panels use
+    copies of them, since building a panel moves and renames its boxes."""
     title = (
         model["system"]["name"] + " — " + style.replace("-", " ").title() + " overview"
     )
     if style != "small-multiples":
         elements, relationships, parents, frames = overview_data(model, style)
         return choose_scene(title, elements, relationships, parents, frames)
-    scenes = [build_view_scene_elk(model, v) for v in model["views"]]
+    view_scenes = view_scenes or {}
+    scenes = [
+        deepcopy(view_scenes[v["id"]])
+        if v["id"] in view_scenes
+        else build_view_scene_elk(model, v)
+        for v in model["views"]
+    ]
     # Every expanded scope gets a panel; retain all repeated L3/L4 scopes. Panels fill
     # rows in reading order at their own widths up to a landscape target, so one wide
     # view does not widen every panel (which overflowed PNG limits on moderate models).

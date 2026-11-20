@@ -98,12 +98,24 @@ def expected_artifact_paths(
     ]
 
 
-def _scene(model, view):
+def _scene(model, view, view_scenes=None):
     if view["type"] == "overview":
-        return build_overview_scene(model, view["style"])
+        return build_overview_scene(model, view["style"], view_scenes)
     if view["type"] == "deployment":
         return build_cloud_scene(model)
     return build_view_scene_elk(model, view)
+
+
+def _built(model: dict, overview_styles=None, level: str = "all") -> list:
+    """(base, view, scene) for every spec, each scene built once; the small-multiples
+    overview reuses the model views' scenes (they come first in diagram_specs)."""
+    built, view_scenes = [], {}
+    for base, view in diagram_specs(model, overview_styles, level):
+        scene = _scene(model, view, view_scenes)
+        if view["type"] not in {"overview", "deployment"}:
+            view_scenes[view["id"]] = scene
+        built.append((base, view, scene))
+    return built
 
 
 def _quoted(value):
@@ -321,18 +333,12 @@ def render_svg(model: dict, view: dict) -> str:
 def layout_measurements(model: dict, overview_styles=None, level: str = "all") -> dict:
     return {
         base: {"width": scene.width, "height": scene.height, **score_scene(scene)}
-        for base, view in diagram_specs(model, overview_styles, level)
-        for scene in [_scene(model, view)]
+        for base, _, scene in _built(model, overview_styles, level)
     }
 
 
 def layout_report(model: dict, overview_styles=None, level: str = "all") -> dict:
-    return _layout_report(
-        [
-            (base, view, _scene(model, view))
-            for base, view in diagram_specs(model, overview_styles, level)
-        ]
-    )
+    return _layout_report(_built(model, overview_styles, level))
 
 
 def _layout_report(built) -> dict:
@@ -727,10 +733,7 @@ def render_artifacts(
     """Write the artifacts, building each scene once; returns the layout verification."""
     verify_assets()
     expected_artifact_paths(model, formats, overview_styles, level)
-    built = [
-        (base, view, _scene(model, view))
-        for base, view in diagram_specs(model, overview_styles, level)
-    ]
+    built = _built(model, overview_styles, level)
     verification = _layout_report(built)
     if not verification["ok"] and not allow_layout_findings:
         raise SafetyError(

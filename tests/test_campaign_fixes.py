@@ -397,6 +397,19 @@ def test_small_multiples_pack_panels_into_rows(model):
     assert scene.width <= max(5600, max(b.x + b.width + 96 for b in panels))
 
 
+
+@pytest.mark.slow
+def test_small_multiples_reuses_view_scenes_without_changing_them(model):
+    from architecture_suite.scene import build_view_scene_elk
+
+    view_scenes = {v["id"]: build_view_scene_elk(model, v) for v in model["views"]}
+    before = {k: [b.id for b in s.boxes] for k, s in view_scenes.items()}
+    reused = build_overview_scene(model, "small-multiples", view_scenes)
+    assert render_scene_svg(reused) == render_scene_svg(
+        build_overview_scene(model, "small-multiples")
+    )
+    assert {k: [b.id for b in s.boxes] for k, s in view_scenes.items()} == before
+
 def test_report_evidence_lines_omit_empty_parts(model):
     report = render_architecture_report(
         {**model, "evidence": [{"id": "ev-1", "reference": "brief"}]}
