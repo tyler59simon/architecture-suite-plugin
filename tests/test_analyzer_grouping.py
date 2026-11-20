@@ -237,6 +237,9 @@ def test_key_colon_values_keep_the_digit_rule_at_any_length():
     assert redact("password: str") == "password: str"
     # A credentialed URI that starts inside a digit-bearing value keeps its own match.
     assert "p,p," not in redact("token:abcdefg1http://u:" + "p," * 200 + "@host")
+    # A key at the end of another key's value keeps its own value.
+    for text in ("token:abcdefgh.password: s3cr3t99", "token:abc1.password: s3cr3t99"):
+        assert "s3cr3t99" not in redact(text) and contains_secret(text), text
 
 
 def test_url_assigned_to_a_secret_name_stays_out_of_the_inventory(tmp_path):

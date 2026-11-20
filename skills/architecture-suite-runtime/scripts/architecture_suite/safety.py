@@ -105,13 +105,21 @@ def _mask(match: re.Match[str]) -> str:
     return f"{scheme}://[REDACTED]@" if scheme else "[REDACTED]"
 
 
-def _digit_values(value: str) -> list[re.Match[str]]:
-    return [m for m in _DIGIT_VALUE.finditer(value) if re.search(r"\d", m["value"])]
+def _digit_values(value: str) -> Iterator[re.Match[str]]:
+    """Digit-bearing `key: value` matches. After each candidate the search resumes 16
+    characters before its end (keys are at most 13 characters): a key starting earlier
+    has its value inside the same run, but a key ending at the run's end (`a.password:`
+    before a space) can have its own value after it."""
+    pos = 0
+    while match := _DIGIT_VALUE.search(value, pos):
+        if re.search(r"\d", match["value"]):
+            yield match
+        pos = max(match.start() + 1, match.end() - 16)
 
 
 def contains_secret(value: str) -> bool:
     """True when redact would mask something in `value`."""
-    return bool(SECRET.search(value) or _digit_values(value))
+    return bool(SECRET.search(value)) or next(_digit_values(value), None) is not None
 
 
 def _redact(value: str, keep_newlines: bool) -> str:
