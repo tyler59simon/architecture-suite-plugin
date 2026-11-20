@@ -1,10 +1,11 @@
 """Offline import of exported infrastructure. Unresolved values remain findings."""
 
+from collections import Counter
 from pathlib import Path
 import json
 import re
 import yaml
-from .plan import _Loader
+from .plan import _Loader, _mapping as _unique_mapping
 from .safety import canonical_existing_file, redact
 from .model import slugify
 
@@ -38,16 +39,61 @@ def _intrinsic(loader, suffix, node):
 _InfraLoader.add_multi_constructor("!", _intrinsic)
 
 
+_CSafeLoader = getattr(yaml, "CSafeLoader", None)
+if _CSafeLoader:
+    # libyaml parser with the same constructors; the pure-Python loader is the fallback.
+    class _CInfraLoader(_CSafeLoader):
+        """C-based _InfraLoader."""
+
+    _CInfraLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _unique_mapping)
+    _CInfraLoader.add_multi_constructor("!", _intrinsic)
+    _LOADER = _CInfraLoader
+else:
+    _LOADER = _InfraLoader
+
+
+def _load(text: str, loader) -> list:
+    for event in yaml.parse(text, Loader=loader):
+        if isinstance(event, yaml.AliasEvent) or getattr(event, "anchor", None) is not None:
+            raise ValueError("YAML anchors and aliases are unsupported")
+    # Empty documents (a Helm template that rendered nothing) are skipped.
+    return [doc for doc in yaml.load_all(text, Loader=loader) if doc is not None]
+
+
+_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
+def _join_surrogates(value):
+    """JSON escapes a character outside the BMP as a surrogate pair, which PyYAML keeps
+    as two halves that UTF-8 cannot encode. Pairs become the character; a lone half
+    becomes U+FFFD."""
+    if isinstance(value, str):
+        if not _SURROGATE.search(value):
+            return value
+        return value.encode("utf-16-le", "surrogatepass").decode("utf-16-le", "replace")
+    if isinstance(value, dict):
+        joined = {_join_surrogates(k): _join_surrogates(v) for k, v in value.items()}
+        if len(joined) < len(value):
+            raise ValueError("Mapping keys must be unique strings")
+        return joined
+    if isinstance(value, list):
+        return [_join_surrogates(v) for v in value]
+    return value
+
+
 def _documents(text: str) -> list:
     """Every non-empty YAML/JSON document; anchors and aliases stay unsupported."""
     if len(text) > 2_000_000:
         raise ValueError("Infrastructure document exceeds 2 MB")
     try:
-        for token in yaml.scan(text):
-            if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken)):
-                raise ValueError("YAML anchors and aliases are unsupported")
-        # Empty documents (a Helm template that rendered nothing) are skipped.
-        return [doc for doc in yaml.load_all(text, Loader=_InfraLoader) if doc is not None]
+        try:
+            docs = _load(text, _LOADER)
+        except yaml.YAMLError:
+            if _LOADER is _InfraLoader:
+                raise
+            # libyaml rejects a few inputs the pure-Python parser accepts (`{api:{}}`).
+            docs = _load(text, _InfraLoader)
+        return [_join_surrogates(doc) for doc in docs]
     except (yaml.YAMLError, RecursionError) as exc:
         raise ValueError(str(exc)[:200]) from exc
 
@@ -119,8 +165,12 @@ def _sub(target, names):
             yield names[name]
 
 
-TERRAFORM_INDEX = re.compile(r"\[(?:\"[^\"]*\"|[^\]]*)\]")
-MODULE_INSTANCE = re.compile(r"^(?:module\.[^.\[]+(?:\[(?:\"[^\"]*\"|[^\]]*)\])?\.)*")
+# An instance key: `[0]`, or `["key"]` with quotes and backslashes escaped inside.
+TERRAFORM_KEY = r'\[(?:\d+|"(?:[^"\\]|\\.)*")\]'
+TERRAFORM_INDEX = re.compile(TERRAFORM_KEY)
+MODULE_INSTANCE = re.compile(rf"^(?:module\.[^.\[]+(?:{TERRAFORM_KEY})?\.)*")
+# `aws_subnet.app[0].id` -> `aws_subnet.app[0]`: type, name and instance key, if any.
+TERRAFORM_REFERENCE = re.compile(rf"([^.\[\]]+)\.([^.\[\]]+)({TERRAFORM_KEY})?")
 
 
 def _config_address(address: str) -> str:
@@ -134,42 +184,270 @@ def _module_instance(address: str) -> str:
     return MODULE_INSTANCE.match(address).group()
 
 
-def _terraform_references(module, prefix=""):
-    """{config address: referenced resource addresses} from a plan's `configuration`."""
-    found = {}
+TERRAFORM_ROOTS = {"var", "local", "data", "module", "each", "count", "path", "self", "terraform"}
 
-    def collect(value, into):
+
+def _terraform_references(module, prefix=""):
+    """({config address: referenced resource addresses}, {config address: references
+    with a malformed instance key}) from a plan's `configuration`. A referenced address
+    keeps its instance key (`aws_subnet.app[0]`) when it has one."""
+    found, rejected = {}, {}
+
+    def collect(value, into, bad):
         if isinstance(value, dict):
+            previous = None
             for ref in value.get("references", []) or []:
-                parts = ref.split(".") if isinstance(ref, str) else []
-                if len(parts) >= 2 and parts[0] not in {
-                    "var", "local", "data", "module", "each", "count", "path", "self", "terraform"
-                }:
-                    into.add(prefix + _config_address(".".join(parts[:2])))
+                match = TERRAFORM_REFERENCE.match(ref) if isinstance(ref, str) else None
+                if match and ref.startswith("[", match.end()):
+                    if match.group(1) not in TERRAFORM_ROOTS:
+                        bad.add(ref)
+                    match = None  # a malformed key (`app[bogus]`) stays unresolved
+                # Terraform lists `aws_subnet.app[0].id`, `aws_subnet.app[0]` and then
+                # `aws_subnet.app` for one reference; that last entry, right after its
+                # instance, is an alias. A dynamic index (`app[var.i]`) lists only
+                # `aws_subnet.app`, which stays a reference of its own.
+                if match and ref != previous and match.group(1) not in TERRAFORM_ROOTS:
+                    into.add(prefix + match.group())
+                # The resource of an entry that is exactly one instance, else None.
+                previous = (
+                    ref[: match.start(3)] if match and match.group(3) and match.end() == len(ref) else None
+                )
             for child in value.values():
-                collect(child, into)
+                collect(child, into, bad)
         elif isinstance(value, list):
             for child in value:
-                collect(child, into)
+                collect(child, into, bad)
 
     for resource in module.get("resources", []) or []:
         if isinstance(resource, dict) and isinstance(resource.get("address"), str):
-            targets = set()
-            collect(resource.get("expressions", {}), targets)
+            targets, bad = set(), set()
+            collect(resource.get("expressions", {}), targets, bad)
             found[prefix + resource["address"]] = targets
+            rejected[prefix + resource["address"]] = bad
     for name, call in (module.get("module_calls") or {}).items():
         if isinstance(call, dict) and isinstance(call.get("module"), dict):
-            found.update(_terraform_references(call["module"], f"{prefix}module.{name}."))
-    return found
+            inner, inner_rejected = _terraform_references(call["module"], f"{prefix}module.{name}.")
+            found.update(inner)
+            rejected.update(inner_rejected)
+    return found, rejected
+
+
+def _mapping(value):
+    return value if isinstance(value, dict) else {}
+
+
+def _ingress_backends(spec):
+    """Service names an Ingress routes to (networking.k8s.io/v1 and v1beta1)."""
+    backends = [spec.get("defaultBackend"), spec.get("backend")]
+    rules = spec.get("rules")
+    for rule in rules if isinstance(rules, list) else []:
+        paths = _mapping(_mapping(rule).get("http")).get("paths")
+        backends += [_mapping(p).get("backend") for p in (paths if isinstance(paths, list) else [])]
+    names = []
+    for backend in map(_mapping, backends):
+        name = _mapping(backend.get("service")).get("name") or backend.get("serviceName")
+        if isinstance(name, str) and name not in names:
+            names.append(name)
+    return names
+
+
+def _kubernetes_edges(resources, kubernetes, edges, findings):
+    """Service selectors to Pods and workload templates, and Ingress backends to Services."""
+    services = {
+        (r["parent_id"], kubernetes[r["id"]][0]): r["id"]
+        for r in resources
+        if r["type"] == "kubernetes/Service" and r["id"] in kubernetes
+    }
+
+    def edge(resource, target, kind):
+        edges.append(
+            {
+                "source_id": resource["id"],
+                "destination_id": target,
+                "kind": kind,
+                "evidence": resource["evidence"],
+            }
+        )
+
+    # (namespace, label key, label value) -> candidate resources in resource order.
+    # A Pod carries its own labels; a workload labels the Pods of its template.
+    by_label, by_namespace = {}, {}
+    for target in resources:
+        if not target["type"].startswith("kubernetes/"):
+            continue
+        labels = (
+            kubernetes.get(target["id"], ("", {}))[1]
+            if target["type"] == "kubernetes/Pod"
+            else _mapping(
+                _mapping(_mapping(target["properties"].get("template")).get("metadata")).get(
+                    "labels"
+                )
+            )
+        )
+        by_namespace.setdefault(target["parent_id"], []).append((target, labels))
+        for key, value in labels.items():
+            try:
+                by_label.setdefault((target["parent_id"], key, value), []).append((target, labels))
+            except TypeError:  # a list or mapping value: only an equal unhashable one matches it
+                by_label.setdefault((target["parent_id"], key, None, "unhashable"), []).append(
+                    (target, labels)
+                )
+
+    for resource in resources:
+        props = resource["properties"]
+        if resource["type"] == "kubernetes/Service":
+            selector = _mapping(props.get("selector"))
+            matched = []
+            # A null selector value also matches a missing label, which the index cannot
+            # look up, so look up by a non-null pair or scan the namespace.
+            first = next(((k, v) for k, v in selector.items() if v is not None), None)
+            candidates = ()
+            if first:
+                try:
+                    candidates = by_label.get((resource["parent_id"], *first), ())
+                except TypeError:
+                    candidates = by_label.get(
+                        (resource["parent_id"], first[0], None, "unhashable"), ()
+                    )
+            elif selector:
+                candidates = by_namespace.get(resource["parent_id"], ())
+            for target, labels in candidates:
+                if target["id"] != resource["id"] and all(
+                    labels.get(k) == v for k, v in selector.items()
+                ):
+                    edge(resource, target["id"], "selector")
+                    matched.append(target["id"])
+            text = ", ".join(f"{k}={v}" for k, v in selector.items())
+            findings.append(
+                {
+                    "resource": resource["id"],
+                    "message": "Service has no selector; its endpoints are managed elsewhere"
+                    if not selector
+                    else f"Service selector {text} matched: " + ", ".join(matched)
+                    if matched
+                    else f"Service selector {text} matched no workload in namespace "
+                    + str(resource["parent_id"]),
+                }
+            )
+        if resource["type"] == "kubernetes/Ingress":
+            missing = []
+            for backend in _ingress_backends(props):
+                target = services.get((resource["parent_id"], backend))
+                if target:
+                    edge(resource, target, "ingress-backend")
+                else:
+                    missing.append(backend)
+            if missing:
+                findings.append(
+                    {
+                        "resource": resource["id"],
+                        "message": "Ingress backends are not declared Services: "
+                        + ", ".join(missing),
+                    }
+                )
+
+
+# Keys whose values import_infrastructure reads as reference targets; kept when masking.
+REFERENCE_KEYS = {"Ref", "Fn::GetAtt", "DependsOn", "depends_on", "depends_on_resource"}
+
+
+class _Declared(frozenset):
+    """Declared resource names; `.parameters` adds the CloudFormation Parameters keys a
+    Ref (never a GetAtt) may also name."""
+
+    parameters = frozenset()
+
+
+AWS_PSEUDO_PARAMETERS = {
+    "AWS::AccountId", "AWS::NotificationARNs", "AWS::NoValue", "AWS::Partition",
+    "AWS::Region", "AWS::StackId", "AWS::StackName", "AWS::URLSuffix",
+}
+
+
+def _declared_operand(value, known, operator):
+    """A reference operand that names only declared things. Ref: one resource, Parameter
+    or pseudo-parameter. GetAtt: `Name.Attr` or `[Name, Attr]` with a declared Name.
+    DependsOn: one declared resource or a list of them."""
+    if operator == "Ref":
+        return isinstance(value, str) and (
+            value in known
+            or value in getattr(known, "parameters", ())
+            or value in AWS_PSEUDO_PARAMETERS
+        )
+    if operator == "GetAtt":
+        if isinstance(value, str):
+            return value.split(".", 1)[0] in known
+        return (
+            isinstance(value, list) and len(value) == 2
+            and all(isinstance(v, str) for v in value) and value[0] in known
+        )
+    if isinstance(value, str):
+        return value in known
+    return (
+        isinstance(value, list) and bool(value)
+        and all(isinstance(v, str) and v in known for v in value)
+    )
+
+
+def _masked(value, known=frozenset()):
+    """A value under a sensitive name: every literal is redacted, references stay.
+    `known` holds the file's declared resource names (see _getatt_masked)."""
+    if isinstance(value, dict):
+        if set(value) == {"intrinsic", "expression"} and isinstance(value["intrinsic"], str):
+            # YAML short forms, exactly as _intrinsic builds them
+            if value["intrinsic"] in {"Ref", "GetAtt"} and _declared_operand(
+                value["expression"], known, value["intrinsic"]
+            ):
+                return value
+            if value["intrinsic"] == "GetAtt":
+                return {**value, "expression": _getatt_masked(value["expression"], known)}
+            if value["intrinsic"] == "Sub":
+                return {**value, "expression": _sub_masked(value["expression"], known)}
+        return {
+            k: v
+            if k in REFERENCE_KEYS
+            and _declared_operand(v, known, {"Ref": "Ref", "Fn::GetAtt": "GetAtt"}.get(k, "DependsOn"))
+            else _sub_masked(v, known)
+            if k == "Fn::Sub"
+            else _getatt_masked(v, known)
+            if k == "Fn::GetAtt"
+            else _masked(v, known)
+            for k, v in value.items()
+        }
+    if isinstance(value, list):
+        return [_masked(v, known) for v in value]
+    if isinstance(value, (str, int, float)) and not isinstance(value, bool):
+        return "[REDACTED]"
+    return value
+
+
+def _getatt_masked(target, known):
+    """GetAtt `[Name, <expression>]`: a declared resource name stays, the attribute is
+    masked. A name that declares nothing is text from a sensitive value and is masked."""
+    if isinstance(target, list) and target and isinstance(target[0], str) and target[0] in known:
+        return [target[0]] + [_masked(v, known) for v in target[1:]]
+    return _masked(target, known)
+
+
+def _sub_masked(target, known=frozenset()):
+    """Fn::Sub without its literal text: only the `${Name}` references remain."""
+    if isinstance(target, str):
+        return "".join(m[0] for m in SUB_VARIABLE.finditer(target))
+    if isinstance(target, list) and target:
+        return [_sub_masked(target[0], known)] + [_masked(v, known) for v in target[1:]]
+    return _masked(target, known)
 
 
 def import_infrastructure(paths, bindings=None):
     resources, edges, findings = [], [], []
     bindings = bindings or {}
+    kubernetes = {}  # resource id -> (metadata name, metadata labels)
+    known_ids = set()
 
     def add(ident, kind, properties, source, parent=None):
-        if any(r["id"] == ident for r in resources):
+        if ident in known_ids:
             raise ValueError("Duplicate infrastructure resource: " + ident)
+        known_ids.add(ident)
         resources.append(
             {
                 "id": ident,
@@ -186,34 +464,65 @@ def import_infrastructure(paths, bindings=None):
         prefix = f"input-{file_index}-"
         declared = {}  # name -> id across this file's documents
 
+        def sensitive(key):
+            return re.search(r"password|secret|token|api.?key", str(key), re.I)
+
         def scrub(value):
             if isinstance(value, dict):
+                # A Kubernetes env entry names the secret in `name` and holds it in `value`;
+                # an expression there keeps its references (edges) but no literal text.
+                named = "value" in value and sensitive(value.get("name", ""))
                 return {
                     # Booleans are kept: they carry Terraform sensitivity masks, not secrets.
                     k: "[REDACTED]"
-                    if re.search(r"password|secret|token|api.?key", str(k), re.I)
-                    and not isinstance(v, bool)
+                    if sensitive(k) and not isinstance(v, bool)
+                    else _masked(v, known)
+                    if named and k == "value"
                     else scrub(v)
                     for k, v in value.items()
                 }
             if isinstance(value, list):
                 return [scrub(v) for v in value]
-            return redact(value) if isinstance(value, str) else value
+            if isinstance(value, str):
+                # Compose list form `KEY=value`: redact misses values under 4 characters.
+                # A key with URL characters (`redis://h/0?token=x`) is not an assignment.
+                pair = re.fullmatch(r"([^\s=/:?#@]+)=(.+)", value, re.S)
+                if pair and sensitive(pair[1]):
+                    return pair[1] + "=[REDACTED]"
+                return redact(value)
+            return value
 
         try:
             # CloudFormation short tags are converted to data, never evaluated.
-            docs = [scrub(doc) for doc in _documents(text)]
+            raw = _documents(text)
+            # CloudFormation logical IDs a sensitive GetAtt may keep (see _getatt_masked).
+            known = _Declared(
+                name
+                for doc in raw
+                if isinstance(doc, dict) and isinstance(doc.get("Resources"), dict)
+                for name in doc["Resources"]
+                if isinstance(name, str)
+            )
+            known.parameters = frozenset(
+                name
+                for doc in raw
+                if isinstance(doc, dict) and isinstance(doc.get("Parameters"), dict)
+                for name in doc["Parameters"]
+                if isinstance(name, str)
+            )
+            docs = [scrub(doc) for doc in raw]
         except ValueError as exc:
             raise ValueError("Malformed infrastructure document") from exc
         for doc_index, doc in enumerate(docs):
             if not isinstance(doc, dict):
                 raise ValueError("Infrastructure document must be a mapping")
             source = {"reference": evidence_reference(path), "document": doc_index + 1}
-            entries, depends, terraform_refs = [], {}, {}
+            entries, depends, terraform_refs, metadata = [], {}, {}, {}
+            terraform_rejected = {}
             if "planned_values" in doc:
                 configuration = doc.get("configuration")
                 if isinstance(configuration, dict):
-                    terraform_refs = _terraform_references(
+                    terraform_refs, terraform_rejected = _terraform_references(
                         configuration.get("root_module") or {}
                     )
                 changes = {
@@ -275,21 +584,20 @@ def import_infrastructure(paths, bindings=None):
                         )
                     )
             elif "apiVersion" in doc and "kind" in doc:
-                items = doc.get("items", []) if doc["kind"] == "List" else [doc]
+                items = (doc.get("items") or []) if doc["kind"] == "List" else [doc]
                 for item in items:
-                    meta = item.get("metadata", {})
-                    namespace = meta.get("namespace", "default")
-                    entries.append(
-                        (
-                            namespace
-                            + "/"
-                            + item["kind"]
-                            + "/"
-                            + meta.get("name", "unnamed"),
-                            "kubernetes/" + item["kind"],
-                            item.get("spec", {}),
-                            namespace,
+                    if not isinstance(item, dict):
+                        findings.append(
+                            {"source": source, "message": "Kubernetes item is not a mapping; skipped"}
                         )
+                        continue
+                    # null metadata, spec or labels read as empty, never as an error.
+                    meta = _mapping(item.get("metadata"))
+                    namespace = meta.get("namespace", "default")
+                    entry = namespace + "/" + item["kind"] + "/" + meta.get("name", "unnamed")
+                    metadata[entry] = (meta.get("name", "unnamed"), _mapping(meta.get("labels")))
+                    entries.append(
+                        (entry, "kubernetes/" + item["kind"], _mapping(item.get("spec")), namespace)
                     )
             elif "services" in doc:
                 for section in ("networks", "volumes"):
@@ -309,7 +617,7 @@ def import_infrastructure(paths, bindings=None):
                     "Expected Terraform plan, CloudFormation/CDK template, Kubernetes/rendered Helm or Compose"
                 )
             names = {}
-            taken = {r["id"] for r in resources}
+            pending = set()  # IDs chosen for this document; `add` records them in known_ids
             for name, _, _, _ in entries:
                 if name in names or name in declared:
                     # A repeated declaration keeps its ID and fails as a duplicate below.
@@ -318,13 +626,24 @@ def import_infrastructure(paths, bindings=None):
                 # Distinct names may share a slug (app.config, app-config): number them.
                 ident = base = prefix + slugify(name)
                 suffix = 2
-                while ident in taken:
+                while ident in known_ids or ident in pending:
                     ident, suffix = f"{base}-{suffix}", suffix + 1
                 names[name] = declared[name] = ident
-                taken.add(ident)
+                pending.add(ident)
+            # Terraform instances by (module instance, address as a reference names it):
+            # `aws_subnet.app[0]` names one instance, `aws_subnet.app` every instance.
+            instances = {}
+            for other in names if terraform_refs else ():
+                module = _module_instance(other)
+                local = _config_address(module) + other[len(module):]
+                instances.setdefault((module, local), []).append(other)
+                if _config_address(local) != local:
+                    instances.setdefault((module, _config_address(local)), []).append(other)
             for name, kind, props, parent in entries:
                 ident = names[name]
                 add(ident, kind, props, source, parent)
+                if name in metadata:
+                    kubernetes[ident] = metadata[name]
                 serialized = json.dumps(props)
                 if (
                     "${" in serialized
@@ -370,15 +689,31 @@ def import_infrastructure(paths, bindings=None):
                 )
                 # Terraform: references recorded in the plan's configuration section
                 # (`bucket = aws_s3_bucket.logs.id`), mapped to the planned instances in
-                # the same module instance (a reference never leaves its module).
-                configured = {
-                    names[other]
-                    for ref in terraform_refs.get(_config_address(name), ())
-                    for other in names
-                    if _config_address(other) == ref
-                    and _module_instance(other) == _module_instance(name)
-                    and other != name
-                }
+                # the same module instance (a reference never leaves its module). An
+                # indexed reference names one instance; an unindexed one that fits
+                # several count or for_each instances is a finding, not an edge to each.
+                module = _module_instance(name)
+                configured = set()
+                for ref in sorted(terraform_refs.get(_config_address(name), ())):
+                    targets = [other for other in instances.get((module, ref), ()) if other != name]
+                    if len(targets) > 1:
+                        findings.append(
+                            {
+                                "resource": ident,
+                                "message": f"Unindexed reference to {ref} fits {len(targets)} "
+                                "instances; no edge guessed",
+                            }
+                        )
+                    else:
+                        configured.update(names[other] for other in targets)
+                for ref in sorted(terraform_rejected.get(_config_address(name), ())):
+                    findings.append(
+                        {
+                            "resource": ident,
+                            "message": f"Reference {ref[:200]} has a malformed instance key; "
+                            "no edge guessed",
+                        }
+                    )
                 for target in sorted(set(refs(props)) | configured):
                     edges.append(
                         {
@@ -435,24 +770,36 @@ def import_infrastructure(paths, bindings=None):
                                     "evidence": source,
                                 }
                             )
-                if kind == "kubernetes/Service":
-                    findings.append(
-                        {
-                            "resource": ident,
-                            "message": "Service selector requires workload label resolution; review before binding",
-                        }
-                    )
     resource_ids = {r["id"] for r in resources}
     # A Terraform ID that several resources share (a bucket and its versioning both use
     # the bucket name) identifies none of them.
-    terraform_ids = [
+    # Only string IDs identify anything; an object or list ID is ignored, not counted.
+    terraform_ids = Counter(
         r["properties"].get("id")
         for r in resources
-        if r["type"].startswith(("aws_", "google_")) and isinstance(r["properties"], dict)
-    ]
-    shared_ids = {v for v in terraform_ids if terraform_ids.count(v) > 1}
+        if r["type"].startswith(("aws_", "google_"))
+        and isinstance(r["properties"], dict)
+        and isinstance(r["properties"].get("id"), str)
+    )
+    shared_ids = {v for v, count in terraform_ids.items() if count > 1}
     linked = {(e["source_id"], e["destination_id"]) for e in edges}
+    # Resolved IDs by value: positions of the resources that carry each one.
+    by_resolved_id = {}
+    for position, target in enumerate(resources):
+        value = target["properties"].get("id") if isinstance(target["properties"], dict) else None
+        # A masked or unknown ID is a shared placeholder, not an identity.
+        if (
+            isinstance(value, str)
+            and value
+            and value not in {SENSITIVE, UNKNOWN}
+            and value not in shared_ids
+            and "[REDACTED]" not in value
+        ):
+            by_resolved_id.setdefault(value, []).append(position)
     for resource in resources:
+        # Terraform resolved IDs are matched only against declared resource IDs.
+        if not resource["type"].startswith(("aws_", "google_")):
+            continue
         props = resource["properties"]
         # Exact values only: "vpc-1" must not match "vpc-123" or free text containing it.
         # Tags and labels are free text, not references.
@@ -463,50 +810,18 @@ def import_infrastructure(paths, bindings=None):
                 else props
             )
         )
-        for target in resources:
-            if resource["id"] == target["id"]:
-                continue
-            if resource["type"].startswith(("aws_", "google_")):
-                # Terraform resolved IDs are matched only against declared resource IDs.
-                value = target["properties"].get("id")
-                # A masked or unknown ID is a shared placeholder, not an identity.
-                if (
-                    isinstance(value, str)
-                    and value
-                    and value not in {SENSITIVE, UNKNOWN}
-                    and value not in shared_ids
-                    and "[REDACTED]" not in value
-                    and value in scalars
-                    and (resource["id"], target["id"]) not in linked
-                ):
-                    edges.append(
-                        {
-                            "source_id": resource["id"],
-                            "destination_id": target["id"],
-                            "kind": "resolved-resource-id",
-                            "evidence": resource["evidence"],
-                        }
-                    )
-            if (
-                resource["type"] == "kubernetes/Service"
-                and target["parent_id"] == resource["parent_id"]
-            ):
-                selector = props.get("selector", {})
-                labels = (
-                    target["properties"]
-                    .get("template", {})
-                    .get("metadata", {})
-                    .get("labels", {})
+        for position in sorted({p for v in scalars for p in by_resolved_id.get(v, ())}):
+            target = resources[position]
+            if resource["id"] != target["id"] and (resource["id"], target["id"]) not in linked:
+                edges.append(
+                    {
+                        "source_id": resource["id"],
+                        "destination_id": target["id"],
+                        "kind": "resolved-resource-id",
+                        "evidence": resource["evidence"],
+                    }
                 )
-                if selector and selector.items() <= labels.items():
-                    edges.append(
-                        {
-                            "source_id": resource["id"],
-                            "destination_id": target["id"],
-                            "kind": "selector",
-                            "evidence": resource["evidence"],
-                        }
-                    )
+    _kubernetes_edges(resources, kubernetes, edges, findings)
     if set(bindings) - resource_ids:
         raise ValueError("Binding refers to unknown resource")
     by_id = {r["id"]: r for r in resources}

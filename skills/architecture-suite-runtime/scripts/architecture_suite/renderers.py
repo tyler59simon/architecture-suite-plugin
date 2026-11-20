@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 import base64
-from contextlib import contextmanager, nullcontext
+from contextlib import ExitStack, contextmanager
 import io
 import math
 import os
@@ -25,6 +25,7 @@ from .overview_layout import (
     build_cloud_scene,
     build_overview_scene,
     normalize_overview_styles,
+    panel_groups,
 )
 from .readability import readability_findings, score_scene
 from .safety import SafetyError, contained_path, run_bounded, safe_text
@@ -47,6 +48,7 @@ ARTIFACT_VIEW_TYPES = {
 }
 MAX_PNG_WIDTH = 6000
 MAX_PNG_PIXELS = 24_000_000
+MIN_PNG_SCALE = 0.5
 EXTENSIONS = {"mermaid": "mmd", "drawio": "drawio", "png": "png", "svg": "svg", "visio": "vsdx", "plantuml": "puml"}
 
 
@@ -96,12 +98,24 @@ def expected_artifact_paths(
     ]
 
 
-def _scene(model, view):
+def _scene(model, view, view_scenes=None):
     if view["type"] == "overview":
-        return build_overview_scene(model, view["style"])
+        return build_overview_scene(model, view["style"], view_scenes)
     if view["type"] == "deployment":
         return build_cloud_scene(model)
     return build_view_scene_elk(model, view)
+
+
+def _built(model: dict, overview_styles=None, level: str = "all") -> list:
+    """(base, view, scene) for every spec, each scene built once; the small-multiples
+    overview reuses the model views' scenes (they come first in diagram_specs)."""
+    built, view_scenes = [], {}
+    for base, view in diagram_specs(model, overview_styles, level):
+        scene = _scene(model, view, view_scenes)
+        if view["type"] not in {"overview", "deployment"}:
+            view_scenes[view["id"]] = scene
+        built.append((base, view, scene))
+    return built
 
 
 def _quoted(value):
@@ -113,9 +127,9 @@ def _quoted(value):
     )
 
 
-def render_mermaid(model: dict, view: dict) -> str:
+def render_mermaid(model: dict, view: dict, *, scene=None) -> str:
     """A portable flowchart preserves C4 stereotypes, scopes, members, and arrows."""
-    scene = _scene(model, view)
+    scene = scene or _scene(model, view)
     ids = {b.id: f"n{i}" for i, b in enumerate(scene.boxes)}
     children = {}
     for b in scene.boxes:
@@ -126,13 +140,13 @@ def render_mermaid(model: dict, view: dict) -> str:
         "flowchart TB" if view.get("direction") == "down" else "flowchart LR",
     ]
 
-    def emit(parent, indent):
-        for b in children.get(parent, []):
+    def emit(boxes, indent):
+        for b in boxes:
             if b.role == "frame":
                 lines.append(
                     indent + f"subgraph {ids[b.id]}[{_quoted(b.label.plain())}]"
                 )
-                emit(b.id, indent + "  ")
+                emit(children.get(b.id, []), indent + "  ")
                 # Mermaid requires a member for an otherwise empty frame.
                 if not children.get(b.id):
                     lines.append(
@@ -154,7 +168,15 @@ def render_mermaid(model: dict, view: dict) -> str:
                         indent + f"style {ids[b.id]} fill:{fill},stroke:{stroke}"
                     )
 
-    emit(None, "  ")
+    panels = panel_groups(scene)
+    if panels:
+        # Small multiples: one subgraph per panel (generated IDs never match a node ID).
+        for number, (title, roots) in enumerate(panels):
+            lines.append(f"  subgraph panel_{number}[{_quoted(title.label.plain())}]")
+            emit(roots, "    ")
+            lines.append("  end")
+    else:
+        emit(children.get(None, []), "  ")
     for edge in scene.edges:
         text = edge.label.label.plain() if edge.label else "depends on"
         lines.append(
@@ -203,9 +225,9 @@ PLANTUML_CARDS = {
 }
 
 
-def render_plantuml(model: dict, view: dict) -> str:
+def render_plantuml(model: dict, view: dict, *, scene=None) -> str:
     """C4-PlantUML text from the shared scene; PlantUML computes its own layout."""
-    scene = _scene(model, view)
+    scene = scene or _scene(model, view)
     ids = {b.id: f"n{i}" for i, b in enumerate(scene.boxes)}
     children = {}
     for b in scene.boxes:
@@ -232,35 +254,40 @@ def render_plantuml(model: dict, view: dict) -> str:
             'AddRelTag("claim", $lineStyle=DashedLine(), '
             '$legendText="claim not observed (inferred, proposed or unknown)")',
         ]
+        if any(b.role == "frame" and _claimed(b) for b in scene.boxes):
+            # Boundaries take their own tag kind.
+            lines.append(
+                'AddBoundaryTag("claim", $borderStyle=DashedLine(), '
+                '$legendText="claim not observed (inferred, proposed or unknown)")'
+            )
 
     def args(*values, tagged=False):
         quoted = ", ".join(f'"{_puml_text(v)}"' for v in values)
         return quoted + (', $tags="claim"' if tagged else "")
 
-    def emit(parent, indent):
-        for b in children.get(parent, []):
+    def emit(boxes, indent):
+        for b in boxes:
             element = b.element or {}
             alias = ids[b.id]
             name = element.get("name") or b.label.plain()
             if b.role == "frame":
                 kind = element.get("type")
+                tagged = _claimed(b)
+                # A claim that is not observed keeps its status text and dashed tag.
+                label = " ".join(x for x in (name, claim_cue(element.get("status"))) if x)
                 if deployment:
-                    opening = f"Deployment_Node({alias}, {args(name, kind or '')})"
+                    opening = f"Deployment_Node({alias}, {args(label, kind or '', tagged=tagged)})"
                 elif kind == "software_system":
-                    opening = f"System_Boundary({alias}, {args(name)})"
+                    opening = f"System_Boundary({alias}, {args(label, tagged=tagged)})"
                 elif kind == "container":
-                    opening = f"Container_Boundary({alias}, {args(name)})"
+                    opening = f"Container_Boundary({alias}, {args(label, tagged=tagged)})"
                 else:
-                    opening = f"Boundary({alias}, {args(name, kind or '')})"
+                    opening = f"Boundary({alias}, {args(label, kind or '', tagged=tagged)})"
                 lines.append(indent + opening + " {")
-                emit(b.id, indent + "  ")
+                emit(children.get(b.id, []), indent + "  ")
                 lines.append(indent + "}")
                 continue
             kind = element.get("type")
-            if not element:
-                # Small-multiples panel titles carry no element.
-                lines.append(indent + f'rectangle "{_puml_text(b.label.plain())}" as {alias}')
-                continue
             cue = claim_cue(element.get("status"))
             description = "\n".join(
                 x
@@ -279,7 +306,15 @@ def render_plantuml(model: dict, view: dict) -> str:
                 body = args(name, description, tagged=tagged)
             lines.append(indent + f"{macro}({alias}, {body})")
 
-    emit(None, "")
+    panels = panel_groups(scene)
+    if panels:
+        # Small multiples: one rectangle per panel (generated IDs never match a node alias).
+        for number, (title, roots) in enumerate(panels):
+            lines.append(f'rectangle "{_puml_text(title.label.plain())}" as panel_{number} {{')
+            emit(roots, "  ")
+            lines.append("}")
+    else:
+        emit(children.get(None, []), "")
     for edge in scene.edges:
         text = edge.label.label.plain() if edge.label else "depends on"
         lines.append(
@@ -298,15 +333,18 @@ def render_svg(model: dict, view: dict) -> str:
 def layout_measurements(model: dict, overview_styles=None, level: str = "all") -> dict:
     return {
         base: {"width": scene.width, "height": scene.height, **score_scene(scene)}
-        for base, view in diagram_specs(model, overview_styles, level)
-        for scene in [_scene(model, view)]
+        for base, _, scene in _built(model, overview_styles, level)
     }
 
 
 def layout_report(model: dict, overview_styles=None, level: str = "all") -> dict:
+    return _layout_report(_built(model, overview_styles, level))
+
+
+def _layout_report(built) -> dict:
+    """Verification for already-built (base, view, scene) triples."""
     results = {}
-    for base, view in diagram_specs(model, overview_styles, level):
-        scene = _scene(model, view)
+    for base, view, scene in built:
         results[base] = {
             "findings": scene_collisions(scene) + readability_findings(scene),
             **score_scene(scene),
@@ -590,19 +628,26 @@ def render_svg_png(
     )
     path = png_file
     width, height = math.ceil(width), math.ceil(height)
-    if (
-        width > MAX_PNG_WIDTH
-        or width * height > MAX_PNG_PIXELS
-        or min(width, height) <= 0
-    ):
+    # Large overviews are shrunk to fit the caps, but not below half size (text gets unreadable).
+    scale = min(
+        1, MAX_PNG_WIDTH / max(width, 1), math.sqrt(MAX_PNG_PIXELS / max(width * height, 1))
+    )
+    if min(width, height) <= 0 or scale < MIN_PNG_SCALE:
         raise SafetyError(
             f"{Path(png_file).name} ({width}x{height}) exceeds PNG size limits "
-            f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP); "
-            "try --overview-style executive or small-multiples, or --format mermaid,svg,drawio"
+            f"({MAX_PNG_WIDTH} px wide, {MAX_PNG_PIXELS // 1_000_000} MP) even at half size; "
+            "use --format mermaid,svg,drawio for this view, or a smaller --overview-style "
+            "such as executive"
         )
+    fit = ""
+    if scale < 1:
+        width, height = math.floor(width * scale), math.floor(height * scale)
+        fit = f"<style>body>svg{{display:block;width:{width}px;height:{height}px}}</style>"
 
     html = (
-        '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'"></head><body style="margin:0">'
+        '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'">'
+        + fit
+        + '</head><body style="margin:0">'
         + svg
         + "</body></html>"
     )
@@ -676,7 +721,7 @@ def scene_vsdx(scene, *, page=None) -> bytes:
     return render_scene_vsdx(scene, rasterize_icons(scene, page))
 
 
-def write_rendered_artifacts(
+def render_artifacts(
     model: dict,
     output: Path,
     formats: set[str],
@@ -684,22 +729,26 @@ def write_rendered_artifacts(
     level: str = "all",
     *,
     allow_layout_findings: bool = False,
-) -> list[str]:
+) -> dict:
+    """Write the artifacts, building each scene once; returns the layout verification."""
     verify_assets()
     expected_artifact_paths(model, formats, overview_styles, level)
-    verification = layout_report(model, overview_styles, level)
+    built = _built(model, overview_styles, level)
+    verification = _layout_report(built)
     if not verification["ok"] and not allow_layout_findings:
         raise SafetyError(
             "Layout verification failed; inspect verify findings before publishing"
         )
-    needs_browser = {"png", "visio"} & set(formats)
-    with browser_page() if needs_browser else nullcontext(None) as page:
-        for base, view in diagram_specs(model, overview_styles, level):
-            scene = _scene(model, view)
+    with ExitStack() as stack:
+        page = stack.enter_context(browser_page()) if "png" in formats else None
+        for base, view, scene in built:
             for fmt in sorted(formats):
                 path = contained_path(output, base + "." + EXTENSIONS[fmt])
                 path.parent.mkdir(parents=True, exist_ok=True)
                 if fmt == "visio":
+                    # Icon-free drawings need no rasterizing; share one browser otherwise.
+                    if page is None and any(b.label.icon for b in scene.boxes):
+                        page = stack.enter_context(browser_page())
                     path.write_bytes(scene_vsdx(scene, page=page))
                 elif fmt == "png":
                     render_svg_png(
@@ -711,15 +760,20 @@ def write_rendered_artifacts(
                     )
                 else:
                     content = (
-                        render_mermaid(model, view)
+                        render_mermaid(model, view, scene=scene)
                         if fmt == "mermaid"
-                        else render_plantuml(model, view)
+                        else render_plantuml(model, view, scene=scene)
                         if fmt == "plantuml"
                         else render_scene_drawio(scene)
                         if fmt == "drawio"
                         else render_scene_svg(scene)
                     )
                     path.write_text(content, encoding="utf-8", newline="\n")
+    return verification
+
+
+def write_rendered_artifacts(*args, **kwargs) -> list[str]:
+    verification = render_artifacts(*args, **kwargs)
     return [
         f"{base}: {finding['code']}: {', '.join(finding.get('elements', []))}"
         for base, value in verification["diagrams"].items()

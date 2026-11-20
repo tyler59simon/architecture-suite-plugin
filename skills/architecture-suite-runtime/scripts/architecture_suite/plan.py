@@ -9,7 +9,7 @@ from typing import Any
 import yaml
 from .aws import PROVIDERS, normalize_gcp_icon_style, resolve_service
 from .model import CLAIM_STATUSES, derive_views, slugify, validate_model
-from .safety import SECRET, safe_text
+from .safety import contains_secret, safe_text
 
 # Values left over from assets/architecture-plan-template.md or common stand-ins.
 PLACEHOLDER = re.compile(r"(replace with\b|unspecified$|tbd$|todo$|\?+$)", re.IGNORECASE)
@@ -268,7 +268,8 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
     for section in ("containers", "flows"):
         if section not in plan:
             add("section-required", f"{section} is required", section)
-    names, ids, groups = {}, set(), {}
+    names, ids, groups, decomposed = {}, set(), {}, set()
+    firsts = {}
     entries = list(_entries(plan))
     for item, typ, parent in entries:
         if not isinstance(item, dict):
@@ -290,14 +291,25 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
             add("element-name", "Element name is required", typ)
             continue
         ident = slugify(name)
+        message = f"Names must slugify to unique IDs ({ident!r} is already used)"
         if ident in ids:
-            add(
-                "duplicate-name",
-                f"Names must slugify to unique IDs ({ident!r} is already used)",
-                name,
-            )
+            first = firsts[ident]
+            kind = item.get("kind", "class")
+            if typ == "code" and first == (typ, parent, kind, name):
+                message += (
+                    "; these look like overloads of one declaration saved before analyze merged them."
+                    " Merge them into one code element: combine their members, list every evidence"
+                    " reference, or re-run plan-draft"
+                )
+            add("duplicate-name", message, name)
+        else:
+            firsts[ident] = (typ, parent, item.get("kind", "class"), name)
         ids.add(ident)
         names[name] = ident
+        # Component-level flows to components with code are normal (code views are a
+        # selection); only a container-level flow on a decomposed container is flagged.
+        if typ == "container" and isinstance(item.get("components"), list) and item["components"]:
+            decomposed.add(name)
         if typ != "code" and (
             not isinstance(item.get("description"), str)
             or not item["description"].strip()
@@ -406,6 +418,16 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                 )
         if flow.get("from") == flow.get("to"):
             add("self-flow", "Flow endpoints must differ", str(i))
+        for key in ("from", "to"):
+            # The scope's own view shows its parts, not the scope, so the arrow is dropped there.
+            if isinstance(flow.get(key), str) and flow[key] in decomposed:
+                add(
+                    "hidden-flow",
+                    f"Flow {key} {flow[key]!r} names a container that has components, so "
+                    "this flow is missing from its component view; name the component instead",
+                    str(i),
+                    ADVISORY,
+                )
         if (
             not isinstance(flow.get("description"), str)
             or not flow["description"].strip()
@@ -529,7 +551,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                     add(finding["code"], finding["message"], finding["path"])
         except (KeyError, TypeError, AttributeError, RecursionError):
             add("deployment-shape", "Invalid deployment mapping")
-    if SECRET.search(json.dumps(plan, default=str)):
+    if contains_secret(json.dumps(plan, default=str)):
         add(
             "credential",
             "Remove credential-like values",
@@ -551,7 +573,7 @@ def _credential_path(value, path="") -> str:
             found = _credential_path(child, where)
             if found:
                 return found
-        elif SECRET.search(json.dumps({str(key): child}, default=str)):
+        elif contains_secret(json.dumps({str(key): child}, default=str)):
             return where
     return ""
 

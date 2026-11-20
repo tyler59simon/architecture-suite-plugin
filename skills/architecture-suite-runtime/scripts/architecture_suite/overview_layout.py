@@ -2,11 +2,14 @@
 
 from copy import deepcopy
 import math
-from .model import ELEMENT_TYPE_DEPTH
-from .scene import Scene, build_view_scene_elk, choose_scene
+import re
+from .model import ELEMENT_TYPE_DEPTH, merge_flows
+from .scene import Box, Scene, build_view_scene_elk, choose_scene
 
 # Below the 6000 px PNG cap, leaving room for the page margin.
 SMALL_MULTIPLES_MAX_WIDTH = 5600
+
+PANEL_PREFIX = re.compile(r"panel-(\d+)-")
 
 OVERVIEW_STYLES = (
     "executive",
@@ -69,11 +72,20 @@ def overview_data(model: dict, style: str):
             for flow in r.get("flow_ids") or [r["id"]]:  # [] means none recorded
                 if flow not in selected or rank > selected[flow][0]:
                     selected[flow] = (rank, r)
-    relationships = (
-        list({r["id"]: r for _, r in selected.values()}.values())
-        if style != "hierarchy"
-        else []
-    )
+    # A merged arrow keeps only the flows assigned to it; the rest are drawn finer.
+    assigned: dict[str, list] = {}
+    for flow, (_, r) in selected.items():
+        assigned.setdefault(r["id"], []).append(flow)
+    relationships = []
+    for r in {r["id"]: r for _, r in selected.values()}.values():
+        details = {f["id"]: f for f in r.get("flows") or [] if isinstance(f, dict)}
+        mine = [f for f in r.get("flow_ids") or [] if f in assigned[r["id"]]]
+        # Rebuilt only when every kept flow has its details; otherwise drawn as stored.
+        if mine and len(mine) < len(r["flow_ids"]) and all(f in details for f in mine):
+            r = merge_flows(r["id"], r["source_id"], r["destination_id"], [details[f] for f in mine])
+        relationships.append(r)
+    if style == "hierarchy":
+        relationships = []
     return (
         [e for e in elements if e["id"] not in frames],
         relationships,
@@ -82,14 +94,24 @@ def overview_data(model: dict, style: str):
     )
 
 
-def build_overview_scene(model: dict, style: str = "progressive") -> Scene:
+def build_overview_scene(
+    model: dict, style: str = "progressive", view_scenes: dict | None = None
+) -> Scene:
+    """`view_scenes` maps view IDs to scenes already built for this model; panels use
+    copies of them, since building a panel moves and renames its boxes."""
     title = (
         model["system"]["name"] + " — " + style.replace("-", " ").title() + " overview"
     )
     if style != "small-multiples":
         elements, relationships, parents, frames = overview_data(model, style)
         return choose_scene(title, elements, relationships, parents, frames)
-    scenes = [build_view_scene_elk(model, v) for v in model["views"]]
+    view_scenes = view_scenes or {}
+    scenes = [
+        deepcopy(view_scenes[v["id"]])
+        if v["id"] in view_scenes
+        else build_view_scene_elk(model, v)
+        for v in model["views"]
+    ]
     # Every expanded scope gets a panel; retain all repeated L3/L4 scopes. Panels fill
     # rows in reading order at their own widths up to a landscape target, so one wide
     # view does not widen every panel (which overflowed PNG limits on moderate models).
@@ -138,12 +160,16 @@ def build_overview_scene(model: dict, style: str = "progressive") -> Scene:
                 edge.label.y += y
                 edge.label.x += x_offset
         # Panel titles are measured labels and live in the panel's reserved title area.
-        from .scene import Box
+        # Their ID never reuses a box ID (an element may be called `title`).
         from .style import Label, TextLine, wrap_to_width
 
+        title_id, suffix = prefix + "title", 2
+        taken = {box.id for box in scene.boxes}
+        while title_id in taken:
+            title_id, suffix = f"{prefix}title-{suffix}", suffix + 1
         result.boxes.append(
             Box(
-                prefix + "title",
+                title_id,
                 "panel-title",
                 48 + x_offset,
                 y + 12,
@@ -163,6 +189,23 @@ def build_overview_scene(model: dict, style: str = "progressive") -> Scene:
             y += row_end[index]
     result.key_y = y + 30
     return result
+
+
+def panel_groups(scene: Scene) -> list[tuple[Box, list[Box]]]:
+    """Small-multiples panels in order: each title box with the panel's top-level boxes.
+
+    Every box of a small-multiples scene has a `panel-<n>-` ID prefix; other scenes
+    have no panel-title boxes and return an empty list.
+    """
+    groups: dict[str, tuple[Box, list[Box]]] = {
+        PANEL_PREFIX.match(b.id).group(1): (b, [])
+        for b in scene.boxes
+        if b.role == "panel-title"
+    }
+    for b in scene.boxes if groups else ():
+        if b.role != "panel-title" and b.parent_id is None:
+            groups[PANEL_PREFIX.match(b.id).group(1)][1].append(b)
+    return list(groups.values())
 
 
 DEPLOYMENT_TITLES = {"aws": "AWS deployment", "gcp": "Google Cloud deployment"}

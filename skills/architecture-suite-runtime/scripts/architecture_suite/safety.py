@@ -23,16 +23,36 @@ class SafetyError(ValueError):
 
 
 # `key=value` (config syntax) counts as a credential for any 4+ character value. A
-# `key: value` pair counts only when the value is quoted, contains a digit (8+
-# characters) or is a long opaque token (24+), so type annotations (`password: str`)
-# and prose ("session token: Redis-backed cache") do not match.
-SECRET = re.compile(
+# `key: value` pair counts only when the value is quoted, is a long opaque token (24+)
+# or is 8+ characters with a digit somewhere (_DIGIT_VALUE), so type annotations
+# (`password: str`) and prose ("session token: Redis-backed cache") do not match.
+# Connection URI schemes: masked here and listed by the dependency inventory.
+URI_SCHEMES = r"https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?"
+# A URI password ends at the last `@` before `/`, whitespace, `?`, `#` or an unescaped `"`,
+# so a credentialed URL in compact JSON never runs into the next field. When that finds no
+# `@`, a password that is empty or contains `/` (up to 256 characters, to keep matching
+# linear) ends at the last `@` before whitespace, `?`, `#` or an unescaped `"`.
+_KEYS = r"(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
+_TOKENS = (
     r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"
-    r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
-    r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
-    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
-    r"|(?:https?|postgres(?:ql)?|mysql|mongodb)://[^/\s:@]+:[^@\s/]+@|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|" + _KEYS + r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
+    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|[A-Za-z0-9_+/=.-]{24,}))"
 )
+# A digit-bearing `key: value` is found by its own scan: the value is consumed whole and
+# checked for a digit afterwards. A lookahead for the digit rescanned the value at every
+# `token:` it held (quadratic on repeated `token:` text), and a combined match hid any
+# credentialed URI that started inside the value.
+_DIGIT_VALUE = re.compile(r"(?i)" + _KEYS + r":\s*(?P<value>[^\s\"',;})]{8,}+)")
+_URI_USER = rf"(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:"
+_URI_PASSWORD = r"(?:[^\s/?#\"\\]|\\.)+@"
+_URI_SLASH_PASSWORD = r"(?:[^\s?#\"\\]|\\.){0,256}@"
+_PRIVATE_KEY = r"-----BEGIN [A-Z ]*PRIVATE KEY-----"
+SECRET = re.compile(
+    rf"{_TOKENS}|{_URI_USER}(?:{_URI_PASSWORD}|{_URI_SLASH_PASSWORD})|{_PRIVATE_KEY}"
+)
+# Redaction masks the union of both patterns' matches (see _redact).
+_SECRET_FIRST = re.compile(rf"{_TOKENS}|{_URI_USER}{_URI_PASSWORD}|{_PRIVATE_KEY}")
+_SLASH_URI = re.compile(rf"(?i){_URI_USER}{_URI_SLASH_PASSWORD}")
 PROMPT_INJECTION = re.compile(
     r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|(?:reveal|print|exfiltrate).{0,40}(?:secret|token|password)|(?:system|developer)\s+prompt|run\s+(?:this|the following)\s+(?:command|script)",
     re.I,
@@ -79,9 +99,63 @@ EXTENSIONS = {
 }
 
 
+def _mask(match: re.Match[str]) -> str:
+    """A credentialed URI keeps its scheme and host; everything else is replaced whole."""
+    scheme = match.groupdict().get("scheme")
+    return f"{scheme}://[REDACTED]@" if scheme else "[REDACTED]"
+
+
+def _digit_values(value: str) -> Iterator[re.Match[str]]:
+    """Digit-bearing `key: value` matches. After each candidate the search resumes 16
+    characters before its end (keys are at most 13 characters): a key starting earlier
+    has its value inside the same run, but a key ending at the run's end (`a.password:`
+    before a space) can have its own value after it."""
+    pos = 0
+    while match := _DIGIT_VALUE.search(value, pos):
+        if re.search(r"\d", match["value"]):
+            yield match
+        pos = max(match.start() + 1, match.end() - 16)
+
+
+def contains_secret(value: str) -> bool:
+    """True when redact would mask something in `value`."""
+    return bool(SECRET.search(value)) or next(_digit_values(value), None) is not None
+
+
+def _redact(value: str, keep_newlines: bool) -> str:
+    """Mask the union of every match: overlapping matches become one masked span, so no
+    match can cut another short and leave part of a secret in clear text."""
+    first = list(_SECRET_FIRST.finditer(value))
+    uri_starts = {m.start() for m in first if m["scheme"]}
+    first += _digit_values(value)
+    # Where the `/`-stopping URI form matched, its shorter reading of the password stands;
+    # the search then resumes one character later so a URI after it gets its own match.
+    matches, pos = list(first), 0
+    while match := _SLASH_URI.search(value, pos):
+        if match.start() in uri_starts:
+            pos = match.start() + 1
+        else:
+            matches.append(match)
+            pos = match.end()
+    matches.sort(key=lambda m: (m.start(), -m.end()))
+    out, pos, i = [], 0, 0
+    while i < len(matches):
+        lead, end = matches[i], matches[i].end()
+        i += 1
+        while i < len(matches) and matches[i].start() < end:
+            end = max(end, matches[i].end())
+            i += 1
+        out += [value[pos : lead.start()], _mask(lead)]
+        if keep_newlines:
+            out.append("\n" * value.count("\n", lead.start(), end))
+        pos = end
+    out.append(value[pos:])
+    return "".join(out)
+
+
 def redact(value: str) -> str:
     """Remove credential-like values before persisting evidence."""
-    return SECRET.sub("[REDACTED]", value)
+    return _redact(value, keep_newlines=False)
 
 
 def detect_prompt_injection(value: str) -> bool:
@@ -307,6 +381,7 @@ def atomic_output_directory(
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=".architecture-stage-", dir=output.parent))
     backup = stage.with_name(stage.name + "-backup")
+    keep_backup = False  # the backup is the only copy when it cannot be restored
     try:
         if seed_existing and output.exists():
             shutil.copytree(output, stage, dirs_exist_ok=True)
@@ -320,12 +395,19 @@ def atomic_output_directory(
             stage.rename(output)
         except OSError:
             if backup.exists():
-                backup.rename(output)
+                try:
+                    backup.rename(output)
+                except OSError as exc:
+                    keep_backup = True
+                    raise OSError(
+                        f"Could not restore the previous output; it is kept at {backup}"
+                    ) from exc
             raise
     finally:
         for temp in (stage, backup):
             if (
-                temp.exists()
+                not (temp == backup and keep_backup)
+                and temp.exists()
                 and temp.parent.resolve() == output.parent.resolve()
                 and temp.name.startswith(".architecture-stage-")
             ):
@@ -389,14 +471,20 @@ def run_bounded(
                 process.wait()
 
 
+def redact_lines(value: str) -> str:
+    """`redact`, but each replacement keeps the newlines it removes (line numbers stay valid)."""
+    return _redact(value, keep_newlines=True)
+
+
 class _RedactedText(str):
     """Redacted file text; `source` keeps the original for in-memory parsing only.
 
     Redaction can break syntax, so parsers read `source` and redact what they record.
+    A redaction keeps the newlines it removes so line numbers match the file.
     """
 
     def __new__(cls, source: str):
-        text = super().__new__(cls, redact(source))
+        text = super().__new__(cls, redact_lines(source))
         text.source = source
         return text
 
@@ -468,16 +556,44 @@ def scan_repository(
                 continue
             try:
                 _no_links(path)
-                size = path.stat().st_size
-                if size > max_file_bytes:
+                # Open first (non-blocking, so a FIFO swapped in for the file cannot hang the
+                # scan), then judge the opened file with fstat instead of a racy path stat().
+                fd = os.open(
+                    path,
+                    os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0),
+                )
+                try:
+                    # The descriptor is closed here, never by the file object, so a failing
+                    # os.fdopen cannot leak it or close it twice.
+                    with os.fdopen(fd, "rb", closefd=False) as handle:
+                        info = os.fstat(fd)
+                        if not stat.S_ISREG(info.st_mode):
+                            result.skipped_files += 1
+                            result.skipped.append(f"{relative}: not a regular file")
+                            continue
+                        size = info.st_size
+                        if size > max_file_bytes:
+                            result.skipped_files += 1
+                            result.skipped_bytes += size
+                            result.skipped.append(f"{relative}: file size limit")
+                            continue
+                        if result.bytes_read + size > max_total_bytes:
+                            result.truncated = True
+                            return result
+                        # Read one byte past the budget so a file that grew after fstat()
+                        # cannot exceed it.
+                        budget = min(max_file_bytes, max_total_bytes - result.bytes_read)
+                        data = handle.read(budget + 1)
+                finally:
+                    os.close(fd)
+                if len(data) > max_file_bytes:
                     result.skipped_files += 1
-                    result.skipped_bytes += size
+                    result.skipped_bytes += len(data)
                     result.skipped.append(f"{relative}: file size limit")
                     continue
-                if result.bytes_read + size > max_total_bytes:
+                if len(data) > budget:
                     result.truncated = True
                     return result
-                data = path.read_bytes()
                 result.bytes_read += len(data)
                 text = data.decode("utf-8-sig")
                 if detect_prompt_injection(text):
