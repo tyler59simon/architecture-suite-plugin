@@ -9,7 +9,7 @@ from typing import Any
 import yaml
 from .aws import PROVIDERS, normalize_gcp_icon_style, resolve_service
 from .model import CLAIM_STATUSES, derive_views, slugify, validate_model
-from .safety import SECRET, safe_text
+from .safety import contains_secret, safe_text
 
 # Values left over from assets/architecture-plan-template.md or common stand-ins.
 PLACEHOLDER = re.compile(r"(replace with\b|unspecified$|tbd$|todo$|\?+$)", re.IGNORECASE)
@@ -551,7 +551,7 @@ def lint_plan(plan: dict, gcp_icon_style: str | None = None) -> list[Finding]:
                     add(finding["code"], finding["message"], finding["path"])
         except (KeyError, TypeError, AttributeError, RecursionError):
             add("deployment-shape", "Invalid deployment mapping")
-    if SECRET.search(json.dumps(plan, default=str)):
+    if contains_secret(json.dumps(plan, default=str)):
         add(
             "credential",
             "Remove credential-like values",
@@ -573,7 +573,7 @@ def _credential_path(value, path="") -> str:
             found = _credential_path(child, where)
             if found:
                 return found
-        elif SECRET.search(json.dumps({str(key): child}, default=str)):
+        elif contains_secret(json.dumps({str(key): child}, default=str)):
             return where
     return ""
 

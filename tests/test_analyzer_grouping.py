@@ -14,7 +14,7 @@ from architecture_suite.analyzer import _is_manifest, analyze_repository, draft_
 from architecture_suite.inventory import dependency_inventory
 from architecture_suite.model import validate_model
 from architecture_suite.plan import errors, lint_plan
-from architecture_suite.safety import redact, scan_repository
+from architecture_suite.safety import contains_secret, redact, scan_repository
 
 INSTALLER = (
     '"""Adapter setup."""\nimport argparse\nfrom core.repository import read\n'
@@ -219,18 +219,24 @@ def test_uri_redaction_is_linear_on_adversarial_input():
         "password:a" * 20_000,
     )
     for case in cases:
-        started = time.perf_counter()
-        redact(case)
-        assert time.perf_counter() - started < 0.5, case[:20]
+        for check in (redact, contains_secret):
+            started = time.perf_counter()
+            check(case)
+            assert time.perf_counter() - started < 0.5, (check.__name__, case[:20])
     assert redact("redis://u:pw@cache:6379/0") == "redis://[REDACTED]@cache:6379/0"
 
 
-def test_long_unquoted_secret_values_stay_masked():
-    """A value longer than the 256-character digit lookahead is masked whole."""
-    for value in ("ab!" * 100 + "1", "ab!" * 100, "x!" * 128 + "y"):
-        assert redact(f"password:{value} next") == "[REDACTED] next", len(value)
+def test_key_colon_values_keep_the_digit_rule_at_any_length():
+    """An unquoted `key: value` of 8+ characters is a secret when a digit appears
+    anywhere in it; a long digit-free value (a public URL in prose) is not."""
+    value = "ab!" * 100 + "1"
+    assert redact(f"password:{value} next") == "[REDACTED] next"
+    assert contains_secret(f"password:{value}")
+    public = "Public OAuth token: https://auth.example.com/" + "path/" * 60
+    assert redact(public) == public and not contains_secret(public)
     assert redact("password: str") == "password: str"
-    assert redact("token:" + "ab!" * 50) == "token:" + "ab!" * 50
+    # A credentialed URI that starts inside a digit-bearing value keeps its own match.
+    assert "p,p," not in redact("token:abcdefg1http://u:" + "p," * 200 + "@host")
 
 
 def test_url_assigned_to_a_secret_name_stays_out_of_the_inventory(tmp_path):

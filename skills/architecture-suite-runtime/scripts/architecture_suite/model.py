@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from typing import Any
 import unicodedata
-from .safety import SECRET
+from .safety import contains_secret
 
 SCHEMA_VERSION = "2.0"
 VIEW_LEVELS = (
@@ -630,6 +630,6 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                 if pair in placements:
                     add("deployment-placement", "Duplicate placement", pair)
                 placements.add(pair)
-    if SECRET.search(json.dumps(model, ensure_ascii=False)):
+    if contains_secret(json.dumps(model, ensure_ascii=False)):
         add("credential", "Credential-like value must be redacted")
     return findings

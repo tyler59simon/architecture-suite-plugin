@@ -23,24 +23,26 @@ class SafetyError(ValueError):
 
 
 # `key=value` (config syntax) counts as a credential for any 4+ character value. A
-# `key: value` pair counts only when the value is quoted, contains a digit (8+
-# characters), is a long opaque token (24+) or is longer than 256 characters, so type
-# annotations (`password: str`) and prose ("session token: Redis-backed cache") do not
-# match. The digit lookahead looks 256 characters ahead and longer values match whole,
-# which keeps matching linear on repeated `token:` text.
+# `key: value` pair counts only when the value is quoted, is a long opaque token (24+)
+# or is 8+ characters with a digit somewhere (_DIGIT_VALUE), so type annotations
+# (`password: str`) and prose ("session token: Redis-backed cache") do not match.
 # Connection URI schemes: masked here and listed by the dependency inventory.
 URI_SCHEMES = r"https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?"
 # A URI password ends at the last `@` before `/`, whitespace, `?`, `#` or an unescaped `"`,
 # so a credentialed URL in compact JSON never runs into the next field. When that finds no
 # `@`, a password that is empty or contains `/` (up to 256 characters, to keep matching
 # linear) ends at the last `@` before whitespace, `?`, `#` or an unescaped `"`.
+_KEYS = r"(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
 _TOKENS = (
     r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"
-    r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
-    r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
-    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]{0,256}\d)[^\s\"',;})]{8,}"
-    r"|[^\s\"',;})]{257,}|[A-Za-z0-9_+/=.-]{24,}))"
+    r"|" + _KEYS + r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
+    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|[A-Za-z0-9_+/=.-]{24,}))"
 )
+# A digit-bearing `key: value` is found by its own scan: the value is consumed whole and
+# checked for a digit afterwards. A lookahead for the digit rescanned the value at every
+# `token:` it held (quadratic on repeated `token:` text), and a combined match hid any
+# credentialed URI that started inside the value.
+_DIGIT_VALUE = re.compile(r"(?i)" + _KEYS + r":\s*(?P<value>[^\s\"',;})]{8,}+)")
 _URI_USER = rf"(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:"
 _URI_PASSWORD = r"(?:[^\s/?#\"\\]|\\.)+@"
 _URI_SLASH_PASSWORD = r"(?:[^\s?#\"\\]|\\.){0,256}@"
@@ -99,8 +101,17 @@ EXTENSIONS = {
 
 def _mask(match: re.Match[str]) -> str:
     """A credentialed URI keeps its scheme and host; everything else is replaced whole."""
-    scheme = match["scheme"]
+    scheme = match.groupdict().get("scheme")
     return f"{scheme}://[REDACTED]@" if scheme else "[REDACTED]"
+
+
+def _digit_values(value: str) -> list[re.Match[str]]:
+    return [m for m in _DIGIT_VALUE.finditer(value) if re.search(r"\d", m["value"])]
+
+
+def contains_secret(value: str) -> bool:
+    """True when redact would mask something in `value`."""
+    return bool(SECRET.search(value) or _digit_values(value))
 
 
 def _redact(value: str, keep_newlines: bool) -> str:
@@ -108,6 +119,7 @@ def _redact(value: str, keep_newlines: bool) -> str:
     match can cut another short and leave part of a secret in clear text."""
     first = list(_SECRET_FIRST.finditer(value))
     uri_starts = {m.start() for m in first if m["scheme"]}
+    first += _digit_values(value)
     # Where the `/`-stopping URI form matched, its shorter reading of the password stands;
     # the search then resumes one character later so a URI after it gets its own match.
     matches, pos = list(first), 0
