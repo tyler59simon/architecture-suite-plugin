@@ -1,0 +1,207 @@
+"""Language-aware static inventory, without compiler or repository execution."""
+
+import ast
+import re
+from pathlib import PurePosixPath
+from tree_sitter_language_pack import get_parser
+from .safety import URI_SCHEMES, redact, redact_lines
+
+LANGUAGES = {
+    ".cs": "csharp",
+    ".java": "java",
+    ".kt": "kotlin",
+    ".go": "go",
+    ".js": "javascript",
+    ".jsx": "javascript",
+    ".ts": "typescript",
+    ".tsx": "tsx",
+}
+
+
+def _name(node):
+    """A declaration's name node; the Kotlin grammar has no `name` field."""
+    name = node.child_by_field_name("name")
+    if name is None:
+        name = next(
+            (
+                n
+                for n in node.named_children
+                if n.type in {"simple_identifier", "type_identifier", "identifier"}
+            ),
+            None,
+        )
+    return name
+
+
+def dependency_inventory(files):
+    declarations, references, routes, findings = [], [], [], []
+    for path, text in sorted(files.items()):
+        suffix = PurePosixPath(path).suffix
+        if suffix != ".py" and suffix not in LANGUAGES:
+            continue
+        # Parse the original text (redaction can break syntax); redact what is recorded.
+        text = getattr(text, "source", text)
+        if suffix == ".py":
+            try:
+                tree = ast.parse(text)
+            except SyntaxError:
+                findings.append({"reference": path, "message": "Python syntax error"})
+                continue
+            for node in ast.walk(tree):
+                if isinstance(
+                    node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+                ):
+                    name = redact(node.name)
+                    declarations.append(
+                        {
+                            "id": path + ":" + str(node.lineno) + ":" + name,
+                            "name": name,
+                            "kind": type(node).__name__,
+                            "reference": path,
+                            "line": node.lineno,
+                            "confidence": 1.0,
+                        }
+                    )
+                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                    for name in (
+                        [node.module]
+                        if isinstance(node, ast.ImportFrom)
+                        else [n.name for n in node.names]
+                    ):
+                        references.append(
+                            {
+                                "reference": path,
+                                "line": node.lineno,
+                                "target": redact(name or "relative import"),
+                                "kind": "import",
+                                "confidence": 1.0,
+                            }
+                        )
+        else:
+            root = get_parser(LANGUAGES[suffix]).parse(text.encode()).root_node
+            if root.has_error:
+                findings.append(
+                    {
+                        "reference": path,
+                        "message": "Parser recovery used; unresolved syntax present",
+                    }
+                )
+            stack = [root]
+            while stack:
+                node = stack.pop()
+                stack.extend(reversed(node.children))
+                if node.type in {
+                    "class_declaration",
+                    "interface_declaration",
+                    "function_declaration",
+                    "method_declaration",
+                    "function_definition",
+                    "class_definition",
+                    "function_item",
+                    "object_declaration",
+                }:
+                    name = _name(node)
+                    if name:
+                        name = redact(name.text.decode())
+                        declarations.append(
+                            {
+                                "id": path + ":" + str(node.start_point[0] + 1) + ":" + name,
+                                "name": name,
+                                "kind": node.type,
+                                "reference": path,
+                                "line": node.start_point[0] + 1,
+                                "confidence": 1.0,
+                            }
+                        )
+                if node.type in {
+                    "import_declaration",
+                    "import_statement",
+                    "import_from_statement",
+                    "using_directive",
+                    "import_spec",
+                    "import_header",  # Kotlin
+                }:
+                    references.append(
+                        {
+                            "reference": path,
+                            "line": node.start_point[0] + 1,
+                            "target": redact(node.text.decode()),
+                            "kind": "import",
+                            "confidence": 1.0,
+                        }
+                    )
+                if node.type in {"call_expression", "invocation_expression"}:
+                    references.append(
+                        {
+                            "reference": path,
+                            "line": node.start_point[0] + 1,
+                            "target": redact(node.text.decode())[:240],
+                            "kind": "unresolved-call",
+                            "confidence": 0.4,
+                        }
+                    )
+        patterns = [
+            # A server registration: a router-like receiver and a path. Client calls such as
+            # client.get("https://...") or dict.get("key") are not routes (URLs are
+            # recorded under connections).
+            # `verb` is the HTTP method when the registration names one (route, Route,
+            # RequestMapping and Go handlers do not).
+            r"(?<![\w.])(?i:\w*(?:app|router|api|server|bp|blueprint|routes?))"
+            r"\.(?P<verb>get|post|put|delete|patch|route)\(\s*[\"\'](?P<path>/[^\"\']*)",
+            r'\[(?:Http(?P<verb>Get|Post|Put|Delete|Patch)|Route)\(\s*"(?P<path>[^"]+)"',
+            r'@(?P<verb>Get|Post|Put|Delete|Patch|Request)Mapping\(\s*"(?P<path>[^"]+)"',
+            # Go ServeMux patterns: "[METHOD ][HOST]/[PATH]".
+            r'\b\w+\.Handle(?:Func)?\(\s*"(?:(?P<verb>[A-Z]+) +)?(?P<path>[^"\s/]*/[^"]*)"',
+        ]
+        for pattern in patterns:
+            for match in re.finditer(pattern, text):
+                verb = (match.groupdict().get("verb") or "").upper()
+                routes.append(
+                    {
+                        "path": redact(match["path"]),
+                        "method": verb if verb not in {"", "ROUTE", "REQUEST"} else None,
+                        "reference": path,
+                        "line": text.count("\n", 0, match.start()) + 1,
+                        "kind": "explicit-route",
+                        "confidence": 0.8,
+                    }
+                )
+    for ref in references:
+        if ref["kind"] != "import":
+            continue
+        candidates = [
+            p
+            for p in files
+            if p != ref["reference"]
+            and PurePosixPath(p).stem in re.findall(r"[A-Za-z_]\w*", ref["target"])
+        ]
+        if len(candidates) == 1:
+            ref["resolved_file"] = candidates[0]
+        else:
+            ref["unresolved"] = True
+    connections = []
+    for path, text in files.items():
+        # Scanned text is redacted already; redacting again is a no-op and covers raw input.
+        text = redact_lines(text)
+        for match in re.finditer(
+            rf'(?:{URI_SCHEMES})://[^\s"\x27<>]+',
+            text,
+        ):
+            connections.append(
+                {
+                    "reference": path,
+                    "line": text.count("\n", 0, match.start()) + 1,
+                    "target": redact(match[0]),
+                    "kind": "configuration-address",
+                    "confidence": 0.6,
+                    "unresolved": True,
+                }
+            )
+    return {
+        "schema_version": "architecture-inventory/v1",
+        "declarations": declarations,
+        "references": references,
+        "routes": routes,
+        "connections": connections,
+        "findings": findings,
+    }

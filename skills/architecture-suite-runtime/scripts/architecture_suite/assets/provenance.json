@@ -1,0 +1,26 @@
+{
+  "elk": {
+    "version": "0.9.3",
+    "source": "https://registry.npmjs.org/elkjs/-/elkjs-0.9.3.tgz",
+    "license": "EPL-2.0"
+  },
+  "font": {
+    "source": "https://raw.githubusercontent.com/googlefonts/roboto-2/v2.138/src/hinted/Roboto-Regular.ttf",
+    "license": "Apache-2.0"
+  },
+  "aws": {
+    "source": "https://d1.awsstatic.com/onedam/marketing-channels/website/public/shared/architecture-icon-release/Icon-package_07312026.5846e92413caa21490223536cc97f1269e44fa92.zip",
+    "release": "2026-07-31",
+    "archive_sha256": "d2d166c453526471749d520e0db022c459abef759d2946cf2dd1d1c992dc6526",
+    "services": 1852
+  },
+  "gcp": {
+    "source": "https://cloud.google.com/icons",
+    "retrieved": "2026-11-03",
+    "redistributed": true,
+    "modern_sha256": "387e7c60cd538f0f98dc40e17129fc2c370d0f02a74a9cf8ccb378deaafe93b1",
+    "legacy_archive_sha256": "a6d9d7921758042538b462f03cf64614c2cebd96743b3ed63580a769fc7de3e9",
+    "modern_icons": 45,
+    "legacy_icons": 216
+  }
+}
