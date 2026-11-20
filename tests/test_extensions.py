@@ -520,6 +520,23 @@ def test_dry_runs_list_files_without_building_diagrams(
         ]
 
 
+def test_import_joins_json_surrogate_pairs_for_utf8_export(tmp_path):
+    path = tmp_path / "compose.json"
+    # JSON escapes: a surrogate pair (U+1F600) and a lone high surrogate.
+    path.write_text(
+        '{"services": {"api": {"labels": {"note": "\\ud83d\\ude00 ok \\ud83d"}}}}',
+        encoding="utf-8",
+    )
+    out = tmp_path / "import"
+    assert main(["import-infra", "--input", str(path), "--output", str(out), "--confirm-write"]) == 0
+    text = (out / "topology.json").read_text(encoding="utf-8")
+    assert "\U0001f600 ok �" in text
+    # A joined key that repeats another key is a duplicate, not a silent overwrite.
+    path.write_text('{"services": {"\\ud83d\\ude00": {}, "\U0001f600": {}}}', encoding="utf-8")
+    with pytest.raises(ValueError):
+        import_infrastructure([path])
+
+
 def test_failure_controls_and_bindings(inputs, tmp_path, scenario):
     path = tmp_path / "infra.yaml"
     path.write_text(

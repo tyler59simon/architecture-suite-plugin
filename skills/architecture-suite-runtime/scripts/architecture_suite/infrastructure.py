@@ -60,18 +60,40 @@ def _load(text: str, loader) -> list:
     return [doc for doc in yaml.load_all(text, Loader=loader) if doc is not None]
 
 
+_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
+def _join_surrogates(value):
+    """JSON escapes a character outside the BMP as a surrogate pair, which PyYAML keeps
+    as two halves that UTF-8 cannot encode. Pairs become the character; a lone half
+    becomes U+FFFD."""
+    if isinstance(value, str):
+        if not _SURROGATE.search(value):
+            return value
+        return value.encode("utf-16-le", "surrogatepass").decode("utf-16-le", "replace")
+    if isinstance(value, dict):
+        joined = {_join_surrogates(k): _join_surrogates(v) for k, v in value.items()}
+        if len(joined) < len(value):
+            raise ValueError("Mapping keys must be unique strings")
+        return joined
+    if isinstance(value, list):
+        return [_join_surrogates(v) for v in value]
+    return value
+
+
 def _documents(text: str) -> list:
     """Every non-empty YAML/JSON document; anchors and aliases stay unsupported."""
     if len(text) > 2_000_000:
         raise ValueError("Infrastructure document exceeds 2 MB")
     try:
         try:
-            return _load(text, _LOADER)
+            docs = _load(text, _LOADER)
         except yaml.YAMLError:
             if _LOADER is _InfraLoader:
                 raise
             # libyaml rejects a few inputs the pure-Python parser accepts (`{api:{}}`).
-            return _load(text, _InfraLoader)
+            docs = _load(text, _InfraLoader)
+        return [_join_surrogates(doc) for doc in docs]
     except (yaml.YAMLError, RecursionError) as exc:
         raise ValueError(str(exc)[:200]) from exc
 
