@@ -214,6 +214,9 @@ def test_uri_redaction_is_linear_on_adversarial_input():
         "http://a:" + "/" * 20_000,
         "http://a:" + "/@" * 20_000,
         "password" + " " * 50_000,
+        "token:" * 20_000,
+        "token:x" * 20_000,
+        "password:a" * 20_000,
     )
     for case in cases:
         started = time.perf_counter()

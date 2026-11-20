@@ -23,9 +23,10 @@ class SafetyError(ValueError):
 
 
 # `key=value` (config syntax) counts as a credential for any 4+ character value. A
-# `key: value` pair counts only when the value is quoted, contains a digit (8+
-# characters) or is a long opaque token (24+), so type annotations (`password: str`)
-# and prose ("session token: Redis-backed cache") do not match.
+# `key: value` pair counts only when the value is quoted, contains a digit within its
+# first 256 characters (8+ characters) or is a long opaque token (24+), so type
+# annotations (`password: str`) and prose ("session token: Redis-backed cache") do not
+# match. The 256 bound keeps the digit lookahead linear on repeated `token:` text.
 # Connection URI schemes: masked here and listed by the dependency inventory.
 URI_SCHEMES = r"https?|postgres(?:ql)?|mysql|mongodb|rediss?|amqps?"
 # A URI password ends at the last `@` before `/`, whitespace, `?`, `#` or an unescaped `"`,
@@ -36,7 +37,7 @@ _TOKENS = (
     r"(?i)(?:AKIA|ASIA)[A-Z0-9]{16}|gh[pousr]_[A-Za-z0-9_]{20,}|\bBearer\s+[A-Za-z0-9._~+/=-]{16,}"
     r"|(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|access[_-]?token)[\"']?\s*"
     r"(?:=\s*[\"']?[^\s\"',;}]{4,}"
-    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]*\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
+    r"|:\s*(?:[\"'][^\s\"',;}]{4,}|(?=[^\s\"',;})]{0,256}\d)[^\s\"',;})]{8,}|[A-Za-z0-9_+/=.-]{24,}))"
 )
 _URI_USER = rf"(?P<scheme>{URI_SCHEMES})://[^/\s:@?#\"]*+:"
 _URI_PASSWORD = r"(?:[^\s/?#\"\\]|\\.)+@"
