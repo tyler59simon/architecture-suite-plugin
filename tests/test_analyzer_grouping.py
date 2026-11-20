@@ -225,6 +225,14 @@ def test_uri_redaction_is_linear_on_adversarial_input():
     assert redact("redis://u:pw@cache:6379/0") == "redis://[REDACTED]@cache:6379/0"
 
 
+def test_long_unquoted_secret_values_stay_masked():
+    """A value longer than the 256-character digit lookahead is masked whole."""
+    for value in ("ab!" * 100 + "1", "ab!" * 100, "x!" * 128 + "y"):
+        assert redact(f"password:{value} next") == "[REDACTED] next", len(value)
+    assert redact("password: str") == "password: str"
+    assert redact("token:" + "ab!" * 50) == "token:" + "ab!" * 50
+
+
 def test_url_assigned_to_a_secret_name_stays_out_of_the_inventory(tmp_path):
     """The scanner redacts the whole `WEBHOOK_SECRET = "<url>"`; the URL must not return."""
     url = "https://hooks.example.com/services/T000/B000/abc123secret"
