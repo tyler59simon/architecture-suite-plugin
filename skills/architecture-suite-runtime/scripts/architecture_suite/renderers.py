@@ -58,11 +58,14 @@ def normalize_artifact_level(level: str = "all") -> str:
     return level
 
 
-def shared_direction(model: dict) -> str:
-    """The direction every view shares, else auto. Overview and deployment diagrams
-    have no view of their own, so a model written with --direction reproduces them."""
-    directions = {v.get("direction", "auto") for v in model["views"]}
-    return directions.pop() if len(directions) == 1 else "auto"
+def container_direction(model: dict) -> str:
+    """The containers view's direction. Overview and deployment diagrams have no view of
+    their own; every level that draws them keeps the containers view, so a model written
+    with --direction reproduces them at any --level."""
+    return next(
+        (v.get("direction", "auto") for v in model["views"] if v["type"] == "container"),
+        "auto",
+    )
 
 
 def directed_model(model: dict, direction: str | None) -> dict:
@@ -76,7 +79,7 @@ def diagram_specs(
     model: dict, overview_styles=None, level: str = "all"
 ) -> list[tuple[str, dict]]:
     normalize_artifact_level(level)
-    shared = shared_direction(model)
+    shared = container_direction(model)
     specs = [
         (f"{VIEW_FOLDERS[v['type']]}/{v['id']}", v)
         for v in model["views"]

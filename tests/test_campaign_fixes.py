@@ -24,7 +24,7 @@ from architecture_suite.renderers import (
     layout_measurements,
     render_mermaid,
     render_plantuml,
-    shared_direction,
+    container_direction,
     render_svg_png,
 )
 from architecture_suite.report import render_architecture_report
@@ -319,9 +319,15 @@ def test_overview_and_deployment_follow_the_direction_every_view_shares(model):
     view = {"type": "overview", "style": "small-multiples", "direction": "down"}
     assert "flowchart TB" in render_mermaid(down, view, scene=built[small])
     mixed = deepcopy(down)
-    mixed["views"][0]["direction"] = "right"
-    assert shared_direction(mixed) == "auto" and shared_direction(down) == "down"
+    code = next(v for v in mixed["views"] if v["type"] == "code")
+    code["direction"] = "right"
     assert _built(mixed, ["small-multiples"], "overview")[0][2].direction == ""
+    # The containers view decides, so projecting to a level keeps the same direction.
+    for level in ("all", "deployment", "overview"):
+        for base, view, _ in _built(mixed, ["executive"], level):
+            if view["type"] in {"overview", "deployment"}:
+                assert view["direction"] == "down", (level, base)
+    assert container_direction({"views": []}) == "auto"
 
 
 def test_explicit_direction_gives_one_small_multiples_layout_at_every_level(model):

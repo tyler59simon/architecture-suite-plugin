@@ -4,7 +4,7 @@
 
 ### Added
 
-- **`--direction auto|down|right`:** `analyze`, `render`, `plan-render`, `verify` and `examples` can lay every diagram out left to right (`right`) or top to bottom (`down`), including overview and deployment diagrams. The flag overrides plan and model directions and is recorded on every view in `architecture-model.json`. Overview and deployment diagrams now use the direction all views share, so a plan-wide `layout.direction` covers them too.
+- **`--direction auto|down|right`:** `analyze`, `render`, `plan-render`, `verify` and `examples` can lay every diagram out left to right (`right`) or top to bottom (`down`), including overview and deployment diagrams. The flag overrides plan and model directions and is recorded on every view in `architecture-model.json`. Overview and deployment diagrams now follow the containers view's direction, so a plan-wide `layout.direction` covers them too.
 
 ### Fixed
 
