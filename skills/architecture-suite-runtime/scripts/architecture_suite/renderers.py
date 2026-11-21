@@ -93,7 +93,9 @@ def diagram_specs(
                     "type": "overview",
                     "style": s,
                     "id": "overview-" + s,
-                    "direction": shared,
+                    # Small-multiples panels keep their own directions; its text
+                    # follows them when they agree and reads left to right otherwise.
+                    "direction": "auto" if s == "small-multiples" else shared,
                 },
             )
             for s in normalize_overview_styles(overview_styles)

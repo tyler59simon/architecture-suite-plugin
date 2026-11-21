@@ -321,7 +321,11 @@ def test_overview_and_deployment_follow_the_direction_every_view_shares(model):
     mixed = deepcopy(down)
     code = next(v for v in mixed["views"] if v["type"] == "code")
     code["direction"] = "right"
-    assert _built(mixed, ["small-multiples"], "overview")[0][2].direction == ""
+    (_, small_view, small_scene), = _built(mixed, ["small-multiples"], "overview")
+    assert small_scene.direction == ""
+    # Mixed panels: the text keeps the left-to-right fallback, not the containers view's.
+    assert "flowchart LR" in render_mermaid(mixed, small_view, scene=small_scene)
+    assert "LAYOUT_LEFT_RIGHT()" in render_plantuml(mixed, small_view, scene=small_scene)
     # The containers view decides, so projecting to a level keeps the same direction.
     for level in ("all", "deployment", "overview"):
         for base, view, _ in _built(mixed, ["executive"], level):
