@@ -101,8 +101,8 @@ def build_overview_scene(
     direction: str = "auto",
 ) -> Scene:
     """`view_scenes` maps view IDs to scenes already built for this model; panels use
-    copies of them, since building a panel moves and renames its boxes. A `direction`
-    other than auto overrides the panels' own view directions."""
+    copies of them, since building a panel moves and renames its boxes. `direction`
+    lays out the other styles; panels keep their own views' directions."""
     title = (
         model["system"]["name"] + " — " + style.replace("-", " ").title() + " overview"
     )
@@ -113,9 +113,7 @@ def build_overview_scene(
     scenes = [
         deepcopy(view_scenes[v["id"]])
         if v["id"] in view_scenes
-        else build_view_scene_elk(
-            model, v if direction == "auto" else {**v, "direction": direction}
-        )
+        else build_view_scene_elk(model, v)
         for v in model["views"]
     ]
     # Every expanded scope gets a panel; retain all repeated L3/L4 scopes. Panels fill
@@ -138,7 +136,16 @@ def build_overview_scene(
         default=660,
     )
     heights = [max(scenes[i].height for i in row) for row in rows]
-    result = Scene(title, width, sum(heights) + 260, title_lines=[title], content_top=100)
+    # Text formats read like the panels when they all run the same way.
+    panel_directions = {s.direction for s in scenes}
+    result = Scene(
+        title,
+        width,
+        sum(heights) + 260,
+        title_lines=[title],
+        content_top=100,
+        direction=panel_directions.pop() if len(panel_directions) == 1 else "",
+    )
     y = 100
     offsets = {}
     for row in rows:

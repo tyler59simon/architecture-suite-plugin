@@ -105,8 +105,9 @@ def _deepest_profile(model):
 
 def _apply_direction(model, direction):
     """--direction overrides every view's direction, so the written model records it."""
-    if direction:
-        for view in model.get("views", []):
+    views = model.get("views") if isinstance(model, dict) else None
+    if direction and isinstance(views, list):  # malformed views reach the validator
+        for view in views:
             if isinstance(view, dict):
                 view["direction"] = direction
     return model

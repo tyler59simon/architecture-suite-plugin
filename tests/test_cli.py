@@ -567,3 +567,11 @@ def test_direction_flag_overrides_every_diagram(inputs, tmp_path, capsys):
     assert {v["direction"] for v in written["views"]} == {"right"}
     assert main(["verify", "--model", str(inputs[0]), "--direction", "right"]) in {0, 1}
     assert json.loads(capsys.readouterr().out)["operation"] == "verify"
+
+
+def test_direction_flag_leaves_malformed_views_to_validation(tmp_path, model, capsys):
+    for views in (None, 7):
+        bad = tmp_path / "bad.json"
+        bad.write_text(json.dumps({**model, "views": views}), encoding="utf-8")
+        assert main(["verify", "--model", str(bad), "--direction", "right"]) == 3
+        capsys.readouterr()

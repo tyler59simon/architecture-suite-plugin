@@ -58,16 +58,27 @@ def normalize_artifact_level(level: str = "all") -> str:
     return level
 
 
+def shared_direction(model: dict) -> str:
+    """The direction every view shares, else auto. Overview and deployment diagrams
+    have no view of their own, so a model written with --direction reproduces them."""
+    directions = {v.get("direction", "auto") for v in model["views"]}
+    return directions.pop() if len(directions) == 1 else "auto"
+
+
+def directed_model(model: dict, direction: str | None) -> dict:
+    """The model with every view set to `direction` (auto, down or right), if given."""
+    if not direction:
+        return model
+    return {**model, "views": [{**v, "direction": direction} for v in model["views"]]}
+
+
 def diagram_specs(
-    model: dict, overview_styles=None, level: str = "all", direction: str | None = None
+    model: dict, overview_styles=None, level: str = "all"
 ) -> list[tuple[str, dict]]:
-    """A `direction` (auto, down or right) overrides every view's own direction."""
     normalize_artifact_level(level)
+    shared = shared_direction(model)
     specs = [
-        (
-            f"{VIEW_FOLDERS[v['type']]}/{v['id']}",
-            {**v, "direction": direction} if direction else v,
-        )
+        (f"{VIEW_FOLDERS[v['type']]}/{v['id']}", v)
         for v in model["views"]
         if level == "all" or v["type"] == ARTIFACT_VIEW_TYPES.get(level)
     ]
@@ -79,7 +90,7 @@ def diagram_specs(
                     "type": "overview",
                     "style": s,
                     "id": "overview-" + s,
-                    "direction": direction or "auto",
+                    "direction": shared,
                 },
             )
             for s in normalize_overview_styles(overview_styles)
@@ -92,7 +103,7 @@ def diagram_specs(
                 {
                     "type": "deployment",
                     "id": f"{provider}-deployment",
-                    "direction": direction or "auto",
+                    "direction": shared,
                 },
             )
         )
@@ -124,9 +135,11 @@ def _built(
     model: dict, overview_styles=None, level: str = "all", direction: str | None = None
 ) -> list:
     """(base, view, scene) for every spec, each scene built once; the small-multiples
-    overview reuses the model views' scenes (they come first in diagram_specs)."""
+    overview reuses the model views' scenes (they come first in diagram_specs). A
+    `direction` overrides every diagram's own."""
+    model = directed_model(model, direction)
     built, view_scenes = [], {}
-    for base, view in diagram_specs(model, overview_styles, level, direction):
+    for base, view in diagram_specs(model, overview_styles, level):
         scene = _scene(model, view, view_scenes)
         if view["type"] not in {"overview", "deployment"}:
             view_scenes[view["id"]] = scene

@@ -18,9 +18,13 @@ from architecture_suite.renderers import (
     MAX_PNG_PIXELS,
     MAX_PNG_WIDTH,
     _quoted,
+    _built,
     _scene,
+    directed_model,
+    layout_measurements,
     render_mermaid,
     render_plantuml,
+    shared_direction,
     render_svg_png,
 )
 from architecture_suite.report import render_architecture_report
@@ -304,6 +308,31 @@ def test_scene_records_its_direction_and_text_formats_follow_it(model):
     ):
         for direction in ("down", "right"):
             assert _scene(model, {**spec, "direction": direction}).direction == direction
+
+
+def test_overview_and_deployment_follow_the_direction_every_view_shares(model):
+    # A model written with --direction reproduces its overview and deployment layouts.
+    down = directed_model(model, "down")
+    built = {base: scene for base, _, scene in _built(down, ["executive", "small-multiples"])}
+    assert all(scene.direction == "down" for scene in built.values()), built.keys()
+    small = next(b for b in built if b.endswith("small-multiples"))
+    view = {"type": "overview", "style": "small-multiples", "direction": "down"}
+    assert "flowchart TB" in render_mermaid(down, view, scene=built[small])
+    mixed = deepcopy(down)
+    mixed["views"][0]["direction"] = "right"
+    assert shared_direction(mixed) == "auto" and shared_direction(down) == "down"
+    assert _built(mixed, ["small-multiples"], "overview")[0][2].direction == ""
+
+
+def test_explicit_direction_gives_one_small_multiples_layout_at_every_level(model):
+    right = directed_model(model, "right")
+    sizes = [
+        layout_measurements(right, ["small-multiples"], level, direction="auto")[
+            "05-overview/overview-small-multiples"
+        ]
+        for level in ("all", "overview")
+    ]
+    assert sizes[0] == sizes[1]
 
 
 def test_drawio_frame_titles_draw_over_edges(model):
