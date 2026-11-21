@@ -41,6 +41,8 @@ def test_defaults_and_invalid_arguments():
         ["unknown"],
         ["render", "--model", "x", "--output", "y", "--format", "pdf"],
         ["analyze", "--repo", "x", "--output", "y", "--cloud-profile", "azure"],
+        ["verify", "--model", "x", "--direction", "diagonal"],
+        ["plan-draft", "--repo", "x", "--output", "y", "--direction", "right"],
     ):
         with pytest.raises(SystemExit):
             parser.parse_args(argv)
@@ -533,3 +535,35 @@ def test_small_multiples_publish_lays_out_each_view_once(inputs, tmp_path, monke
     assert main(argv) == 0
     views = [v["id"] for v in json.loads(inputs[0].read_text())["views"]]
     assert sorted(laid_out) == sorted(views)
+
+
+@pytest.mark.slow
+def test_direction_flag_overrides_every_diagram(inputs, tmp_path, capsys):
+    output = tmp_path / "right"
+    argv = [
+        "render",
+        "--model",
+        str(inputs[0]),
+        "--output",
+        str(output),
+        "--format",
+        "mermaid,plantuml",
+        "--overview-style",
+        "executive",
+        "--direction",
+        "right",
+        "--confirm-write",
+    ]
+    assert main(argv) == 0
+    assert json.loads(capsys.readouterr().out)["direction"] == "right"
+    mermaid = sorted(output.rglob("*.mmd"))
+    assert any("overview" in p.name for p in mermaid)
+    assert any("deployment" in p.name for p in mermaid)
+    for path in mermaid:
+        assert path.read_text(encoding="utf-8").splitlines()[1] == "flowchart LR", path
+    for path in output.rglob("*.puml"):
+        assert "LAYOUT_LEFT_RIGHT()" in path.read_text(encoding="utf-8"), path
+    written = json.loads((output / "architecture-model.json").read_text(encoding="utf-8"))
+    assert {v["direction"] for v in written["views"]} == {"right"}
+    assert main(["verify", "--model", str(inputs[0]), "--direction", "right"]) in {0, 1}
+    assert json.loads(capsys.readouterr().out)["operation"] == "verify"

@@ -14,6 +14,7 @@ from .aws import gcp_icon_status, verify_assets
 from .examples import SCENARIOS, example_model, example_plan
 from .layout_host import layout_graph
 from .model import (
+    DIRECTIONS,
     VIEW_TYPE_DEPTH,
     format_findings,
     load_model,
@@ -100,6 +101,15 @@ def _view_types(model):
 def _deepest_profile(model):
     # Every evidenced level: a container-only plan is complete at container depth.
     return next((t for t in ("code", "component") if t in _view_types(model)), "container")
+
+
+def _apply_direction(model, direction):
+    """--direction overrides every view's direction, so the written model records it."""
+    if direction:
+        for view in model.get("views", []):
+            if isinstance(view, dict):
+                view["direction"] = direction
+    return model
 
 
 def _selected_model(model, level, styles):
@@ -303,9 +313,14 @@ def cmd_verify(args) -> int:
     styles = parse_overview_styles(args.overview_style)
     _check_styles(args)
     model = _selected_model(
-        load_model(canonical_existing_file(Path(args.model), "--model"), "--model"), args.level, styles
+        _apply_direction(
+            load_model(canonical_existing_file(Path(args.model), "--model"), "--model"),
+            args.direction,
+        ),
+        args.level,
+        styles,
     )
-    result = layout_report(model, styles, args.level)
+    result = layout_report(model, styles, args.level, args.direction)
     result.update(
         operation="verify",
         status="clean" if result["ok"] else "findings",
@@ -357,7 +372,7 @@ def cmd_publish(args) -> int:
     if input_path.is_relative_to(output):
         raise SafetyError("Output must not contain its input")
     unplaced = deployment_placement_problem(model.get("deployment")) is not None
-    model = _selected_model(model, args.level, styles)
+    model = _selected_model(_apply_direction(model, args.direction), args.level, styles)
     formats = args.format
     paths = expected_artifact_paths(model, formats, styles, args.level)
     paths.append("architecture-report.md")
@@ -379,6 +394,8 @@ def cmd_publish(args) -> int:
         "conflicts": changes["conflicts"],
         "overwrites_edited": changes["overwrites_edited"],
     }
+    if args.direction:
+        summary["direction"] = args.direction
     if args.level in {"all", "overview"}:
         summary["overview_styles"] = list(styles)
     if args.level == "all":
@@ -400,6 +417,7 @@ def cmd_publish(args) -> int:
             styles,
             args.level,
             allow_layout_findings=getattr(args, "allow_layout_findings", False),
+            direction=args.direction,
         )
         (stage / "architecture-report.md").write_text(
             render_architecture_report(model, verification=verification),
@@ -469,8 +487,10 @@ def cmd_examples(args) -> int:
         for index, scenario in enumerate(SCENARIOS):
             folder = stage / scenario["id"]
             folder.mkdir(exist_ok=True)
-            model = example_model(index)
-            write_rendered_artifacts(model, folder, args.format, styles)
+            model = _apply_direction(example_model(index), args.direction)
+            write_rendered_artifacts(
+                model, folder, args.format, styles, direction=args.direction
+            )
             (folder / "architecture-model.json").write_text(
                 json.dumps(model, indent=2), encoding="utf-8", newline="\n"
             )
@@ -639,6 +659,14 @@ def build_parser() -> argparse.ArgumentParser:
                 help="overview styles (executive, progressive, hierarchy, "
                 "small-multiples, complete, or all); repeat or comma-separate; "
                 "only with --level all or overview",
+            )
+            p.add_argument(
+                "--direction",
+                choices=DIRECTIONS,
+                default=None,
+                help="reading direction of every diagram: right (left to right), "
+                "down (top to bottom) or auto (whichever lays out better); overrides "
+                "the plan's layout section and the model's view directions",
             )
             if name != "examples":
                 p.add_argument(

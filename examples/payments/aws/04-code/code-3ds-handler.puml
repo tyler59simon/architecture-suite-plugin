@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Component>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 Boundary(n0, "3DS Handler", "component") {
   Component(n1, "ThreeDSecureClient", "class", "Illustrative implementation\n+authenticate(payment): AuthenticationResult")
 }

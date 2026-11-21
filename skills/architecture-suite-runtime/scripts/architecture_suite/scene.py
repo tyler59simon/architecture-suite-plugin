@@ -45,6 +45,7 @@ class Scene:
     content_top: float = 100
     key_y: float = 0
     sequence: bool = False  # a scenario: arrows are messages in time order
+    direction: str = ""  # "down" or "right" when ELK laid it out; "" otherwise
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -152,6 +153,7 @@ def build_scene(
         title_lines=title_lines,
         content_top=top,
         key_y=graph["height"] + top + 40,
+        direction="down" if direction == "down" else "right",
     )
 
     def visit(parent, ox, oy):

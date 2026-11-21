@@ -95,21 +95,27 @@ def overview_data(model: dict, style: str):
 
 
 def build_overview_scene(
-    model: dict, style: str = "progressive", view_scenes: dict | None = None
+    model: dict,
+    style: str = "progressive",
+    view_scenes: dict | None = None,
+    direction: str = "auto",
 ) -> Scene:
     """`view_scenes` maps view IDs to scenes already built for this model; panels use
-    copies of them, since building a panel moves and renames its boxes."""
+    copies of them, since building a panel moves and renames its boxes. A `direction`
+    other than auto overrides the panels' own view directions."""
     title = (
         model["system"]["name"] + " — " + style.replace("-", " ").title() + " overview"
     )
     if style != "small-multiples":
         elements, relationships, parents, frames = overview_data(model, style)
-        return choose_scene(title, elements, relationships, parents, frames)
+        return choose_scene(title, elements, relationships, parents, frames, direction)
     view_scenes = view_scenes or {}
     scenes = [
         deepcopy(view_scenes[v["id"]])
         if v["id"] in view_scenes
-        else build_view_scene_elk(model, v)
+        else build_view_scene_elk(
+            model, v if direction == "auto" else {**v, "direction": direction}
+        )
         for v in model["views"]
     ]
     # Every expanded scope gets a panel; retain all repeated L3/L4 scopes. Panels fill
@@ -211,7 +217,7 @@ def panel_groups(scene: Scene) -> list[tuple[Box, list[Box]]]:
 DEPLOYMENT_TITLES = {"aws": "AWS deployment", "gcp": "Google Cloud deployment"}
 
 
-def build_cloud_scene(model: dict) -> Scene:
+def build_cloud_scene(model: dict, direction: str = "auto") -> Scene:
     deployment = model["deployment"]
     by_id = {e["id"]: e for e in model["elements"]}
     frames = {n["id"]: n for n in deployment["nodes"]}
@@ -239,6 +245,7 @@ def build_cloud_scene(model: dict) -> Scene:
         relationships,
         parents,
         frames,
+        direction,
     )
 
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`--direction auto|down|right`:** `analyze`, `render`, `plan-render`, `verify` and `examples` can lay every diagram out left to right (`right`) or top to bottom (`down`), including overview and deployment diagrams, which ignored the plan's `layout` section before. The flag overrides plan and model directions and is recorded in `architecture-model.json`.
+
+### Fixed
+
+- **Mermaid and PlantUML follow the drawn layout:** with direction `auto`, `.mmd` and `.puml` files said left to right even when the SVG, PNG, Draw.io and Visio layout ran top to bottom. They now use the direction the layout picked.
+
 ## 1.4.0 - safer redaction, infrastructure import fixes and clearer diagrams
 
 Fixes from an 18-system test campaign and three rounds of code review: credential redaction covers more inputs and formats, infrastructure import keeps the right edges, and overviews, scenarios and Draw.io titles draw more cleanly.

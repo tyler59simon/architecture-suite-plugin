@@ -55,6 +55,7 @@ def test_external_systems_direction_and_escaping(model):
     system["external"] = True
     system["name"] = 'Say "hi" <b>now</b> C:\\path'
     system["description"] = "first\nsecond %date() $var"
+    view["direction"] = "right"
     text = renderers.render_plantuml(model, view)
     # The preprocessor would otherwise run %date() and expand $var.
     assert "%date()" not in text and "$var" not in text

@@ -20,6 +20,7 @@ from architecture_suite.renderers import (
     _quoted,
     _scene,
     render_mermaid,
+    render_plantuml,
     render_svg_png,
 )
 from architecture_suite.report import render_architecture_report
@@ -278,11 +279,31 @@ def test_frame_titles_draw_over_edges_and_mermaid_keeps_direction(model):
     title = svg.index(f">{frame.label.lines[0].text}</text>")
     assert svg.rindex("<polyline") < title
     assert 'paint-order="stroke"' in svg
-    assert "flowchart LR" in render_mermaid(model, view)
+    assert "flowchart LR" in render_mermaid(model, {**view, "direction": "right"})
     down = deepcopy(model)
     for v in down["views"]:
         v["direction"] = "down"
     assert "flowchart TB" in render_mermaid(down, next(v for v in down["views"] if v["type"] == "container"))
+
+
+def test_scene_records_its_direction_and_text_formats_follow_it(model):
+    view = next(v for v in model["views"] if v["type"] == "container")
+    for direction, mermaid, plantuml in (
+        ("down", "flowchart TB", "LAYOUT_TOP_DOWN()"),
+        ("right", "flowchart LR", "LAYOUT_LEFT_RIGHT()"),
+    ):
+        scene = _scene(model, {**view, "direction": direction})
+        assert scene.direction == direction
+        # On auto the text formats say what ELK picked, not a fixed default.
+        auto = {**view, "direction": "auto"}
+        assert mermaid in render_mermaid(model, auto, scene=scene)
+        assert plantuml in render_plantuml(model, auto, scene=scene)
+    for spec in (
+        {"type": "overview", "style": "executive"},
+        {"type": "deployment"},
+    ):
+        for direction in ("down", "right"):
+            assert _scene(model, {**spec, "direction": direction}).direction == direction
 
 
 def test_drawio_frame_titles_draw_over_edges(model):

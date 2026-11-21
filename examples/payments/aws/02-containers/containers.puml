@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Container>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 Person(n0, "Shopper", "Pays for orders at merchant checkouts")
 Person(n1, "Merchant", "Accepts payments and receives payouts")
 Person(n2, "Risk Analyst", "Reviews flagged payments and fraud rules")

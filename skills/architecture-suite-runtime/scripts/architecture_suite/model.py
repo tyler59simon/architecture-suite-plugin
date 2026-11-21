@@ -11,6 +11,7 @@ import unicodedata
 from .safety import contains_secret
 
 SCHEMA_VERSION = "2.0"
+DIRECTIONS = ("auto", "down", "right")  # a view's reading direction
 VIEW_LEVELS = (
     ("system-context", "context", "01-system-context"),
     ("containers", "container", "02-containers"),
@@ -514,7 +515,7 @@ def validate_model(model: dict, profile: str = "full") -> list[dict[str, str]]:
                     "Code view cannot expand sibling component internals",
                     ident,
                 )
-        if v.get("direction", "auto") not in {"auto", "down", "right"}:
+        if v.get("direction", "auto") not in DIRECTIONS:
             add("view-direction", "Direction must be auto, down or right", ident)
     deployment = model.get("deployment")
     if deployment is not None:

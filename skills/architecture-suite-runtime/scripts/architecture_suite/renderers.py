@@ -59,11 +59,15 @@ def normalize_artifact_level(level: str = "all") -> str:
 
 
 def diagram_specs(
-    model: dict, overview_styles=None, level: str = "all"
+    model: dict, overview_styles=None, level: str = "all", direction: str | None = None
 ) -> list[tuple[str, dict]]:
+    """A `direction` (auto, down or right) overrides every view's own direction."""
     normalize_artifact_level(level)
     specs = [
-        (f"{VIEW_FOLDERS[v['type']]}/{v['id']}", v)
+        (
+            f"{VIEW_FOLDERS[v['type']]}/{v['id']}",
+            {**v, "direction": direction} if direction else v,
+        )
         for v in model["views"]
         if level == "all" or v["type"] == ARTIFACT_VIEW_TYPES.get(level)
     ]
@@ -71,7 +75,12 @@ def diagram_specs(
         specs.extend(
             (
                 f"05-overview/overview-{s}",
-                {"type": "overview", "style": s, "id": "overview-" + s},
+                {
+                    "type": "overview",
+                    "style": s,
+                    "id": "overview-" + s,
+                    "direction": direction or "auto",
+                },
             )
             for s in normalize_overview_styles(overview_styles)
         )
@@ -80,7 +89,11 @@ def diagram_specs(
         specs.append(
             (
                 f"06-{provider}-deployment/{provider}-deployment",
-                {"type": "deployment", "id": f"{provider}-deployment"},
+                {
+                    "type": "deployment",
+                    "id": f"{provider}-deployment",
+                    "direction": direction or "auto",
+                },
             )
         )
     return specs
@@ -99,18 +112,21 @@ def expected_artifact_paths(
 
 
 def _scene(model, view, view_scenes=None):
+    direction = view.get("direction", "auto")
     if view["type"] == "overview":
-        return build_overview_scene(model, view["style"], view_scenes)
+        return build_overview_scene(model, view["style"], view_scenes, direction)
     if view["type"] == "deployment":
-        return build_cloud_scene(model)
+        return build_cloud_scene(model, direction)
     return build_view_scene_elk(model, view)
 
 
-def _built(model: dict, overview_styles=None, level: str = "all") -> list:
+def _built(
+    model: dict, overview_styles=None, level: str = "all", direction: str | None = None
+) -> list:
     """(base, view, scene) for every spec, each scene built once; the small-multiples
     overview reuses the model views' scenes (they come first in diagram_specs)."""
     built, view_scenes = [], {}
-    for base, view in diagram_specs(model, overview_styles, level):
+    for base, view in diagram_specs(model, overview_styles, level, direction):
         scene = _scene(model, view, view_scenes)
         if view["type"] not in {"overview", "deployment"}:
             view_scenes[view["id"]] = scene
@@ -127,6 +143,11 @@ def _quoted(value):
     )
 
 
+def _direction(view: dict, scene) -> str:
+    """The scene's laid-out direction; scenes ELK did not lay out use the view's."""
+    return scene.direction or view.get("direction", "auto")
+
+
 def render_mermaid(model: dict, view: dict, *, scene=None) -> str:
     """A portable flowchart preserves C4 stereotypes, scopes, members, and arrows."""
     scene = scene or _scene(model, view)
@@ -136,8 +157,8 @@ def render_mermaid(model: dict, view: dict, *, scene=None) -> str:
         children.setdefault(b.parent_id, []).append(b)
     lines = [
         "%% Architecture Suite schema 2.0; portable layout is independent of ELK",
-        # An explicit layout direction carries over; auto keeps the portable default.
-        "flowchart TB" if view.get("direction") == "down" else "flowchart LR",
+        # The direction ELK used carries over, so the text reads like the picture.
+        "flowchart TB" if _direction(view, scene) == "down" else "flowchart LR",
     ]
 
     def emit(boxes, indent):
@@ -245,7 +266,9 @@ def render_plantuml(model: dict, view: dict, *, scene=None) -> str:
         "@startuml",
         "' Architecture Suite schema 2.0; PlantUML computes its own layout",
         f"!include <C4/{library}>",
-        "LAYOUT_TOP_DOWN()" if view.get("direction") == "down" else "LAYOUT_LEFT_RIGHT()",
+        "LAYOUT_TOP_DOWN()"
+        if _direction(view, scene) == "down"
+        else "LAYOUT_LEFT_RIGHT()",
     ]
     if claims:
         lines += [
@@ -330,15 +353,19 @@ def render_svg(model: dict, view: dict) -> str:
     return render_scene_svg(_scene(model, view))
 
 
-def layout_measurements(model: dict, overview_styles=None, level: str = "all") -> dict:
+def layout_measurements(
+    model: dict, overview_styles=None, level: str = "all", direction: str | None = None
+) -> dict:
     return {
         base: {"width": scene.width, "height": scene.height, **score_scene(scene)}
-        for base, _, scene in _built(model, overview_styles, level)
+        for base, _, scene in _built(model, overview_styles, level, direction)
     }
 
 
-def layout_report(model: dict, overview_styles=None, level: str = "all") -> dict:
-    return _layout_report(_built(model, overview_styles, level))
+def layout_report(
+    model: dict, overview_styles=None, level: str = "all", direction: str | None = None
+) -> dict:
+    return _layout_report(_built(model, overview_styles, level, direction))
 
 
 def _layout_report(built) -> dict:
@@ -729,11 +756,13 @@ def render_artifacts(
     level: str = "all",
     *,
     allow_layout_findings: bool = False,
+    direction: str | None = None,
 ) -> dict:
-    """Write the artifacts, building each scene once; returns the layout verification."""
+    """Write the artifacts, building each scene once; returns the layout verification.
+    A `direction` overrides every diagram's reading direction."""
     verify_assets()
     expected_artifact_paths(model, formats, overview_styles, level)
-    built = _built(model, overview_styles, level)
+    built = _built(model, overview_styles, level, direction)
     verification = _layout_report(built)
     if not verification["ok"] and not allow_layout_findings:
         raise SafetyError(

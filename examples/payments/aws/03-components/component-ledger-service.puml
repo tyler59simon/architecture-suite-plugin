@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Component>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 Container(n0, "Settlement Worker", "Python batch jobs", "Reconciles acquirer settlement files and initiates payouts")
 ContainerDb(n1, "Ledger Store", "Distributed SQL", "Strongly consistent journal and balance records")
 ContainerQueue(n2, "Payment Event Stream", "Event bus", "Ordered payment lifecycle events")

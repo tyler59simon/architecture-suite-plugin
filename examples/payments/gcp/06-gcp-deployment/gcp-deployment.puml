@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Deployment>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 Deployment_Node(n0, "Google Cloud", "cloud") {
   Deployment_Node(n1, "Example Organization", "organization") {
     Deployment_Node(n2, "paystream-prod", "project") {

@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Component>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 System_Ext(n0, "3-D Secure Directory Server", "Card network cardholder authentication")
 System_Ext(n1, "Acquirer Processor", "Card authorization, capture and settlement")
 System_Ext(n2, "Bank Payout Rail", "Bank transfers for merchant payouts")

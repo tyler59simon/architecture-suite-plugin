@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Container>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 System(n0, "PayStream", "Online payments platform: checkout, card processing, ledger and payouts")
 Person(n1, "Shopper", "Pays for orders at merchant checkouts")
 Person(n2, "Merchant", "Accepts payments and receives payouts")

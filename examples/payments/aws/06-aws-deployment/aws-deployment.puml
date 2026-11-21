@@ -1,7 +1,7 @@
 @startuml
 ' Architecture Suite schema 2.0; PlantUML computes its own layout
 !include <C4/C4_Deployment>
-LAYOUT_LEFT_RIGHT()
+LAYOUT_TOP_DOWN()
 Deployment_Node(n0, "AWS Cloud", "cloud") {
   Deployment_Node(n1, "PayStream production account", "account") {
     Container(n2, "Merchant Dashboard", "React single-page app", "Payments, refunds, disputes and payouts for merchants")
