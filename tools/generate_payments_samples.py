@@ -12,6 +12,8 @@ rendered as a complete package:
   examples/payments/<cloud>/06-<cloud>-deployment  deployment diagram
   examples/payments/<cloud>/large-overviews/  progressive, small-multiples, complete (SVG/Draw.io)
   examples/payments/<cloud>/c4-dynamic.mmd         card payment authorization sequence
+  examples/payments/left-to-right/                 the AWS plan with --direction right
+                                                   (levels 1-3, executive overview, deployment)
 
 Levels 1-4 are identical in both packages apart from cloud icons; the deployment differs.
 A Google Cloud file that is byte-identical to its AWS counterpart is not kept. Every fact here
@@ -342,9 +344,17 @@ byte-identical.
 | Deployment | [aws/06-aws-deployment](aws/06-aws-deployment) | [gcp/06-gcp-deployment](gcp/06-gcp-deployment) |
 | Progressive, small-multiples, complete (SVG/Draw.io) | [aws/large-overviews](aws/large-overviews) | [gcp/large-overviews](gcp/large-overviews) |
 
+[left-to-right/](left-to-right) is the AWS plan rendered with `--direction right`, so every
+diagram reads left to right. Compare it with `aws/`, where the default `--direction auto` picks
+whichever direction lays each diagram out best (mostly top to bottom here). It has levels 1-3, the
+executive overview and the deployment; a file identical to its `aws/` twin (a view that `auto`
+already drew left to right) is not repeated.
+
 Regenerate with `python tools/generate_payments_samples.py`. Every fact here is fictional.
 """
 SAME = "same as AWS"
+LEFT_TO_RIGHT_KEEP = {"01-system-context", "02-containers", "03-components", "05-overview",
+                      "06-aws-deployment"}
 
 
 def readme():
@@ -382,6 +392,17 @@ def main():
         if cloud != "aws":
             drop_identical(OUT / "aws", folder)
         print(f"{cloud}: {sum(1 for p in folder.rglob('*') if p.is_file())} files")
+    left = OUT / "left-to-right"
+    if left.exists():
+        shutil.rmtree(left)
+    run("plan-render", "--plan", OUT / "plans" / "aws-architecture-plan.md", "--output", left,
+        "--format", "mermaid,drawio,png,svg,plantuml", "--confirm-write", "--level", "all",
+        "--overview-style", "executive", "--direction", "right", label="left-to-right render")
+    for child in left.iterdir():
+        if child.is_dir() and child.name not in LEFT_TO_RIGHT_KEEP:
+            shutil.rmtree(child)
+    drop_identical(OUT / "aws", left)
+    print(f"left-to-right: {sum(1 for p in left.rglob('*') if p.is_file())} files")
     (OUT / "README.md").write_bytes(readme().encode("utf-8"))
 
 

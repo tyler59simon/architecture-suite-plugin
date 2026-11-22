@@ -24,7 +24,7 @@ None of this ships in the plugin. All systems and facts are invented.
 
 | Example | Cloud | What it shows |
 | --- | --- | --- |
-| [payments](payments/README.md) | AWS **and** Google Cloud | PayStream online payments, the most complete example: one architecture rendered on both clouds with every level, overview and deployment, plus a card-payment sequence |
+| [payments](payments/README.md) | AWS **and** Google Cloud | PayStream online payments, the most complete example: one architecture rendered on both clouds with every level, overview and deployment, plus a card-payment sequence and a [left-to-right](payments/left-to-right) render (`--direction right`) |
 | [ride-dispatch](ride-dispatch/README.md) | Google Cloud | RidePulse ride dispatch: full set, modern vs legacy GCP icons, and reverse-engineering diagrams from a small source repository |
 | [starter-systems](starter-systems/index.md) | AWS | Three small systems (order platform, research portal, telemetry platform), the output of `architecture-suite examples` with all five overview styles; shared component and code views appear once |
 | [cli-features](cli-features/README.md) | - | Request scenarios, architecture diffs, rule checks, infrastructure import and the offline HTML explorer |
@@ -34,7 +34,7 @@ None of this ships in the plugin. All systems and facts are invented.
 | Skill | Look at |
 | --- | --- |
 | `architecture-plan` | [payments/plans](payments/plans), [ride-dispatch/plans](ride-dispatch/plans) (complete plans; `plan-review` reports every level ready) |
-| `c4-diagrams` | [payments/aws](payments/aws), [ride-dispatch/diagrams](ride-dispatch/diagrams) |
+| `c4-diagrams` | [payments/aws](payments/aws), [ride-dispatch/diagrams](ride-dispatch/diagrams), [payments/left-to-right](payments/left-to-right) (`--direction right`) |
 | `c4-system` | [payments/aws/01-system-context](payments/aws/01-system-context) |
 | `c4-container` | [payments/aws/02-containers](payments/aws/02-containers) |
 | `c4-component` | [payments/aws/03-components](payments/aws/03-components) |

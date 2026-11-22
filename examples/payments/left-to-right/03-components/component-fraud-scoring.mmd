@@ -1,0 +1,12 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Risk Analyst#10;«person»#10;Reviews flagged payments and fraud#10;rules"]
+  n1["Payment Orchestrator#10;«container»#10;Java#10;Drives each payment through#10;authorization, capture and refund"]
+  subgraph n2["Fraud Scoring"]
+    n3["Risk Scorer#10;«component»#10;Python#10;Returns a risk score from the hosted#10;model"]
+    n4["Rules Engine#10;«component»#10;Python#10;Applies merchant and platform block rules"]
+  end
+  n1 -->|"Requests a fraud score #91;gRPC#93;"| n3
+  n3 -->|"Applies block and review rules #91;in-process#93;"| n4
+  n0 -->|"Reviews flagged payments and tunes rules #91;HTTPS#93;"| n4
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

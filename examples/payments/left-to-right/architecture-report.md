@@ -1,0 +1,194 @@
+# PayStream
+
+Synthetic, non-production example
+
+Illustrative owned services running on AWS
+
+## Evidence
+
+- evidence-1: fictional brief
+
+## Assumptions
+
+- All architecture and deployment facts in this example are fictional.
+
+## Gaps
+
+
+## Layout verification
+
+```json
+{
+  "ok": true,
+  "diagrams": {
+    "01-system-context/system-context": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 14,
+      "aspect_ratio": 1.82,
+      "score": 43.820245979186375,
+      "advisories": []
+    },
+    "02-containers/containers": {
+      "findings": [],
+      "crossings": 6,
+      "bends": 54,
+      "aspect_ratio": 2.921,
+      "score": 764.9209216810888,
+      "advisories": []
+    },
+    "03-components/component-card-vault": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 2,
+      "aspect_ratio": 3.39,
+      "score": 9.38953488372093,
+      "advisories": []
+    },
+    "03-components/component-fraud-scoring": {
+      "findings": [],
+      "crossings": 1,
+      "bends": 4,
+      "aspect_ratio": 2.486,
+      "score": 114.48613138686132,
+      "advisories": []
+    },
+    "03-components/component-ledger-service": {
+      "findings": [],
+      "crossings": 1,
+      "bends": 4,
+      "aspect_ratio": 2.135,
+      "score": 114.13545816733068,
+      "advisories": []
+    },
+    "03-components/component-payment-orchestrator": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 14,
+      "aspect_ratio": 1.896,
+      "score": 43.895617529880475,
+      "advisories": []
+    },
+    "03-components/component-payments-api": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 14,
+      "aspect_ratio": 2.348,
+      "score": 44.34788879096226,
+      "advisories": []
+    },
+    "04-code/code-3ds-handler": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.243,
+      "score": 1.2429378531073447,
+      "advisories": []
+    },
+    "04-code/code-acquirer-router": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.287,
+      "score": 1.286549707602339,
+      "advisories": []
+    },
+    "04-code/code-balance-calculator": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.287,
+      "score": 1.286549707602339,
+      "advisories": []
+    },
+    "04-code/code-card-tokenizer": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.243,
+      "score": 1.2429378531073447,
+      "advisories": []
+    },
+    "04-code/code-envelope-encryptor": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.243,
+      "score": 1.2429378531073447,
+      "advisories": []
+    },
+    "04-code/code-idempotency-guard": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.243,
+      "score": 1.2429378531073447,
+      "advisories": []
+    },
+    "04-code/code-journal-writer": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.287,
+      "score": 1.286549707602339,
+      "advisories": []
+    },
+    "04-code/code-merchant-authenticator": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.243,
+      "score": 1.2429378531073447,
+      "advisories": []
+    },
+    "04-code/code-payment-intents-controller": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.202,
+      "score": 1.2021857923497268,
+      "advisories": []
+    },
+    "04-code/code-payment-state-machine": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.754,
+      "score": 1.7540983606557377,
+      "advisories": []
+    },
+    "04-code/code-risk-scorer": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.287,
+      "score": 1.286549707602339,
+      "advisories": []
+    },
+    "04-code/code-rules-engine": {
+      "findings": [],
+      "crossings": 0,
+      "bends": 0,
+      "aspect_ratio": 1.287,
+      "score": 1.286549707602339,
+      "advisories": []
+    },
+    "05-overview/overview-executive": {
+      "findings": [],
+      "crossings": 6,
+      "bends": 48,
+      "aspect_ratio": 3.147,
+      "score": 747.1465592715812,
+      "advisories": []
+    },
+    "06-aws-deployment/aws-deployment": {
+      "findings": [],
+      "crossings": 2,
+      "bends": 32,
+      "aspect_ratio": 2.42,
+      "score": 298.42024691358023,
+      "advisories": []
+    }
+  }
+}
+```

@@ -1,0 +1,15 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Checkout Web SDK#10;«container»#10;TypeScript in the shopper's browser#10;Hosted payment fields embedded in#10;merchant checkout pages"]
+  n1["Payment Orchestrator#10;«container»#10;Java#10;Drives each payment through#10;authorization, capture and refund"]
+  n2[("Vault Key Store#10;«container»#10;Managed KMS#10;Key-encryption keys for the card vault")]
+  style n2 fill:#eaf6ec,stroke:#2e7d32
+  subgraph n3["Card Vault"]
+    n4["Card Tokenizer#10;«component»#10;Rust#10;Swaps card numbers for single-purpose#10;tokens"]
+    n5["Envelope Encryptor#10;«component»#10;Rust#10;Encrypts card data with per-record data#10;keys"]
+  end
+  n0 -->|"Submits card data for a token #91;HTTPS#93;"| n4
+  n1 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n4
+  n4 -->|"Encrypts card records #91;in-process#93;"| n5
+  n5 -->|"Wraps and unwraps data keys #91;KMS API#93;"| n2
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

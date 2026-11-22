@@ -1,0 +1,24 @@
+%% Architecture Suite schema 2.0; portable layout is independent of ELK
+flowchart LR
+  n0["Acquirer Processor#10;«software_system»#10;Card authorization, capture and settlement"]
+  n1["3-D Secure Directory Server#10;«software_system»#10;Card network cardholder authentication"]
+  n2["Payments API#10;«container»#10;Go#10;Public REST API for payment intents,#10;captures and refunds"]
+  n3["Card Vault#10;«container»#10;Rust#10;Tokenizes card numbers inside the#10;cardholder data environment"]
+  n4["Fraud Scoring#10;«container»#10;Python ML model#10;Scores each payment for fraud risk before#10;authorization"]
+  style n4 fill:#f5eafa,stroke:#7b1fa2
+  n5(["Payment Event Stream#10;«container»#10;Event bus#10;Ordered payment lifecycle events"])
+  style n5 fill:#fff3e6,stroke:#e65100
+  subgraph n6["Payment Orchestrator"]
+    n7["Payment State Machine#10;«component»#10;Java#10;Owns payment state transitions and#10;retries"]
+    n8["Acquirer Router#10;«component»#10;Java#10;Chooses the acquiring connection by card#10;and region"]
+    n9["3DS Handler#10;«component»#10;Java#10;Runs 3-D Secure cardholder#10;authentication"]
+  end
+  n2 -->|"Starts authorization #91;gRPC#93;"| n7
+  n7 -->|"Requests a fraud score #91;gRPC#93;"| n4
+  n7 -->|"Requests cardholder authentication #91;in-process#93;"| n9
+  n9 -->|"Authenticates the cardholder #91;EMV 3DS over HTTPS#93;"| n1
+  n7 -->|"Sends authorization and capture #91;in-process#93;"| n8
+  n8 -->|"Detokenizes the card for the network request #91;mTLS#93;"| n3
+  n8 -->|"Authorizes, captures and refunds #91;ISO 8583 over TLS#93;"| n0
+  n7 -->|"Publishes payment lifecycle events #91;events#93;"| n5
+  notation_key["Name · «type» · technology · responsibility#10;Frame = scope; arrow = directed dependency"]

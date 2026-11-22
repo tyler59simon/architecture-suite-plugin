@@ -18,4 +18,10 @@ byte-identical.
 | Deployment | [aws/06-aws-deployment](aws/06-aws-deployment) | [gcp/06-gcp-deployment](gcp/06-gcp-deployment) |
 | Progressive, small-multiples, complete (SVG/Draw.io) | [aws/large-overviews](aws/large-overviews) | [gcp/large-overviews](gcp/large-overviews) |
 
+[left-to-right/](left-to-right) is the AWS plan rendered with `--direction right`, so every
+diagram reads left to right. Compare it with `aws/`, where the default `--direction auto` picks
+whichever direction lays each diagram out best (mostly top to bottom here). It has levels 1-3, the
+executive overview and the deployment; a file identical to its `aws/` twin (a view that `auto`
+already drew left to right) is not repeated.
+
 Regenerate with `python tools/generate_payments_samples.py`. Every fact here is fictional.
