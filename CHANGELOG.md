@@ -9,6 +9,7 @@
 ### Fixed
 
 - **Mermaid and PlantUML follow the drawn layout:** with direction `auto`, `.mmd` and `.puml` files said left to right even when the SVG, PNG, Draw.io and Visio layout ran top to bottom. They now use the direction the layout picked.
+- **Inventory routes have full paths:** class and controller prefixes (Spring `@RequestMapping`, C# `[Route]`, NestJS `@Controller`) and Flask blueprint `url_prefix` are joined onto method routes, so `@RequestMapping("/api/users")` with `@GetMapping("/{id}")` is one `GET /api/users/{id}` route, not two. Bare C# `[HttpGet]` and Spring `@GetMapping` are recorded, and NestJS `@Get`, `@Post`, `@Put`, `@Delete` and `@Patch` are now found. A `register_blueprint(..., url_prefix=...)` in another file is applied when its argument names exactly one blueprint; those routes have confidence 0.6 and a `prefix_reference`.
 
 ## 1.4.0 - safer redaction, infrastructure import fixes and clearer diagrams
 

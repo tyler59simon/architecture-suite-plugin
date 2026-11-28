@@ -1421,12 +1421,10 @@ def test_inventory_route_methods_and_registrations():
     )
     routes = sorted((r["reference"], r["path"], r["method"] or "") for r in report["routes"])
     assert routes == [
-        ("Orders.cs", "api/orders", ""),
-        ("Orders.cs", "{id}", "PATCH"),
-        ("Users.java", "/api/users", ""),
-        ("Users.java", "/{id}", "DELETE"),
-        ("Users.java", "/{id}", "GET"),
-        ("Users.java", "/{id}", "PUT"),
+        ("Orders.cs", "api/orders/{id}", "PATCH"),
+        ("Users.java", "/api/users/{id}", "DELETE"),
+        ("Users.java", "/api/users/{id}", "GET"),
+        ("Users.java", "/api/users/{id}", "PUT"),
         ("app.py", "/health", ""),
         ("app.py", "/items", "POST"),
         ("main.go", "/mux", ""),
@@ -1437,6 +1435,86 @@ def test_inventory_route_methods_and_registrations():
     ]
     kotlin = [r for r in report["references"] if r["kind"] == "import" and r["reference"] == "App.kt"]
     assert kotlin and kotlin[0].get("resolved_file") == "Worker.kt"
+
+
+def _routes(files):
+    return sorted(
+        (r["reference"], r["path"], r["method"] or "")
+        for r in dependency_inventory(files)["routes"]
+    )
+
+
+def test_inventory_class_prefixes_are_joined():
+    assert _routes(
+        {
+            # NestJS: @Controller prefix, bare @Get(), a decorator on an exported class.
+            "users.controller.ts": "@Controller('users')\nexport class UsersController {\n"
+            " @Get()\n list() {}\n @Post(':id')\n create() {}\n}\n"
+            "@Controller()\nclass Root {\n @Get()\n home() {}\n}",
+            # C#: bare [HttpGet] takes the class route; a /-rooted action overrides it;
+            # without a class route a bare action uses conventional routing and is skipped.
+            "Orders.cs": '[ApiController]\n[Route("api/orders")]\npublic class Orders {\n'
+            " [HttpGet]\n public void List() {}\n [HttpDelete(\"~/admin/orders\")]\n"
+            " public void Purge() {}\n}\npublic class Home {\n [HttpGet]\n public void Index() {}\n}",
+            # Spring: bare @GetMapping is the class route; each class keeps its own prefix,
+            # including a nested one; a class route with no methods stays a route.
+            "Api.java": '@RequestMapping("/a")\nclass A {\n @GetMapping\n void list() {}\n'
+            ' @RequestMapping("/b")\n static class B {\n  @PostMapping("/x")\n  void x() {}\n }\n}\n'
+            'class C {\n @GetMapping()\n void root() {}\n}\n@RequestMapping("/empty")\nclass D {}',
+            # Kotlin, with non-ASCII text before the class so byte and character offsets differ.
+            "Jobs.kt": '// Aufträge für die Warteschlange\n@RequestMapping("/jobs")\nclass Jobs {\n'
+            ' @GetMapping("/{id}")\n fun get() {}\n}',
+        }
+    ) == [
+        ("Api.java", "/", "GET"),
+        ("Api.java", "/a", "GET"),
+        ("Api.java", "/b/x", "POST"),
+        ("Api.java", "/empty", ""),
+        ("Jobs.kt", "/jobs/{id}", "GET"),
+        ("Orders.cs", "/admin/orders", "DELETE"),
+        ("Orders.cs", "api/orders", "GET"),
+        ("users.controller.ts", "/", "GET"),
+        ("users.controller.ts", "users", "GET"),
+        ("users.controller.ts", "users/:id", "POST"),
+    ]
+
+
+def test_inventory_flask_blueprint_prefixes():
+    files = {
+        # Same file: the Blueprint url_prefix is joined.
+        "shop/catalog.py": 'from flask import Blueprint\ncatalog = Blueprint("catalog", __name__,'
+        ' url_prefix="/catalog")\n@catalog.get("/items")\ndef items(): pass\n',
+        # Registered from another file: the registration prefix overrides url_prefix,
+        # once per registration.
+        "shop/users.py": 'import flask\nbp = flask.Blueprint("users", __name__, url_prefix="/u")\n'
+        '@bp.route("/<id>")\ndef user(id): pass\n',
+        "shop/app.py": "from flask import Flask\nfrom shop.users import bp as users_bp\n"
+        "from shop import catalog\napp = Flask(__name__)\n"
+        'app.register_blueprint(users_bp, url_prefix="/v1/users")\n'
+        'app.register_blueprint(users_bp, url_prefix="/v2/users")\n'
+        'app.register_blueprint(catalog.catalog, url_prefix="/shop")\n'
+        # Two files define `admin`, so this registration names neither.
+        'app.register_blueprint(admin, url_prefix="/admin")\n',
+        "one/admin.py": 'from flask import Blueprint\nadmin = Blueprint("a", __name__)\n'
+        '@admin.route("/one")\ndef one(): pass\n',
+        "two/admin.py": 'from flask import Blueprint\nadmin = Blueprint("b", __name__)\n'
+        '@admin.route("/two")\ndef two(): pass\n',
+    }
+    report = dependency_inventory(files)
+    routes = sorted(
+        (r["reference"], r["path"], r["confidence"], r.get("prefix_reference", {}).get("line"))
+        for r in report["routes"]
+    )
+    assert routes == [
+        ("one/admin.py", "/one", 0.8, None),
+        ("shop/catalog.py", "/shop/items", 0.6, 7),
+        ("shop/users.py", "/v1/users/<id>", 0.6, 5),
+        ("shop/users.py", "/v2/users/<id>", 0.6, 6),
+        ("two/admin.py", "/two", 0.8, None),
+    ]
+    assert all("_recv" not in r for r in report["routes"])
+    del files["shop/app.py"]
+    assert ("shop/catalog.py", "/catalog/items", "GET") in _routes(files)
 
 
 @pytest.mark.parametrize(
