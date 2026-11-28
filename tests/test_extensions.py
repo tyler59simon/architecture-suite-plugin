@@ -1517,6 +1517,72 @@ def test_inventory_flask_blueprint_prefixes():
     assert ("shop/catalog.py", "/catalog/items", "GET") in _routes(files)
 
 
+def test_inventory_csharp_and_spring_route_forms():
+    assert _routes(
+        {
+            # [Route] and a bare verb on one action are one route; an absolute action
+            # route leaves no standalone class route behind; "" is the class path.
+            "Orders.cs": '[Route("api/orders")]\npublic class Orders {\n'
+            ' [HttpGet]\n [Route("{id}")]\n public void Get() {}\n'
+            ' [HttpPost("")]\n public void Create() {}\n}\n'
+            '[Route("api/health")]\npublic class Health {\n [HttpGet("/health")]\n public void Get() {}\n}',
+            # A space before the argument list is still a path, and "" is the class path.
+            "Users.java": '@RequestMapping("/users")\nclass Users {\n @GetMapping ("/{id}")\n'
+            ' User get() {}\n @PostMapping("")\n void create() {}\n}',
+        }
+    ) == [
+        ("Orders.cs", "/health", "GET"),
+        ("Orders.cs", "api/orders", "POST"),
+        ("Orders.cs", "api/orders/{id}", "GET"),
+        ("Users.java", "/users", "POST"),
+        ("Users.java", "/users/{id}", "GET"),
+    ]
+
+
+def test_inventory_nestjs_controller_forms():
+    assert _routes(
+        {
+            "a.controller.ts": "@Controller({ path: 'users', host: 'x' })\nexport class A {\n @Get()\n a() {}\n}",
+            # A prefix that is not a literal makes the routes under it unknown.
+            "b.controller.ts": "@Controller(PREFIX)\nexport class B {\n @Get()\n b() {}\n @Get(':id')\n c() {}\n}",
+            "c.controller.ts": "@Controller('cats')\nexport default class {\n @Get(':id')\n one() {}\n}",
+            "d.controller.ts": "@Controller('base')\nexport abstract class D {\n @Get('x')\n x() {}\n}",
+        }
+    ) == [
+        ("a.controller.ts", "users", "GET"),
+        ("c.controller.ts", "cats/:id", "GET"),
+        ("d.controller.ts", "base/x", "GET"),
+    ]
+
+
+def test_inventory_flask_registration_resolution():
+    files = {
+        "shop/views.py": 'from flask import Blueprint\nbp = Blueprint("s", __name__, url_prefix="/s")\n'
+        '@bp.route("/a")\ndef a(): pass\n',
+        "other/views.py": 'from flask import Blueprint\nbp = Blueprint("o", __name__, url_prefix="/o")\n'
+        '@bp.route("/b")\ndef b(): pass\n',
+        "inner.py": 'from flask import Blueprint\nchild = Blueprint("c", __name__, url_prefix="/c")\n'
+        '@child.route("/items")\ndef items(): pass\n',
+        "shop/app.py": "from .views import bp\nfrom inner import child\nfrom flask import Blueprint\n"
+        'parent = Blueprint("p", __name__)\n'
+        # The import names shop/views.py although another views.py defines bp too.
+        'app.register_blueprint(bp, url_prefix="/v1")\n'
+        # A second app keeps the blueprint's own url_prefix.
+        "other_app.register_blueprint(bp)\n"
+        # Nested under another blueprint: not an app prefix.
+        'parent.register_blueprint(child, url_prefix="/inner")\n',
+    }
+    assert _routes(files) == [
+        ("inner.py", "/c/items", ""),
+        ("other/views.py", "/o/b", ""),
+        ("shop/views.py", "/s/a", ""),
+        ("shop/views.py", "/v1/a", ""),
+    ]
+    # An imported module that is not in the scan names no blueprint.
+    del files["shop/views.py"]
+    assert ("other/views.py", "/o/b", "") in _routes(files)
+
+
 @pytest.mark.parametrize(
     "value",
     [
